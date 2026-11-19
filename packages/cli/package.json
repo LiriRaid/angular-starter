@@ -1,0 +1,37 @@
+{
+  "name": "@as-starter/cli",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Angular Starter CLI: create Angular applications with a ready-made architecture and infrastructure.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "as-starter": "dist/bin.js",
+    "as": "dist/bin.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LiriRaid/as-starter.git",
+    "directory": "packages/cli"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^8.8.0",
+    "commander": "^15.1.0",
+    "execa": "^10.2.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "vitest": "^5.1.1"
+  }
+}
