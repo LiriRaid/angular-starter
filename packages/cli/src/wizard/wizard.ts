@@ -1,6 +1,8 @@
 import {
   APP_SHELL_AVAILABLE,
+  CAPABILITIES,
   availableOptions,
+  supportsArchitecture,
   type CapabilityCategory,
 } from '../config/capabilities.js';
 import { DEFAULT_OPTIONS } from '../config/resolve.js';
@@ -38,7 +40,18 @@ export async function runWizard(
 
   async function ask(key: SelectKey): Promise<void> {
     if (known[key] !== undefined) return;
-    const options = availableOptions(key);
+    const architecture =
+      known.architecture ?? answers['architecture'] ?? DEFAULT_OPTIONS.architecture;
+    const routing = CAPABILITIES.routing.find((option) => option.id === known.routing);
+    const options = availableOptions(key).filter((option) =>
+      key === 'architecture'
+        ? !routing || supportsArchitecture(routing, option.id)
+        : supportsArchitecture(option, String(architecture)),
+    );
+    // The only architecture the routing already chosen accepts is the answer, not a question.
+    if (options.length === 1 && key === 'architecture' && options[0]) {
+      answers[key] = options[0].id;
+    }
     if (options.length < 2) return;
 
     const fallback = key === 'packageManager' ? detectPackageManager(env) : DEFAULT_OPTIONS[key];

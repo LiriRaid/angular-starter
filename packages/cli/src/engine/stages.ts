@@ -1,7 +1,12 @@
 import { constants } from 'node:fs';
-import { access, stat, writeFile } from 'node:fs/promises';
+import { access, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { ANGULAR_CLI_VERSION, SUPPORTED_NODE_RANGE, isSupportedNode } from '../compat.js';
+import {
+  ANGULAR_CLI_VERSION,
+  ICON_PACKAGES,
+  SUPPORTED_NODE_RANGE,
+  isSupportedNode,
+} from '../compat.js';
 import {
   PROJECT_CONFIG_FILE,
   createProjectConfig,
@@ -9,8 +14,12 @@ import {
 } from '../config/project-config.js';
 import { RuntimeError, UsageError } from '../errors.js';
 import { CLI_VERSION } from '../version.js';
+import { ARCHITECTURE_PROFILES } from './architectures/index.js';
 import { buildNgCommand } from './angular-cli.js';
+import { addDependencies } from './edits/package-json.js';
+import { pathExists } from './fs.js';
 import type { GenerationContext, Stage } from './pipeline.js';
+import { ROUTING_PROFILES } from './routing/index.js';
 
 const PROBE_TIMEOUT_MS = 15_000;
 const WORKSPACE_TIMEOUT_MS = 10 * 60_000;
@@ -21,7 +30,7 @@ export const validateEnvironment: Stage = {
   id: 'validate-environment',
   title: 'Validating environment',
   async run({ name, options, cwd, targetDir, deps }) {
-    if (await exists(targetDir)) {
+    if (await pathExists(targetDir)) {
       throw new UsageError(
         `"${name}" already exists in ${cwd}.`,
         'Choose another name or remove the existing folder; Angular Starter never overwrites a project.',
@@ -73,6 +82,43 @@ export const createWorkspace: Stage = {
     } catch (error) {
       throw new RuntimeError(`The Angular CLI could not create the workspace: ${describe(error)}`);
     }
+  },
+};
+
+export const applyArchitecture: Stage = {
+  id: 'apply-architecture',
+  title: 'Applying architecture profile',
+  enabled: ({ options }) => ARCHITECTURE_PROFILES[options.architecture] !== undefined,
+  async run({ name, options, targetDir }) {
+    await ARCHITECTURE_PROFILES[options.architecture]?.apply({
+      targetDir,
+      name,
+      prefix: options.prefix,
+    });
+  },
+};
+
+export const applyRouting: Stage = {
+  id: 'apply-routing',
+  title: 'Adding Angular Starter routing',
+  enabled: ({ options }) => ROUTING_PROFILES[options.routing] !== undefined,
+  async run({ name, options, targetDir }) {
+    await ROUTING_PROFILES[options.routing]?.apply({ targetDir, name, prefix: options.prefix });
+  },
+};
+
+export const addIconLibrary: Stage = {
+  id: 'add-icon-library',
+  title: 'Adding icon library',
+  enabled: ({ options }) => ICON_PACKAGES[options.icons] !== undefined,
+  async run({ options, targetDir }) {
+    const icons = ICON_PACKAGES[options.icons];
+    if (!icons) return;
+    const manifest = join(targetDir, 'package.json');
+    const updated = addDependencies(await readFile(manifest, 'utf8'), {
+      [icons.name]: icons.version,
+    });
+    await writeFile(manifest, updated);
   },
 };
 
@@ -129,11 +175,18 @@ export const initGit: Stage = {
 export const verifyProject: Stage = {
   id: 'verify-project',
   title: 'Validating generated application',
-  async run({ targetDir }) {
-    const required = ['package.json', 'angular.json', join('src', 'main.ts'), PROJECT_CONFIG_FILE];
+  async run({ options, targetDir }) {
+    const required = [
+      'package.json',
+      'angular.json',
+      join('src', 'main.ts'),
+      PROJECT_CONFIG_FILE,
+      ...(ARCHITECTURE_PROFILES[options.architecture]?.requiredFiles ?? []),
+      ...(ROUTING_PROFILES[options.routing]?.requiredFiles ?? []),
+    ];
     const missing: string[] = [];
     for (const file of required) {
-      if (!(await exists(join(targetDir, file)))) missing.push(file);
+      if (!(await pathExists(join(targetDir, file)))) missing.push(file);
     }
     if (missing.length > 0) {
       throw new RuntimeError(
@@ -147,6 +200,9 @@ export const verifyProject: Stage = {
 export const NEW_PROJECT_STAGES: readonly Stage[] = [
   validateEnvironment,
   createWorkspace,
+  applyArchitecture,
+  applyRouting,
+  addIconLibrary,
   writeStarterConfig,
   installDependencies,
   initGit,
@@ -163,13 +219,6 @@ async function requireTool(
   } catch {
     throw new UsageError(message);
   }
-}
-
-async function exists(path: string): Promise<boolean> {
-  return stat(path).then(
-    () => true,
-    () => false,
-  );
 }
 
 /** The last lines of the child's stderr when there are any, otherwise the error message. */

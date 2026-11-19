@@ -7,6 +7,8 @@ export interface CapabilityOption {
   /** False for options that are planned but cannot be generated yet. */
   readonly available: boolean;
   readonly recommended?: boolean;
+  /** Architectures this option can be generated on; any architecture when absent. */
+  readonly requiresArchitecture?: readonly string[];
 }
 
 /**
@@ -16,7 +18,7 @@ export interface CapabilityOption {
 export const CAPABILITIES: Readonly<Record<CapabilityCategory, readonly CapabilityOption[]>> = {
   architecture: [
     { id: 'angular-default', label: 'Angular default structure', available: true },
-    { id: 'screaming', label: 'Screaming Architecture', available: false },
+    { id: 'screaming', label: 'Screaming Architecture', available: true },
     { id: 'modular', label: 'Modular Architecture', available: false },
     { id: 'hexagonal', label: 'Hexagonal Architecture', available: false },
     { id: 'clean', label: 'Clean Architecture', available: false },
@@ -24,7 +26,12 @@ export const CAPABILITIES: Readonly<Record<CapabilityCategory, readonly Capabili
   ],
   routing: [
     { id: 'angular', label: 'Default Angular Routing', available: true },
-    { id: 'starter', label: 'Angular Starter Routing', available: false },
+    {
+      id: 'starter',
+      label: 'Angular Starter Routing',
+      available: true,
+      requiresArchitecture: ['screaming'],
+    },
   ],
   style: [
     { id: 'css', label: 'CSS', available: true, recommended: true },
@@ -44,7 +51,7 @@ export const CAPABILITIES: Readonly<Record<CapabilityCategory, readonly Capabili
   ],
   icons: [
     { id: 'none', label: 'None', available: true },
-    { id: 'lucide', label: 'Lucide Icons', available: false },
+    { id: 'lucide', label: 'Lucide Icons', available: true, recommended: true },
     { id: 'heroicons', label: 'Heroicons', available: false },
     { id: 'phosphor', label: 'Phosphor Icons', available: false },
     { id: 'tabler', label: 'Tabler Icons', available: false },
@@ -68,6 +75,11 @@ export function availableOptions(category: CapabilityCategory): readonly Capabil
 
 export function availableIds(category: CapabilityCategory): string[] {
   return availableOptions(category).map((option) => option.id);
+}
+
+/** Whether `option` can be generated on `architecture`. */
+export function supportsArchitecture(option: CapabilityOption, architecture: string): boolean {
+  return option.requiresArchitecture?.includes(architecture) ?? true;
 }
 
 export function isAvailable(category: CapabilityCategory, id: string): boolean {

@@ -1,8 +1,27 @@
+import type { StarterOptions } from './config/schema.js';
+
 /**
  * Compatibility matrix. `as new` runs exactly this Angular CLI version. It is raised only after the
  * generation tests pass against the new release.
  */
 export const ANGULAR_CLI_VERSION = '22.3.0';
+
+export interface IconPackage {
+  /** npm package added to the generated project's dependencies. */
+  name: string;
+  /** Version range tested with the Angular version above. */
+  version: string;
+  docs: string;
+}
+
+/** Icon libraries by id (see `ICONS` in the config schema). `none` and planned ones have no entry. */
+export const ICON_PACKAGES: Readonly<Partial<Record<StarterOptions['icons'], IconPackage>>> = {
+  lucide: {
+    name: '@lucide/angular',
+    version: '^1.76.0',
+    docs: 'https://lucide.dev/guide/angular/getting-started',
+  },
+};
 
 /** Same range the Angular CLI declares for the version above, since this CLI runs it. */
 export const SUPPORTED_NODE_RANGE = '^22.22.3 || ^24.15.0 || >=26.0.0';

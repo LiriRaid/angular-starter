@@ -13,6 +13,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 const enabled = process.env['AS_E2E'] === '1';
 const bin = fileURLToPath(new URL('../dist/bin.js', import.meta.url));
 const TIMEOUT_MS = 5 * 60_000;
+const INSTALL_TIMEOUT_MS = 15 * 60_000;
+const CLEANUP_TIMEOUT_MS = 2 * 60_000;
 
 describe.skipIf(!enabled)('as new (end to end, real Angular CLI)', () => {
   let cwd: string;
@@ -22,9 +24,10 @@ describe.skipIf(!enabled)('as new (end to end, real Angular CLI)', () => {
     cwd = await mkdtemp(join(tmpdir(), 'as-e2e-'));
   });
 
+  // Deleting two installed projects (node_modules) takes longer than the default hook timeout.
   afterAll(async () => {
     await rm(cwd, { recursive: true, force: true });
-  });
+  }, CLEANUP_TIMEOUT_MS);
 
   async function create(name: string, ...flags: string[]) {
     const result = await execa(
@@ -34,6 +37,36 @@ describe.skipIf(!enabled)('as new (end to end, real Angular CLI)', () => {
     );
     expect(result.exitCode, `${result.stdout}\n${result.stderr}`).toBe(0);
     return join(cwd, name);
+  }
+
+  /** Creates a project with its dependencies installed, so that it can be built and tested. */
+  async function createInstalled(name: string, ...flags: string[]) {
+    const result = await execa(
+      'node',
+      [bin, 'new', name, '--defaults', '--no-git', '--package-manager', 'npm', ...flags],
+      { cwd, reject: false, env: { CI: '1' }, extendEnv: true },
+    );
+    expect(
+      result.exitCode,
+      `${result.stdout}
+${result.stderr}`,
+    ).toBe(0);
+    return join(cwd, name);
+  }
+
+  async function ng(project: string, ...args: string[]) {
+    const result = await execa('npx', ['--no-install', 'ng', ...args], {
+      cwd: project,
+      reject: false,
+      env: { CI: '1' },
+      extendEnv: true,
+    });
+    expect(
+      result.exitCode,
+      `ng ${args.join(' ')}
+${result.stdout}
+${result.stderr}`,
+    ).toBe(0);
   }
 
   const read = (project: string, file: string): Promise<string> =>
@@ -73,5 +106,85 @@ describe.skipIf(!enabled)('as new (end to end, real Angular CLI)', () => {
       expect(existsSync(join(project, 'src', 'main.server.ts'))).toBe(true);
     },
     TIMEOUT_MS,
+  );
+
+  it.each([
+    ['csr', 'e2e-screaming'],
+    ['ssr', 'e2e-screaming-ssr'],
+  ])(
+    'creates a Screaming Architecture project (%s) that builds and passes its tests',
+    async (rendering, name) => {
+      const project = await createInstalled(
+        name,
+        '--architecture',
+        'screaming',
+        '--rendering',
+        rendering,
+      );
+
+      for (const file of [
+        'src/app/core/README.md',
+        'src/app/features/home/home.routes.ts',
+        'src/app/shared/components/index.ts',
+      ]) {
+        expect(existsSync(join(project, file)), file).toBe(true);
+      }
+      expect(await read(project, 'tsconfig.json')).toContain('"@features/*"');
+      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      expect(config.options.architecture).toBe('screaming');
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it.each([
+    ['csr', 'e2e-routing'],
+    ['ssr', 'e2e-routing-ssr'],
+  ])(
+    'creates a Screaming project with the Angular Starter routing (%s) that builds and passes its tests',
+    async (rendering, name) => {
+      const project = await createInstalled(
+        name,
+        '--architecture',
+        'screaming',
+        '--routing',
+        'starter',
+        '--rendering',
+        rendering,
+      );
+
+      for (const file of [
+        'src/app/core/navigation/breadcrumb.service.ts',
+        'src/app/core/navigation/navigation-title.strategy.ts',
+        'src/app/core/navigation/navigation.providers.ts',
+        'src/app/features/app-shell/navigation/navigation.data.ts',
+      ]) {
+        expect(existsSync(join(project, file)), file).toBe(true);
+      }
+      expect(await read(project, 'src/app/app.config.ts')).toContain(
+        `provideNavigation(APP_NAVIGATION, { appName: '${name}' })`,
+      );
+      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      expect(config.options).toMatchObject({ architecture: 'screaming', routing: 'starter' });
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'installs the Lucide Icons package and still builds',
+    async () => {
+      const project = await createInstalled('e2e-lucide', '--icons', 'lucide');
+      expect(
+        JSON.parse(await read(project, 'package.json')).dependencies['@lucide/angular'],
+      ).toMatch(/^\^1\./);
+      expect(existsSync(join(project, 'node_modules', '@lucide', 'angular'))).toBe(true);
+      await ng(project, 'build');
+    },
+    INSTALL_TIMEOUT_MS,
   );
 });

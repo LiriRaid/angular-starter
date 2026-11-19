@@ -1,6 +1,6 @@
-import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { CommandRunner } from '../../src/engine/process.js';
+import { writeGeneratedWorkspace } from './generated-workspace.js';
 
 export interface RecordedCall {
   command: string;
@@ -11,11 +11,13 @@ export interface RecordedCall {
 export interface FakeRunnerOptions {
   /** Return an error to make a call fail. */
   failOn?: (call: RecordedCall) => Error | undefined;
+  /** Replaces (or, with null, removes) files of the workspace `ng new` writes. */
+  files?: Readonly<Record<string, string | null>>;
 }
 
 /**
  * Records every call and imitates the one side effect the engine relies on: `ng new <name>` creating
- * the workspace folder with the files the final verification looks for.
+ * the workspace folder with the files the engine reads and edits.
  */
 export function createFakeRunner(options: FakeRunnerOptions = {}): {
   run: CommandRunner;
@@ -32,11 +34,7 @@ export function createFakeRunner(options: FakeRunnerOptions = {}): {
     const newIndex = args.indexOf('new');
     if (command === 'npx' && newIndex >= 0 && runOptions?.cwd) {
       const name = args[newIndex + 1] ?? 'unnamed';
-      const dir = join(runOptions.cwd, name);
-      await mkdir(join(dir, 'src'), { recursive: true });
-      await writeFile(join(dir, 'package.json'), '{}\n');
-      await writeFile(join(dir, 'angular.json'), '{}\n');
-      await writeFile(join(dir, 'src', 'main.ts'), '\n');
+      await writeGeneratedWorkspace(join(runOptions.cwd, name), options.files);
     }
     return { stdout: args.includes('--version') ? '1.0.0\n' : '', stderr: '' };
   };

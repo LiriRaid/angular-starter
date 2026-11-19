@@ -70,7 +70,8 @@ describe('as (program)', () => {
     expect(await run(['list'], fake.io)).toBe(0);
     const out = fake.out();
     expect(out).toContain('angular-default');
-    expect(out).toMatch(/screaming.*planned/);
+    expect(out).toMatch(/screaming(?!.*planned)/);
+    expect(out).toMatch(/modular.*planned/);
   });
 
   it('prints environment information', async () => {

@@ -27,17 +27,27 @@ describe('resolveOptions', () => {
   });
 
   it('rejects options that exist in the plan but are not available yet', () => {
-    const run = () => resolveOptions({ flags: { architecture: 'screaming' } });
+    const run = () => resolveOptions({ flags: { architecture: 'modular' } });
     expect(run).toThrow(UsageError);
     expect(run).toThrow(/not available yet/);
     expect(run).toThrow(/angular-default/);
   });
 
+  it('accepts the Angular Starter routing on the Screaming architecture', () => {
+    const options = resolveOptions({ flags: { architecture: 'screaming', routing: 'starter' } });
+    expect(options.routing).toBe('starter');
+  });
+
+  it('rejects the Angular Starter routing on an architecture without a profile', () => {
+    const run = () => resolveOptions({ flags: { routing: 'starter' } });
+    expect(run).toThrow(UsageError);
+    expect(run).toThrow(/routing: "starter" requires the architecture: screaming/);
+  });
+
   it.each([
-    [{ routing: 'starter' }],
     [{ rendering: 'starter-ssr' }],
     [{ components: 'recommended' }],
-    [{ icons: 'lucide' }],
+    [{ icons: 'heroicons' }],
     [{ appShell: true }],
   ] as const)('rejects unavailable option %j', (flags) => {
     expect(() => resolveOptions({ flags })).toThrow(/not available yet/);

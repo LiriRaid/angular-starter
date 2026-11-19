@@ -1,6 +1,6 @@
 # AS Starter
 
-> **Status: pre-alpha.** The CLI core exists and creates plain Angular applications; architecture profiles, the app shell and the native UI are not available yet. Names, scope and commands are provisional.
+> **Status: pre-alpha.** The CLI core exists and creates Angular applications with the default structure or the Screaming Architecture profile; the app shell and the native UI are not available yet. Names, scope and commands are provisional.
 
 AS Starter is an independent, community-driven ecosystem of developer tools for [Angular](https://angular.dev/). Its goal is to remove the repetitive work every Angular team redoes when starting an application: architecture, routing, app shell, layouts, theming and reusable UI.
 
@@ -17,7 +17,7 @@ The generated code belongs entirely to the developer. AS Starter is not a runtim
 | Component registry                     | A single metadata source for the CLI, docs, playground and AI skills               |
 | Documentation site                     | Interactive docs built with the project's own components                           |
 
-The first architecture profile will be **Screaming Architecture** (`core/`, `features/`, `shared/`, standalone components, Signals). Other profiles come later.
+The first architecture profile, **Screaming Architecture** (`core/`, `features/`, `shared/`, standalone components, Signals, one lazy route file per feature), is available with `--architecture screaming`; see [ADR-0002](docs/adr/0002-screaming-architecture-profile.md). Other profiles come later. **Angular Starter Routing** (`--routing starter`, Screaming only) adds one navigation tree that drives page titles and breadcrumbs (`TitleStrategy`, `BreadcrumbService`), ready for the sidebar of the app shell; see [ADR-0003](docs/adr/0003-starter-routing.md). Lucide icons (`--icons lucide`) are the first icon library offered.
 
 ## Try the CLI (development)
 
@@ -29,6 +29,8 @@ pnpm build
 node packages/cli/dist/bin.js new my-app            # interactive wizard
 node packages/cli/dist/bin.js new my-app --defaults # no prompts
 node packages/cli/dist/bin.js new my-app --dry-run  # show the plan, create nothing
+node packages/cli/dist/bin.js new my-app --architecture screaming --defaults
+node packages/cli/dist/bin.js new my-app --architecture screaming --routing starter --defaults
 ```
 
 `as new` runs the official `ng new` (Angular CLI 22.3.0, the tested version) with every option set

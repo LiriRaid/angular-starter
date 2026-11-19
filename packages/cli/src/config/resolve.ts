@@ -1,5 +1,12 @@
 import { UsageError } from '../errors.js';
-import { APP_SHELL_AVAILABLE, CATEGORIES, availableIds, isAvailable } from './capabilities.js';
+import {
+  APP_SHELL_AVAILABLE,
+  CAPABILITIES,
+  CATEGORIES,
+  availableIds,
+  isAvailable,
+  supportsArchitecture,
+} from './capabilities.js';
 import { formatIssues } from './issues.js';
 import { optionsSchema, type StarterOptions } from './schema.js';
 
@@ -60,6 +67,12 @@ function compatibilityProblems(options: StarterOptions): string[] {
   if (options.tailwind && options.style !== 'css') {
     problems.push(
       `tailwind: Tailwind CSS requires the CSS stylesheet format; "${options.style}" cannot be combined with it.`,
+    );
+  }
+  const routing = CAPABILITIES.routing.find((option) => option.id === options.routing);
+  if (routing && !supportsArchitecture(routing, options.architecture)) {
+    problems.push(
+      `routing: "${routing.id}" requires the architecture: ${routing.requiresArchitecture?.join(', ')}.`,
     );
   }
   return problems;

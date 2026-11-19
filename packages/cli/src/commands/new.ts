@@ -1,11 +1,13 @@
 import { join } from 'node:path';
-import { ANGULAR_CLI_VERSION } from '../compat.js';
+import { ANGULAR_CLI_VERSION, ICON_PACKAGES } from '../compat.js';
 import { CAPABILITIES, type CapabilityCategory } from '../config/capabilities.js';
 import { readConfigFile } from '../config/file.js';
 import { resolveOptions } from '../config/resolve.js';
 import type { StarterOptions } from '../config/schema.js';
 import type { ProgramDeps } from '../deps.js';
 import { buildNgCommand } from '../engine/angular-cli.js';
+import { ARCHITECTURE_PROFILES } from '../engine/architectures/index.js';
+import { ROUTING_PROFILES } from '../engine/routing/index.js';
 import { runPipeline, type GenerationContext } from '../engine/pipeline.js';
 import { NEW_PROJECT_STAGES, validateEnvironment } from '../engine/stages.js';
 import { CancelledError, CliError, UsageError } from '../errors.js';
@@ -180,6 +182,19 @@ async function runDryRun(context: GenerationContext): Promise<void> {
   println(io.stdout, style.bold('Dry run: nothing was created. Planned steps:'));
   const steps = [
     `Create the Angular workspace: ${[ng.command, ...ng.args].join(' ')}`,
+    ...(ARCHITECTURE_PROFILES[options.architecture]
+      ? [`Apply the ${labelOf('architecture', options.architecture)} profile`]
+      : []),
+    ...(ROUTING_PROFILES[options.routing]
+      ? [
+          `Add the ${labelOf('routing', options.routing)} (navigation tree, page titles and breadcrumbs)`,
+        ]
+      : []),
+    ...(ICON_PACKAGES[options.icons]
+      ? [
+          `Add the ${labelOf('icons', options.icons)} package (${ICON_PACKAGES[options.icons]?.name})`,
+        ]
+      : []),
     'Write angular-starter.config.json',
     ...(options.install ? [`Install dependencies: ${options.packageManager} install`] : []),
     ...(options.git ? ['Initialize a Git repository with an initial commit'] : []),
@@ -197,4 +212,9 @@ function printSuccess(context: GenerationContext): void {
   println(io.stdout, `  cd ${name}`);
   if (!options.install) println(io.stdout, `  ${options.packageManager} install`);
   println(io.stdout, `  ${options.packageManager} start`);
+  const icons = ICON_PACKAGES[options.icons];
+  if (icons) {
+    println(io.stdout);
+    println(io.stdout, `${labelOf('icons', options.icons)}: ${icons.docs}`);
+  }
 }
