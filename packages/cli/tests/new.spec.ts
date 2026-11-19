@@ -38,6 +38,17 @@ describe('as new (non-interactive)', () => {
     expect(runner.calls).toEqual([]);
   });
 
+  it('accepts a name with capital letters, like ng new', async () => {
+    const fake = createFakeIo({ cwd });
+    const runner = createFakeRunner();
+    expect(
+      await run(['new', 'InventorySystem', '--defaults', '--no-install', '--no-git'], fake.io, {
+        run: runner.run,
+      }),
+    ).toBe(0);
+    expect(await exists(join(cwd, 'InventorySystem', 'angular-starter.config.json'))).toBe(true);
+  });
+
   it('never overwrites an existing folder', async () => {
     await mkdir(join(cwd, 'my-app'));
     const fake = createFakeIo({ cwd });
