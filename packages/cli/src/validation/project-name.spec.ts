@@ -2,20 +2,22 @@ import { describe, expect, it } from 'vitest';
 import { validateProjectName } from './project-name.js';
 
 describe('validateProjectName', () => {
-  it.each(['my-project', 'app', 'app1', 'my-app-2', 'a'])('accepts %s', (name) => {
-    expect(validateProjectName(name)).toBeUndefined();
-  });
+  it.each(['my-project', 'app', 'app1', 'my-app-2', 'a', 'InventorySystem', 'My-Project'])(
+    'accepts %s',
+    (name) => {
+      expect(validateProjectName(name)).toBeUndefined();
+    },
+  );
 
   it.each([
     ['', 'required'],
-    ['My-Project', 'lowercase'],
     ['1app', 'letter'],
-    ['my_app', 'lowercase'],
-    ['my app', 'lowercase'],
-    ['my--app', 'lowercase'],
-    ['my-', 'lowercase'],
-    ['-my', 'lowercase'],
-    ['../escape', 'lowercase'],
+    ['my_app', 'letters'],
+    ['my app', 'letters'],
+    ['my--app', 'letters'],
+    ['my-', 'letters'],
+    ['-my', 'letters'],
+    ['../escape', 'letters'],
   ])('rejects %j', (name, fragment) => {
     expect(validateProjectName(name)).toContain(fragment);
   });
