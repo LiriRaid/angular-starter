@@ -41,3 +41,6 @@ Thumbs.db
 
 # Generated sample apps produced by integration tests
 .tmp/
+
+# Copy of /blueprints made by the CLI build and test run
+packages/cli/blueprints/

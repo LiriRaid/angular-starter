@@ -1,0 +1,12 @@
+# Plan: Screaming Architecture profile (ADR-0002)
+
+Each step ends with its gate; a step is done only when its gate passes.
+
+| #   | Step                                                                                                                                                                                         | Gate                                                                                |
+| --- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 1   | ADR-0002 and this plan                                                                                                                                                                       | `pnpm format:check`                                                                 |
+| 2   | Edit modules, tests first: `engine/edits/typescript.ts` (routes, router feature, root component via `ts-morph`) and `engine/edits/tsconfig.ts` (aliases via `jsonc-parser`)                  | `pnpm --filter @as-starter/cli exec vitest run src/engine/edits`                    |
+| 3   | Blueprint engine, tests first: locate, list, render (`__PROJECT_NAME__`, `__PREFIX__`), copy without overwriting; blueprint files in `blueprints/architectures/screaming`; build copy script | `vitest run src/engine/blueprint` + `pnpm build`                                    |
+| 4   | `apply-architecture` stage after `create-workspace`, dry-run text, verify list, `screaming` available, wizard offers it                                                                      | `pnpm test` + `pnpm typecheck`                                                      |
+| 5   | Opt-in e2e (`AS_E2E=1`): generate with Screaming, `ng build` and `ng test` pass                                                                                                              | `AS_E2E=1 pnpm test` and `as new demo --architecture screaming --defaults --no-git` |
+| 6   | Docs (README, CHANGELOG), full repo gates, `code-review`, `simplify`                                                                                                                         | `pnpm typecheck && pnpm lint && pnpm format:check && pnpm test && pnpm build`       |
