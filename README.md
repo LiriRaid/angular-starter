@@ -19,6 +19,20 @@ The generated code belongs entirely to the developer. AS Starter is not a runtim
 
 The first architecture profile, **Screaming Architecture** (`core/`, `features/`, `shared/`, standalone components, Signals, one lazy route file per feature), is available with `--architecture screaming`; see [ADR-0002](docs/adr/0002-screaming-architecture-profile.md). Other profiles come later. **Angular Starter Routing** (`--routing starter`, Screaming only) adds one navigation tree that drives page titles and breadcrumbs (`TitleStrategy`, `BreadcrumbService`), ready for the sidebar of the app shell; see [ADR-0003](docs/adr/0003-starter-routing.md). Lucide icons (`--icons lucide`) are the first icon library offered.
 
+## Install the CLI
+
+The package is not published yet. Once it is, any package manager works:
+
+| Package manager | Install globally                  | Run without installing                |
+| --------------- | --------------------------------- | ------------------------------------- |
+| npm             | `npm install -g @as-starter/cli`  | `npx @as-starter/cli new my-app`      |
+| pnpm            | `pnpm add -g @as-starter/cli`     | `pnpm dlx @as-starter/cli new my-app` |
+| Yarn            | `yarn global add @as-starter/cli` | `yarn dlx @as-starter/cli new my-app` |
+
+Yarn 2 and later have no global installs; use `yarn dlx`. Then run `as-starter new my-app`. Until
+the package is published, install it from a clone (see below). The package manager of the
+generated project is chosen separately, with `--package-manager` or in the wizard.
+
 ## Try the CLI (development)
 
 Requires Node.js `^22.22.3 || ^24.15.0 || >=26.0.0` (the range of the Angular CLI it runs) and pnpm.
@@ -46,6 +60,9 @@ configuration, which is saved in `angular-starter.config.json` inside the new pr
 Only options that can really be generated are offered. `as list` shows what is available and what is
 planned. The package installs two binaries, `as-starter` and the short alias `as`; on macOS and
 Linux `as` is normally the system assembler, so prefer `as-starter` or `npx @as-starter/cli` there.
+
+To install your clone as a global command (no publishing involved), after `pnpm build`:
+`pnpm add -g ./packages/cli`, or `npm pack` inside `packages/cli` and `npm install -g` the `.tgz`.
 
 Tests: `pnpm test`. End-to-end tests that run the real Angular CLI (network required) are opt-in:
 `AS_E2E=1 pnpm --filter @as-starter/cli exec vitest run tests/e2e.spec.ts` (PowerShell:
