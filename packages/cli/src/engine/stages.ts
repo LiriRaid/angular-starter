@@ -108,6 +108,29 @@ export const applyRouting: Stage = {
   },
 };
 
+export const addAngularSsr: Stage = {
+  id: 'add-angular-ssr',
+  title: 'Adding Angular SSR',
+  pending: 'runs ng add @angular/ssr and installs its packages',
+  async run({ targetDir, deps, verbose }) {
+    try {
+      await deps.run(
+        'npx',
+        [
+          '--yes',
+          `@angular/cli@${ANGULAR_CLI_VERSION}`,
+          'add',
+          '@angular/ssr',
+          '--skip-confirmation',
+        ],
+        { cwd: targetDir, inherit: verbose, timeoutMs: INSTALL_TIMEOUT_MS },
+      );
+    } catch (error) {
+      throw new RuntimeError(`ng add @angular/ssr failed: ${describe(error)}`);
+    }
+  },
+};
+
 export const applyRendering: Stage = {
   id: 'apply-rendering',
   title: 'Applying Angular Starter SSR',

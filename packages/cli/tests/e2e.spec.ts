@@ -54,6 +54,22 @@ ${result.stderr}`,
     return join(cwd, name);
   }
 
+  /** Runs the compiled CLI inside an existing project, as a person would. */
+  async function asProject(project: string, ...args: string[]) {
+    const result = await execa('node', [bin, ...args], {
+      cwd: project,
+      reject: false,
+      env: { CI: '1' },
+      extendEnv: true,
+    });
+    expect(
+      result.exitCode,
+      `as ${args.join(' ')}
+${result.stdout}
+${result.stderr}`,
+    ).toBe(0);
+  }
+
   async function ng(project: string, ...args: string[]) {
     const result = await execa('npx', ['--no-install', 'ng', ...args], {
       cwd: project,
@@ -197,6 +213,46 @@ ${result.stderr}`,
         '@defer (hydrate on viewport)',
       );
       expect(existsSync(join(project, 'src', 'main.server.ts'))).toBe(true);
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'adds routing, icons and SSR to an existing project and generates a feature that build and test',
+    async () => {
+      const project = await createInstalled(
+        'e2e-add',
+        '--architecture',
+        'screaming',
+        '--routing',
+        'angular',
+        '--icons',
+        'none',
+        '--components',
+        'none',
+      );
+      await asProject(project, 'add', 'routing', 'starter');
+      await asProject(project, 'add', 'icons', 'lucide');
+      await asProject(project, 'generate', 'feature', 'billing');
+      await asProject(project, 'generate', 'component', 'invoice-card', '--feature', 'billing');
+      await asProject(project, 'add', 'rendering', 'starter-ssr');
+
+      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      expect(config.options).toMatchObject({
+        routing: 'starter',
+        icons: 'lucide',
+        rendering: 'starter-ssr',
+      });
+      expect(await read(project, 'src/app/app.config.ts')).toContain('withIncrementalHydration()');
+      expect(
+        existsSync(join(project, 'src/app/features/billing/invoice-card/invoice-card.ts')),
+      ).toBe(true);
+      expect(
+        await read(project, 'src/app/features/app-shell/navigation/navigation.data.ts'),
+      ).toContain("id: 'billing'");
 
       await ng(project, 'build');
       await ng(project, 'test', '--watch=false');

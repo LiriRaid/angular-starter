@@ -122,6 +122,42 @@ export function addProvider(
   return file.getFullText();
 }
 
+export interface NavigationItemSpec {
+  id: string;
+  title: string;
+  link: string;
+  icon?: string;
+}
+
+/** Appends a page to the first group of the `APP_NAVIGATION` tree, unless its id is there. */
+export function addNavigationItem(source: string, spec: NavigationItemSpec): string {
+  const file = parseSource(source);
+  const tree = file
+    .getVariableDeclaration('APP_NAVIGATION')
+    ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression);
+  const group = tree?.getElements().find(Node.isObjectLiteralExpression);
+  const items = group
+    ?.getProperty('items')
+    ?.asKind(SyntaxKind.PropertyAssignment)
+    ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression);
+  if (!items) {
+    throw new Error('Could not find the "APP_NAVIGATION" tree with a group that has "items".');
+  }
+
+  const declared = items
+    .getElements()
+    .filter(Node.isObjectLiteralExpression)
+    .some((element) => stringProperty(element, 'id') === spec.id);
+  if (!declared) {
+    const icon = spec.icon === undefined ? '' : ` icon: ${quote(spec.icon)},`;
+    items.addElement(
+      `{ id: ${quote(spec.id)}, title: ${quote(spec.title)},${icon} type: 'basic', link: ${quote(spec.link)} }`,
+      { useNewLines: true },
+    );
+  }
+  return file.getFullText();
+}
+
 /** Appends routes to the exported `routes` array, skipping those that are already declared. */
 export function addRoutes(source: string, routes: readonly RouteSpec[]): string {
   const file = parseSource(source);

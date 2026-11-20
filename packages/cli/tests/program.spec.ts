@@ -56,14 +56,95 @@ describe('as (program)', () => {
     expect(await run(['list', '--nope'], fake.io)).toBe(2);
   });
 
-  it.each(['generate', 'add', 'config', 'update'])(
-    '%s says it is not available yet',
-    async (command) => {
-      const fake = createFakeIo();
-      expect(await run([command], fake.io)).toBe(1);
-      expect(fake.err()).toContain('not available yet');
-    },
-  );
+  it('update says it is not available yet', async () => {
+    const fake = createFakeIo();
+    expect(await run(['update'], fake.io)).toBe(1);
+    expect(fake.err()).toContain('not available yet');
+  });
+
+  it('groups the commands by what they do, in the root help', async () => {
+    const fake = createFakeIo();
+    await run(['--help'], fake.io);
+    const out = fake.out();
+    const positions = [
+      'Create a project',
+      '  new ',
+      'Change an existing project',
+      '  add ',
+      '  generate',
+      'Inspect',
+      '  list',
+      '  config',
+      '  doctor',
+      'Planned',
+      '  update',
+    ].map((text) => out.indexOf(text));
+    expect(
+      positions.every((position) => position >= 0),
+      out,
+    ).toBe(true);
+    expect(positions).toEqual([...positions].sort((a, b) => a - b));
+  });
+
+  it('shows examples and says what only `as new` can decide, in the root help', async () => {
+    const fake = createFakeIo();
+    await run(['--help'], fake.io);
+    const out = fake.out();
+    expect(out).toContain('Examples:');
+    expect(out).toContain('as new InventorySystem');
+    expect(out).toContain('as add icons lucide');
+    expect(out).toContain('as generate feature billing');
+    expect(out).toMatch(/Only `as new` decides:.*architecture.*stylesheet.*package manager/s);
+    expect(out).toContain('as <command> --help');
+  });
+
+  it('documents every flag and example of `new`', async () => {
+    const fake = createFakeIo();
+    await run(['new', '--help'], fake.io);
+    const out = fake.out();
+    for (const flag of ['--architecture', '--routing', '--style', '--tailwind', '--rendering']) {
+      expect(out).toContain(flag);
+    }
+    expect(out).toContain('(css, tailwind, scss, sass, less)');
+    expect(out).toContain('--defaults');
+    expect(out).toContain('Examples:');
+    expect(out).toContain('as new Shop --defaults');
+    expect(out).toContain('Recommended');
+  });
+
+  it('documents `add` with its capabilities, flags and examples', async () => {
+    const fake = createFakeIo();
+    expect(await run(['add', '--help'], fake.io)).toBe(0);
+    const out = fake.out();
+    expect(out).toContain('Usage: as add <capability> [value]');
+    for (const capability of ['icons', 'components', 'routing', 'rendering']) {
+      expect(out).toMatch(new RegExp(`^ {2}${capability} `, 'm'));
+    }
+    expect(out).toContain('--dry-run');
+    expect(out).toContain('--no-install');
+    expect(out).toContain('as add routing starter');
+  });
+
+  it('documents `generate` with its kinds, flags and examples', async () => {
+    const fake = createFakeIo();
+    expect(await run(['generate', '--help'], fake.io)).toBe(0);
+    const out = fake.out();
+    expect(out).toContain('Usage: as generate');
+    expect(out).toMatch(/^ {2}feature /m);
+    expect(out).toMatch(/^ {2}component /m);
+    expect(out).toContain('--feature <name>');
+    expect(out).toContain('--shared');
+    expect(out).toContain('as generate component invoice-card --shared');
+  });
+
+  it('documents `config`', async () => {
+    const fake = createFakeIo();
+    expect(await run(['config', '--help'], fake.io)).toBe(0);
+    const out = fake.out();
+    expect(out).toContain('Usage: as config <list|get> [key]');
+    expect(out).toContain('read-only');
+    expect(out).toContain('as config get architecture');
+  });
 
   it('lists available and planned options', async () => {
     const fake = createFakeIo();

@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   addCallArgument,
   addComponentImport,
+  addNavigationItem,
   addProvider,
   addRouterFeature,
   addRoutes,
@@ -289,5 +290,40 @@ describe('addComponentImport', () => {
 
   it('fails clearly when the class is not there', () => {
     expect(() => addComponentImport(APP_ROUTES, 'App', 'X', './x')).toThrow(/App/);
+  });
+});
+
+const NAVIGATION = `import type { NavigationGroup } from '@core/navigation/navigation.types';
+
+export const APP_NAVIGATION: readonly NavigationGroup[] = [
+  {
+    label: 'General',
+    items: [{ id: 'home', title: 'Home', icon: 'house', type: 'basic', link: '/home' }],
+  },
+  // Keep this comment.
+];
+`;
+
+describe('addNavigationItem', () => {
+  const ITEM = { id: 'billing', title: 'Billing', link: '/billing', icon: 'wallet' };
+
+  it('appends an item to the first group', () => {
+    const result = addNavigationItem(NAVIGATION, ITEM);
+    expect(result).toContain("id: 'billing'");
+    expect(result).toContain("title: 'Billing'");
+    expect(result).toContain("link: '/billing'");
+    expect(result).toContain("icon: 'wallet'");
+    expect(result).toContain("id: 'home'");
+    expect(result).toContain('// Keep this comment.');
+    expect(syntaxErrors(result)).toBe(0);
+  });
+
+  it('is idempotent', () => {
+    const once = addNavigationItem(NAVIGATION, ITEM);
+    expect(addNavigationItem(once, ITEM)).toBe(once);
+  });
+
+  it('fails clearly when the tree is not there', () => {
+    expect(() => addNavigationItem(APP_ROUTES, ITEM)).toThrow(/APP_NAVIGATION/);
   });
 });
