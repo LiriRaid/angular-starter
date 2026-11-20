@@ -166,6 +166,11 @@ describe('App Shell profile', () => {
       expect(styles).toContain("@import './styles/features/design-preferences-styles.css';");
     });
 
+    it('leaves a marker in the UI tab where the UI System puts its catalog', async () => {
+      await apply();
+      expect(await read(`${PAGE}/tabs/ui-tab.html`)).toContain('<!-- as:ui-system -->');
+    });
+
     it('lists its files for the verification stage', () => {
       expect(appShellProfile.requiredFiles).toEqual(
         expect.arrayContaining([

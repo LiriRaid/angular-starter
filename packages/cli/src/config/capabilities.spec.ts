@@ -148,6 +148,7 @@ describe('capability registry', () => {
 
   it('offers the UI System on top of the shell and a component collection', () => {
     expect(CAPABILITIES.uiSystem.map((option) => option.id)).toEqual(['none', 'starter']);
+    expect(availableIds('uiSystem')).toEqual(['none', 'starter']);
     const starter = CAPABILITIES.uiSystem.find((option) => option.id === 'starter');
     expect(starter?.requires).toEqual({
       architecture: ['screaming'],

@@ -750,6 +750,37 @@ export const appConfig: ApplicationConfig = {
     expect(runner.calls).toEqual([]);
   });
 
+  it('adds the UI System with --ui-system starter and leaves it out of the defaults', async () => {
+    const fake = createFakeIo({ cwd });
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--ui-system', 'starter', '--no-install', '--no-git'],
+      fake.io,
+      { run: createFakeRunner().run },
+    );
+    expect(code, fake.err()).toBe(0);
+    const out = fake.out();
+    expect(out.indexOf('✓ Adding the application shell')).toBeLessThan(
+      out.indexOf('✓ Adding the UI System'),
+    );
+    const target = join(cwd, 'my-app');
+    expect(
+      await readFile(join(target, 'src/app/features/preference-design/tabs/ui-tab.html'), 'utf8'),
+    ).toContain('<app-ui-system />');
+    const config = JSON.parse(await readFile(join(target, 'angular-starter.config.json'), 'utf8'));
+    expect(config.options.uiSystem).toBe('starter');
+  });
+
+  it('rejects --ui-system starter without a component collection', async () => {
+    const fake = createFakeIo({ cwd });
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--components', 'none', '--ui-system', 'starter'],
+      fake.io,
+      { run: createFakeRunner().run },
+    );
+    expect(code).toBe(2);
+    expect(fake.err()).toContain('uiSystem: "starter" requires the components: recommended, all');
+  });
+
   it('refuses a layout mode that is under construction before doing anything', async () => {
     const fake = createFakeIo({ cwd });
     const runner = createFakeRunner();

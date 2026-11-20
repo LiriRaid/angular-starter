@@ -19,6 +19,7 @@ import { componentsProfile } from './components/components.js';
 import { designProfile } from './design/design.js';
 import { appShellProfile } from './app-shell/app-shell.js';
 import { presenceProfile } from './presence/presence.js';
+import { uiSystemProfile } from './ui-system/ui-system.js';
 import { buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
 import { pathExists } from './fs.js';
@@ -190,6 +191,15 @@ export const applyPresence: Stage = {
   },
 };
 
+export const applyUiSystem: Stage = {
+  id: 'apply-ui-system',
+  title: 'Adding the UI System',
+  enabled: ({ options }) => options.uiSystem === 'starter',
+  async run({ name, options, targetDir }) {
+    await uiSystemProfile.apply({ targetDir, name, prefix: options.prefix });
+  },
+};
+
 export const addIconLibrary: Stage = {
   id: 'add-icon-library',
   title: 'Adding icon library',
@@ -272,6 +282,7 @@ export const verifyProject: Stage = {
         : designProfile.requiredFiles),
       ...(options.appShell === 'starter' ? appShellProfile.requiredFiles : []),
       ...(options.presence === 'starter' ? presenceProfile.requiredFiles : []),
+      ...(options.uiSystem === 'starter' ? uiSystemProfile.requiredFiles : []),
       ...(options.components === 'none'
         ? []
         : componentsProfile.requiredFilesFor(options.components === 'all' ? 'all' : 'recommended')),
@@ -299,6 +310,7 @@ export const NEW_PROJECT_STAGES: readonly Stage[] = [
   applyComponents,
   applyAppShell,
   applyPresence,
+  applyUiSystem,
   addIconLibrary,
   writeStarterConfig,
   installDependencies,

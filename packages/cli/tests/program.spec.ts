@@ -146,6 +146,7 @@ describe('as (program)', () => {
     expect(out).toContain('as add routing starter');
     expect(out).toContain('as add app-shell');
     expect(out).toContain('as add presence');
+    expect(out).toContain('as add ui-system');
   });
 
   it('documents `generate` with its kinds, flags and examples', async () => {

@@ -223,6 +223,10 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
       'presence',
       'Real-time user status in the shell, with a transport contract and a Redis guide (needs the app shell)',
     ],
+    [
+      'ui-system',
+      'Catalog of the components with live previews in the design preferences (needs the shell and the components)',
+    ],
     ['rendering', 'Server-side rendering'],
   ];
   program
@@ -246,6 +250,7 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
           ['as add routing starter', 'Navigation tree, titles and breadcrumbs'],
           ['as add app-shell', 'Floating sidebar, header and example pages'],
           ['as add presence', 'User status in the shell, in memory or over a WebSocket'],
+          ['as add ui-system', 'Components catalog in the UI tab of the design preferences'],
           ['as add rendering starter-ssr', 'Angular SSR with incremental hydration'],
           ['as add components all --dry-run', 'See the steps without changing anything'],
         ])

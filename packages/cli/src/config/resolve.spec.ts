@@ -180,6 +180,13 @@ describe('resolveOptions', () => {
     );
   });
 
+  it('accepts the UI System on top of the shell and a component collection', () => {
+    expect(resolveOptions({ flags: { uiSystem: 'starter' } }).uiSystem).toBe('starter');
+    expect(resolveOptions({ flags: { uiSystem: 'starter', components: 'all' } }).uiSystem).toBe(
+      'starter',
+    );
+  });
+
   it('needs the shell and a component collection for the UI System', () => {
     expect(() => resolveOptions({ flags: { uiSystem: 'starter', appShell: 'none' } })).toThrow(
       /uiSystem: "starter" requires/,

@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -46,7 +46,15 @@ describe('as add', () => {
     const result = await add(project, ['theme']);
     expect(result.code).toBe(2);
     expect(result.err).toContain('Unknown capability "theme"');
-    for (const name of ['icons', 'components', 'routing', 'app-shell', 'presence', 'rendering']) {
+    for (const name of [
+      'icons',
+      'components',
+      'routing',
+      'app-shell',
+      'presence',
+      'ui-system',
+      'rendering',
+    ]) {
       expect(result.err).toContain(name);
     }
   });
@@ -272,6 +280,71 @@ describe('as add', () => {
       expect(result.code).toBe(0);
       expect(result.out).toContain('Adding presence');
       expect(await exists(join(project, 'src/app/core/presence'))).toBe(false);
+    });
+  });
+
+  describe('ui-system', () => {
+    const TAB = 'src/app/features/preference-design/tabs/ui-tab.html';
+
+    it('adds the catalog to the UI tab of the design preferences and records it', async () => {
+      const project = await createStarterProject(cwd);
+      const result = await add(project, ['ui-system']);
+      expect(result.code, result.err).toBe(0);
+      expect(result.out).toContain('✓ Adding the UI System');
+      expect(
+        await exists(join(project, 'src/app/features/preference-design/ui-system/ui-system.ts')),
+      ).toBe(true);
+      expect(await readFile(join(project, TAB), 'utf8')).toContain('<app-ui-system />');
+      expect((await readConfig(project)).uiSystem).toBe('starter');
+      expect(result.calls.some((call) => call.args.includes('install'))).toBe(false);
+    });
+
+    it('works on a project whose configuration was written before the UI System existed', async () => {
+      const project = await createStarterProject(cwd);
+      const file = join(project, 'angular-starter.config.json');
+      const config = JSON.parse(await readFile(file, 'utf8'));
+      for (const key of ['uiSystem', 'layout', 'ssrPurpose']) delete config.options[key];
+      await writeFile(file, JSON.stringify(config));
+      const result = await add(project, ['ui-system']);
+      expect(result.code, result.err).toBe(0);
+    });
+
+    it('needs the shell and a component collection', async () => {
+      const noShell = await createStarterProject(cwd, ['--app-shell', 'none']);
+      const withoutShell = await add(noShell, ['ui-system']);
+      expect(withoutShell.code).toBe(2);
+      expect(withoutShell.err).toContain('requires the app shell: starter');
+
+      await mkdir(join(cwd, 'other'));
+      const noComponents = await createStarterProject(join(cwd, 'other'), ['--components', 'none']);
+      const withoutComponents = await add(noComponents, ['ui-system']);
+      expect(withoutComponents.code).toBe(2);
+      expect(withoutComponents.err).toContain('the components: recommended, all');
+    });
+
+    it('refuses to add it twice', async () => {
+      const project = await createStarterProject(cwd, ['--ui-system', 'starter']);
+      const result = await add(project, ['ui-system']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('already');
+    });
+
+    it('leaves the project as it was when the UI tab does not have the expected shape', async () => {
+      const project = await createStarterProject(cwd);
+      await writeFile(join(project, TAB), '<p>my own tab</p>\n');
+      const result = await add(project, ['ui-system']);
+      expect(result.code).not.toBe(0);
+      expect(result.err).toContain('ui-tab.html');
+      expect((await readConfig(project)).uiSystem).toBe('none');
+      expect(await readFile(join(project, TAB), 'utf8')).toBe('<p>my own tab</p>\n');
+    });
+
+    it('shows the steps with --dry-run and changes nothing', async () => {
+      const project = await createStarterProject(cwd);
+      const result = await add(project, ['ui-system', '--dry-run']);
+      expect(result.code).toBe(0);
+      expect(result.out).toContain('Adding the UI System');
+      expect(await readFile(join(project, TAB), 'utf8')).not.toContain('<app-ui-system />');
     });
   });
 

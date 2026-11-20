@@ -17,6 +17,7 @@ import {
   applyPresence,
   applyRendering,
   applyRouting,
+  applyUiSystem,
   installDependencies,
   writeStarterConfig,
 } from '../engine/stages.js';
@@ -33,6 +34,7 @@ export const ADDABLE: Readonly<Record<string, Extract<CapabilityCategory, keyof 
     routing: 'routing',
     'app-shell': 'appShell',
     presence: 'presence',
+    'ui-system': 'uiSystem',
     rendering: 'rendering',
   };
 
@@ -43,6 +45,7 @@ const NOT_ADDABLE: Readonly<Record<string, readonly string[]>> = {
   routing: ['angular'],
   'app-shell': ['none'],
   presence: ['none'],
+  'ui-system': ['none'],
   rendering: ['csr'],
 };
 
@@ -195,6 +198,8 @@ function stagesFor(
       ];
     case 'presence':
       return [applyPresence, writeStarterConfig];
+    case 'uiSystem':
+      return [applyUiSystem, writeStarterConfig];
     default:
       return [writeStarterConfig];
   }

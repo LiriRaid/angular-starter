@@ -236,6 +236,11 @@ async function runDryRun(context: GenerationContext): Promise<void> {
       : [
           `Add ${labelOf('presence', options.presence)} (core/presence, the status of the user menu and docs/presence.md)`,
         ]),
+    ...(options.uiSystem === 'none'
+      ? []
+      : [
+          `Add the ${labelOf('uiSystem', options.uiSystem)} (a catalog of the components with live previews in the UI tab of the design preferences)`,
+        ]),
     ...(ICON_PACKAGES[options.icons]
       ? [
           `Add the ${labelOf('icons', options.icons)} package (${ICON_PACKAGES[options.icons]?.name})`,

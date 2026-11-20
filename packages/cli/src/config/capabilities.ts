@@ -405,7 +405,7 @@ export const CAPABILITIES: Registry = {
       description:
         'A catalog of the installed as- components with a preview of each one, its code and what it affects, and the design tokens (radius, button size, density, font size) that you change in real time from the design preferences page. Needs the application shell and a component collection.',
       docs: STARTER_ROUTED_DOCS,
-      available: false,
+      available: true,
       requires: {
         architecture: ['screaming'],
         appShell: ['starter'],
