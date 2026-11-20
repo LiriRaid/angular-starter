@@ -74,6 +74,17 @@ describe('as (program)', () => {
     expect(out).toMatch(/modular.*planned/);
   });
 
+  it('explains every option in the list: label, documentation and description', async () => {
+    const fake = createFakeIo();
+    expect(await run(['list', 'style'], fake.io)).toBe(0);
+    const out = fake.out();
+    expect(out).toContain('Stylesheet formats (style)');
+    expect(out).toMatch(/^ {2}tailwind +Tailwind CSS \(Recommended\)/m);
+    expect(out).toContain('https://tailwindcss.com');
+    expect(out).toContain('Utility-first');
+    expect(out).toMatch(/^ {2}css +CSS/m);
+  });
+
   it('prints environment information', async () => {
     const fake = createFakeIo();
     expect(await run(['info'], fake.io)).toBe(0);

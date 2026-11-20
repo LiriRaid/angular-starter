@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import { ANGULAR_CLI_VERSION, ICON_PACKAGES } from '../compat.js';
 import { CAPABILITIES, type CapabilityCategory } from '../config/capabilities.js';
 import { readConfigFile } from '../config/file.js';
-import { resolveOptions } from '../config/resolve.js';
+import { normalizeStyleChoice, resolveOptions } from '../config/resolve.js';
 import type { StarterOptions } from '../config/schema.js';
 import type { ProgramDeps } from '../deps.js';
 import { buildNgCommand } from '../engine/angular-cli.js';
@@ -140,8 +140,13 @@ const OPTION_FLAGS = [
 
 /** Only the flags that describe the project; control flags such as --dry-run stay out. */
 function optionsFromFlags(flags: NewFlags): Partial<StarterOptions> {
+  const { style, tailwind } = normalizeStyleChoice(flags.style, flags.tailwind);
+  const normalized: NewFlags = { ...flags, style, tailwind };
   return Object.fromEntries(
-    OPTION_FLAGS.filter((key) => flags[key] !== undefined).map((key) => [key, flags[key]]),
+    OPTION_FLAGS.filter((key) => normalized[key] !== undefined).map((key) => [
+      key,
+      normalized[key],
+    ]),
   ) as Partial<StarterOptions>;
 }
 
@@ -161,6 +166,8 @@ function printSummary(io: CliIo, name: string, options: StarterOptions): void {
     ['Stylesheet', labelOf('style', options.style)],
     ['Tailwind CSS', toggle(options.tailwind)],
     ['Rendering', labelOf('rendering', options.rendering)],
+    ['Components', labelOf('components', options.components)],
+    ['Icons', labelOf('icons', options.icons)],
     ['Package manager', options.packageManager],
     ['Selector prefix', options.prefix],
     ['Git', toggle(options.git)],

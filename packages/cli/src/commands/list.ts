@@ -1,7 +1,7 @@
 import { CAPABILITIES, CATEGORIES, type CapabilityCategory } from '../config/capabilities.js';
 import { UsageError } from '../errors.js';
 import { println, type CliIo } from '../io.js';
-import { formatRows } from '../ui/format.js';
+import { createStyler } from '../ui/format.js';
 
 const TITLES: Record<CapabilityCategory, string> = {
   architecture: 'Architectures',
@@ -14,14 +14,20 @@ const TITLES: Record<CapabilityCategory, string> = {
 };
 
 export function listCommand(io: CliIo, category?: string): void {
+  const style = createStyler(io.color);
   const selected = selectCategories(category);
   selected.forEach((name, index) => {
     if (index > 0) println(io.stdout);
-    println(io.stdout, `${TITLES[name]} (${name})`);
-    const rows = CAPABILITIES[name].map(
-      (option) => [option.id, `${option.label}${option.available ? '' : ' (planned)'}`] as const,
-    );
-    for (const line of formatRows(rows)) println(io.stdout, line);
+    println(io.stdout, style.bold(`${TITLES[name]} (${name})`));
+    const options = CAPABILITIES[name];
+    const idWidth = Math.max(...options.map((option) => option.id.length));
+    const margin = ' '.repeat(2 + idWidth + 2);
+    for (const option of options) {
+      const badge = option.available ? (option.recommended ? ' (Recommended)' : '') : ' (planned)';
+      println(io.stdout, `  ${option.id.padEnd(idWidth)}  ${option.label}${badge}`);
+      println(io.stdout, style.dim(`${margin}${option.description}`));
+      if (option.docs) println(io.stdout, style.dim(`${margin}${option.docs}`));
+    }
   });
 }
 
