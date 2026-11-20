@@ -24,36 +24,41 @@ function pick<T extends string>(
 
 /**
  * The defaults for everything that was not given: Screaming, Angular Starter Routing, Tailwind CSS,
- * Client-Side Rendering, Lucide, the Angular Starter App Shell and the essential components. Each
- * one is derived from what was already chosen so a default never conflicts with a choice: with
- * SCSS there is no Tailwind CSS, no shell and no component collection, without the Screaming
- * Architecture the routing is Angular's own and so there is no shell either. Presence is never a
- * default: a project opts into it.
+ * Client-Side Rendering, Lucide, the Angular Starter App Shell with its floating layout and the
+ * essential components. Each one is derived from what was already chosen so a default never
+ * conflicts with a choice: with SCSS there is no Tailwind CSS, no shell and no component collection,
+ * without the Screaming Architecture the project is Angular's own (no routing, shell, Lucide or
+ * Starter SSR). Presence and the UI System are never defaults: a project opts into them.
  */
 function defaultsFor(given: Partial<StarterOptions>): StarterOptions {
   const architecture = pick(given.architecture, 'architecture', {}, 'angular-default');
   const style = given.style ?? 'css';
   // An explicit stylesheet format means no Tailwind CSS unless it was asked for.
   const tailwind = given.tailwind ?? given.style === undefined;
-  const icons = pick(given.icons, 'icons', {}, 'none');
+  const icons = pick(given.icons, 'icons', { architecture }, 'none');
   const routing = pick(
     given.routing,
     'routing',
     { architecture, style, tailwind, icons },
     'angular',
   );
-  const rendering = pick(given.rendering, 'rendering', {}, 'csr');
+  const rendering = pick(given.rendering, 'rendering', { architecture }, 'csr');
+  const ssrPurpose = pick(given.ssrPurpose, 'ssrPurpose', { rendering }, 'none');
   const context = { architecture, routing, rendering, style, tailwind, icons };
   const appShell = pick(given.appShell, 'appShell', context, 'none');
+  const components = pick(given.components, 'components', context, 'none');
   return {
     architecture,
     routing,
     style,
     tailwind,
     rendering,
+    ssrPurpose,
     appShell,
+    layout: pick(given.layout, 'layout', { appShell }, 'none'),
     presence: pick(given.presence, 'presence', { ...context, appShell }, 'none'),
-    components: pick(given.components, 'components', context, 'none'),
+    components,
+    uiSystem: pick(given.uiSystem, 'uiSystem', { ...context, appShell, components }, 'none'),
     icons,
     packageManager: 'npm',
     prefix: 'app',

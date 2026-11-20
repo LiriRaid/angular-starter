@@ -50,7 +50,7 @@ const ROOT_EXAMPLES: readonly (readonly [string, string])[] = [
 ];
 
 const ONLY_NEW =
-  'Only `as new` decides: architecture, stylesheet format, Tailwind CSS, package manager and selector prefix.';
+  'Only `as new` decides: architecture, stylesheet format, Tailwind CSS, the purpose of the Starter SSR, the layout of the shell, package manager and selector prefix.';
 
 export function createProgram(io: CliIo, deps: ProgramDeps): Command {
   const program = new Command();
@@ -79,7 +79,7 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
     .description('List available options with what each one is and its documentation')
     .argument(
       '[category]',
-      'architecture, routing, style, rendering, components, icons, packageManager, appShell or presence',
+      'architecture, routing, style, rendering, ssrPurpose, appShell, layout, presence, components, uiSystem, icons or packageManager',
     )
     .addHelpText(
       'after',
@@ -169,9 +169,12 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     .option('--tailwind', 'Integrate Tailwind CSS (same as --style tailwind)')
     .option('--no-tailwind', 'Do not integrate Tailwind CSS')
     .option('--rendering <strategy>', `Rendering strategy (${valuesOf('rendering')})`)
+    .option('--ssr-purpose <id>', `What the Starter SSR is for (${valuesOf('ssrPurpose')})`)
     .option('--app-shell <id>', `Application shell (${valuesOf('appShell')})`)
+    .option('--layout <id>', `Layout of the app shell (${valuesOf('layout')})`)
     .option('--presence <id>', `Real-time presence (${valuesOf('presence')})`)
     .option('--components <set>', `Native UI components (${valuesOf('components')})`)
+    .option('--ui-system <id>', `UI System of the design preferences (${valuesOf('uiSystem')})`)
     .option('--icons <library>', `Icon library (${valuesOf('icons')})`)
     .option('--package-manager <name>', `Package manager (${valuesOf('packageManager')})`)
     .option('--prefix <prefix>', 'Selector prefix of your application components (default: app)')

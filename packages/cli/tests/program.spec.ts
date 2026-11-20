@@ -108,11 +108,17 @@ describe('as (program)', () => {
       '--style',
       '--tailwind',
       '--rendering',
+      '--ssr-purpose',
       '--app-shell',
+      '--layout',
       '--presence',
+      '--ui-system',
     ]) {
       expect(out).toContain(flag);
     }
+    // Only what can be generated is listed as a value.
+    expect(out).toContain('Layout of the app shell (none, floating-wide)');
+    expect(out).toContain('What the Starter SSR is for (none,');
     expect(out).toContain('(css, tailwind, scss, sass, less)');
     expect(out).toContain('--defaults');
     expect(out).toContain('Examples:');
@@ -191,6 +197,33 @@ describe('as (program)', () => {
     expect(out).toMatch(/^ {2}starter +Angular Starter App Shell/m);
     expect(out).toContain('0008-app-shell.md');
     expect(out).not.toMatch(/App Shell \(Recommended\)/);
+  });
+
+  it('lists the layout modes of the shell: the one that exists and the ones under construction', async () => {
+    const fake = createFakeIo();
+    expect(await run(['list', 'layout'], fake.io)).toBe(0);
+    const out = fake.out();
+    expect(out).toContain('Layout modes of the application shell (layout)');
+    expect(out).toMatch(/^ {2}floating-wide +Floating \(wide\) \(Recommended\)/m);
+    expect(out).toMatch(/^ {2}compact-joined +Compact sidebar \(joined\) \(planned\)/m);
+    expect(out).toMatch(/^ {2}transparent-floating +Transparent \(floating\) \(planned\)/m);
+  });
+
+  it('lists what the Starter SSR can be for', async () => {
+    const fake = createFakeIo();
+    expect(await run(['list', 'ssrPurpose'], fake.io)).toBe(0);
+    const out = fake.out();
+    expect(out).toContain('Purposes of the Starter SSR (ssrPurpose)');
+    expect(out).toMatch(/^ {2}backoffice +Backoffice(?! \(planned\))/m);
+    expect(out).toMatch(/^ {2}landing +Landing page \(planned\)/m);
+    expect(out).toMatch(/^ {2}ecommerce +Ecommerce \(planned\)/m);
+  });
+
+  it('lists the UI System', async () => {
+    const fake = createFakeIo();
+    expect(await run(['list', 'uiSystem'], fake.io)).toBe(0);
+    expect(fake.out()).toContain('UI Systems (uiSystem)');
+    expect(fake.out()).toMatch(/^ {2}starter +Angular Starter UI System/m);
   });
 
   it('lists the presence options with the link to their decision', async () => {

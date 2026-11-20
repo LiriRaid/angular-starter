@@ -3,7 +3,9 @@ import {
   CAPABILITIES,
   CATEGORIES,
   availableIds,
+  SHOWN_WHEN_PLANNED,
   defaultOption,
+  offeredOptions,
   recommendedOption,
   unmetRequirements,
 } from './capabilities.js';
@@ -53,12 +55,123 @@ describe('capability registry', () => {
       routing: [],
       style: ['tailwind'],
       rendering: ['csr'],
+      ssrPurpose: [],
+      appShell: [],
+      layout: ['floating-wide'],
+      presence: [],
       components: [],
+      uiSystem: [],
       icons: ['lucide'],
       packageManager: [],
-      appShell: [],
-      presence: [],
     });
+  });
+
+  it('lists the categories in the order of the wizard, each answer opening the next', () => {
+    expect(CATEGORIES).toEqual([
+      'architecture',
+      'routing',
+      'style',
+      'rendering',
+      'ssrPurpose',
+      'appShell',
+      'layout',
+      'presence',
+      'components',
+      'uiSystem',
+      'icons',
+      'packageManager',
+    ]);
+  });
+
+  it('keeps what only the wizard offers apart from what a project needs', () => {
+    const lucide = CAPABILITIES.icons.find((option) => option.id === 'lucide');
+    const starterSsr = CAPABILITIES.rendering.find((option) => option.id === 'starter-ssr');
+    expect(lucide?.offeredWith).toEqual({ architecture: ['screaming'] });
+    expect(starterSsr?.offeredWith).toEqual({ architecture: ['screaming'] });
+    // A project with Angular's own structure may still have Lucide: it is not a requirement.
+    expect(lucide?.requires).toBeUndefined();
+    expect(starterSsr?.requires).toBeUndefined();
+  });
+
+  it('offers neither Lucide nor Starter SSR where the default Angular structure is chosen', () => {
+    const angular = { architecture: 'angular-default' };
+    expect(defaultOption('icons', angular)).toBeUndefined();
+    expect(recommendedOption('icons', angular)).toBeUndefined();
+    expect(offeredOptions('rendering', angular).map((option) => option.id)).toEqual(['csr', 'ssr']);
+    expect(offeredOptions('icons', angular).map((option) => option.id)).toEqual(['none']);
+    expect(offeredOptions('rendering', { architecture: 'screaming' }).map((o) => o.id)).toEqual([
+      'csr',
+      'ssr',
+      'starter-ssr',
+    ]);
+  });
+
+  it('asks the purpose of Starter SSR: landing and ecommerce are under construction', () => {
+    expect(CAPABILITIES.ssrPurpose.map((option) => option.id)).toEqual([
+      'none',
+      'landing',
+      'ecommerce',
+      'backoffice',
+    ]);
+    expect(availableIds('ssrPurpose')).toEqual(['none', 'backoffice']);
+    const backoffice = CAPABILITIES.ssrPurpose.find((option) => option.id === 'backoffice');
+    expect(backoffice?.default).toBe(true);
+    expect(backoffice?.requires).toEqual({ rendering: ['starter-ssr'] });
+    expect(CAPABILITIES.ssrPurpose.find((option) => option.id === 'none')?.requires).toEqual({
+      rendering: ['csr', 'ssr'],
+    });
+  });
+
+  it('has the six layout modes of the demo and only the floating wide one built', () => {
+    expect(CAPABILITIES.layout.map((option) => option.id)).toEqual([
+      'none',
+      'wide-joined',
+      'compact-joined',
+      'floating-wide',
+      'floating-compact',
+      'transparent-joined',
+      'transparent-floating',
+    ]);
+    expect(availableIds('layout')).toEqual(['none', 'floating-wide']);
+    const floating = CAPABILITIES.layout.find((option) => option.id === 'floating-wide');
+    expect(floating?.recommended).toBe(true);
+    expect(floating?.default).toBe(true);
+    expect(floating?.requires).toEqual({ appShell: ['starter'] });
+    expect(CAPABILITIES.layout.find((option) => option.id === 'none')?.requires).toEqual({
+      appShell: ['none'],
+    });
+  });
+
+  it('shows the planned layouts and purposes in the wizard, and nothing else', () => {
+    expect(SHOWN_WHEN_PLANNED).toEqual(['ssrPurpose', 'layout']);
+  });
+
+  it('offers the UI System on top of the shell and a component collection', () => {
+    expect(CAPABILITIES.uiSystem.map((option) => option.id)).toEqual(['none', 'starter']);
+    const starter = CAPABILITIES.uiSystem.find((option) => option.id === 'starter');
+    expect(starter?.requires).toEqual({
+      architecture: ['screaming'],
+      appShell: ['starter'],
+      components: ['recommended', 'all'],
+      tailwind: true,
+    });
+    expect(starter?.default).toBeUndefined();
+    expect(unmetRequirements(starter!, { appShell: 'starter', components: 'none' })).toEqual([
+      'the components: recommended, all',
+    ]);
+  });
+
+  it('says how many components each collection brings', () => {
+    const [none, essential, all] = CAPABILITIES.components;
+    expect(none?.id).toBe('none');
+    expect(essential?.description).toMatch(/\b16\b/);
+    expect(all?.description).toMatch(/\b26\b/);
+    expect(all?.description).toMatch(/16/);
+  });
+
+  it('says that no shell means the default Angular screen', () => {
+    const none = CAPABILITIES.appShell.find((option) => option.id === 'none');
+    expect(none?.description).toMatch(/default Angular/i);
   });
 
   it('offers presence like any other option, only on top of the application shell', () => {

@@ -3,11 +3,14 @@ export type CapabilityCategory =
   | 'routing'
   | 'style'
   | 'rendering'
-  | 'components'
-  | 'icons'
-  | 'packageManager'
+  | 'ssrPurpose'
   | 'appShell'
-  | 'presence';
+  | 'layout'
+  | 'presence'
+  | 'components'
+  | 'uiSystem'
+  | 'icons'
+  | 'packageManager';
 
 /** What an option needs from the rest of the project; any value is accepted when a key is absent. */
 export interface OptionRequirements {
@@ -16,6 +19,8 @@ export interface OptionRequirements {
   readonly rendering?: readonly string[];
   /** The application shell the option is built on. */
   readonly appShell?: readonly string[];
+  /** The component collection the option previews or extends. */
+  readonly components?: readonly string[];
   /** Stylesheet format (`css` also covers Tailwind CSS). */
   readonly style?: readonly string[];
   /** True when the option only works in a project that uses Tailwind CSS. */
@@ -36,7 +41,13 @@ export interface CapabilityOption {
   readonly recommended?: boolean;
   /** What `--defaults` and a flag-less run pick, without any badge in the wizard. */
   readonly default?: boolean;
+  /** What a project cannot be generated without: validated by `as new` and by `as add`. */
   readonly requires?: OptionRequirements;
+  /**
+   * What the wizard and `--defaults` need to offer the option: the same shape as `requires`, but a
+   * project that has the option without it is still valid (ADR-0010).
+   */
+  readonly offeredWith?: OptionRequirements;
 }
 
 export type Registry = Readonly<Record<CapabilityCategory, readonly CapabilityOption[]>>;
@@ -47,6 +58,7 @@ export interface RequirementContext {
   routing?: string;
   rendering?: string;
   appShell?: string;
+  components?: string;
   style?: string;
   tailwind?: boolean;
   icons?: string;
@@ -54,6 +66,13 @@ export interface RequirementContext {
 
 const STARTER_DOCS = 'https://github.com/LiriRaid/as-starter/blob/main/docs/adr';
 const STARTER_PRESENCE_DOCS = `${STARTER_DOCS}/0009-presence-documentation-and-welcome-home.md`;
+const STARTER_ROUTED_DOCS = `${STARTER_DOCS}/0010-routed-wizard-layout-modes-and-design-preferences.md`;
+
+/**
+ * The categories whose options that cannot be generated yet are still listed by the wizard, disabled
+ * and marked as under construction, so a developer sees the map of the product (ADR-0010).
+ */
+export const SHOWN_WHEN_PLANNED: readonly CapabilityCategory[] = ['ssrPurpose', 'layout'];
 
 /**
  * Single registry of everything `as new` can offer. Setting `available` to true is the only change
@@ -191,6 +210,156 @@ export const CAPABILITIES: Registry = {
         'Default SSR plus incremental hydration, event replay and view transitions, with a @defer (hydrate on viewport) example as in the maintainer portfolio. Use it for content-heavy public sites.',
       docs: 'https://angular.dev/guide/incremental-hydration',
       available: true,
+      offeredWith: { architecture: ['screaming'] },
+    },
+  ],
+  ssrPurpose: [
+    {
+      id: 'none',
+      label: 'None',
+      description: 'Not applicable: only the Angular Starter SSR has a purpose.',
+      docs: STARTER_ROUTED_DOCS,
+      available: true,
+      requires: { rendering: ['csr', 'ssr'] },
+    },
+    {
+      id: 'landing',
+      label: 'Landing page',
+      description:
+        'A public page rendered on the server, with its own shell and sections for search engines. Under construction.',
+      docs: STARTER_ROUTED_DOCS,
+      available: false,
+      requires: { rendering: ['starter-ssr'] },
+    },
+    {
+      id: 'ecommerce',
+      label: 'Ecommerce',
+      description:
+        'A storefront with catalog, product pages and cart, rendered on the server. Under construction.',
+      docs: STARTER_ROUTED_DOCS,
+      available: false,
+      requires: { rendering: ['starter-ssr'] },
+    },
+    {
+      id: 'backoffice',
+      label: 'Backoffice',
+      description:
+        'An administration application with tables, forms and dashboards, with incremental hydration. The application shell is client-side for now.',
+      docs: STARTER_ROUTED_DOCS,
+      available: true,
+      default: true,
+      requires: { rendering: ['starter-ssr'] },
+    },
+  ],
+  appShell: [
+    {
+      id: 'none',
+      label: 'None',
+      description:
+        'No application shell: the project keeps the default Angular look, with no sidebar, header or content layout, and the root component is just the router outlet. You can add it later with as add app-shell.',
+      docs: `${STARTER_DOCS}/0008-app-shell.md`,
+      available: true,
+    },
+    {
+      id: 'starter',
+      label: 'Angular Starter App Shell',
+      description:
+        'A wide sidebar that floats, with the header and the content floating too, reading the navigation tree, with five example pages to try it. Needs the starter routing, Tailwind CSS and client-side rendering (server rendering is not supported yet).',
+      docs: `${STARTER_DOCS}/0008-app-shell.md`,
+      available: true,
+      default: true,
+      requires: {
+        architecture: ['screaming'],
+        routing: ['starter'],
+        rendering: ['csr'],
+        tailwind: true,
+        icons: ['lucide'],
+      },
+    },
+  ],
+  layout: [
+    {
+      id: 'none',
+      label: 'None',
+      description: 'No application shell, so there is no layout to choose.',
+      docs: STARTER_ROUTED_DOCS,
+      available: true,
+      requires: { appShell: ['none'] },
+    },
+    {
+      id: 'wide-joined',
+      label: 'Wide sidebar (joined)',
+      description:
+        'A wide sidebar with the icon and the text in a row, joined to the header and the content. Under construction.',
+      docs: STARTER_ROUTED_DOCS,
+      available: false,
+      requires: { appShell: ['starter'] },
+    },
+    {
+      id: 'compact-joined',
+      label: 'Compact sidebar (joined)',
+      description:
+        'A compact sidebar with the icon above the text, joined to the header and the content. Under construction.',
+      docs: STARTER_ROUTED_DOCS,
+      available: false,
+      requires: { appShell: ['starter'] },
+    },
+    {
+      id: 'floating-wide',
+      label: 'Floating (wide)',
+      description:
+        'A wide sidebar that floats, with the header and the content floating too: the layout of the reference application.',
+      docs: STARTER_ROUTED_DOCS,
+      available: true,
+      recommended: true,
+      default: true,
+      requires: { appShell: ['starter'] },
+    },
+    {
+      id: 'floating-compact',
+      label: 'Floating (compact)',
+      description:
+        'A compact sidebar with the header and the content floating. Under construction.',
+      docs: STARTER_ROUTED_DOCS,
+      available: false,
+      requires: { appShell: ['starter'] },
+    },
+    {
+      id: 'transparent-joined',
+      label: 'Transparent (joined)',
+      description:
+        'A sidebar with no background, joined to the header and the content. Under construction.',
+      docs: STARTER_ROUTED_DOCS,
+      available: false,
+      requires: { appShell: ['starter'] },
+    },
+    {
+      id: 'transparent-floating',
+      label: 'Transparent (floating)',
+      description:
+        'A sidebar with no background and the header and the content floating. Under construction.',
+      docs: STARTER_ROUTED_DOCS,
+      available: false,
+      requires: { appShell: ['starter'] },
+    },
+  ],
+  presence: [
+    {
+      id: 'none',
+      label: 'None',
+      description:
+        'No presence: the user menu has no status. You can add it later with as add presence.',
+      docs: STARTER_PRESENCE_DOCS,
+      available: true,
+    },
+    {
+      id: 'starter',
+      label: 'Angular Starter Presence',
+      description:
+        'The user status of the reference (online, away, busy, invisible, with a duration) in the user menu, automatic away on inactivity, and a transport contract with an in-memory mock and a WebSocket transport, plus a guide to connect Redis and your API. Needs the application shell.',
+      docs: STARTER_PRESENCE_DOCS,
+      available: true,
+      requires: { appShell: ['starter'] },
     },
   ],
   components: [
@@ -205,7 +374,7 @@ export const CAPABILITIES: Registry = {
       id: 'recommended',
       label: 'Essential component collection',
       description:
-        'The design base (tokens, light and dark theme, typography, animations) and 16 as- components: icon, button, input, textarea, checkbox, toggle, select, avatar, divider, skeleton, tooltip, modal, drawer, toast, tabs and popover. Needs Tailwind CSS.',
+        'The essential 16 as- components (icon, button, input, textarea, checkbox, toggle, select, avatar, divider, skeleton, tooltip, modal, drawer, toast, tabs and popover) with the design base: tokens, light and dark theme, typography and animations. Needs Tailwind CSS.',
       docs: `${STARTER_DOCS}/0007-omni-structure-design-and-components.md`,
       available: true,
       default: true,
@@ -215,10 +384,34 @@ export const CAPABILITIES: Registry = {
       id: 'all',
       label: 'All available components',
       description:
-        'The essential collection plus table, search, datepicker, section-nav, selectable-item, reorder-list, preview, media-preview, theme-color-picker and weekly-schedule. Needs Tailwind CSS.',
+        'All 26 as- components: the 16 of the essential collection plus ten more (table, search, datepicker, section-nav, selectable-item, reorder-list, preview, media-preview, theme-color-picker and weekly-schedule), with the design base. Needs Tailwind CSS.',
       docs: `${STARTER_DOCS}/0007-omni-structure-design-and-components.md`,
       available: true,
       requires: { architecture: ['screaming'], tailwind: true, icons: ['lucide'] },
+    },
+  ],
+  uiSystem: [
+    {
+      id: 'none',
+      label: 'None',
+      description:
+        'No UI System: the components keep the design base as it is generated. You can add it later with as add ui-system.',
+      docs: STARTER_ROUTED_DOCS,
+      available: true,
+    },
+    {
+      id: 'starter',
+      label: 'Angular Starter UI System',
+      description:
+        'A catalog of the installed as- components with a preview of each one, its code and what it affects, and the design tokens (radius, button size, density, font size) that you change in real time from the design preferences page. Needs the application shell and a component collection.',
+      docs: STARTER_ROUTED_DOCS,
+      available: false,
+      requires: {
+        architecture: ['screaming'],
+        appShell: ['starter'],
+        components: ['recommended', 'all'],
+        tailwind: true,
+      },
     },
   ],
   icons: [
@@ -236,6 +429,7 @@ export const CAPABILITIES: Registry = {
       docs: 'https://lucide.dev/guide/angular/getting-started',
       available: true,
       recommended: true,
+      offeredWith: { architecture: ['screaming'] },
     },
     {
       id: 'heroicons',
@@ -289,51 +483,6 @@ export const CAPABILITIES: Registry = {
       available: true,
     },
   ],
-  appShell: [
-    {
-      id: 'none',
-      label: 'None',
-      description:
-        'No application shell: the root component is just the router outlet. You can add it later with as add app-shell.',
-      docs: `${STARTER_DOCS}/0008-app-shell.md`,
-      available: true,
-    },
-    {
-      id: 'starter',
-      label: 'Angular Starter App Shell',
-      description:
-        'A wide sidebar that floats, with the header and the content floating too, reading the navigation tree, with five example pages to try it. Needs the starter routing, Tailwind CSS and client-side rendering (server rendering is not supported yet).',
-      docs: `${STARTER_DOCS}/0008-app-shell.md`,
-      available: true,
-      default: true,
-      requires: {
-        architecture: ['screaming'],
-        routing: ['starter'],
-        rendering: ['csr'],
-        tailwind: true,
-        icons: ['lucide'],
-      },
-    },
-  ],
-  presence: [
-    {
-      id: 'none',
-      label: 'None',
-      description:
-        'No presence: the user menu has no status. You can add it later with as add presence.',
-      docs: STARTER_PRESENCE_DOCS,
-      available: true,
-    },
-    {
-      id: 'starter',
-      label: 'Angular Starter Presence',
-      description:
-        'The user status of the reference (online, away, busy, invisible, with a duration) in the user menu, automatic away on inactivity, and a transport contract with an in-memory mock and a WebSocket transport, plus a guide to connect Redis and your API. Needs the application shell.',
-      docs: STARTER_PRESENCE_DOCS,
-      available: true,
-      requires: { appShell: ['starter'] },
-    },
-  ],
 };
 
 export const CATEGORIES = Object.keys(CAPABILITIES) as CapabilityCategory[];
@@ -354,38 +503,68 @@ export function isAvailable(category: CapabilityCategory, id: string): boolean {
 }
 
 const REQUIREMENT_TEXT: Record<
-  'architecture' | 'routing' | 'rendering' | 'appShell' | 'style' | 'icons',
+  'architecture' | 'routing' | 'rendering' | 'appShell' | 'components' | 'style' | 'icons',
   string
 > = {
   architecture: 'the architecture',
   routing: 'the routing',
   rendering: 'the rendering',
   appShell: 'the app shell',
+  components: 'the components',
   style: 'the stylesheet format',
   icons: 'the icons',
 };
+
+function unmet(
+  requirements: OptionRequirements | undefined,
+  context: RequirementContext,
+): string[] {
+  const missing: string[] = [];
+  if (!requirements) return missing;
+  for (const key of Object.keys(REQUIREMENT_TEXT) as (keyof typeof REQUIREMENT_TEXT)[]) {
+    const accepted = requirements[key];
+    const actual = context[key];
+    if (accepted && actual !== undefined && !accepted.includes(actual)) {
+      missing.push(`${REQUIREMENT_TEXT[key]}: ${accepted.join(', ')}`);
+    }
+  }
+  if (requirements.tailwind && context.tailwind === false) missing.push('Tailwind CSS');
+  return missing;
+}
 
 /**
  * What `option` needs that `context` does not provide, as "the architecture: screaming". A choice
  * the context does not know yet is not checked.
  */
 export function unmetRequirements(option: CapabilityOption, context: RequirementContext): string[] {
-  const unmet: string[] = [];
-  const { requires } = option;
-  if (!requires) return unmet;
-  for (const key of Object.keys(REQUIREMENT_TEXT) as (keyof typeof REQUIREMENT_TEXT)[]) {
-    const accepted = requires[key];
-    const actual = context[key];
-    if (accepted && actual !== undefined && !accepted.includes(actual)) {
-      unmet.push(`${REQUIREMENT_TEXT[key]}: ${accepted.join(', ')}`);
-    }
-  }
-  if (requires.tailwind && context.tailwind === false) unmet.push('Tailwind CSS');
-  return unmet;
+  return unmet(option.requires, context);
 }
 
+/** True when a project with `context` can have the option and the wizard and `--defaults` offer it. */
 const usable = (option: CapabilityOption, context: RequirementContext): boolean =>
-  unmetRequirements(option, context).length === 0;
+  unmet(option.requires, context).length === 0 && unmet(option.offeredWith, context).length === 0;
+
+/** The options of a category that can be generated and that fit what `context` already holds. */
+export function offeredOptions(
+  category: CapabilityCategory,
+  context: RequirementContext,
+  registry: Registry = CAPABILITIES,
+): readonly CapabilityOption[] {
+  return availableOptions(category, registry).filter((option) => usable(option, context));
+}
+
+/**
+ * The options the wizard lists as under construction: they fit `context` but cannot be generated
+ * yet. Only the categories of `SHOWN_WHEN_PLANNED` have any.
+ */
+export function plannedOptions(
+  category: CapabilityCategory,
+  context: RequirementContext,
+  registry: Registry = CAPABILITIES,
+): readonly CapabilityOption[] {
+  if (!SHOWN_WHEN_PLANNED.includes(category)) return [];
+  return registry[category].filter((option) => !option.available && usable(option, context));
+}
 
 /** The recommended option of a category that can be generated with what `context` already holds. */
 export function recommendedOption(
@@ -393,9 +572,7 @@ export function recommendedOption(
   context: RequirementContext,
   registry: Registry = CAPABILITIES,
 ): CapabilityOption | undefined {
-  return availableOptions(category, registry).find(
-    (option) => option.recommended && usable(option, context),
-  );
+  return offeredOptions(category, context, registry).find((option) => option.recommended);
 }
 
 /**
@@ -407,6 +584,6 @@ export function defaultOption(
   context: RequirementContext,
   registry: Registry = CAPABILITIES,
 ): CapabilityOption | undefined {
-  const options = availableOptions(category, registry).filter((option) => usable(option, context));
+  const options = offeredOptions(category, context, registry);
   return options.find((option) => option.default) ?? options.find((option) => option.recommended);
 }

@@ -692,6 +692,87 @@ export const appConfig: ApplicationConfig = {
     expect(fake.out()).toMatch(/^ {2}App shell +Angular Starter App Shell$/m);
   });
 
+  it('records the layout, the purpose and the UI System, and shows them in the summary', async () => {
+    const fake = createFakeIo({ cwd });
+    const code = await run(['new', 'my-app', '--defaults', '--no-install', '--no-git'], fake.io, {
+      run: createFakeRunner().run,
+    });
+    expect(code, fake.err()).toBe(0);
+    expect(fake.out()).toMatch(/^ {2}Layout +Floating \(wide\)$/m);
+    expect(fake.out()).toMatch(/^ {2}UI System +None$/m);
+    const config = JSON.parse(
+      await readFile(join(cwd, 'my-app', 'angular-starter.config.json'), 'utf8'),
+    );
+    expect(config.options).toMatchObject({
+      ssrPurpose: 'none',
+      layout: 'floating-wide',
+      uiSystem: 'none',
+    });
+  });
+
+  it('records the purpose of Starter SSR and refuses the ones under construction', async () => {
+    const backoffice = createFakeIo({ cwd });
+    expect(
+      await run(
+        ['new', 'my-app', '--defaults', '--rendering', 'starter-ssr', '--no-install', '--no-git'],
+        backoffice.io,
+        {
+          run: createFakeRunner({
+            files: {
+              'src/app/app.config.ts': `import { ApplicationConfig } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideClientHydration } from '@angular/platform-browser';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideRouter([]), provideClientHydration()],
+};
+`,
+            },
+          }).run,
+        },
+      ),
+      backoffice.err(),
+    ).toBe(0);
+    const config = JSON.parse(
+      await readFile(join(cwd, 'my-app', 'angular-starter.config.json'), 'utf8'),
+    );
+    expect(config.options).toMatchObject({ rendering: 'starter-ssr', ssrPurpose: 'backoffice' });
+
+    const landing = createFakeIo({ cwd });
+    const runner = createFakeRunner();
+    const code = await run(
+      ['new', 'shop', '--defaults', '--rendering', 'starter-ssr', '--ssr-purpose', 'landing'],
+      landing.io,
+      { run: runner.run },
+    );
+    expect(code).toBe(2);
+    expect(landing.err()).toContain('ssrPurpose: "landing" is not available yet');
+    expect(runner.calls).toEqual([]);
+  });
+
+  it('refuses a layout mode that is under construction before doing anything', async () => {
+    const fake = createFakeIo({ cwd });
+    const runner = createFakeRunner();
+    const code = await run(['new', 'my-app', '--defaults', '--layout', 'compact-joined'], fake.io, {
+      run: runner.run,
+    });
+    expect(code).toBe(2);
+    expect(fake.err()).toContain('layout: "compact-joined" is not available yet');
+    expect(runner.calls).toEqual([]);
+  });
+
+  it('leaves Angular plain with the default structure: no Lucide, no shell, no layout', async () => {
+    const fake = createFakeIo({ cwd });
+    await run(
+      ['new', 'my-app', '--defaults', '--architecture', 'angular-default', '--dry-run'],
+      fake.io,
+      { run: createFakeRunner().run },
+    );
+    expect(fake.out()).toMatch(/^ {2}Icons +None$/m);
+    expect(fake.out()).toMatch(/^ {2}Layout +None$/m);
+    expect(fake.out()).not.toContain('Lucide');
+  });
+
   it('lists only the values that can be used in the help of `new`', async () => {
     const fake = createFakeIo();
     expect(await run(['new', '--help'], fake.io)).toBe(0);
@@ -710,12 +791,12 @@ describe('as new (interactive)', () => {
   it('asks for the missing values, shows a summary and creates the project', async () => {
     const fake = createFakeIo({ cwd, interactive: true });
     const runner = createFakeRunner();
-    // architecture, style, rendering, icons, package manager, git, install, final confirmation.
+    // architecture, style, rendering, package manager, git, install, final confirmation: the
+    // default Angular structure has no routing, shell, components or icon questions.
     const { prompter, asked } = createFakePrompter([
       'angular-default',
       'scss',
       'csr',
-      'none',
       'pnpm',
       false,
       false,
@@ -728,7 +809,6 @@ describe('as new (interactive)', () => {
       'architecture',
       'style',
       'rendering',
-      'icons',
       'packageManager',
       'git',
       'install',
@@ -749,7 +829,6 @@ describe('as new (interactive)', () => {
       'angular-default',
       'css',
       'csr',
-      'none',
       'npm',
       false,
       false,
@@ -767,7 +846,6 @@ describe('as new (interactive)', () => {
       'angular-default',
       'css',
       'csr',
-      'none',
       'npm',
       true,
       true,

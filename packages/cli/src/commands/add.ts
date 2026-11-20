@@ -1,4 +1,9 @@
-import { CAPABILITIES, availableIds, type CapabilityCategory } from '../config/capabilities.js';
+import {
+  CAPABILITIES,
+  availableIds,
+  defaultOption,
+  type CapabilityCategory,
+} from '../config/capabilities.js';
 import { resolveOptions } from '../config/resolve.js';
 import type { StarterOptions } from '../config/schema.js';
 import type { ProgramDeps } from '../deps.js';
@@ -96,6 +101,7 @@ export async function addCommand(
     file: {
       ...project.options,
       ...(implied ? { icons: implied as StarterOptions['icons'] } : {}),
+      ...dependentChoices(category, choice),
       [category]: choice,
       install: flags.install !== false,
     },
@@ -117,6 +123,19 @@ export async function addCommand(
   println(io.stdout);
   println(io.stdout, style.green(`${label?.label ?? choice} added.`));
   if (label?.docs) println(io.stdout, `Documentation: ${label.docs}`);
+}
+
+/** What the new choice settles for the options that only mean something next to it (ADR-0010). */
+function dependentChoices(category: CapabilityCategory, choice: string): Partial<StarterOptions> {
+  if (category === 'appShell') {
+    const layout = defaultOption('layout', { appShell: choice })?.id;
+    return layout ? { layout: layout as StarterOptions['layout'] } : {};
+  }
+  if (category === 'rendering') {
+    const ssrPurpose = defaultOption('ssrPurpose', { rendering: choice })?.id;
+    return ssrPurpose ? { ssrPurpose: ssrPurpose as StarterOptions['ssrPurpose'] } : {};
+  }
+  return {};
 }
 
 function chooseValue(capability: string, value: string | undefined): string {

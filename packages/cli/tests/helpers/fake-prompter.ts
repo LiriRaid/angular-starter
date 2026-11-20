@@ -9,6 +9,8 @@ export interface AskedQuestion {
   /** What the user reads for each choice, and the line shown while it is highlighted. */
   names?: string[];
   descriptions?: (string | undefined)[];
+  /** The values that are listed but cannot be chosen, with the reason shown next to them. */
+  disabled?: Record<string, string>;
 }
 
 /** Answers are consumed in order; an `Error` answer is thrown, like Ctrl+C in a real prompt. */
@@ -46,6 +48,11 @@ export function createFakePrompter(answers: unknown[]): {
         choices: question.choices.map((choice) => choice.value),
         names: question.choices.map((choice) => choice.name),
         descriptions: question.choices.map((choice) => choice.description),
+        disabled: Object.fromEntries(
+          question.choices.flatMap((choice) =>
+            choice.disabled === undefined ? [] : [[choice.value, choice.disabled]],
+          ),
+        ),
       }) as T,
     confirm: async (question) =>
       next({

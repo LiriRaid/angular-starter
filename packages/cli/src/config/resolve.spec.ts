@@ -124,6 +124,71 @@ describe('resolveOptions', () => {
     expect(without({ architecture: 'angular-default' })).toThrow(/the architecture: screaming/);
   });
 
+  it('keeps the default Angular structure plain: no Lucide unless it was asked for', () => {
+    const plain = resolveOptions({ flags: { architecture: 'angular-default' } });
+    expect(plain.icons).toBe('none');
+    expect(plain.rendering).toBe('csr');
+    expect(plain.appShell).toBe('none');
+    expect(plain.layout).toBe('none');
+    expect(plain.uiSystem).toBe('none');
+    expect(
+      resolveOptions({ flags: { architecture: 'angular-default', icons: 'lucide' } }).icons,
+    ).toBe('lucide');
+  });
+
+  it('defaults the purpose of the rendering, the layout and the UI System', () => {
+    expect(DEFAULT_OPTIONS).toMatchObject({
+      ssrPurpose: 'none',
+      layout: 'floating-wide',
+      uiSystem: 'none',
+    });
+    expect(resolveOptions({ flags: { rendering: 'starter-ssr' } }).ssrPurpose).toBe('backoffice');
+    expect(resolveOptions({ flags: { rendering: 'ssr' } }).ssrPurpose).toBe('none');
+    expect(resolveOptions({ flags: { appShell: 'none' } }).layout).toBe('none');
+  });
+
+  it('accepts Starter SSR for a backoffice and refuses the purposes under construction', () => {
+    expect(
+      resolveOptions({ flags: { rendering: 'starter-ssr', ssrPurpose: 'backoffice' } }).ssrPurpose,
+    ).toBe('backoffice');
+    for (const ssrPurpose of ['landing', 'ecommerce'] as const) {
+      expect(() => resolveOptions({ flags: { rendering: 'starter-ssr', ssrPurpose } })).toThrow(
+        /ssrPurpose: "\w+" is not available yet. Available: none, backoffice/,
+      );
+    }
+  });
+
+  it('ties the purpose to Starter SSR', () => {
+    expect(() => resolveOptions({ flags: { ssrPurpose: 'backoffice' } })).toThrow(
+      /ssrPurpose: "backoffice" requires the rendering: starter-ssr/,
+    );
+    expect(() =>
+      resolveOptions({ flags: { rendering: 'starter-ssr', ssrPurpose: 'none' } }),
+    ).toThrow(/ssrPurpose: "none" requires the rendering: csr, ssr/);
+  });
+
+  it('ties the layout to the application shell and refuses the modes under construction', () => {
+    expect(resolveOptions({ flags: { layout: 'floating-wide' } }).layout).toBe('floating-wide');
+    expect(() => resolveOptions({ flags: { layout: 'compact-joined' } })).toThrow(
+      /layout: "compact-joined" is not available yet. Available: none, floating-wide/,
+    );
+    expect(() => resolveOptions({ flags: { appShell: 'none', layout: 'floating-wide' } })).toThrow(
+      /layout: "floating-wide" requires the app shell: starter/,
+    );
+    expect(() => resolveOptions({ flags: { layout: 'none' } })).toThrow(
+      /layout: "none" requires the app shell: none/,
+    );
+  });
+
+  it('needs the shell and a component collection for the UI System', () => {
+    expect(() => resolveOptions({ flags: { uiSystem: 'starter', appShell: 'none' } })).toThrow(
+      /uiSystem: "starter" requires/,
+    );
+    expect(() => resolveOptions({ flags: { uiSystem: 'starter', components: 'none' } })).toThrow(
+      /the components: recommended, all/,
+    );
+  });
+
   it('rejects unknown values and lists every issue', () => {
     expect(() => resolveOptions({ flags: { style: 'stylus' as never } })).toThrow(/style/);
   });

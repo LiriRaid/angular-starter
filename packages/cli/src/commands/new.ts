@@ -24,9 +24,12 @@ export interface NewFlags {
   style?: string;
   tailwind?: boolean;
   rendering?: string;
+  ssrPurpose?: string;
   appShell?: string;
+  layout?: string;
   presence?: string;
   components?: string;
+  uiSystem?: string;
   icons?: string;
   packageManager?: string;
   prefix?: string;
@@ -133,9 +136,12 @@ const OPTION_FLAGS = [
   'style',
   'tailwind',
   'rendering',
+  'ssrPurpose',
   'appShell',
+  'layout',
   'presence',
   'components',
+  'uiSystem',
   'icons',
   'packageManager',
   'prefix',
@@ -171,9 +177,14 @@ function printSummary(io: CliIo, name: string, options: StarterOptions): void {
     ['Stylesheet', labelOf('style', options.style)],
     ['Tailwind CSS', toggle(options.tailwind)],
     ['Rendering', labelOf('rendering', options.rendering)],
+    ...(options.ssrPurpose === 'none'
+      ? []
+      : [['Starter SSR for', labelOf('ssrPurpose', options.ssrPurpose)] as const]),
     ['App shell', labelOf('appShell', options.appShell)],
+    ['Layout', labelOf('layout', options.layout)],
     ['Presence', labelOf('presence', options.presence)],
     ['Components', labelOf('components', options.components)],
+    ['UI System', labelOf('uiSystem', options.uiSystem)],
     ['Icons', labelOf('icons', options.icons)],
     ['Package manager', options.packageManager],
     ['Selector prefix', options.prefix],
