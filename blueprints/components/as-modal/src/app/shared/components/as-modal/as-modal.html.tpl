@@ -1,27 +1,42 @@
-@if (open()) {
-  <div class="as-modal__backdrop as-animate-fade-in" (click)="onBackdropClick()">
-    <div
-      #panel
-      class="as-modal__panel as-modal__panel--{{ size() }} as-animate-scale-in"
-      role="dialog"
-      aria-modal="true"
-      tabindex="-1"
-      [attr.aria-labelledby]="title() ? titleId : null"
-      (click)="$event.stopPropagation()"
-      (keydown)="onKeydown($event)"
-    >
-      @if (title() || closable()) {
-        <header class="as-modal__header">
-          <h2 class="as-modal__title" [id]="titleId">{{ title() }}</h2>
+<ng-template #modalTemplate>
+  <div class="as-modal-backdrop" [class.as-modal-backdrop--visible]="visible()" (click)="onBackdropClick()"></div>
+
+  <div #panelRef [class]="hostClasses()" [class.as-modal--visible]="visible()" [style.width]="variant() === 'default' ? width() : null" role="dialog" aria-modal="true">
+    <div class="as-modal-resize-handle" (mousedown)="onResizeMouseDown($event)"></div>
+
+    @if (variant() === 'default') {
+      <div class="as-modal-header" (mousedown)="onHeaderMouseDown($event)">
+        @if (title() || titleIcon()) {
+          <div class="as-modal-header-title flex min-w-0 items-center gap-2">
+            @if (titleIcon(); as icon) {
+              <as-icon [name]="icon" size="20" />
+            }
+            <span class="truncate text-body-2-bold text-(--app-text-color)">{{ title() }}</span>
+          </div>
+        }
+
+        <div class="as-modal-header-actions">
+          <ng-content select="[modal-header-actions]" />
+
           @if (closable()) {
-            <button type="button" class="as-modal__close" aria-label="Close" (click)="close()">
-              <as-icon name="x" [size]="18" />
-            </button>
+            <as-button icon="X" iconSize="18" variant="text" size="small" styleClass="!text-(--app-text-color) hover:!text-(--as-primary-color) as-btn-r-full" ariaLabel="Cerrar" (onClick)="close()" />
           }
-        </header>
-      }
-      <div class="as-modal__body"><ng-content /></div>
-      <footer class="as-modal__footer"><ng-content select="[asModalFooter]" /></footer>
+        </div>
+      </div>
+    }
+
+    <div class="as-modal-content">
+      <ng-content />
     </div>
+
+    @if (variant() === 'preview') {
+      <as-button icon="X" iconSize="18" size="small" styleClass="as-modal-preview-close as-icon-overlay-btn" ariaLabel="Cerrar" (onClick)="close()" />
+    }
+
+    @if (showFooter()) {
+      <div class="as-modal-footer">
+        <ng-content select="[modal-footer]" />
+      </div>
+    }
   </div>
-}
+</ng-template>

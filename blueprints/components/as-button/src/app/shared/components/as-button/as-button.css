@@ -1,167 +1,122 @@
-:host {
-  display: inline-block;
-}
+@layer components {
+  .as-button__trailing-icon {
+    margin-left: auto;
+  }
 
-:host(.as-button--block) {
-  display: block;
-}
+  .as-button-label--collapsed {
+    opacity: 0;
+    transform: translateX(-6px);
+    max-width: 0;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+  }
 
-:host(.as-button--block) .as-btn {
-  width: 100%;
-}
+  .as-button__badge {
+    min-width: 1.25rem;
+    height: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.375rem;
+    margin-left: 0.25rem;
+    border-radius: 9999px;
+    background-color: var(--app-primary-button-bg);
+    color: var(--app-primary-button-disabled-text);
+    font-size: var(--font-size-caption-2);
+    font-weight: 800;
+    line-height: 1;
+    flex-shrink: 0;
+  }
 
-.as-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border: 1px solid transparent;
-  border-radius: var(--as-radius-md);
-  font-weight: 500;
-  line-height: 1.25;
-  text-decoration: none;
-  white-space: nowrap;
-  cursor: pointer;
-  user-select: none;
-  transition:
-    background-color 120ms ease,
-    border-color 120ms ease,
-    color 120ms ease,
-    box-shadow 120ms ease;
-}
+  .as-btn:hover .as-button__badge,
+  .as-btn:focus-visible .as-button__badge {
+    background-color: var(--app-primary-button-bg);
+    color: var(--app-primary-button-disabled-text);
+  }
 
-.as-btn:hover {
-  text-decoration: none;
-}
+  /* Padding estándar 8×10px para todos los botones con contenido */
 
-.as-btn:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 3px var(--as-focus-ring);
-}
+  .as-btn {
+    padding: 0.5rem 0.625rem;
+    border-radius: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
 
-/* Sizes. */
-.as-btn--sm {
-  padding: 0.25rem 0.625rem;
-  font-size: 0.75rem;
-}
+  .as-btn.as-btn-r-lg {
+    border-radius: 1rem;
+  }
+  .as-btn.as-btn-r-full {
+    border-radius: 9999px;
+  }
 
-.as-btn--md {
-  padding: 0.5rem 0.875rem;
-  font-size: 0.875rem;
-}
+  .as-btn:focus-visible {
+    outline: 2px solid var(--as-primary-color);
+    outline-offset: 0;
+    box-shadow: none;
+  }
 
-.as-btn--lg {
-  padding: 0.625rem 1.125rem;
-  font-size: 1rem;
-}
+  /* Tamaños estandarizados (height fijo) */
 
-.as-btn--icon-only.as-btn--sm {
-  padding: 0.25rem;
-}
+  .as-btn.as-btn-xsmall {
+    height: 1.75rem;
+  }
+  .as-btn.as-btn-small {
+    height: 2.375rem;
+  }
+  .as-btn.as-btn-medium {
+    height: 2.5rem;
+  }
+  .as-btn.as-btn-high {
+    height: 2.625rem;
+  }
+  .as-btn.as-btn-large {
+    height: 2.75rem;
+  }
 
-.as-btn--icon-only.as-btn--md {
-  padding: 0.5rem;
-}
+  /* Botones de solo ícono → cuadrados, sin padding */
 
-.as-btn--icon-only.as-btn--lg {
-  padding: 0.625rem;
-}
+  .as-btn.as-btn-icon {
+    padding: 0;
+  }
 
-/* Severities: each one sets the three colors the variants use. */
-.as-btn--primary {
-  --as-btn-color: var(--as-primary);
-  --as-btn-hover: var(--as-primary-hover);
-  --as-btn-active: var(--as-primary-active);
-  --as-btn-on: var(--as-on-primary);
-}
+  .as-btn.as-btn-icon.as-btn-xsmall {
+    width: 1.75rem;
+    min-width: 1.75rem;
+  }
+  .as-btn.as-btn-icon.as-btn-small {
+    width: 2.375rem;
+    min-width: 2.375rem;
+  }
+  .as-btn.as-btn-icon.as-btn-medium {
+    width: 2.5rem;
+    min-width: 2.5rem;
+  }
+  .as-btn.as-btn-icon.as-btn-high {
+    width: 2.625rem;
+    min-width: 2.625rem;
+  }
+  .as-btn.as-btn-icon.as-btn-large {
+    width: 2.75rem;
+    min-width: 2.75rem;
+  }
 
-.as-btn--secondary {
-  --as-btn-color: var(--as-text-muted);
-  --as-btn-hover: var(--as-text);
-  --as-btn-active: var(--as-text);
-  --as-btn-on: var(--as-panel);
-}
-
-.as-btn--success {
-  --as-btn-color: var(--as-success);
-  --as-btn-hover: color-mix(in srgb, var(--as-success) 85%, black);
-  --as-btn-active: color-mix(in srgb, var(--as-success) 70%, black);
-  --as-btn-on: #ffffff;
-}
-
-.as-btn--info {
-  --as-btn-color: var(--as-info);
-  --as-btn-hover: color-mix(in srgb, var(--as-info) 85%, black);
-  --as-btn-active: color-mix(in srgb, var(--as-info) 70%, black);
-  --as-btn-on: #ffffff;
-}
-
-.as-btn--warn {
-  --as-btn-color: var(--as-warning);
-  --as-btn-hover: color-mix(in srgb, var(--as-warning) 85%, black);
-  --as-btn-active: color-mix(in srgb, var(--as-warning) 70%, black);
-  --as-btn-on: #ffffff;
-}
-
-.as-btn--danger {
-  --as-btn-color: var(--as-danger);
-  --as-btn-hover: color-mix(in srgb, var(--as-danger) 85%, black);
-  --as-btn-active: color-mix(in srgb, var(--as-danger) 70%, black);
-  --as-btn-on: #ffffff;
-}
-
-/* Variants. */
-.as-btn--solid {
-  background: var(--as-btn-color);
-  border-color: var(--as-btn-color);
-  color: var(--as-btn-on);
-}
-
-.as-btn--solid:hover {
-  background: var(--as-btn-hover);
-  border-color: var(--as-btn-hover);
-}
-
-.as-btn--solid:active {
-  background: var(--as-btn-active);
-  border-color: var(--as-btn-active);
-}
-
-.as-btn--outlined {
-  background: transparent;
-  border-color: var(--as-btn-color);
-  color: var(--as-btn-color);
-}
-
-.as-btn--outlined:hover {
-  background: color-mix(in srgb, var(--as-btn-color) 12%, transparent);
-}
-
-.as-btn--outlined:active {
-  background: color-mix(in srgb, var(--as-btn-color) 20%, transparent);
-}
-
-.as-btn--text {
-  background: transparent;
-  color: var(--as-btn-color);
-}
-
-.as-btn--text:hover {
-  background: color-mix(in srgb, var(--as-btn-color) 10%, transparent);
-}
-
-.as-btn--text:active {
-  background: color-mix(in srgb, var(--as-btn-color) 18%, transparent);
-}
-
-/* Disabled and loading. */
-.as-btn:disabled,
-.as-btn--inactive {
-  cursor: not-allowed;
-  opacity: 0.55;
-  pointer-events: none;
-}
-
-.as-btn[aria-busy='true'] {
-  cursor: progress;
+  /* iconPos 'top'/'bottom' → ícono y label en columna en vez de fila. as-btn-{size} no se
+   agrega en este caso (ver isStackedIcon en el .ts), así que el alto lo da el propio padding
+   + contenido en vez de un height fijo pensado para una sola línea; el label se centra y
+   puede hacer wrap en vez de truncarse. El !important en el padding vertical es necesario
+   porque consumidores como admin-field-type-option traen `padding: 0 ...` (pensado para la
+   variante horizontal de altura fija) con la misma especificidad — sin esto, esa clase gana
+   y el botón apilado queda sin aire arriba/abajo. */
+  .as-btn.as-btn-icon-stacked {
+    flex-direction: column;
+    gap: 0.375rem;
+    text-align: center;
+    white-space: normal;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
 }

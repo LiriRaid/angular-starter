@@ -1,23 +1,34 @@
 import { formatFileSize } from './format-file-size';
 
 describe('formatFileSize', () => {
-  it.each([
-    [1, '1 B'],
-    [1023, '1023 B'],
-    [1024, '1.0 KB'],
-    [1536, '1.5 KB'],
-    [5 * 1024 * 1024, '5.0 MB'],
-    [3 * 1024 ** 3, '3.0 GB'],
-    [2 * 1024 ** 4, '2.0 TB'],
-  ])('formats %d bytes as %s', (bytes, expected) => {
-    expect(formatFileSize(bytes)).toBe(expected);
-  });
-
-  it('returns an empty string when there is nothing to show', () => {
-    expect(formatFileSize(0)).toBe('');
-    expect(formatFileSize(-5)).toBe('');
+  it('devuelve string vacío para null/undefined/0/negativos', () => {
     expect(formatFileSize(null)).toBe('');
     expect(formatFileSize(undefined)).toBe('');
-    expect(formatFileSize(Number.NaN)).toBe('');
+    expect(formatFileSize(0)).toBe('');
+    expect(formatFileSize(-5)).toBe('');
+  });
+
+  it('formatea bytes sin decimales', () => {
+    expect(formatFileSize(512)).toBe('512 B');
+  });
+
+  it('formatea en el límite exacto de 1024 como KB', () => {
+    expect(formatFileSize(1024)).toBe('1.0 KB');
+  });
+
+  it('formatea justo antes del límite como B', () => {
+    expect(formatFileSize(1023)).toBe('1023 B');
+  });
+
+  it('formatea MB con un decimal', () => {
+    expect(formatFileSize(3 * 1024 * 1024)).toBe('3.0 MB');
+  });
+
+  it('formatea GB con un decimal', () => {
+    expect(formatFileSize(2 * 1024 * 1024 * 1024)).toBe('2.0 GB');
+  });
+
+  it('no pasa de GB (queda ahí como unidad máxima)', () => {
+    expect(formatFileSize(5 * 1024 * 1024 * 1024 * 1024)).toBe('5120.0 GB');
   });
 });

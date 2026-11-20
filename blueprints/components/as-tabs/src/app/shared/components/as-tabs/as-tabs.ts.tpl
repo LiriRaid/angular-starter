@@ -1,71 +1,151 @@
-import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, ViewEncapsulation, afterRenderEffect, inject, input, model, signal } from '@angular/core';
+import { AsAvatar } from '../as-avatar/as-avatar';
 import { AsIcon } from '../as-icon/as-icon';
+import { AsRipple } from '../as-button/as-ripple';
+import { AsTooltip } from '../as-tooltip/as-tooltip.directive';
 
-export interface AsTab {
-  id: string;
-  label: string;
-  /** Name of an icon (see `as-icon`). */
-  icon?: string;
-  /** A small number or text next to the label, for example a counter. */
-  badge?: string | number;
-  disabled?: boolean;
+export interface AsTabAvatar {
+  readonly label: string;
+  readonly background: string;
+  /** El avatar de una tab siempre es chico — SIEMPRE el ícono de marca, nunca el logo (el logo
+   *  es horizontal, no cabe recortado ahí). */
+  readonly iconUrl?: string | null;
 }
 
-/**
- * A row of tabs. It only manages the tab strip: show the content of the selected tab yourself.
- *
- * ```html
- * <as-tabs [tabs]="tabs" [(selected)]="current" />
- * @switch (current()) {
- *   @case ('profile') { <app-profile /> }
- *   @case ('billing') { <app-billing /> }
- * }
- * ```
- */
+export interface AsTab {
+  readonly id: string;
+  readonly label?: string;
+  readonly icon?: string | null;
+  readonly count?: number;
+  /** `danger` resalta un contador que espera una decisión (pendientes, errores); por defecto `primary`. */
+  readonly countTone?: 'primary' | 'danger';
+  readonly avatar?: AsTabAvatar;
+  readonly color?: string;
+  readonly tooltip?: string;
+}
+
 @Component({
   selector: 'as-tabs',
-  imports: [AsIcon],
+  standalone: true,
+  imports: [AsAvatar, AsIcon, AsRipple, AsTooltip],
   templateUrl: './as-tabs.html',
   styleUrl: './as-tabs.css',
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.as-tabs--pills]': 'variant() === "pills"',
+    '[class.as-tabs--compact]': 'size() === "compact"',
+  },
 })
 export class AsTabs {
   readonly tabs = input<readonly AsTab[]>([]);
-  /** The id of the selected tab. Two-way: `[(selected)]="current"`. */
-  readonly selected = model<string>('');
-  readonly label = input<string>('Tabs');
+  readonly ariaLabel = input<string>('');
+  readonly variant = input<'default' | 'pills'>('default');
+  readonly size = input<'default' | 'compact'>('default');
 
-  protected select(tab: AsTab): void {
-    if (!tab.disabled) this.selected.set(tab.id);
+  readonly active = model<string>('');
+
+  readonly tabLabelClass = input<string>('text-caption-1-bold');
+
+  readonly showPrevButton = signal(false);
+  readonly showNextButton = signal(false);
+
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+
+  constructor() {
+    // Recalcula la barra activa, el scroll y las flechas prev/next cuando cambia la lista
+    // de tabs (el ancho del contenido) — corre después de que el @for ya pintó el DOM.
+    afterRenderEffect(() => {
+      this.tabs();
+      this.active();
+      this.resetScrollWhenFits();
+      this.syncActiveBar();
+      this.updateScrollButtons();
+    });
+
+    // Y también ante cambios de tamaño del contenedor (responsive).
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(() => {
+      this.resetScrollWhenFits();
+      this.syncActiveBar();
+      this.updateScrollButtons();
+    });
+    observer.observe(this.host.nativeElement);
+    inject(DestroyRef).onDestroy(() => observer.disconnect());
   }
 
-  /** Arrow keys, Home and End move between the tabs that are not disabled. */
-  protected onKeydown(event: KeyboardEvent): void {
-    const enabled = this.tabs().filter((tab) => !tab.disabled);
-    if (enabled.length === 0) return;
-    const index = enabled.findIndex((tab) => tab.id === this.selected());
+  private get content(): HTMLElement | null {
+    return this.host.nativeElement.querySelector<HTMLElement>('.as-tablist-content');
+  }
 
-    let next: number;
-    switch (event.key) {
-      case 'ArrowRight':
-        next = (index + 1) % enabled.length;
-        break;
-      case 'ArrowLeft':
-        next = (index - 1 + enabled.length) % enabled.length;
-        break;
-      case 'Home':
-        next = 0;
-        break;
-      case 'End':
-        next = enabled.length - 1;
-        break;
-      default:
-        return;
+  // Si el carril ya cabe, resetea scrollLeft para que las flechas queden ocultas.
+  private resetScrollWhenFits(): void {
+    const content = this.content;
+    if (!content) return;
+    if (content.scrollWidth - content.clientWidth > 1) return;
+    content.scrollLeft = 0;
+  }
+
+  onScroll(): void {
+    this.updateScrollButtons();
+  }
+
+  private updateScrollButtons(): void {
+    const content = this.content;
+    if (!content) return;
+
+    const overflow = content.scrollWidth - content.clientWidth > 1;
+    this.showPrevButton.set(overflow && content.scrollLeft > 0);
+    this.showNextButton.set(overflow && content.scrollLeft + content.clientWidth < content.scrollWidth - 1);
+  }
+
+  scrollByPage(direction: -1 | 1): void {
+    const content = this.content;
+    if (!content) return;
+
+    const delta = content.clientWidth * 0.8 * direction;
+    content.scrollTo({ left: content.scrollLeft + delta, behavior: 'smooth' });
+  }
+
+  selectTab(tab: AsTab, event: Event): void {
+    this.active.set(tab.id);
+    const el = event.currentTarget as HTMLElement | null;
+    if (!el) return;
+    this.scrollTabIntoView(el);
+    this.syncActiveBar(el);
+  }
+
+  // Trae el tab a la vista desplazando solo el carril de tabs (nunca la página).
+  private scrollTabIntoView(tab: HTMLElement): void {
+    const content = this.content;
+    if (!content) return;
+
+    const pad = 52;
+    const start = tab.offsetLeft;
+    const end = start + tab.offsetWidth;
+    const viewStart = content.scrollLeft;
+    const viewEnd = viewStart + content.clientWidth;
+
+    if (start - pad < viewStart) {
+      content.scrollTo({ left: Math.max(0, start - pad), behavior: 'smooth' });
+    } else if (end + pad > viewEnd) {
+      content.scrollTo({ left: end + pad - content.clientWidth, behavior: 'smooth' });
     }
-    event.preventDefault();
-    const tab = enabled[next];
-    if (!tab) return;
-    this.selected.set(tab.id);
-    (event.currentTarget as HTMLElement).querySelector<HTMLElement>(`[data-tab="${tab.id}"]`)?.focus();
+  }
+
+  // Ajusta la barra activa al ancho/posición exactos del tab seleccionado.
+  private syncActiveBar(tab?: HTMLElement | null): void {
+    const root = this.host.nativeElement;
+    const bar = root.querySelector<HTMLElement>('.as-tablist-active-bar');
+    const target = tab ?? root.querySelector<HTMLElement>('.as-tab--active');
+    if (!bar || !target) return;
+
+    bar.style.width = `${target.offsetWidth}px`;
+    bar.style.left = `${target.offsetLeft}px`;
+
+    if (this.variant() === 'pills') {
+      const color = target.style.getPropertyValue('--as-tab-color').trim();
+      bar.style.background = color || '';
+    }
   }
 }

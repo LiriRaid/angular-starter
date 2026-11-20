@@ -23,6 +23,11 @@ export const ICON_PACKAGES: Readonly<Partial<Record<StarterOptions['icons'], Ico
   },
 };
 
+/** Packages the native components import (modal: overlay and portal, reorder-list: drag and drop). */
+export const COMPONENT_PACKAGES: Readonly<Record<string, string>> = {
+  '@angular/cdk': '^22.3.0',
+};
+
 /** Same range the Angular CLI declares for the version above, since this CLI runs it. */
 export const SUPPORTED_NODE_RANGE = '^22.22.3 || ^24.15.0 || >=26.0.0';
 

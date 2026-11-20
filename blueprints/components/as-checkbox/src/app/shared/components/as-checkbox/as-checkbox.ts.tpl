@@ -1,42 +1,64 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  booleanAttribute,
-  computed,
-  forwardRef,
-  input,
-} from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { AsFormControl } from '../as-form-control/as-form-control';
+import { ChangeDetectionStrategy, Component, forwardRef, input, signal, ViewEncapsulation } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-/**
- * A checkbox with its label. A form control of `boolean`.
- *
- * ```html
- * <as-checkbox label="Remember me" [formControl]="remember" />
- * <as-checkbox label="Select all" [indeterminate]="someSelected" [(ngModel)]="all" />
- * ```
- */
+import { AsIcon } from '../as-icon/as-icon';
+
 @Component({
   selector: 'as-checkbox',
+  standalone: true,
+  imports: [AsIcon],
   templateUrl: './as-checkbox.html',
   styleUrl: './as-checkbox.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => AsCheckbox), multi: true }],
+  host: {
+    '[class.as-checkbox-checked]': 'value()',
+    '[class.as-checkbox-indeterminate]': 'indeterminate() && !value()',
+    '[class.as-checkbox-disabled]': 'isDisabled()',
+    '[attr.data-as-checked]': 'value()',
+    '[attr.data-as-disabled]': 'isDisabled()',
+  },
 })
-export class AsCheckbox extends AsFormControl<boolean> {
-  readonly label = input<string>('');
-  /** Shows a dash instead of a check, for a "some of them" state. */
-  readonly indeterminate = input(false, { transform: booleanAttribute });
-  readonly disabled = input(false, { transform: booleanAttribute });
+export class AsCheckbox implements ControlValueAccessor {
+  readonly inputId = input<string>('');
+  readonly ariaLabel = input<string | undefined>(undefined);
+  readonly ariaLabelledBy = input<string | undefined>(undefined);
+  /** Solo marca el atributo nativo `indeterminate` del `<input>` (para lectores de pantalla) —
+   *  no tiene tratamiento visual propio a propósito: con selección parcial (ej. el "seleccionar
+   *  todos" de la tabla) el checkbox debe verse igual que sin selección, y solo pintarse cuando
+   *  esté 100% seleccionado. No forma parte del value del control. */
+  readonly indeterminate = input<boolean>(false);
 
-  protected readonly isDisabled = computed(() => this.disabled() || this.disabledByForm());
+  readonly value = signal(false);
+  readonly isDisabled = signal(false);
 
-  protected override empty(): boolean {
-    return false;
+  onChange: (value: boolean) => void = () => {};
+  onTouched: () => void = () => {};
+
+  writeValue(value: unknown): void {
+    this.value.set(!!value);
   }
 
-  protected onToggle(event: Event): void {
-    this.update((event.target as HTMLInputElement).checked);
+  registerOnChange(fn: (value: boolean) => void): void {
+    this.onChange = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.onTouched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.isDisabled.set(isDisabled);
+  }
+
+  handleChange(): void {
+    const next = !this.value();
+    this.value.set(next);
+    this.onChange(next);
+  }
+
+  onInputBlur(): void {
+    this.onTouched();
   }
 }

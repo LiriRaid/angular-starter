@@ -26,7 +26,7 @@ const FULL: Registry = Object.fromEntries(
 const SETTLED = { packageManager: 'npm', git: true, install: true } as const;
 
 describe('runWizard', () => {
-  it('asks each question once, with the recommended option preselected', async () => {
+  it('asks each question once and preselects only what has one best answer', async () => {
     const { prompter, asked } = createFakePrompter([
       'screaming',
       'starter',
@@ -49,12 +49,13 @@ describe('runWizard', () => {
       'git',
       'install',
     ]);
+    // Architecture, routing and components are the user's call: nothing is preselected there.
     expect(asked.slice(0, 5).map((question) => question.default)).toEqual([
-      'screaming',
-      'starter',
+      undefined,
+      undefined,
       'tailwind',
       'csr',
-      'recommended',
+      undefined,
     ]);
     expect(answers).toEqual({
       architecture: 'screaming',
@@ -89,8 +90,9 @@ describe('runWizard', () => {
     );
     const architecture = asked[0];
     expect(architecture?.names?.[1]).toMatch(
-      /^Screaming Architecture \(Recommended\) +\[ https:\/\/\S+ +\]$/,
+      /^Screaming Architecture +\[ https:\/\/github\.com\/LiriRaid\/\S+ +\]$/,
     );
+    expect(architecture?.names?.join('')).not.toContain('Recommended');
     expect(architecture?.descriptions?.every((text) => (text ?? '').length > 20)).toBe(true);
   });
 
@@ -122,7 +124,7 @@ describe('runWizard', () => {
         architecture: 'screaming',
         routing: 'angular',
         style: 'css',
-        tailwind: false,
+        tailwind: true,
         rendering: 'csr',
         components: 'all',
       },
@@ -181,13 +183,29 @@ describe('runWizard', () => {
       FULL,
     );
     expect(noLucide.asked).toEqual([]);
+
+    // The component collections are Tailwind CSS code: plain CSS does not get the question either.
+    const plainCss = createFakePrompter(['none']);
+    await runWizard(
+      {
+        ...SETTLED,
+        architecture: 'screaming',
+        routing: 'angular',
+        style: 'css',
+        rendering: 'csr',
+      },
+      plainCss.prompter,
+      NO_ENV,
+      FULL,
+    );
+    expect(plainCss.asked.map((question) => question.name)).toEqual(['icons']);
   });
 
   it('never offers options that cannot be generated', async () => {
     const { prompter, asked } = createFakePrompter([
       'screaming',
       'starter',
-      'css',
+      'tailwind',
       'csr',
       'recommended',
       'npm',

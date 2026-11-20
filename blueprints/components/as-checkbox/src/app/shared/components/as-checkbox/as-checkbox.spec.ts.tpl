@@ -1,63 +1,58 @@
-import { Component } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { AsCheckbox } from './as-checkbox';
 
-@Component({
-  imports: [AsCheckbox, ReactiveFormsModule],
-  template: `<as-checkbox label="Remember me" [formControl]="control" />`,
-})
-class Host {
-  control = new FormControl(false, { nonNullable: true });
-}
-
 describe('AsCheckbox', () => {
-  function render() {
-    TestBed.configureTestingModule({ imports: [Host] });
-    const fixture = TestBed.createComponent(Host);
-    fixture.detectChanges();
-    const element = fixture.nativeElement as HTMLElement;
-    return { fixture, host: fixture.componentInstance, input: element.querySelector('input') as HTMLInputElement, element };
-  }
+  let fixture: ComponentFixture<AsCheckbox>;
+  let component: AsCheckbox;
 
-  it('shows its label and starts unchecked', () => {
-    const { input, element } = render();
-    expect(element.textContent).toContain('Remember me');
-    expect(input.checked).toBe(false);
+  beforeEach(async () => {
+    TestBed.overrideComponent(AsCheckbox, { set: { imports: [], template: '' } });
+
+    await TestBed.configureTestingModule({
+      imports: [AsCheckbox],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AsCheckbox);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
   });
 
-  it('writes the checked state to the form control', () => {
-    const { input, host } = render();
-    input.click();
-    expect(host.control.value).toBe(true);
-    input.click();
-    expect(host.control.value).toBe(false);
+  it('creates the component', () => {
+    expect(component).toBeTruthy();
   });
 
-  it('follows a value set from the form', async () => {
-    const { fixture, host, input } = render();
-    host.control.setValue(true);
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(input.checked).toBe(true);
+  it('writeValue reflects the incoming boolean into value()', () => {
+    component.writeValue(true);
+    expect(component.value()).toBe(true);
+
+    component.writeValue(undefined);
+    expect(component.value()).toBe(false);
   });
 
-  it('is disabled when the form disables it', () => {
-    const { fixture, host, input } = render();
-    host.control.disable();
-    fixture.detectChanges();
-    expect(input.disabled).toBe(true);
-  });
-});
+  it('handleChange toggles value() and notifies onChange', () => {
+    const onChange = vi.fn();
+    component.registerOnChange(onChange);
 
-describe('AsCheckbox indeterminate', () => {
-  it('announces the mixed state', () => {
-    TestBed.configureTestingModule({ imports: [AsCheckbox] });
-    const fixture = TestBed.createComponent(AsCheckbox);
-    fixture.componentRef.setInput('indeterminate', true);
-    fixture.detectChanges();
-    const input = (fixture.nativeElement as HTMLElement).querySelector('input') as HTMLInputElement;
-    expect(input.indeterminate).toBe(true);
-    expect(input.getAttribute('aria-checked')).toBe('mixed');
+    component.handleChange();
+    expect(component.value()).toBe(true);
+    expect(onChange).toHaveBeenCalledWith(true);
+
+    component.handleChange();
+    expect(component.value()).toBe(false);
+    expect(onChange).toHaveBeenCalledWith(false);
+  });
+
+  it('setDisabledState updates isDisabled()', () => {
+    component.setDisabledState(true);
+    expect(component.isDisabled()).toBe(true);
+  });
+
+  it('onInputBlur notifies onTouched', () => {
+    const onTouched = vi.fn();
+    component.registerOnTouched(onTouched);
+
+    component.onInputBlur();
+    expect(onTouched).toHaveBeenCalled();
   });
 });

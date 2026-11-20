@@ -1,53 +1,171 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { LucideDynamicIcon } from '@lucide/angular';
+import { AS_LUCIDE_ICONS } from '@core/common/icons/lucide-icons.provider';
+import { AsIconsSVG } from '@core/common/icons/as-icons';
 
-/**
- * An icon by name: any Lucide icon registered in `core/icons` (`name="check"`), or your own SVG file
- * with `src` (drawn in the current text color).
- *
- * ```html
- * <as-icon name="search" />
- * <as-icon name="loader-circle" [spin]="true" size="1.5rem" />
- * <as-icon src="/logo.svg" label="Company logo" />
- * ```
- */
 @Component({
   selector: 'as-icon',
+  standalone: true,
   imports: [LucideDynamicIcon],
-  templateUrl: './as-icon.html',
-  styleUrl: './as-icon.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    @if (svgUrl(); as svgUrl) {
+      @if (svgColored()) {
+        <svg role="img" [attr.aria-label]="name()" [class]="coloredSvgClass()" [attr.width]="fontSize()" [attr.height]="fontSize()" viewBox="0 0 1 1" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <filter [attr.id]="coloredFilterId" color-interpolation-filters="sRGB">
+              <feFlood flood-color="currentColor" result="tint"></feFlood>
+              <feBlend in="tint" in2="SourceGraphic" mode="color" result="colored"></feBlend>
+              <feComposite in="colored" in2="SourceAlpha" operator="in"></feComposite>
+            </filter>
+          </defs>
+
+          <image [attr.href]="svgUrl" width="1" height="1" preserveAspectRatio="xMidYMid meet" [attr.filter]="coloredFilterUrl()"></image>
+        </svg>
+      } @else {
+        <span role="img" [attr.aria-label]="name()" [class]="maskedImageClass()" [style.width]="fontSize()" [style.height]="fontSize()" [style.--icon-url]="'url(' + svgUrl + ')'"></span>
+      }
+    } @else if (lucideName(); as lucideName) {
+      <svg [lucideIcon]="lucideName" [class]="iconClass()" [size]="pixelSize()"></svg>
+    } @else {
+      <span [class]="iconClass()" [style.fontSize]="fontSize()">
+        {{ name() }}
+      </span>
+    }
+  `,
   host: {
-    '[style.--as-icon-size]': 'cssSize()',
-    '[style.color]': 'color() || null',
-    '[attr.role]': 'label() ? "img" : null',
-    '[attr.aria-label]': 'label() || null',
-    '[attr.aria-hidden]': 'label() ? null : "true"',
+    '[style.color]': 'resolvedColor()',
+    '[style.fontSize]': 'fontSize()',
   },
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [
+    `
+      :host {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+      }
+
+      svg[lucideIcon],
+      span {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        color: inherit;
+      }
+
+      .svg-colored-icon,
+      .svg-icon {
+        display: inline-block;
+        flex: 0 0 auto;
+      }
+
+      .svg-colored-icon {
+        color: inherit;
+        overflow: visible;
+      }
+
+      .svg-icon {
+        background-color: currentColor;
+        mask: var(--icon-url) center / contain no-repeat;
+        -webkit-mask: var(--icon-url) center / contain no-repeat;
+      }
+
+      .spin {
+        animation: as-icon-spin 1s linear infinite;
+      }
+
+      @keyframes as-icon-spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    `,
+  ],
 })
 export class AsIcon {
-  /** Name of a registered Lucide icon, in kebab-case. */
-  readonly name = input<string>('');
-  /** URL of an SVG file, used instead of `name`. */
-  readonly src = input<string>('');
-  /** A number is pixels; a string is any CSS length (`1.5rem`). */
-  readonly size = input<number | string>(16);
-  readonly color = input<string>('');
-  readonly spin = input(false);
-  /** Accessible name. Without it the icon is decorative and hidden from screen readers. */
-  readonly label = input<string>('');
+  private static nextFilterId = 0;
 
-  protected readonly cssSize = computed(() => {
-    const value = this.size();
-    return typeof value === 'number' || /^\d+(\.\d+)?$/.test(value) ? `${value}px` : value;
+  private readonly lucideIcons = inject(AS_LUCIDE_ICONS);
+  private readonly svgIcons = AsIconsSVG;
+  protected readonly coloredFilterId = `as-colored-icon-${AsIcon.nextFilterId++}`;
+
+  readonly name = input.required<string>();
+  readonly size = input<string | number>('1.25rem');
+  readonly color = input<string | undefined>(undefined);
+  readonly spin = input<boolean>(false);
+  readonly extraClass = input<string>('');
+
+  readonly svgEntry = computed(() => {
+    const key = this.name();
+    return this.svgIcons.find((icon) => icon.name === key) ?? null;
   });
 
-  /** Lucide wants a number of pixels. */
-  protected readonly pixels = computed(() => {
+  readonly svgUrl = computed(() => this.svgEntry()?.url ?? null);
+  readonly svgColored = computed(() => this.svgEntry()?.colored ?? false);
+
+  readonly lucideName = computed(() => {
+    const key = this.name();
+    return key in this.lucideIcons ? key : null;
+  });
+
+  readonly iconClass = computed(() => {
+    const base = this.spin() ? 'spin' : '';
+    const extra = (this.extraClass() ?? '').trim();
+    return [base, extra].filter(Boolean).join(' ');
+  });
+
+  readonly imageClass = computed(() => {
+    const base = this.spin() ? 'spin' : '';
+    const extra = (this.extraClass() ?? '').trim();
+    return [base, extra].filter(Boolean).join(' ');
+  });
+
+  readonly coloredSvgClass = computed(() => {
+    const base = this.spin() ? 'svg-colored-icon spin' : 'svg-colored-icon';
+    const extra = (this.extraClass() ?? '').trim();
+    return [base, extra].filter(Boolean).join(' ');
+  });
+
+  readonly coloredFilterUrl = computed(() => `url(#${this.coloredFilterId})`);
+
+  readonly maskedImageClass = computed(() => {
+    const base = this.spin() ? 'svg-icon spin' : 'svg-icon';
+    const extra = (this.extraClass() ?? '').trim();
+    return [base, extra].filter(Boolean).join(' ');
+  });
+
+  readonly resolvedColor = computed(() => {
+    if (this.color()) return this.color()!;
+    if (this.svgColored()) return 'var(--app-icon-primary)';
+    return null;
+  });
+
+  readonly fontSize = computed(() => {
     const value = this.size();
+    if (typeof value === 'number') return `${value}px`;
+
+    const sizeStr = (value ?? '').toString().trim();
+    if (/^\d+$/.test(sizeStr)) return `${sizeStr}px`;
+
+    return sizeStr || '1.25rem';
+  });
+
+  readonly pixelSize = computed(() => {
+    const value = this.size();
+
     if (typeof value === 'number') return value;
-    const parsed = Number.parseFloat(value);
-    if (Number.isNaN(parsed)) return 16;
-    return /rem|em/.test(value) ? Math.round(parsed * 16) : parsed;
+
+    const sizeStr = (value ?? '').toString().trim();
+    if (/^\d+$/.test(sizeStr)) return Number(sizeStr);
+    if (/^\d+px$/.test(sizeStr)) return Number(sizeStr.replace('px', ''));
+    if (/^\d*\.?\d+rem$/.test(sizeStr)) return Math.round(Number(sizeStr.replace('rem', '')) * 16);
+    if (/^\d*\.?\d+em$/.test(sizeStr)) return Math.round(Number(sizeStr.replace('em', '')) * 16);
+
+    return 20;
   });
 }

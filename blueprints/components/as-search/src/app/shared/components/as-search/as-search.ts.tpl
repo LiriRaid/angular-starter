@@ -1,57 +1,76 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  inject,
-  input,
-  model,
-  output,
-} from '@angular/core';
-import { createTimer } from '../../utils/safe-timeout';
-import { AsIcon } from '../as-icon/as-icon';
+import { ChangeDetectionStrategy, Component, DestroyRef, ViewEncapsulation, effect, inject, input, output, signal } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-/**
- * A search field: the text is available at once through `value`, and `search` fires once the user
- * stops typing (or presses Enter), so you can query a server without sending a request per key.
- *
- * ```html
- * <as-search placeholder="Find a customer" (search)="query.set($event)" />
- * ```
- */
+import { AsButton } from '../as-button/as-button';
+import { AsInput } from '../as-input/as-input';
+
+export type AsSearchMode = 'input' | 'collapsed' | 'chat';
+
 @Component({
   selector: 'as-search',
-  imports: [AsIcon],
+  standalone: true,
+  imports: [ReactiveFormsModule, AsButton, AsInput],
   templateUrl: './as-search.html',
   styleUrl: './as-search.css',
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.as-search--input]': 'mode() !== "collapsed" && !renderCollapsed()',
+    '[class.as-search--collapsed]': 'renderCollapsed()',
+    '[class.as-search--chat]': 'mode() === "chat" && !renderCollapsed()',
+  },
 })
 export class AsSearch {
-  /** The text in the field. Two-way: `[(value)]="text"`. */
-  readonly value = model('');
-  readonly placeholder = input<string>('Search...');
-  /** Milliseconds to wait after the last key before `search` fires. */
-  readonly debounce = input<number>(300);
-  readonly label = input<string>('Search');
+  private readonly collapseTransitionMs = 400;
 
-  /** The text to search for, after the pause or with Enter. */
-  readonly search = output<string>();
+  readonly mode = input<AsSearchMode>('input');
+  readonly control = input.required<FormControl<string | null>>();
+  readonly placeholder = input<string>('Buscar...');
+  readonly inputClass = input<string>('');
 
-  private readonly timer = createTimer(inject(DestroyRef));
+  readonly searchEnter = output<string>();
+  readonly collapsedSearchClick = output<void>();
+  readonly backClick = output<void>();
 
-  protected onInput(event: Event): void {
-    const text = (event.target as HTMLInputElement).value;
-    this.value.set(text);
-    this.timer.set(() => this.search.emit(text), this.debounce());
+  readonly renderCollapsed = signal(false);
+
+  private collapseTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    let initialized = false;
+
+    effect(() => {
+      const current = this.mode();
+      if (!initialized) {
+        this.renderCollapsed.set(current === 'collapsed');
+        initialized = true;
+        return;
+      }
+      this.clearTimer();
+      if (current === 'collapsed') {
+        this.collapseTimer = setTimeout(() => {
+          this.renderCollapsed.set(true);
+          this.collapseTimer = null;
+        }, this.collapseTransitionMs);
+      } else {
+        requestAnimationFrame(() => this.renderCollapsed.set(false));
+      }
+    });
+
+    inject(DestroyRef).onDestroy(() => this.clearTimer());
   }
 
-  protected submit(): void {
-    this.timer.clear();
-    this.search.emit(this.value());
+  onKeyup(event: KeyboardEvent): void {
+    const term = this.control().value?.trim() || '';
+
+    if (event.key === 'Enter' || term === '') {
+      this.searchEnter.emit(term);
+    }
   }
 
-  protected clear(): void {
-    this.timer.clear();
-    this.value.set('');
-    this.search.emit('');
+  private clearTimer(): void {
+    if (!this.collapseTimer) return;
+    clearTimeout(this.collapseTimer);
+    this.collapseTimer = null;
   }
 }

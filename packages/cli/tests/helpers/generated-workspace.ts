@@ -27,6 +27,9 @@ export const GENERATED_FILES: Readonly<Record<string, string>> = {
               "src/styles.css"
             ]
           }
+        },
+        "test": {
+          "builder": "@angular/build:unit-test"
         }
       }
     }

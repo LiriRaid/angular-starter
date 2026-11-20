@@ -1,12 +1,4 @@
-const ENTITIES: Readonly<Record<string, string>> = {
-  '&': '&amp;',
-  '<': '&lt;',
-  '>': '&gt;',
-  '"': '&quot;',
-  "'": '&#39;',
-};
-
-/** Escapes text so it can go inside HTML, as content or as a quoted attribute value. */
+/** Escapa un texto para ponerlo dentro de HTML (contenido o atributo entre comillas): `&`, `<`, `>`, `"` y `'`. */
 export function escapeHtml(value: string): string {
-  return value.replace(/[&<>"']/g, (character) => ENTITIES[character] ?? character);
+  return value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }

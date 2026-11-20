@@ -1,16 +1,18 @@
-<label class="as-checkbox" [class.as-checkbox--disabled]="isDisabled()">
-  <input
-    class="as-checkbox__input"
-    type="checkbox"
-    [checked]="value()"
-    [indeterminate]="indeterminate()"
-    [disabled]="isDisabled()"
-    [attr.aria-checked]="indeterminate() ? 'mixed' : value()"
-    (change)="onToggle($event)"
-    (blur)="touch()"
-  />
-  <span class="as-checkbox__box" aria-hidden="true"></span>
-  @if (label()) {
-    <span class="as-checkbox__label">{{ label() }}</span>
+<input
+  type="checkbox"
+  class="as-checkbox-input"
+  [attr.id]="inputId() || null"
+  [checked]="value()"
+  [indeterminate]="indeterminate() && !value()"
+  [disabled]="isDisabled()"
+  [attr.aria-label]="ariaLabel() || null"
+  [attr.aria-labelledby]="ariaLabelledBy() || null"
+  (change)="handleChange()"
+  (blur)="onInputBlur()"
+/>
+
+<div class="as-checkbox-box">
+  @if (value()) {
+    <as-icon name="Check" size="18" class="as-checkbox-icon" />
   }
-</label>
+</div>

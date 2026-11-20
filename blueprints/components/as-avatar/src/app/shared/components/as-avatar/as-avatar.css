@@ -1,73 +1,25 @@
 :host {
-  --as-avatar-size: 2.5rem;
-  position: relative;
   display: inline-flex;
-  flex: none;
+  flex: 0 0 auto;
+}
+
+.as-avatar {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, white 16%, transparent);
+}
+
+.as-avatar--img {
+  display: block;
+  /* contain (no cover) — la imagen se adapta completa al tamaño del avatar sin recortarse; un
+     logo/ícono de marca no puede perder ningún detalle visual por un crop. */
+  object-fit: contain;
+}
+
+.as-avatar--initials {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--as-avatar-size);
-  height: var(--as-avatar-size);
-  border-radius: var(--as-radius-full);
-  background: hsl(var(--as-avatar-hue, 220) 55% 88%);
-  color: hsl(var(--as-avatar-hue, 220) 55% 28%);
-  font-size: calc(var(--as-avatar-size) * 0.4);
-  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
   user-select: none;
-}
-
-:host(.as-avatar--square) {
-  border-radius: var(--as-radius-md);
-}
-
-:host(.as-avatar--xs) {
-  --as-avatar-size: 1.5rem;
-}
-
-:host(.as-avatar--sm) {
-  --as-avatar-size: 2rem;
-}
-
-:host(.as-avatar--lg) {
-  --as-avatar-size: 3.5rem;
-}
-
-:host(.as-avatar--xl) {
-  --as-avatar-size: 5rem;
-}
-
-:host-context(.dark) {
-  background: hsl(var(--as-avatar-hue, 220) 35% 24%);
-  color: hsl(var(--as-avatar-hue, 220) 70% 85%);
-}
-
-.as-avatar__image {
-  width: 100%;
-  height: 100%;
-  border-radius: inherit;
-  object-fit: cover;
-}
-
-.as-avatar__status {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 28%;
-  height: 28%;
-  min-width: 0.5rem;
-  min-height: 0.5rem;
-  border: 2px solid var(--as-panel);
-  border-radius: var(--as-radius-full);
-  background: var(--as-text-subtle);
-}
-
-.as-avatar__status[data-status='online'] {
-  background: var(--as-success);
-}
-
-.as-avatar__status[data-status='away'] {
-  background: var(--as-warning);
-}
-
-.as-avatar__status[data-status='busy'] {
-  background: var(--as-danger);
+  overflow: hidden;
 }

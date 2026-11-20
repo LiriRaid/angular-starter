@@ -1,12 +1,16 @@
-import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { RuntimeError } from '../../errors.js';
+import { COMPONENT_PACKAGES } from '../../compat.js';
 import { BLUEPRINTS_ROOT, copyBlueprint } from '../blueprint.js';
+import { addDependencies } from '../edits/package-json.js';
+import { planEdit, writeEdits } from '../edits/planned.js';
+import { addComponentStyles } from '../edits/styles.js';
 import { pathExists } from '../fs.js';
-import { barrelLines, componentsOf, type ComponentSet } from './manifest.js';
+import { barrelLines, componentsOf, stylesOf, type ComponentSet } from './manifest.js';
 
 const SHARED = 'src/app/shared/components';
 const BARREL = `${SHARED}/index.ts`;
+const STYLES = 'src/styles.css';
+const PACKAGE_JSON = 'package.json';
 
 export interface ComponentsProject {
   targetDir: string;
@@ -16,10 +20,11 @@ export interface ComponentsProject {
 }
 
 /**
- * The native `as-` components of ADR-0005: the collection's folders under `shared/components`, each
- * with its spec, and their exports in the `@shared/components` barrel. A component that is already
- * in the project is left alone, so a bigger collection can be added later without touching what
- * the developer has changed.
+ * The native `as-` components (ADR-0007): the collection's folders under `shared/components`, each
+ * with its spec, their global stylesheets imported from `styles.css`, the packages they import (the
+ * CDK) and their exports in the
+ * `@shared/components` barrel. A component that is already in the project is left alone, so a bigger
+ * collection can be added later without touching what the developer has changed.
  */
 export const componentsProfile = {
   /** Project files (forward slashes) that must exist once the collection has been applied. */
@@ -29,19 +34,18 @@ export const componentsProfile = {
   async apply({ targetDir, name, prefix, set }: ComponentsProject): Promise<void> {
     const definitions = componentsOf(set);
 
-    // Compute the barrel first: a project without it stops the stage before anything is written.
-    const barrelPath = join(targetDir, BARREL);
-    let barrel: string;
-    try {
-      const current = await readFile(barrelPath, 'utf8');
-      const missing = barrelLines(definitions).filter((line) => !current.includes(line));
-      // The generated barrel is `export {};`, which stops being needed with the first export.
-      barrel = `${current.replace(/^export \{\};\n/m, '').trimEnd()}\n${missing.join('\n')}\n`;
-      if (missing.length === 0) barrel = current;
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : String(error);
-      throw new RuntimeError(`Could not adapt ${BARREL}: ${reason}`);
-    }
+    // Plan every edit first: a project without the barrel or the design base stops the stage
+    // before anything is written.
+    const planned = [
+      await planEdit(targetDir, BARREL, (current) => {
+        const missing = barrelLines(definitions).filter((line) => !current.includes(line));
+        if (missing.length === 0) return current;
+        // The generated barrel is `export {};`, which stops being needed with the first export.
+        return `${current.replace(/^export \{\};\n/m, '').trimEnd()}\n${missing.join('\n')}\n`;
+      }),
+      await planEdit(targetDir, STYLES, (text) => addComponentStyles(text, stylesOf(definitions))),
+      await planEdit(targetDir, PACKAGE_JSON, (text) => addDependencies(text, COMPONENT_PACKAGES)),
+    ];
 
     for (const { id } of definitions) {
       if (await pathExists(join(targetDir, SHARED, `as-${id}`))) continue;
@@ -51,6 +55,6 @@ export const componentsProfile = {
         variables: { PROJECT_NAME: name, PREFIX: prefix },
       });
     }
-    await writeFile(barrelPath, barrel);
+    await writeEdits(planned);
   },
 };

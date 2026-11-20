@@ -1,102 +1,124 @@
-import { Component } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { provideAsIcons } from '@core/icons/icons.provider';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+
 import { AsDatepicker } from './as-datepicker';
 
-@Component({
-  imports: [AsDatepicker, ReactiveFormsModule],
-  template: `<as-datepicker label="Birthday" locale="en" [min]="min" [max]="max" [formControl]="control" />`,
-})
-class Host {
-  min = new Date(2026, 0, 10);
-  max = new Date(2026, 0, 20);
-  control = new FormControl<Date | null>(new Date(2026, 0, 15));
-}
-
 describe('AsDatepicker', () => {
-  function render() {
-    TestBed.configureTestingModule({ imports: [Host], providers: [provideAsIcons()] });
-    const fixture = TestBed.createComponent(Host);
-    fixture.detectChanges();
-    const element = fixture.nativeElement as HTMLElement;
-    const trigger = element.querySelector('.as-datepicker__trigger') as HTMLButtonElement;
-    const days = () => Array.from(element.querySelectorAll<HTMLButtonElement>('.as-datepicker__day'));
-    const dayButton = (label: string) =>
-      days().find((day) => day.textContent?.trim() === label && !day.classList.contains('as-datepicker__day--outside'));
-    return { fixture, host: fixture.componentInstance, element, trigger, days, dayButton };
-  }
+  let fixture: ComponentFixture<AsDatepicker>;
+  let component: AsDatepicker;
 
-  it('shows the date of the form control, formatted', () => {
-    const { trigger } = render();
-    expect(trigger.textContent).toContain('Jan 15, 2026');
+  beforeEach(async () => {
+    TestBed.overrideComponent(AsDatepicker, { set: { imports: [], template: '' } });
+
+    await TestBed.configureTestingModule({ imports: [AsDatepicker] }).compileComponents();
+
+    fixture = TestBed.createComponent(AsDatepicker);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
   });
 
-  it('opens a calendar on the month of the value', () => {
-    const { fixture, trigger, element, days } = render();
-    trigger.click();
-    fixture.detectChanges();
-    expect(element.querySelector('.as-datepicker__title')?.textContent).toContain('January 2026');
-    expect(days()).toHaveLength(42);
-    expect(element.querySelector('.as-datepicker__day--selected')?.textContent?.trim()).toBe('15');
+  it('creates the component', () => {
+    expect(component).toBeTruthy();
   });
 
-  it('writes the picked day to the form control and closes', () => {
-    const { fixture, host, trigger, element, dayButton } = render();
-    trigger.click();
-    fixture.detectChanges();
-    dayButton('18')?.click();
-    fixture.detectChanges();
-    expect(host.control.value).toEqual(new Date(2026, 0, 18));
-    expect(element.querySelector('[role="dialog"]')).toBeNull();
+  describe('contrato de valor (ControlValueAccessor)', () => {
+    it('writeValue con yyyy-mm-dd puebla el texto y el grid del calendario', () => {
+      component.writeValue('2026-09-04');
+
+      expect(component.inputValue()).toContain('04/09/2026');
+      expect(component.calendarDays().some((day) => day.selected && day.date.getDate() === 4)).toBe(true);
+    });
+
+    it('writeValue(null) limpia el valor', () => {
+      component.writeValue('2026-09-04');
+      component.writeValue(null);
+
+      expect(component.inputValue()).toBe('');
+      expect(component.hasSelectedDate()).toBe(false);
+    });
+
+    it('seleccionar un día del grid emite yyyy-mm-dd (mismo contrato del <input type="date"> que reemplaza)', () => {
+      const onChange = vi.fn();
+      component.registerOnChange(onChange);
+
+      const day15 = component.calendarDays().find((day) => day.currentMonth && day.date.getDate() === 15);
+      component.selectDate(day15!);
+
+      expect(onChange).toHaveBeenCalledWith(expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/));
+    });
+
+    it('no permite seleccionar un día fuera de minDate/maxDate', () => {
+      component.writeValue('2026-09-04');
+      const onChange = vi.fn();
+      component.registerOnChange(onChange);
+      fixture.componentRef.setInput('minDate', new Date(2026, 8, 10));
+
+      const outOfRange = component.calendarDays().find((day) => day.currentMonth && day.date.getDate() === 5);
+      component.selectDate(outOfRange!);
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
   });
 
-  it('does not let the user pick a day outside of min and max', () => {
-    const { fixture, host, trigger, dayButton } = render();
-    trigger.click();
-    fixture.detectChanges();
-    expect(dayButton('5')?.disabled).toBe(true);
-    expect(dayButton('25')?.disabled).toBe(true);
-    dayButton('25')?.click();
-    expect(host.control.value).toEqual(new Date(2026, 0, 15));
+  describe('navegación de mes/año', () => {
+    it('previousMonth/nextMonth mueven el grid mostrado', () => {
+      component.writeValue('2026-09-04'); // septiembre 2026 — 30 días
+
+      component.nextMonth();
+      expect(component.calendarDays().filter((day) => day.currentMonth)).toHaveLength(31); // octubre 2026
+
+      component.previousMonth();
+      component.previousMonth();
+      expect(component.calendarDays().filter((day) => day.currentMonth)).toHaveLength(31); // agosto 2026 — confirma que retrocedió 2 meses desde octubre
+    });
   });
 
-  it('moves between months', () => {
-    const { fixture, trigger, element } = render();
-    trigger.click();
-    fixture.detectChanges();
-    (element.querySelector('[aria-label="Next month"]') as HTMLButtonElement).click();
-    fixture.detectChanges();
-    expect(element.querySelector('.as-datepicker__title')?.textContent).toContain('February 2026');
+  describe('modo con hora manual (allowManualTime)', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('allowManualTime', true);
+    });
+
+    it('tipear una fecha+hora válida emite el nuevo valor', () => {
+      const onChange = vi.fn();
+      component.registerOnChange(onChange);
+
+      component.onInputChange({ target: { value: '04/09/2026 07:40 AM' } } as unknown as Event);
+
+      expect(onChange).toHaveBeenCalledWith(expect.stringContaining('2026-09-04'));
+    });
+
+    it('emite datetime completo (con hora), no solo la fecha', () => {
+      const onChange = vi.fn();
+      component.registerOnChange(onChange);
+
+      component.onInputChange({ target: { value: '04/09/2026 07:40 AM' } } as unknown as Event);
+
+      const emittedValue = onChange.mock.calls.at(-1)?.[0] as string;
+      expect(emittedValue).not.toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(new Date(emittedValue).getHours()).toBe(7);
+    });
+
+    it('texto inválido al perder foco revierte al último valor válido', () => {
+      component.writeValue('2026-09-04');
+      const validText = component.inputValue();
+
+      component.onInputChange({ target: { value: 'texto que no es una fecha' } } as unknown as Event);
+      component.onBlurInput();
+
+      expect(component.inputValue()).toBe(validText);
+    });
   });
 
-  it('clears the value', () => {
-    const { fixture, host, trigger, element } = render();
-    trigger.click();
-    fixture.detectChanges();
-    (element.querySelector('.as-datepicker__clear') as HTMLButtonElement).click();
-    expect(host.control.value).toBeNull();
-  });
+  describe('selectToday', () => {
+    it('respeta minDate/maxDate — no hace nada si hoy queda fuera de rango', () => {
+      const onChange = vi.fn();
+      component.registerOnChange(onChange);
+      const farFuture = new Date();
+      farFuture.setFullYear(farFuture.getFullYear() + 5);
+      fixture.componentRef.setInput('minDate', farFuture);
 
-  it('closes with Escape and when the user clicks outside', () => {
-    const { fixture, trigger, element } = render();
-    trigger.click();
-    fixture.detectChanges();
-    (element.querySelector('as-datepicker') as HTMLElement).dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
-    fixture.detectChanges();
-    expect(element.querySelector('[role="dialog"]')).toBeNull();
+      component.selectToday();
 
-    trigger.click();
-    fixture.detectChanges();
-    document.body.click();
-    fixture.detectChanges();
-    expect(element.querySelector('[role="dialog"]')).toBeNull();
-  });
-
-  it('is disabled when the form disables it', () => {
-    const { fixture, host, trigger } = render();
-    host.control.disable();
-    fixture.detectChanges();
-    expect(trigger.disabled).toBe(true);
+      expect(onChange).not.toHaveBeenCalled();
+    });
   });
 });

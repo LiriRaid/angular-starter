@@ -1,58 +1,84 @@
-import { TestBed } from '@angular/core/testing';
-import { provideAsIcons } from '@core/icons/icons.provider';
-import { vi } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, expect, it, vi } from 'vitest';
+
 import { AsPreview } from './as-preview';
 
+async function setup(): Promise<{ fixture: ComponentFixture<AsPreview>; component: AsPreview }> {
+  await TestBed.configureTestingModule({
+    imports: [AsPreview],
+  }).compileComponents();
+
+  const fixture = TestBed.createComponent(AsPreview);
+  const component = fixture.componentInstance;
+  fixture.detectChanges();
+
+  return { fixture, component };
+}
+
 describe('AsPreview', () => {
-  beforeEach(() => {
-    URL.createObjectURL = vi.fn(() => 'blob:preview');
-    URL.revokeObjectURL = vi.fn();
+  it('creates the component', async () => {
+    const { component } = await setup();
+    expect(component).toBeTruthy();
   });
 
-  function render(inputs: Record<string, unknown> = {}) {
-    TestBed.configureTestingModule({ imports: [AsPreview], providers: [provideAsIcons()] });
-    const fixture = TestBed.createComponent(AsPreview);
-    for (const [key, value] of Object.entries(inputs)) fixture.componentRef.setInput(key, value);
+  it('onBoxClick abre el file picker cuando no hay imagen', async () => {
+    const { fixture, component } = await setup();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="file"]');
+    const clickSpy = vi.spyOn(input, 'click');
+    component.onBoxClick();
+    expect(clickSpy).toHaveBeenCalled();
+  });
+
+  it('onBoxClick abre la vista previa cuando ya hay imagen', async () => {
+    const { fixture, component } = await setup();
+    fixture.componentRef.setInput('imageUrl', 'data:image/png;base64,abc');
     fixture.detectChanges();
-    const element = fixture.nativeElement as HTMLElement;
-    const choose = (file: File) => {
-      const input = element.querySelector('input[type="file"]') as HTMLInputElement;
-      Object.defineProperty(input, 'files', { value: [file], configurable: true });
-      input.dispatchEvent(new Event('change'));
-      fixture.detectChanges();
-    };
-    return { fixture, element, choose };
-  }
-
-  it('shows a placeholder until there is an image', () => {
-    const { element } = render({ label: 'logo' });
-    expect(element.querySelector('img')).toBeNull();
-    expect(element.querySelector('.as-preview__frame')?.getAttribute('aria-label')).toBe('Choose logo');
+    expect(component.isPreviewOpen()).toBe(false);
+    component.onBoxClick();
+    expect(component.isPreviewOpen()).toBe(true);
   });
 
-  it('shows the image it is given and offers to remove it', () => {
-    const { fixture, element } = render({ imageUrl: '/logo.png', label: 'logo' });
-    expect(element.querySelector('img')?.getAttribute('src')).toBe('/logo.png');
-
-    let removed = 0;
-    fixture.componentInstance.removed.subscribe(() => removed++);
-    (element.querySelector('.as-preview__remove') as HTMLButtonElement).click();
-    expect(removed).toBe(1);
+  it('onBoxClick abre la vista previa aunque esté deshabilitado, si ya hay imagen', async () => {
+    const { fixture, component } = await setup();
+    fixture.componentRef.setInput('imageUrl', 'data:image/png;base64,abc');
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    component.onBoxClick();
+    expect(component.isPreviewOpen()).toBe(true);
   });
 
-  it('shows the file the user picks at once and reports it', () => {
-    const { fixture, element, choose } = render();
-    const files: File[] = [];
-    fixture.componentInstance.fileSelected.subscribe((file) => files.push(file));
-    const file = new File(['x'], 'photo.png', { type: 'image/png' });
-    choose(file);
-    expect(files).toEqual([file]);
-    expect(element.querySelector('img')?.getAttribute('src')).toBe('blob:preview');
+  it('onBoxClick no abre el file picker cuando está deshabilitado y no hay imagen', async () => {
+    const { fixture, component } = await setup();
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[type="file"]');
+    const clickSpy = vi.spyOn(input, 'click');
+    component.onBoxClick();
+    expect(clickSpy).not.toHaveBeenCalled();
   });
 
-  it('cannot be changed while it is disabled', () => {
-    const { element } = render({ disabled: true, imageUrl: '/logo.png' });
-    expect((element.querySelector('.as-preview__frame') as HTMLButtonElement).disabled).toBe(true);
-    expect(element.querySelector('.as-preview__remove')).toBeNull();
+  it('onFileInputChange emite fileSelected con el archivo elegido', async () => {
+    const { component } = await setup();
+    const spy = vi.spyOn(component.fileSelected, 'emit');
+    const file = new File(['x'], 'logo.png', { type: 'image/png' });
+    const event = { target: { files: [file], value: '' } } as unknown as Event;
+    component.onFileInputChange(event);
+    expect(spy).toHaveBeenCalledWith(file);
+  });
+
+  it('onRemoveClick emite removed y detiene la propagación', async () => {
+    const { component } = await setup();
+    const spy = vi.spyOn(component.removed, 'emit');
+    const event = { stopPropagation: vi.fn() } as unknown as MouseEvent;
+    component.onRemoveClick(event);
+    expect(event.stopPropagation).toHaveBeenCalled();
+    expect(spy).toHaveBeenCalled();
+  });
+
+  it('closePreview oculta la vista previa', async () => {
+    const { component } = await setup();
+    component.isPreviewOpen.set(true);
+    component.closePreview();
+    expect(component.isPreviewOpen()).toBe(false);
   });
 });

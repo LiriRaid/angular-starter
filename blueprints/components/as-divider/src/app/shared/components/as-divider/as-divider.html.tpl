@@ -1,3 +1,3 @@
-@if (label()) {
-  <span class="as-divider__label">{{ label() }}</span>
-}
+<div class="as-divider-content">
+  <ng-content></ng-content>
+</div>

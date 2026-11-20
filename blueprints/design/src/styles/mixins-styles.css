@@ -1,0 +1,23 @@
+.sidebar-hover-with-before:not(.sidebar-selected-with-before):hover::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--app-accent-soft-bg);
+  border-radius: 0.25rem;
+  z-index: -1;
+  transition: background 0.2s ease;
+}
+
+.sidebar-selected-with-before::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--as-primary-color) 16%, transparent) 0%,
+    transparent 80%
+  );
+  border-radius: 0.25rem;
+  z-index: -1;
+  transition: background 0.2s ease;
+}

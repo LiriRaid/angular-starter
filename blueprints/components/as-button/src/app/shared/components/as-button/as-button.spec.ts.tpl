@@ -1,65 +1,148 @@
-import { TestBed } from '@angular/core/testing';
-import { provideAsIcons } from '@core/icons/icons.provider';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { AsButton } from './as-button';
 
 describe('AsButton', () => {
-  function render(inputs: Record<string, unknown> = {}) {
-    TestBed.configureTestingModule({ imports: [AsButton], providers: [provideAsIcons()] });
-    const fixture = TestBed.createComponent(AsButton);
-    for (const [key, value] of Object.entries(inputs)) fixture.componentRef.setInput(key, value);
+  let fixture: ComponentFixture<AsButton>;
+  let component: AsButton;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [AsButton],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AsButton);
+    component = fixture.componentInstance;
+  });
+
+  it('keeps width classes on the host and text classes on the label', () => {
+    fixture.componentRef.setInput('styleClass', 'w-full text-caption-1-bold rounded-lg');
     fixture.detectChanges();
-    const element = fixture.nativeElement as HTMLElement;
-    return { fixture, element, control: element.querySelector('.as-btn') as HTMLElement };
-  }
 
-  it('shows its label inside a button that does not submit by default', () => {
-    const { control } = render({ label: 'Save' });
-    expect(control.tagName).toBe('BUTTON');
-    expect(control.textContent).toContain('Save');
-    expect(control.getAttribute('type')).toBe('button');
+    expect(component.hostClass()).toBe('block w-full');
+    expect(component.buttonClass()).toContain('rounded-lg');
+    expect(component.buttonClass()).not.toContain('text-caption-1-bold');
+    expect(component.computedLabelClass()).toContain('text-caption-1-bold');
   });
 
-  it('applies the severity, variant and size as classes', () => {
-    const { control } = render({ label: 'x', severity: 'danger', variant: 'outlined', size: 'lg' });
-    expect(control.classList).toContain('as-btn--danger');
-    expect(control.classList).toContain('as-btn--outlined');
-    expect(control.classList).toContain('as-btn--lg');
+  it('emits the click event through the custom output', () => {
+    const clickEvent = new MouseEvent('click');
+    const emitSpy = vi.spyOn(component.onClick, 'emit');
+
+    component.handleClick(clickEvent);
+
+    expect(emitSpy).toHaveBeenCalledWith(clickEvent);
   });
 
-  it('emits the click', () => {
-    const { fixture, control } = render({ label: 'Go' });
-    let clicks = 0;
-    fixture.componentInstance.clicked.subscribe(() => clicks++);
-    control.click();
-    expect(clicks).toBe(1);
+  it('no emite aria-pressed por defecto y lo anuncia solo cuando el botón es de alternar', () => {
+    fixture.detectChanges();
+    const button = (): HTMLButtonElement => fixture.nativeElement.querySelector('button');
+    expect(button().hasAttribute('aria-pressed')).toBe(false);
+
+    fixture.componentRef.setInput('ariaPressed', true);
+    fixture.detectChanges();
+    expect(button().getAttribute('aria-pressed')).toBe('true');
+
+    fixture.componentRef.setInput('ariaPressed', false);
+    fixture.detectChanges();
+    expect(button().getAttribute('aria-pressed')).toBe('false');
   });
 
-  it('does not emit while it is disabled or loading', () => {
-    const disabled = render({ label: 'Go', disabled: true });
-    let clicks = 0;
-    disabled.fixture.componentInstance.clicked.subscribe(() => clicks++);
-    disabled.control.click();
-    expect(clicks).toBe(0);
-    expect(disabled.control.hasAttribute('disabled')).toBe(true);
+  // ── isDisabled ──────────────────────────────────────────────────────────────
+
+  it('isDisabled returns true when disabled input is true', () => {
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+
+    expect(component.isDisabled()).toBe(true);
   });
 
-  it('shows a spinner and announces that it is busy while loading', () => {
-    const { control } = render({ label: 'Go', loading: true });
-    expect(control.getAttribute('aria-busy')).toBe('true');
-    expect(control.hasAttribute('disabled')).toBe(true);
-    expect(control.querySelector('as-icon')).not.toBeNull();
+  it('isDisabled returns true when loading input is true', () => {
+    fixture.componentRef.setInput('loading', true);
+    fixture.detectChanges();
+
+    expect(component.isDisabled()).toBe(true);
   });
 
-  it('becomes a link with an href', () => {
-    const { control } = render({ label: 'Docs', href: 'https://angular.dev', target: '_blank' });
-    expect(control.tagName).toBe('A');
-    expect(control.getAttribute('href')).toBe('https://angular.dev');
-    expect(control.getAttribute('rel')).toBe('noopener noreferrer');
+  it('isDisabled returns false when both disabled and loading are false', () => {
+    fixture.componentRef.setInput('disabled', false);
+    fixture.componentRef.setInput('loading', false);
+    fixture.detectChanges();
+
+    expect(component.isDisabled()).toBe(false);
   });
 
-  it('is an icon button when it has an icon and no label', () => {
-    const { control } = render({ icon: 'plus', ariaLabel: 'Add' });
-    expect(control.classList).toContain('as-btn--icon-only');
-    expect(control.getAttribute('aria-label')).toBe('Add');
+  // ── handleClick when disabled ───────────────────────────────────────────────
+
+  it('handleClick does NOT emit when isDisabled is true (disabled input)', () => {
+    fixture.componentRef.setInput('disabled', true);
+    fixture.detectChanges();
+
+    const emitSpy = vi.spyOn(component.onClick, 'emit');
+    const clickEvent = new MouseEvent('click');
+    component.handleClick(clickEvent);
+
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  it('handleClick does NOT emit when isDisabled is true (loading input)', () => {
+    fixture.componentRef.setInput('loading', true);
+    fixture.detectChanges();
+
+    const emitSpy = vi.spyOn(component.onClick, 'emit');
+    const clickEvent = new MouseEvent('click');
+    component.handleClick(clickEvent);
+
+    expect(emitSpy).not.toHaveBeenCalled();
+  });
+
+  // ── isIconOnly ──────────────────────────────────────────────────────────────
+
+  it('isIconOnly is true when there is an icon and no label or badge', () => {
+    fixture.componentRef.setInput('icon', 'Search');
+    fixture.componentRef.setInput('label', '');
+    fixture.componentRef.setInput('badge', null);
+    fixture.detectChanges();
+
+    expect(component.isIconOnly()).toBe(true);
+  });
+
+  it('isIconOnly is false when there is an icon and a label', () => {
+    fixture.componentRef.setInput('icon', 'Search');
+    fixture.componentRef.setInput('label', 'Buscar');
+    fixture.detectChanges();
+
+    expect(component.isIconOnly()).toBe(false);
+  });
+
+  it('isIconOnly is false when there is an icon and a badge', () => {
+    fixture.componentRef.setInput('icon', 'Bell');
+    fixture.componentRef.setInput('label', '');
+    fixture.componentRef.setInput('badge', '3');
+    fixture.detectChanges();
+
+    expect(component.isIconOnly()).toBe(false);
+  });
+
+  // ── isOutlined ──────────────────────────────────────────────────────────────
+
+  it('isOutlined is true when outlined input is true', () => {
+    fixture.componentRef.setInput('outlined', true);
+    fixture.detectChanges();
+
+    expect(component.isOutlined()).toBe(true);
+  });
+
+  it('isOutlined is true when variant is "outlined"', () => {
+    fixture.componentRef.setInput('variant', 'outlined');
+    fixture.detectChanges();
+
+    expect(component.isOutlined()).toBe(true);
+  });
+
+  it('isOutlined is false when neither outlined nor variant is set', () => {
+    fixture.detectChanges();
+
+    expect(component.isOutlined()).toBe(false);
   });
 });

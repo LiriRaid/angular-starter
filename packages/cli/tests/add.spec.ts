@@ -189,7 +189,7 @@ describe('as add', () => {
       ]) {
         expect(result.out).toContain(`✓ ${title}`);
       }
-      expect(await exists(join(project, 'src/styles/design.css'))).toBe(true);
+      expect(await exists(join(project, 'src/styles/theme/theme-styles.css'))).toBe(true);
       expect(await exists(join(project, 'src/app/shared/components/as-button/as-button.ts'))).toBe(
         true,
       );
@@ -204,11 +204,11 @@ describe('as add', () => {
       expect(result.calls).toContainEqual({ command: 'npm', args: ['install'], cwd: project });
     });
 
-    it('needs the stylesheet the design is written in', async () => {
+    it('needs Tailwind CSS, the stylesheet the design is written in', async () => {
       const project = await createStarterProject(cwd, ['--style', 'scss']);
       const result = await add(project, ['components', 'recommended']);
       expect(result.code).toBe(2);
-      expect(result.err).toContain('requires the stylesheet format: css');
+      expect(result.err).toContain('requires Tailwind CSS');
     });
 
     it('needs the Screaming architecture', async () => {

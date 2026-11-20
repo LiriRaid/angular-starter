@@ -1,53 +1,50 @@
-import { Component } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { ComponentRef } from '@angular/core';
 import { AsToggle } from './as-toggle';
 
-@Component({
-  imports: [AsToggle, ReactiveFormsModule],
-  template: `<as-toggle label="Notifications" [formControl]="control" />`,
-})
-class Host {
-  control = new FormControl(false, { nonNullable: true });
-}
+type ToggleInternals = { localChecked: () => boolean };
 
 describe('AsToggle', () => {
-  function render() {
-    TestBed.configureTestingModule({ imports: [Host] });
-    const fixture = TestBed.createComponent(Host);
-    fixture.detectChanges();
-    const element = fixture.nativeElement as HTMLElement;
-    return { fixture, host: fixture.componentInstance, button: element.querySelector('button') as HTMLButtonElement, element };
-  }
+  let fixture: ComponentFixture<AsToggle>;
+  let component: AsToggle;
+  let ref: ComponentRef<AsToggle>;
 
-  it('is a switch with its label, off at the start', () => {
-    const { button, element } = render();
-    expect(button.getAttribute('role')).toBe('switch');
-    expect(button.getAttribute('aria-checked')).toBe('false');
-    expect(element.textContent).toContain('Notifications');
+  beforeEach(async () => {
+    TestBed.overrideComponent(AsToggle, { set: { imports: [], template: '' } });
+
+    await TestBed.configureTestingModule({
+      imports: [AsToggle],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AsToggle);
+    component = fixture.componentInstance;
+    ref = fixture.componentRef;
+    fixture.detectChanges();
   });
 
-  it('writes the new state to the form control when clicked', () => {
-    const { fixture, host, button } = render();
-    button.click();
-    fixture.detectChanges();
-    expect(host.control.value).toBe(true);
-    expect(button.getAttribute('aria-checked')).toBe('true');
+  it('creates the component', () => {
+    expect(component).toBeTruthy();
   });
 
-  it('follows a value set from the form', () => {
-    const { fixture, host, button } = render();
-    host.control.setValue(true);
+  it('localChecked mirrors the checked input', () => {
+    ref.setInput('checked', true);
     fixture.detectChanges();
-    expect(button.getAttribute('aria-checked')).toBe('true');
+    expect((component as unknown as ToggleInternals).localChecked()).toBe(true);
   });
 
-  it('does not change when the form disables it', () => {
-    const { fixture, host, button } = render();
-    host.control.disable();
+  it('onToggle inverts localChecked', () => {
+    component.onToggle();
+    expect((component as unknown as ToggleInternals).localChecked()).toBe(true);
+    component.onToggle();
+    expect((component as unknown as ToggleInternals).localChecked()).toBe(false);
+  });
+
+  it('onToggle emits the changed output with the new value', () => {
+    const spy = vi.spyOn(component.changed, 'emit');
+    ref.setInput('checked', true);
     fixture.detectChanges();
-    expect(button.disabled).toBe(true);
-    button.click();
-    expect(host.control.value).toBe(false);
+    component.onToggle();
+    expect(spy).toHaveBeenCalledWith(false);
   });
 });

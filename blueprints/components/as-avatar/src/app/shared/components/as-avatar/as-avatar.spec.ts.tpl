@@ -1,49 +1,85 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, expect, it, beforeEach } from 'vitest';
 import { AsAvatar } from './as-avatar';
+import { ComponentRef } from '@angular/core';
+
+type AsAvatarInternals = {
+  radius: () => string;
+  initialsClass: () => string;
+  resolvedDotSize: () => string;
+  resolvedDotIconSize: () => number;
+  dotIcon: () => string | null;
+};
 
 describe('AsAvatar', () => {
-  function render(inputs: Record<string, unknown>) {
-    TestBed.configureTestingModule({ imports: [AsAvatar] });
-    const fixture = TestBed.createComponent(AsAvatar);
-    for (const [key, value] of Object.entries(inputs)) fixture.componentRef.setInput(key, value);
+  let fixture: ComponentFixture<AsAvatar>;
+  let component: AsAvatar;
+  let internals: AsAvatarInternals;
+  let ref: ComponentRef<AsAvatar>;
+
+  beforeEach(async () => {
+    TestBed.overrideComponent(AsAvatar, { set: { imports: [], template: '' } });
+
+    await TestBed.configureTestingModule({
+      imports: [AsAvatar],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AsAvatar);
+    component = fixture.componentInstance;
+    internals = component as unknown as AsAvatarInternals;
+    ref = fixture.componentRef;
     fixture.detectChanges();
-    return { fixture, element: fixture.nativeElement as HTMLElement };
-  }
-
-  it('shows the initials of the name when there is no picture', () => {
-    const { element } = render({ name: 'Ada Lovelace' });
-    expect(element.querySelector('.as-avatar__initials')?.textContent).toBe('AL');
-    expect(element.querySelector('img')).toBeNull();
   });
 
-  it('shows the picture when it has one', () => {
-    const { element } = render({ name: 'Ada Lovelace', src: '/ada.png' });
-    expect(element.querySelector('img')?.getAttribute('src')).toBe('/ada.png');
-  });
-
-  it('falls back to the initials when the picture fails to load', () => {
-    const { fixture, element } = render({ name: 'Ada Lovelace', src: '/broken.png' });
-    element.querySelector('img')?.dispatchEvent(new Event('error'));
+  it('radius is 9999px for circle shape', () => {
+    ref.setInput('shape', 'circle');
     fixture.detectChanges();
-    expect(element.querySelector('img')).toBeNull();
-    expect(element.querySelector('.as-avatar__initials')?.textContent).toBe('AL');
+    expect(internals.radius()).toBe('9999px');
   });
 
-  it('is an image with the name as its accessible name', () => {
-    const { element } = render({ name: 'Ada Lovelace' });
-    expect(element.getAttribute('role')).toBe('img');
-    expect(element.getAttribute('aria-label')).toBe('Ada Lovelace');
+  it('radius is proportional to size for rounded shape', () => {
+    ref.setInput('shape', 'rounded');
+    ref.setInput('size', 40);
+    fixture.detectChanges();
+    expect(internals.radius()).toBe(`${Math.round(40 * 0.28)}px`);
   });
 
-  it('gives the same name the same color', () => {
-    const first = render({ name: 'Ada' }).element.style.getPropertyValue('--as-avatar-hue');
-    TestBed.resetTestingModule();
-    const second = render({ name: 'Ada' }).element.style.getPropertyValue('--as-avatar-hue');
-    expect(first).toBe(second);
+  it('initialsClass includes the textClass input', () => {
+    ref.setInput('textClass', 'text-caption-1-bold');
+    fixture.detectChanges();
+    expect(internals.initialsClass()).toContain('text-caption-1-bold');
   });
 
-  it('shows a status dot', () => {
-    const { element } = render({ name: 'Ada', status: 'online' });
-    expect(element.querySelector('.as-avatar__status')?.getAttribute('data-status')).toBe('online');
+  it('resolvedDotSize/resolvedDotIconSize use the small bucket for size <= 40', () => {
+    ref.setInput('size', 40);
+    fixture.detectChanges();
+    expect(internals.resolvedDotSize()).toBe('0.875rem');
+    expect(internals.resolvedDotIconSize()).toBe(10);
+  });
+
+  it('resolvedDotSize/resolvedDotIconSize use the large bucket for size > 40', () => {
+    ref.setInput('size', 42);
+    fixture.detectChanges();
+    expect(internals.resolvedDotSize()).toBe('1rem');
+    expect(internals.resolvedDotIconSize()).toBe(12);
+  });
+
+  it('dotSize/dotIconSize inputs override the computed bucket', () => {
+    ref.setInput('size', 40);
+    ref.setInput('dotSize', '1.75rem');
+    ref.setInput('dotIconSize', 20);
+    fixture.detectChanges();
+    expect(internals.resolvedDotSize()).toBe('1.75rem');
+    expect(internals.resolvedDotIconSize()).toBe(20);
+  });
+
+  it('dotIcon resolves the status icon, null for online', () => {
+    ref.setInput('presenceStatus', 'busy');
+    fixture.detectChanges();
+    expect(internals.dotIcon()).toBe('CircleMinus');
+
+    ref.setInput('presenceStatus', 'online');
+    fixture.detectChanges();
+    expect(internals.dotIcon()).toBeNull();
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addStyleEntry } from './angular-json.js';
+import { addTestSetupFile } from './angular-json.js';
 
 /** The part of angular.json that `ng new` (Angular CLI 22.3) writes and the edit reads. */
 const ANGULAR_JSON = `{
@@ -13,10 +13,7 @@ const ANGULAR_JSON = `{
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "browser": "src/main.ts",
-            "styles": [
-              "src/styles.css"
-            ]
+            "browser": "src/main.ts"
           }
         },
         "test": {
@@ -28,38 +25,42 @@ const ANGULAR_JSON = `{
 }
 `;
 
-describe('addStyleEntry', () => {
-  it('appends the file to the styles of the build target', () => {
-    const result = addStyleEntry(ANGULAR_JSON, 'src/styles/design.css');
-    const styles = JSON.parse(result).projects.demo.architect.build.options.styles;
-    expect(styles).toEqual(['src/styles.css', 'src/styles/design.css']);
+const setupFiles = (text: string): unknown =>
+  JSON.parse(text).projects.demo.architect.test.options?.setupFiles;
+
+describe('addTestSetupFile', () => {
+  it('registers a setup file in the options of the test target', () => {
+    const result = addTestSetupFile(ANGULAR_JSON, 'src/test-setup.ts');
+    expect(setupFiles(result)).toEqual(['src/test-setup.ts']);
   });
 
   it('keeps the rest of the file as it was', () => {
-    const result = addStyleEntry(ANGULAR_JSON, 'src/styles/design.css');
+    const result = addTestSetupFile(ANGULAR_JSON, 'src/test-setup.ts');
     expect(result).toContain('"$schema": "./node_modules/@angular/cli/lib/config/schema.json"');
-    expect(JSON.parse(result).projects.demo.prefix).toBe('app');
-    expect(result.endsWith('\n')).toBe(true);
+    expect(JSON.parse(result).projects.demo.architect.test.builder).toBe(
+      '@angular/build:unit-test',
+    );
   });
 
-  it('is idempotent', () => {
-    const once = addStyleEntry(ANGULAR_JSON, 'src/styles/design.css');
-    expect(addStyleEntry(once, 'src/styles/design.css')).toBe(once);
+  it('appends to the setup files the project already has', () => {
+    const withOne = addTestSetupFile(ANGULAR_JSON, 'src/first.ts');
+    expect(setupFiles(addTestSetupFile(withOne, 'src/test-setup.ts'))).toEqual([
+      'src/first.ts',
+      'src/test-setup.ts',
+    ]);
   });
 
-  it('finds the project whatever its name', () => {
-    const renamed = ANGULAR_JSON.replace('"demo"', '"inventory-system"');
-    const styles = JSON.parse(addStyleEntry(renamed, 'a.css')).projects['inventory-system']
-      .architect.build.options.styles;
-    expect(styles).toContain('a.css');
+  it('does not add the same file twice', () => {
+    const once = addTestSetupFile(ANGULAR_JSON, 'src/test-setup.ts');
+    expect(addTestSetupFile(once, 'src/test-setup.ts')).toBe(once);
   });
 
-  it('fails clearly when the build target has no styles', () => {
-    const without = ANGULAR_JSON.replace(/"styles": \[\s*"src\/styles.css"\s*\]/, '"x": 1');
-    expect(() => addStyleEntry(without, 'a.css')).toThrow(/styles/);
+  it('rejects text that is not JSON', () => {
+    expect(() => addTestSetupFile('{ nope', 'src/test-setup.ts')).toThrow(/not valid JSON/);
   });
 
-  it('fails clearly when the file is not JSON', () => {
-    expect(() => addStyleEntry('{ nope', 'a.css')).toThrow(/angular\.json/);
+  it('fails when the project has no test target', () => {
+    const without = ANGULAR_JSON.replace(/,\s*"test": \{[^}]*\}/, '');
+    expect(() => addTestSetupFile(without, 'src/test-setup.ts')).toThrow(/"test" target/);
   });
 });

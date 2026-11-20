@@ -1,14 +1,23 @@
-/** A named color ramp (shades 50 to 950) that the theme can apply as the primary or surface color. */
 export interface ThemeColor {
-  readonly key: string;
-  readonly label: string;
-  /** The shade shown in a color picker. */
-  readonly swatch: string;
-  readonly palette: Readonly<Record<string, string>>;
+  key: string;
+  label: string;
+  swatch: string;
+  palette: Record<string, string>;
 }
 
-/** Accent colors. The shade 500 is the color itself, 600 its hover and 700 its pressed state. */
-export const PRIMARY_COLORS: readonly ThemeColor[] = [
+export const PRIMARY_COLORS: ThemeColor[] = [
+  {
+    key: 'angular',
+    label: 'Angular',
+    swatch: '#dc2626',
+    palette: { 50: '#fef2f2', 100: '#fee2e2', 200: '#fecaca', 300: '#fca5a5', 400: '#f87171', 500: '#dc2626', 600: '#b91c1c', 700: '#991b1b', 800: '#7f1d1d', 900: '#450a0a', 950: '#2d0000' },
+  },
+  {
+    key: 'black',
+    label: 'Slate',
+    swatch: '#404040',
+    palette: { 50: '#fafafa', 100: '#f5f5f5', 200: '#e5e5e5', 300: '#d4d4d4', 400: '#a3a3a3', 500: '#737373', 600: '#525252', 700: '#404040', 800: '#262626', 900: '#171717', 950: '#0a0a0a' },
+  },
   {
     key: 'indigo',
     label: 'Indigo',
@@ -40,7 +49,7 @@ export const PRIMARY_COLORS: readonly ThemeColor[] = [
     palette: { 50: '#f0fdfa', 100: '#ccfbf1', 200: '#99f6e4', 300: '#5eead4', 400: '#2dd4bf', 500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 800: '#115e59', 900: '#134e4a', 950: '#042f2e' },
   },
   {
-    key: 'emerald',
+    key: 'green',
     label: 'Emerald',
     swatch: '#10b981',
     palette: { 50: '#ecfdf5', 100: '#d1fae5', 200: '#a7f3d0', 300: '#6ee7b7', 400: '#34d399', 500: '#10b981', 600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b', 950: '#022c22' },
@@ -54,37 +63,38 @@ export const PRIMARY_COLORS: readonly ThemeColor[] = [
   {
     key: 'orange',
     label: 'Orange',
-    swatch: '#f97316',
+    swatch: '#fb923c',
     palette: { 50: '#fff7ed', 100: '#ffedd5', 200: '#fed7aa', 300: '#fdba74', 400: '#fb923c', 500: '#f97316', 600: '#ea580c', 700: '#c2410c', 800: '#9a3412', 900: '#7c2d12', 950: '#431407' },
   },
   {
-    key: 'rose',
+    key: 'red',
     label: 'Rose',
-    swatch: '#f43f5e',
-    palette: { 50: '#fff1f2', 100: '#ffe4e6', 200: '#fecdd3', 300: '#fda4af', 400: '#fb7185', 500: '#f43f5e', 600: '#e11d48', 700: '#be123c', 800: '#9f1239', 900: '#881337', 950: '#4c0519' },
+    swatch: '#d94674',
+    palette: { 50: '#fff1f5', 100: '#ffe4ec', 200: '#fecddd', 300: '#fda4c2', 400: '#fb72a6', 500: '#f04f8b', 600: '#d94674', 700: '#b8325d', 800: '#992c52', 900: '#7f2948', 950: '#4d1027' },
   },
   {
-    key: 'pink',
+    key: 'hotpink',
     label: 'Pink',
     swatch: '#ec4899',
     palette: { 50: '#fdf2f8', 100: '#fce7f3', 200: '#fbcfe8', 300: '#f9a8d4', 400: '#f472b6', 500: '#ec4899', 600: '#db2777', 700: '#be185d', 800: '#9d174d', 900: '#831843', 950: '#500724' },
   },
   {
-    key: 'fuchsia',
+    key: 'pink',
     label: 'Fuchsia',
     swatch: '#d946ef',
     palette: { 50: '#fdf4ff', 100: '#fae8ff', 200: '#f5d0fe', 300: '#f0abfc', 400: '#e879f9', 500: '#d946ef', 600: '#c026d3', 700: '#a21caf', 800: '#86198f', 900: '#701a75', 950: '#4a044e' },
   },
   {
-    key: 'violet',
+    key: 'purple',
     label: 'Violet',
     swatch: '#8b5cf6',
     palette: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9', 800: '#5b21b6', 900: '#4c1d95', 950: '#2e1065' },
   },
 ];
 
-/** Neutral ramps for backgrounds, borders and text. Shade 0 is white. */
-export const SURFACE_COLORS: readonly ThemeColor[] = [
+export const DEFAULT_PRIMARY_COLOR_KEY = 'black';
+
+export const SURFACE_COLORS: ThemeColor[] = [
   {
     key: 'slate',
     label: 'Slate',
@@ -115,16 +125,31 @@ export const SURFACE_COLORS: readonly ThemeColor[] = [
     swatch: '#78716c',
     palette: { 0: '#ffffff', 50: '#fafaf9', 100: '#f5f5f4', 200: '#e7e5e4', 300: '#d6d3d1', 400: '#a8a29e', 500: '#78716c', 600: '#57534e', 700: '#44403c', 800: '#292524', 900: '#1c1917', 950: '#0c0a09' },
   },
+  {
+    key: 'soho',
+    label: 'Soho',
+    swatch: '#7f8084',
+    palette: { 0: '#ffffff', 50: '#ececec', 100: '#dedfdf', 200: '#c4c4c6', 300: '#adaeb0', 400: '#97979b', 500: '#7f8084', 600: '#6a6b70', 700: '#55565b', 800: '#3f4046', 900: '#2c2c34', 950: '#16161d' },
+  },
+  {
+    key: 'viva',
+    label: 'Viva',
+    swatch: '#87898a',
+    palette: { 0: '#ffffff', 50: '#f3f3f3', 100: '#e7e7e8', 200: '#cfd0d0', 300: '#b7b8b9', 400: '#9fa1a1', 500: '#87898a', 600: '#6e7173', 700: '#565a5b', 800: '#3e4244', 900: '#262b2c', 950: '#0e1315' },
+  },
+  {
+    key: 'ocean',
+    label: 'Ocean',
+    swatch: '#828787',
+    palette: { 0: '#ffffff', 50: '#fbfcfc', 100: '#F7F9F8', 200: '#EFF3F2', 300: '#DADEDD', 400: '#B1B7B6', 500: '#828787', 600: '#5F7274', 700: '#415B61', 800: '#29444E', 900: '#183240', 950: '#0c1920' },
+  },
 ];
 
-export const DEFAULT_PRIMARY_COLOR_KEY = 'indigo';
 export const DEFAULT_SURFACE_COLOR_KEY = 'neutral';
 
-/** The color with that key, or the first one of the list when the key is unknown. */
-function pick(colors: readonly ThemeColor[], key: string | null | undefined, fallback: string): ThemeColor {
-  return colors.find((color) => color.key === key) ?? colors.find((color) => color.key === fallback) ?? colors[0]!;
-}
+export const getPrimaryColor = (key: string | null | undefined): ThemeColor => PRIMARY_COLORS.find((color) => color.key === key) ?? PRIMARY_COLORS[0];
 
-export const getPrimaryColor = (key: string | null | undefined): ThemeColor => pick(PRIMARY_COLORS, key, DEFAULT_PRIMARY_COLOR_KEY);
+export const getSurfaceColor = (key: string | null | undefined): ThemeColor => SURFACE_COLORS.find((color) => color.key === key) ?? getSurfaceColor(DEFAULT_SURFACE_COLOR_KEY);
 
-export const getSurfaceColor = (key: string | null | undefined): ThemeColor => pick(SURFACE_COLORS, key, DEFAULT_SURFACE_COLOR_KEY);
+export const DEFAULT_PRIMARY_PALETTE = getPrimaryColor(DEFAULT_PRIMARY_COLOR_KEY).palette;
+export const DEFAULT_SURFACE_PALETTE = getSurfaceColor(DEFAULT_SURFACE_COLOR_KEY).palette;

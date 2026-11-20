@@ -1,54 +1,9 @@
-:host {
-  display: block;
+.as-weekly-schedule-time-input {
+  background: var(--app-panel-bg);
+  color: var(--app-text-color);
 }
 
-.as-schedule {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-
-.as-schedule__row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.as-schedule__day {
-  width: 9rem;
-}
-
-.as-schedule__time {
-  min-height: 2.25rem;
-  padding: 0 0.5rem;
-  border: 1px solid var(--as-border);
-  border-radius: var(--as-radius-md);
-  background: var(--as-panel);
-  color: var(--as-text);
-  font: inherit;
-}
-
-.as-schedule__time:focus-visible {
-  outline: none;
-  border-color: var(--as-primary);
-  box-shadow: 0 0 0 3px var(--as-focus-ring);
-}
-
-.as-schedule__time:disabled {
-  background: var(--as-disabled-bg);
-  color: var(--as-disabled-text);
-}
-
-.as-schedule__row--invalid .as-schedule__time {
-  border-color: var(--as-danger);
-}
-
-.as-schedule__total {
-  margin-top: 0.25rem;
-  color: var(--as-text-subtle);
-  font-size: 0.8125rem;
+.as-weekly-schedule-time-input:focus-visible {
+  outline: 0;
+  border-color: var(--as-primary-color);
 }

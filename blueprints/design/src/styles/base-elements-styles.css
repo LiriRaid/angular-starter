@@ -1,0 +1,41 @@
+* {
+  font-family: 'Inter', 'Helvetica Neue', 'Arial', sans-serif;
+}
+
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* Desactiva transiciones visuales durante el cambio de tema. */
+:root.theme-switching *,
+:root.theme-switching *::before,
+:root.theme-switching *::after {
+  transition-property:
+    background-color,
+    border-color,
+    color,
+    fill,
+    stroke,
+    box-shadow,
+    outline-color,
+    text-decoration-color,
+    column-rule-color,
+    -webkit-text-fill-color !important;
+  transition-duration: 0s !important;
+  transition-delay: 0s !important;
+}

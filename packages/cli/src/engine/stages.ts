@@ -152,12 +152,7 @@ export const applyDesign: Stage = {
   title: 'Adding the design base',
   enabled: ({ options }) => options.components !== 'none',
   async run({ name, options, targetDir }) {
-    await designProfile.apply({
-      targetDir,
-      name,
-      prefix: options.prefix,
-      tailwind: options.tailwind,
-    });
+    await designProfile.apply({ targetDir, name, prefix: options.prefix });
   },
 };
 

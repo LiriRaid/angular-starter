@@ -1,17 +1,13 @@
+import { describe, expect, it } from 'vitest';
 import { escapeHtml } from './escape-html';
 
 describe('escapeHtml', () => {
-  it('escapes the characters that have a meaning in HTML', () => {
-    expect(escapeHtml(`<a href="x">Tom & 'Jerry'</a>`)).toBe(
-      '&lt;a href=&quot;x&quot;&gt;Tom &amp; &#39;Jerry&#39;&lt;/a&gt;',
-    );
+  it('escapa lo que rompe HTML, en contenido y en atributos entre comillas', () => {
+    expect(escapeHtml(`<img src="x" onerror='y'> & más`)).toBe('&lt;img src=&quot;x&quot; onerror=&#39;y&#39;&gt; &amp; más');
   });
 
-  it('leaves plain text untouched', () => {
-    expect(escapeHtml('Plain text 123')).toBe('Plain text 123');
-  });
-
-  it('escapes an ampersand only once', () => {
-    expect(escapeHtml('&lt;')).toBe('&amp;lt;');
+  it('no escapa dos veces un texto ya escapado a mano: cada carácter se trata una vez', () => {
+    expect(escapeHtml('a & b')).toBe('a &amp; b');
+    expect(escapeHtml(escapeHtml('<'))).toBe('&amp;lt;');
   });
 });

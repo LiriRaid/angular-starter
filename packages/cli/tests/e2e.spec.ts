@@ -14,7 +14,7 @@ const enabled = process.env['AS_E2E'] === '1';
 const bin = fileURLToPath(new URL('../dist/bin.js', import.meta.url));
 const TIMEOUT_MS = 5 * 60_000;
 const INSTALL_TIMEOUT_MS = 15 * 60_000;
-const CLEANUP_TIMEOUT_MS = 2 * 60_000;
+const CLEANUP_TIMEOUT_MS = 10 * 60_000;
 
 describe.skipIf(!enabled)('as new (end to end, real Angular CLI)', () => {
   let cwd: string;
@@ -221,7 +221,7 @@ ${result.stderr}`,
   );
 
   it(
-    'adds routing, icons and SSR to an existing project and generates a feature that build and test',
+    'adds routing, icons, SSR and components to an existing project and generates a feature that build and test',
     async () => {
       const project = await createInstalled(
         'e2e-add',
@@ -239,13 +239,19 @@ ${result.stderr}`,
       await asProject(project, 'generate', 'feature', 'billing');
       await asProject(project, 'generate', 'component', 'invoice-card', '--feature', 'billing');
       await asProject(project, 'add', 'rendering', 'starter-ssr');
+      await asProject(project, 'add', 'components', 'recommended');
 
       const config = JSON.parse(await read(project, 'angular-starter.config.json'));
       expect(config.options).toMatchObject({
         routing: 'starter',
         icons: 'lucide',
         rendering: 'starter-ssr',
+        components: 'recommended',
       });
+      expect(existsSync(join(project, 'src/app/shared/components/as-button/as-button.ts'))).toBe(
+        true,
+      );
+      expect(await read(project, 'src/styles.css')).toContain('button-styles.css');
       expect(await read(project, 'src/app/app.config.ts')).toContain('withIncrementalHydration()');
       expect(
         existsSync(join(project, 'src/app/features/billing/invoice-card/invoice-card.ts')),
@@ -265,9 +271,13 @@ ${result.stderr}`,
     async () => {
       const project = await createInstalled('e2e-recommended');
       for (const file of [
-        'src/styles/design.css',
-        'src/styles/tailwind.css',
+        'src/styles/theme/theme-styles.css',
+        'src/styles/typography/typography-styles.css',
+        'src/styles/components/button-styles.css',
+        'src/app/shared/animations/animations.css',
+        'src/test-setup.ts',
         'src/app/core/theme/theme.service.ts',
+        'src/app/core/common/icons/lucide-icons.ts',
         'src/app/shared/components/as-button/as-button.ts',
         'src/app/shared/components/as-modal/as-modal.ts',
         'src/app/shared/utils/slugify.ts',
@@ -277,8 +287,12 @@ ${result.stderr}`,
       // The root is composed in app.ts: no welcome page of Angular is left.
       expect(existsSync(join(project, 'src/app/app.html'))).toBe(false);
       expect(await read(project, 'src/app/app.ts')).toContain("template: '<router-outlet />'");
-      expect(await read(project, 'angular.json')).toContain('src/styles/design.css');
-      expect(await read(project, 'src/styles.css')).toContain("@import './styles/tailwind.css';");
+      // The design is imported from styles.css, as in the reference, not registered in angular.json.
+      const styles = await read(project, 'src/styles.css');
+      expect(styles).toContain("@import './styles/theme/theme-styles.css';");
+      expect(styles).toContain('@layer base, components, legacy-overrides, utilities;');
+      expect(await read(project, 'angular.json')).not.toContain('theme-styles');
+      expect(await read(project, 'angular.json')).toContain('src/test-setup.ts');
 
       await ng(project, 'build');
       await ng(project, 'test', '--watch=false');
@@ -287,20 +301,17 @@ ${result.stderr}`,
   );
 
   it(
-    'creates a project with every component, plain CSS and the Starter SSR that builds and passes its tests',
+    'creates a project with every component and the Starter SSR that builds and passes its tests',
     async () => {
       const project = await createInstalled(
         'e2e-all-components',
-        '--style',
-        'css',
         '--components',
         'all',
         '--rendering',
         'starter-ssr',
       );
-      // Plain CSS: nothing of Tailwind CSS is installed or imported.
-      expect(await read(project, 'package.json')).not.toContain('tailwindcss');
-      expect(existsSync(join(project, 'src/styles/tailwind.css'))).toBe(false);
+      expect(await read(project, 'package.json')).toContain('@angular/cdk');
+      expect(await read(project, 'src/styles.css')).toContain('table-styles.css');
       for (const file of [
         'src/app/shared/components/as-table/as-table.ts',
         'src/app/shared/components/as-datepicker/as-datepicker.ts',

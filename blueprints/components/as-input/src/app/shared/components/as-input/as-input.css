@@ -1,0 +1,226 @@
+:host {
+  display: block;
+}
+
+fieldset {
+  border-style: solid;
+}
+
+.as-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.as-input-field {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  appearance: none;
+  border-radius: 0;
+  padding: 0;
+  /* Hereda tipografía del wrapper (que tiene text-caption-1-medium) */
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  font-family: inherit;
+  /* Color activo */
+  color: var(--app-control-surface-text);
+  color-scheme: inherit;
+  /* Layout */
+  width: 100%;
+  cursor: text;
+  transition: color 0.18s ease;
+}
+
+/* Botones ▲▼ propios de [showStepper]="true": no son las flechas nativas (su stepUp() realinea el valor al
+   múltiplo de step, ver stepNumberValue). Dos triángulos apilados sin caja ni borde, el mismo look minimalista
+   del spinner nativo que reemplazan: por eso el <button> se resetea a mano. */
+.as-input-stepper-group {
+  position: absolute;
+  top: 0;
+  right: 0.75rem;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.as-input-stepper-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  appearance: none;
+  color: var(--app-text-subtle);
+  cursor: pointer;
+  line-height: 0;
+}
+
+.as-input-stepper-btn:hover:not(:disabled) {
+  color: var(--app-text-primary);
+}
+
+.as-input-stepper-btn:focus-visible {
+  outline: 2px solid var(--as-primary-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.as-input-stepper-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.as-input-field:focus,
+.as-input-field:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.as-input-field::placeholder {
+  color: var(--app-placeholder-color);
+  opacity: 1;
+  transition: color 0.18s ease;
+}
+
+.as-input-field--disabled {
+  color: var(--app-control-disabled-text);
+  cursor: not-allowed;
+}
+
+.as-input-field--placeholder-hidden::placeholder {
+  color: transparent;
+  opacity: 0;
+}
+
+/* Chip individual en modo isTagInput — el template solo trae layout (border/flex/bg), le faltaba el padding y el radius para verse como chip y no como rectángulo pegado. */
+.tag {
+  padding: 0.25rem 0.625rem;
+  border-radius: 999px;
+  font-size: var(--font-size-caption-2);
+  line-height: 1;
+}
+
+/* Reserva el alto del label de `over` cuando hay label — vive siempre afuera/arriba del
+   campo, no solo mientras "flota" (ver resolveInputLabelClass en as-input.config.ts). */
+.as-input-over {
+  transition: padding-top 150ms ease;
+}
+
+.as-input-over-float {
+  padding-top: 1rem;
+}
+
+.as-input-invalid .as-input-field {
+  border-color: var(--app-error-color);
+}
+
+.as-input-invalid label {
+  color: var(--app-error-color);
+}
+
+.as-input-error {
+  color: var(--app-error-color);
+  font-size: 0.75rem;
+  line-height: 1.4;
+  padding-left: 1.25rem;
+  top: 100%;
+  z-index: 10;
+}
+
+/* Phone mode (phoneCountryPicker): the trigger is an as-button `variant="text"`
+   `size="medium"` (no `severity`, no background or border of its own, 40px like the input) and
+   the "|" line is the visual separator between it and the number. The country panel
+   reutiliza el mismo estilo de fila que as-select-option (separador inferior +
+   hover sólido), ver src/styles/components/select-styles.css. */
+.as-phone-country-panel {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 0;
+  display: none;
+  flex-direction: column;
+  max-height: 16rem;
+  width: max-content;
+  background: var(--app-panel-bg);
+  border: 1px solid var(--app-control-surface-border);
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.35);
+  overflow: hidden;
+  z-index: 1090;
+}
+
+/* El popover solo debe ser flex mientras está realmente abierto — si `display: flex` se
+   aplica siempre, pisa el `display: none` por defecto del navegador para el estado cerrado
+   y el panel queda visible y en flujo normal (ya no en el top layer) apenas se le hace hide. */
+.as-phone-country-panel:popover-open {
+  display: flex;
+}
+
+.as-phone-country-search {
+  flex-shrink: 0;
+  padding: 0.5rem;
+  border-bottom: 1px solid var(--app-control-surface-border);
+  background: var(--app-panel-bg);
+}
+
+.as-phone-country-search input {
+  width: 100%;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid var(--app-control-surface-border);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--app-control-surface-text);
+  font-size: var(--font-size-caption-2, 0.75rem);
+  outline: none;
+}
+
+.as-phone-country-search input:focus {
+  border-color: var(--app-control-focus-ring);
+  box-shadow: inset 0 0 0 1px var(--app-control-focus-ring);
+}
+
+.as-phone-country-list {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.as-phone-country-option {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0.75rem;
+  border: 0;
+  background: var(--app-panel-bg);
+  color: var(--app-text-color);
+  font-size: var(--font-size-caption-2, 0.75rem);
+  text-align: left;
+  cursor: pointer;
+  box-shadow: inset 0 -1px 0 var(--app-border-color);
+}
+
+.as-phone-country-option:last-child {
+  box-shadow: none;
+}
+
+.as-phone-country-option:hover,
+.as-phone-country-option--selected {
+  background: var(--app-primary-button-bg);
+  color: #fff;
+}
+
+.as-phone-country-empty {
+  padding: 0.75rem;
+  color: var(--app-text-muted);
+  font-size: var(--font-size-caption-2, 0.75rem);
+}

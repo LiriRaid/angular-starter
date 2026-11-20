@@ -1,15 +1,14 @@
-import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { RuntimeError } from '../../errors.js';
 import { BLUEPRINTS_ROOT, copyBlueprint } from '../blueprint.js';
-import { addStyleEntry } from '../edits/angular-json.js';
+import { addTestSetupFile } from '../edits/angular-json.js';
+import { planEdit, writeEdits } from '../edits/planned.js';
+import { addDesignStyles } from '../edits/styles.js';
 import { addProvider } from '../edits/typescript.js';
 
 const ANGULAR_JSON = 'angular.json';
+const TEST_SETUP = 'src/test-setup.ts';
 const STYLES = 'src/styles.css';
 const APP_CONFIG = 'src/app/app.config.ts';
-const DESIGN_ENTRY = 'src/styles/design.css';
-const TAILWIND_IMPORT = "@import './styles/tailwind.css';";
 
 export interface DesignProject {
   targetDir: string;
@@ -17,66 +16,52 @@ export interface DesignProject {
   name: string;
   /** Selector prefix of the application components. */
   prefix: string;
-  /** Whether the project uses Tailwind CSS, so the tokens are also mapped to its theme. */
-  tailwind: boolean;
 }
 
 /**
- * The design base of ADR-0005: design tokens, light and dark theme, typography and animations as
- * plain CSS registered in `angular.json`; the theme service and the icon registration in `core`;
- * utilities and pipes in `shared`. Every file is the developer's to change.
+ * The design base (ADR-0007), laid out like the reference application: the stylesheets of
+ * `src/styles/` imported from `src/styles.css` (Tailwind CSS, the `dark` variant, the cascade
+ * layers), the animations in `shared/animations`, the theme service in `core/theme`, the Lucide
+ * registration in `core/common/icons` (with the test setup that provides it to the specs), and the
+ * generic utilities and data in `shared`. Every file is
+ * the developer's to change.
  */
 export const designProfile = {
   /** Project files (forward slashes) that must exist once the base has been applied. */
   requiredFiles: [
-    DESIGN_ENTRY,
-    'src/styles/tokens.css',
+    'src/styles/theme/theme-styles.css',
+    'src/styles/typography/typography-styles.css',
+    'src/app/shared/animations/animations.css',
     'src/app/core/theme/theme.service.ts',
-    'src/app/core/icons/icons.provider.ts',
+    'src/app/core/common/icons/as-icons.ts',
     'src/app/shared/utils/slugify.ts',
-    'src/app/shared/pipes/initials.pipe.ts',
   ],
 
-  async apply({ targetDir, name, prefix, tailwind }: DesignProject): Promise<void> {
-    // Compute every edit first: a file that does not have the expected shape stops the stage
-    // before anything is written.
-    const edited: [path: string, text: string][] = [];
-    const adapt = async (file: string, edit: (text: string) => string): Promise<void> => {
-      const path = join(targetDir, file);
-      try {
-        edited.push([path, edit(await readFile(path, 'utf8'))]);
-      } catch (error) {
-        const reason = error instanceof Error ? error.message : String(error);
-        throw new RuntimeError(`Could not adapt ${file}: ${reason}`);
-      }
-    };
-
-    await adapt(ANGULAR_JSON, (text) => addStyleEntry(text, DESIGN_ENTRY));
-    await adapt(APP_CONFIG, (text) =>
-      addProvider(
-        addProvider(text, 'provideThemeInitializer()', [
-          { module: '@core/theme/theme.initializer', names: ['provideThemeInitializer'] },
-        ]),
-        'provideAsIcons()',
-        [{ module: '@core/icons/icons.provider', names: ['provideAsIcons'] }],
+  async apply({ targetDir, name, prefix }: DesignProject): Promise<void> {
+    // Plan every edit first: a file that does not have the expected shape stops the stage before
+    // anything is written.
+    const planned = [
+      await planEdit(targetDir, STYLES, addDesignStyles),
+      await planEdit(targetDir, ANGULAR_JSON, (text) => addTestSetupFile(text, TEST_SETUP)),
+      await planEdit(targetDir, APP_CONFIG, (text) =>
+        addProvider(
+          addProvider(text, 'provideThemeInitializer()', [
+            { module: '@core/theme/theme.initializer', names: ['provideThemeInitializer'] },
+          ]),
+          '{ provide: LUCIDE_ICONS, useExisting: AS_LUCIDE_ICONS }',
+          [
+            { module: '@lucide/angular', names: ['LUCIDE_ICONS'] },
+            { module: '@core/common/icons/lucide-icons.provider', names: ['AS_LUCIDE_ICONS'] },
+          ],
+        ),
       ),
-    );
-    if (tailwind) {
-      // Tailwind only sees what its own stylesheet imports, so the token mapping is imported there.
-      await adapt(STYLES, (text) =>
-        text.includes(TAILWIND_IMPORT) ? text : `${text.trimEnd()}\n${TAILWIND_IMPORT}\n`,
-      );
-    }
+    ];
 
-    const variables = { PROJECT_NAME: name, PREFIX: prefix };
-    await copyBlueprint({ source: join(BLUEPRINTS_ROOT, 'design'), target: targetDir, variables });
-    if (tailwind) {
-      await copyBlueprint({
-        source: join(BLUEPRINTS_ROOT, 'design-tailwind'),
-        target: targetDir,
-        variables,
-      });
-    }
-    for (const [path, text] of edited) await writeFile(path, text);
+    await copyBlueprint({
+      source: join(BLUEPRINTS_ROOT, 'design'),
+      target: targetDir,
+      variables: { PROJECT_NAME: name, PREFIX: prefix },
+    });
+    await writeEdits(planned);
   },
 };

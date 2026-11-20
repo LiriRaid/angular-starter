@@ -1,18 +1,8 @@
-@switch (kind()) {
-  @case ('image') {
-    <img class="as-media-preview__media" [src]="url()" [alt]="name()" />
+<as-modal [(visible)]="visible" variant="preview" [dismissableMask]="true" (hide)="close()">
+  @if (kind() === 'image') {
+    <as-button icon="Download" iconSize="20" size="small" variant="text" styleClass="as-media-preview-download as-icon-overlay-btn" ariaLabel="Descargar" (onClick)="download()" />
+    <img [src]="url()" [alt]="fileName() || 'Vista previa'" class="as-media-preview-image" />
+  } @else {
+    <iframe [src]="safeUrl()" class="as-media-preview-frame" title="Vista previa del documento"></iframe>
   }
-  @case ('video') {
-    <video class="as-media-preview__media" [src]="url()" controls preload="metadata"></video>
-  }
-  @case ('audio') {
-    <audio class="as-media-preview__audio" [src]="url()" controls preload="metadata"></audio>
-  }
-  @default {
-    <a class="as-media-preview__document" [href]="url()" [attr.download]="name()" target="_blank" rel="noopener noreferrer">
-      <as-icon name="file-text" [size]="28" />
-      <span class="as-media-preview__name">{{ name() }}</span>
-      <as-icon name="download" [size]="18" />
-    </a>
-  }
-}
+</as-modal>

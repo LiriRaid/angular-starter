@@ -1,72 +1,131 @@
-import { Component } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { AsWeeklySchedule, computeWeeklyHours, defaultSchedule, type AsScheduleDay } from './as-weekly-schedule';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
 
-describe('weekly schedule helpers', () => {
-  it('opens Monday to Friday, 09:00 to 17:00, by default', () => {
-    const days = defaultSchedule();
-    expect(days).toHaveLength(7);
-    expect(days.filter((day) => day.enabled).map((day) => day.day)).toEqual([1, 2, 3, 4, 5]);
-    expect(computeWeeklyHours(days)).toBe(40);
+import { AsWeeklySchedule, computeWeeklyHours, parseSchedule } from './as-weekly-schedule';
+
+describe('AsWeeklySchedule', () => {
+  let fixture: ComponentFixture<AsWeeklySchedule>;
+  let component: AsWeeklySchedule;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [AsWeeklySchedule] }).compileComponents();
+
+    fixture = TestBed.createComponent(AsWeeklySchedule);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    // El default (Lun-Vie 8:00-17:00) se siembra hacia `value` con un effect propio: hay que dejarlo asentar antes de leer el estado inicial.
+    await fixture.whenStable();
   });
 
-  it('counts only enabled days with a closing time after the opening time', () => {
-    const days: AsScheduleDay[] = [
-      { day: 1, enabled: true, start: '08:00', end: '12:30' },
-      { day: 2, enabled: false, start: '08:00', end: '12:00' },
-      { day: 3, enabled: true, start: '12:00', end: '08:00' },
-    ];
-    expect(computeWeeklyHours(days)).toBe(4.5);
+  it('por defecto activa Lun-Vie 08:00-17:00 y lo refleja en value', () => {
+    expect(component.summary()).toBe('Lun-Vie 8:00-17:00');
+    expect(component.weeklyHours()).toBe(45);
+    expect(component.value()).toBe('Lun-Vie 8:00-17:00');
+  });
+
+  it('applyPreset "all-9-23" activa los 7 días', () => {
+    component.applyPreset('all-9-23');
+    expect(component.summary()).toBe('Todos los días 9:00-23:00');
+    expect(component.value()).toBe('Todos los días 9:00-23:00');
+  });
+
+  it('applyPreset "24h" reporta 168 horas semanales', () => {
+    component.applyPreset('24h');
+    expect(component.summary()).toBe('Todos los días 24 horas');
+    expect(component.weeklyHours()).toBe(168);
+  });
+
+  it('toggleDay desactiva un día y lo excluye del resumen', () => {
+    component.toggleDay(4); // Viernes
+    expect(component.days()[4].enabled).toBe(false);
+    expect(component.summary()).toBe('Lun-Jue 8:00-17:00');
+  });
+
+  it('con todos los días cerrados el resumen lo dice', () => {
+    for (let index = 0; index < 5; index++) component.toggleDay(index);
+
+    expect(component.summary()).toBe('Cerrado toda la semana');
+    expect(component.weeklyHours()).toBe(0);
+  });
+
+  it('copyDay replica el horario del día a los demás días activos', () => {
+    component.updateTime(0, 'start', '09:00');
+    component.updateTime(0, 'end', '18:00');
+    component.copyDay(0);
+    expect(component.summary()).toBe('Lun-Vie 9:00-18:00');
+  });
+
+  it('reparsea un valor externo real (ej. cargado de una entidad guardada)', async () => {
+    fixture.componentRef.setInput('value', 'Lun-Vie 7:00-18:00 · Sáb 8:00-13:00');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.summary()).toBe('Lun-Vie 7:00-18:00 · Sáb 8:00-13:00');
+    expect(component.days()[5].enabled).toBe(true); // Sábado
+    expect(component.days()[5].start).toBe('08:00');
+    expect(component.days()[6].enabled).toBe(false); // Domingo sigue cerrado
+  });
+
+  it('resetea al default cuando el valor externo pasa de uno real a vacío (reuso sin destruir, ej. un modal que edita distintos registros)', async () => {
+    fixture.componentRef.setInput('value', 'Lun-Vie 9:00-18:00');
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.summary()).toBe('Lun-Vie 9:00-18:00');
+
+    fixture.componentRef.setInput('value', '');
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    // El horario del registro anterior no debe "filtrarse" hacia el nuevo.
+    expect(component.summary()).toBe('Lun-Vie 8:00-17:00');
+    expect(component.value()).toBe('Lun-Vie 8:00-17:00');
+  });
+
+  it('borrar la hora de un campo no cambia el horario: se conserva la anterior', () => {
+    component.updateTime(0, 'start', '');
+    component.updateTime(0, 'end', 'abc');
+
+    expect(component.days()[0].start).toBe('08:00');
+    expect(component.days()[0].end).toBe('17:00');
+    expect(component.summary()).toBe('Lun-Vie 8:00-17:00');
+    expect(component.weeklyHours()).toBe(45);
+    expect(component.value()).toBe('Lun-Vie 8:00-17:00');
+  });
+
+  it('al borrar la hora en el campo, este vuelve a mostrar la hora que sigue vigente', () => {
+    const [start] = fixture.nativeElement.querySelectorAll('input[type="time"]') as NodeListOf<HTMLInputElement>;
+
+    start.value = '';
+    start.dispatchEvent(new Event('change'));
+
+    expect(start.value).toBe('08:00');
+    expect(component.summary()).toBe('Lun-Vie 8:00-17:00');
+  });
+
+  it('cada interruptor de día tiene nombre accesible', () => {
+    const toggles = [...fixture.nativeElement.querySelectorAll('as-toggle button')] as HTMLElement[];
+
+    expect(toggles).toHaveLength(7);
+    expect(toggles[0].getAttribute('aria-label')).toBe('Activar Lunes');
   });
 });
 
-@Component({
-  imports: [AsWeeklySchedule, ReactiveFormsModule],
-  template: `<as-weekly-schedule label="Opening hours" locale="en" [formControl]="control" />`,
-})
-class Host {
-  control = new FormControl<AsScheduleDay[]>(defaultSchedule(), { nonNullable: true });
-}
+describe('computeWeeklyHours / parseSchedule', () => {
+  it('un horario que cruza la medianoche cuenta las horas hasta el día siguiente', () => {
+    const days = parseSchedule('Lun 22:00-06:00');
 
-describe('AsWeeklySchedule', () => {
-  function render() {
-    TestBed.configureTestingModule({ imports: [Host] });
-    const fixture = TestBed.createComponent(Host);
-    fixture.detectChanges();
-    const element = fixture.nativeElement as HTMLElement;
-    return { fixture, host: fixture.componentInstance, element };
-  }
-
-  it('shows a row for each day of the week, with its total', () => {
-    const { element } = render();
-    expect(element.querySelectorAll('.as-schedule__row')).toHaveLength(7);
-    expect(element.textContent).toContain('Monday');
-    expect(element.querySelector('.as-schedule__total')?.textContent).toContain('40 hours a week');
+    expect(computeWeeklyHours(days)).toBe(8);
   });
 
-  it('writes a changed time to the form control', () => {
-    const { fixture, host, element } = render();
-    const monday = element.querySelectorAll('.as-schedule__row')[1] as HTMLElement;
-    const start = monday.querySelector('input[type="time"]') as HTMLInputElement;
-    start.value = '10:00';
-    start.dispatchEvent(new Event('change'));
-    fixture.detectChanges();
-    expect(host.control.value.find((day) => day.day === 1)?.start).toBe('10:00');
-    expect(element.querySelector('.as-schedule__total')?.textContent).toContain('39 hours a week');
+  it('una hora mal formada no produce NaN: el total ignora ese día', () => {
+    const days = parseSchedule('Lun 08:00-17:00');
+    days[0].end = '';
+
+    expect(Number.isNaN(computeWeeklyHours(days))).toBe(false);
+    expect(computeWeeklyHours(days)).toBe(0);
   });
 
-  it('flags a day that closes before it opens', () => {
-    const { fixture, host, element } = render();
-    host.control.setValue(defaultSchedule().map((day) => (day.day === 1 ? { ...day, end: '08:00' } : day)));
-    fixture.detectChanges();
-    expect(element.querySelector('.as-schedule__row--invalid [role="alert"]')).not.toBeNull();
-  });
-
-  it('is disabled when the form disables it', () => {
-    const { fixture, host, element } = render();
-    host.control.disable();
-    fixture.detectChanges();
-    expect((element.querySelector('fieldset') as HTMLFieldSetElement).disabled).toBe(true);
+  it('un valor vacío deja todos los días cerrados', () => {
+    expect(parseSchedule('').every((day) => !day.enabled)).toBe(true);
   });
 });

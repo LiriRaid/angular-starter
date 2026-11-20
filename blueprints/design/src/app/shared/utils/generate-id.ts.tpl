@@ -1,12 +1,7 @@
-/**
- * A unique id for client-side use (optimistic entries, temporary attachments, form rows). It uses
- * `crypto.randomUUID()` and falls back to a random string where Web Crypto is missing.
- * `prefix`, when given, goes in front with a hyphen ("row-3f2a...").
- */
+/** Genera un id único para uso client-side (entradas optimistas, adjuntos temporales, etc.) —
+ *  usa `crypto.randomUUID()` cuando está disponible, con un fallback determinístico-random para
+ *  entornos sin Web Crypto. `prefix`, si se pasa, se antepone con un guion (ej. `optimistic-...`). */
 export function generateId(prefix?: string): string {
-  const id =
-    typeof crypto !== 'undefined' && 'randomUUID' in crypto
-      ? crypto.randomUUID()
-      : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+  const id = typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   return prefix ? `${prefix}-${id}` : id;
 }

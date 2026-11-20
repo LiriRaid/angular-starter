@@ -9,77 +9,99 @@ export interface ComponentExport {
 export interface ComponentDefinition {
   /** The id without the `as-` prefix; its blueprint is `blueprints/components/as-<id>`. */
   id: string;
-  /** Components it needs, by id. They are always generated with it. */
+  /** Components it imports, by id. They are always generated with it. */
   uses: readonly string[];
   exports: readonly ComponentExport[];
+  /**
+   * Global stylesheets of the component below `src/styles/components`, without extension. Each one
+   * is imported from `styles.css` only when the component is generated, so a project does not
+   * bundle the styles of components it does not have.
+   */
+  styles: readonly string[];
 }
 
 const component = (
   id: string,
   uses: readonly string[],
   exports: readonly string[],
-  extra: readonly ComponentExport[] = [],
+  options: {
+    extra?: readonly ComponentExport[];
+    styles?: readonly string[];
+    /** The file that exports `exports`, when it is not `as-<id>.ts`. */
+    main?: string;
+  } = {},
 ): ComponentDefinition => ({
   id,
   uses,
-  exports: [{ from: `as-${id}/as-${id}`, names: exports }, ...extra],
+  exports: [
+    { from: `as-${id}/${options.main ?? `as-${id}`}`, names: exports },
+    ...(options.extra ?? []),
+  ],
+  styles: options.styles ?? [],
 });
 
+/** The generic components of the reference application, renamed from `omniinbox-*` to `as-*`. */
 export const COMPONENTS: readonly ComponentDefinition[] = [
   component('icon', [], ['AsIcon']),
+  component('button', ['icon'], ['AsButton', 'type ButtonSeverity'], {
+    extra: [{ from: 'as-button/as-ripple', names: ['AsRipple'] }],
+    styles: ['button-styles'],
+  }),
+  component('input', ['button', 'icon', 'select'], ['AsInput'], { styles: ['input-styles'] }),
+  component('textarea', ['icon', 'input'], ['AsTextarea']),
+  component('checkbox', ['icon'], ['AsCheckbox']),
+  component('toggle', [], ['AsToggle']),
+  component('select', ['avatar', 'icon', 'input'], ['AsSelect'], { styles: ['select-styles'] }),
+  component('avatar', ['icon'], ['AsAvatar'], { styles: ['presence-indicator-styles'] }),
   component(
-    'button',
-    ['icon'],
-    ['AsButton', 'type AsButtonSeverity', 'type AsButtonSize', 'type AsButtonVariant'],
+    'divider',
+    [],
+    ['AsDivider', 'type AsDividerLayout', 'type AsDividerType', 'type AsDividerAlign'],
   ),
-  component('form-control', [], ['AsFormControl']),
-  component('input', ['form-control', 'icon'], ['AsInput', 'type AsInputType']),
-  component('textarea', ['form-control'], ['AsTextarea']),
-  component('checkbox', ['form-control'], ['AsCheckbox']),
-  component('toggle', ['form-control'], ['AsToggle']),
-  component('select', ['form-control', 'icon'], ['AsSelect', 'type AsSelectOption']),
-  component('avatar', [], ['AsAvatar', 'type AsAvatarSize', 'type AsAvatarStatus']),
-  component('divider', [], ['AsDivider']),
   component('skeleton', [], ['AsSkeleton']),
-  component('tooltip', [], ['AsTooltip', 'type AsTooltipPosition']),
-  component('modal', ['icon'], ['AsModal']),
-  component('drawer', ['icon'], ['AsDrawer']),
+  component('tooltip', [], ['AsTooltip', 'type AsTooltipPosition'], {
+    main: 'as-tooltip.directive',
+    styles: ['tooltip-styles'],
+  }),
+  component('modal', ['button', 'icon'], ['AsModal']),
+  component('drawer', ['icon'], ['AsDrawer', 'type AsDrawerPosition']),
+  component('toast', ['button'], ['AsToast'], { styles: ['toast-styles'] }),
   component(
-    'toast',
-    ['icon'],
-    ['AsToast'],
-    [
-      {
-        from: 'as-toast/as-toast.service',
-        names: [
-          'AsToastService',
-          'type AsToastItem',
-          'type AsToastOptions',
-          'type AsToastSeverity',
-        ],
-      },
-    ],
+    'tabs',
+    ['avatar', 'button', 'icon', 'tooltip'],
+    ['AsTabs', 'type AsTab', 'type AsTabAvatar'],
   ),
-  component('tabs', ['icon'], ['AsTabs', 'type AsTab']),
-  component('popover', ['icon'], ['AsPopover', 'type AsPopoverItem', 'type AsPopoverPlacement']),
+  component(
+    'popover',
+    ['button', 'tooltip'],
+    ['AsPopover', 'type AsPopoverActionItem', 'type SubPanelAnchor'],
+    { styles: ['popover-styles'] },
+  ),
   // What the "all" collection adds to the recommended one.
   component(
     'table',
-    ['icon'],
-    ['AsTable', 'AsTableCell', 'type AsTableColumn', 'type AsTablePage', 'type AsTableSort'],
+    ['checkbox', 'icon', 'select', 'skeleton'],
+    ['AsTable', 'type AsTableColumn', 'type AsTableAlign', 'type AsTablePageEvent'],
+    { styles: ['table-styles'] },
   ),
-  component('search', ['icon'], ['AsSearch']),
-  component('datepicker', ['form-control', 'icon'], ['AsDatepicker']),
+  component('search', ['button', 'input'], ['AsSearch']),
+  component('datepicker', ['button', 'icon', 'input', 'popover', 'select'], ['AsDatepicker']),
   component('section-nav', ['icon'], ['AsSectionNav', 'type AsSectionNavItem']),
-  component('selectable-item', [], ['AsSelectableItem']),
-  component('reorder-list', ['icon'], ['AsReorderList']),
-  component('preview', ['icon'], ['AsPreview']),
-  component('media-preview', ['icon'], ['AsMediaPreview', 'type AsMediaKind']),
-  component('theme-color-picker', ['popover', 'icon'], ['AsThemeColorPicker']),
+  component('selectable-item', ['icon'], ['AsSelectableItem']),
+  component('reorder-list', [], ['AsReorderList']),
+  component('preview', ['button', 'icon', 'modal'], ['AsPreview']),
+  component('media-preview', ['button', 'modal'], ['AsMediaPreview', 'type MediaPreviewKind']),
+  component('theme-color-picker', ['popover', 'tooltip'], ['AsThemeColorPicker']),
   component(
     'weekly-schedule',
-    ['form-control', 'toggle'],
-    ['AsWeeklySchedule', 'computeWeeklyHours', 'defaultSchedule', 'type AsScheduleDay'],
+    ['button', 'toggle'],
+    [
+      'AsWeeklySchedule',
+      'computeWeeklyHours',
+      'parseSchedule',
+      'type AsScheduleDay',
+      'type AsWeeklySchedulePreset',
+    ],
   ),
 ];
 
@@ -119,21 +141,30 @@ export const EXTRA_COMPONENTS: readonly string[] = [
 
 export type ComponentSet = 'recommended' | 'all';
 
-/** The components of a collection plus what they need, each once, needed ones first. */
+/** The components of a collection plus what they import, each once, imported ones first. */
 export function componentsOf(set: ComponentSet): ComponentDefinition[] {
   const ids =
     set === 'all' ? [...RECOMMENDED_COMPONENTS, ...EXTRA_COMPONENTS] : RECOMMENDED_COMPONENTS;
   const byId = new Map(COMPONENTS.map((definition) => [definition.id, definition]));
   const ordered: ComponentDefinition[] = [];
+  // Components can import each other in both directions (input and select), so a component is
+  // marked before its imports are visited.
+  const visited = new Set<string>();
   const visit = (id: string): void => {
+    if (visited.has(id)) return;
+    visited.add(id);
     const definition = byId.get(id);
     if (!definition) throw new Error(`The component "${id}" is not in the manifest.`);
-    if (ordered.includes(definition)) return;
     definition.uses.forEach(visit);
     ordered.push(definition);
   };
   ids.forEach(visit);
   return ordered;
+}
+
+/** The global stylesheets (without extension) of these components, each once. */
+export function stylesOf(definitions: readonly ComponentDefinition[]): string[] {
+  return [...new Set(definitions.flatMap((definition) => definition.styles))];
 }
 
 /** The `export { ... } from '...';` lines of the barrel for these components. */
