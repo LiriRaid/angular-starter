@@ -9,7 +9,7 @@ app-shell/
     main/                 the layout route: sidebar + header + the routed page (<router-outlet>)
     empty/                a layout with no chrome, for pages such as a sign-in
     header/               sidebar toggle, breadcrumb, colour picker and light/dark mode
-    sidebar/              brand, search, the navigation tree, user menu and preferences drawer
+    sidebar/              brand, search, the navigation tree and the user menu
     enums/                SidebarStatus (expanded, collapsed)
   components/breadcrumb/  breadcrumb of the current page, with a menu for the crumbs that do not fit
   providers/              provideLayout(tree, state): what the layout needs in app.ts
@@ -21,8 +21,12 @@ app-shell/
   breadcrumb and title (`as generate feature <name>` does both for you).
 - `app.ts` provides the layout (`provideLayout`) and `app.routes.ts` loads every page inside the
   `Main` layout route. To show a page without the shell, add a route outside of it that loads `Empty`.
-- The user menu and the preferences drawer show an example identity held in the component: replace
-  it with the user of your session when the project has authentication.
+- The user menu shows an example identity held in the component: replace it with the user of your
+  session when the project has authentication.
+- "Preferencias de Diseño" in the user menu opens `/preference-design` (`features/preference-design`):
+  a page with the tabs Apariencia, Tema, UI and Otros whose changes apply in real time. The logic is
+  `core/design-preferences` (ADR-0010); only the floating wide layout is built, the others are shown
+  as under construction.
 - `as add presence` adds the status of the user (online, away, busy, invisible) to the user menu and the
   presence dot to its avatars; see `core/presence`.
 - `features/home` is a welcome page (`home.data.ts` holds its cards and links): edit it or replace it

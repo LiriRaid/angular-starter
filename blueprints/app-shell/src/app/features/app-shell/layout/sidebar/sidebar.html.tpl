@@ -124,10 +124,8 @@
       </nav>
 
       <footer class="sidebar-footer">
-        <__PREFIX__-user-menu [expanded]="isSidebarVisible()" (preferencesClick)="openUserPreferences()" />
+        <__PREFIX__-user-menu [expanded]="isSidebarVisible()" />
       </footer>
-
-      <__PREFIX__-user-preferences />
     </aside>
   }
 </div>

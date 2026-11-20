@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 
 import { BreadcrumbComponent } from '../../components/breadcrumb/breadcrumb';
 import { BreadcrumbService } from '@core/navigation/breadcrumb.service';
+import { DesignPreferencesService } from '@core/design-preferences/design-preferences.service';
 import { LayoutService } from '../../services/layout.service';
 import { ThemeService } from '@core/theme/theme.service';
 
@@ -22,6 +23,7 @@ export class Header {
   readonly router = inject(Router);
   readonly breadcrumbService = inject(BreadcrumbService);
   readonly themeService = inject(ThemeService);
+  readonly designPreferences = inject(DesignPreferencesService);
 
   readonly isDark = computed(() => this.themeService.mode() === 'dark');
 

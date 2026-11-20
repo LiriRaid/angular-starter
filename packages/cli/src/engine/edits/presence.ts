@@ -8,6 +8,9 @@ import { addNamedImports, parseSource } from './typescript.js';
 
 const STATUS_ROW_MARKER = 'um-status-trigger';
 
+/** The button of the user menu that opens the design preferences page (ADR-0010). */
+const PREFERENCES_BUTTON = 'label="Preferencias de Diseño"';
+
 const eolOf = (text: string): string => (text.includes('\r\n') ? '\r\n' : '\n');
 
 /** The sidebar card and the popover panel paint different surfaces behind the dot. */
@@ -90,11 +93,11 @@ export function addPresenceToUserMenuTemplate(html: string): string {
   if (avatars.length === 0) {
     throw new Error('Could not find the <as-avatar> of the user menu to give the presence dot.');
   }
-  const preferences = html.indexOf('label="Preferencias"');
+  const preferences = html.indexOf(PREFERENCES_BUTTON);
   const button = preferences < 0 ? -1 : html.lastIndexOf('<as-button', preferences);
   if (button < 0) {
     throw new Error(
-      'Could not find the preferences button (label="Preferencias") to put the status row before.',
+      `Could not find the preferences button (${PREFERENCES_BUTTON}) to put the status row before.`,
     );
   }
 

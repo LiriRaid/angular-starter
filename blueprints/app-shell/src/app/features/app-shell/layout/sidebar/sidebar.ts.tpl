@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -12,11 +12,10 @@ import { LayoutService } from '../../services/layout.service';
 import { filterNavigationGroups, getFolderRootLink, hasActiveDescendant, isNavigationItemActive, normalizeSidebarUrl } from './sidebar-navigation.utils';
 import { AsIcon, AsRipple, AsSearch, AsTooltip } from '@shared/components';
 import { UserMenu } from './user-menu/user-menu';
-import { UserPreferences } from './user-preferences/user-preferences';
 
 @Component({
   selector: '__PREFIX__-sidebar',
-  imports: [ReactiveFormsModule, AsIcon, AsRipple, AsSearch, AsTooltip, UserMenu, UserPreferences],
+  imports: [ReactiveFormsModule, AsIcon, AsRipple, AsSearch, AsTooltip, UserMenu],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -25,8 +24,6 @@ import { UserPreferences } from './user-preferences/user-preferences';
   },
 })
 export class Sidebar {
-  private readonly userPreferencesRef = viewChild(UserPreferences);
-
   /** Nombre del proyecto: el mismo que `provideNavigation` agrega a los títulos de página. */
   readonly brandTitle = inject(NAV_APP_NAME_TOKEN);
   readonly brandInitial = (Array.from(this.brandTitle.trim())[0] ?? '').toUpperCase();
@@ -184,10 +181,6 @@ export class Sidebar {
     }
 
     setTimeout(() => this.focusSearchInput(), 0);
-  }
-
-  openUserPreferences(): void {
-    this.userPreferencesRef()?.open();
   }
 
   // =========================

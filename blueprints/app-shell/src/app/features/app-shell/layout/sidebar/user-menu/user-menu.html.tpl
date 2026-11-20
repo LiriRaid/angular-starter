@@ -29,7 +29,7 @@
 
     <hr class="h-px border-0 bg-(--app-border-color) m-0" aria-hidden="true" />
 
-    <as-button [text]="true" size="medium" icon="SlidersHorizontal" iconSize="16" label="Preferencias" ariaLabel="Preferencias" labelClass="text-caption-1-medium" styleClass="w-full um-status-item" (onClick)="openPreferences()" />
+    <as-button [text]="true" size="medium" icon="SlidersHorizontal" iconSize="16" label="Preferencias de Diseño" ariaLabel="Preferencias de Diseño" labelClass="text-caption-1-medium" styleClass="w-full um-status-item" (onClick)="openPreferences()" />
 
     <hr class="h-px border-0 bg-(--app-border-color) m-0" aria-hidden="true" />
 

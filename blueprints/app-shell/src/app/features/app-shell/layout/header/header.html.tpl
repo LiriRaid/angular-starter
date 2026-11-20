@@ -4,7 +4,9 @@
       <as-button type="button" variant="text" size="small" [icon]="isSidebarOpen ? 'PanelClose' : 'PanelOpen'" iconSize="24" styleClass="header-theme-btn !border-0 [color:var(--app-action-icon-color)] hover:[color:var(--app-text-primary)] hover:!bg-(--app-action-hover-bg)" [ariaLabel]="isSidebarOpen ? 'Colapsar sidebar' : 'Expandir sidebar'" [asTooltip]="isSidebarOpen ? 'Colapsar' : 'Expandir'" tooltipPosition="bottom" [showDelay]="300" (onClick)="toggleSidebar()" />
 
       <div class="breadcrumb-slot flex-1 min-w-0 mr-3 overflow-visible">
-        <__PREFIX__-breadcrumb [breadcrumbs]="breadcrumbService.breadcrumbs()" />
+        @if (designPreferences.preferences().showBreadcrumb) {
+          <__PREFIX__-breadcrumb [breadcrumbs]="breadcrumbService.breadcrumbs()" />
+        }
       </div>
     </div>
 

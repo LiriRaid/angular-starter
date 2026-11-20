@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject, input, signal, viewChild } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { AsAvatar, AsButton, AsIcon, AsPopover } from '@shared/components';
 import { NAV_APP_NAME_TOKEN } from '@core/navigation/navigation.tokens';
@@ -15,7 +16,7 @@ import { NAV_APP_NAME_TOKEN } from '@core/navigation/navigation.tokens';
 export class UserMenu {
   readonly expanded = input(true);
 
-  readonly preferencesClick = output<void>();
+  private readonly router = inject(Router);
 
   private readonly popoverRef = viewChild(AsPopover);
 
@@ -34,8 +35,9 @@ export class UserMenu {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   });
 
+  /** Las preferencias de diseño son una página (ADR-0010), no un drawer. */
   openPreferences(): void {
     this.popoverRef()?.hide();
-    this.preferencesClick.emit();
+    void this.router.navigateByUrl('/preference-design');
   }
 }

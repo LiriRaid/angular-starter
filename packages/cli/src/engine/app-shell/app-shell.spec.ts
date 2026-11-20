@@ -48,7 +48,6 @@ describe('App Shell profile', () => {
       'layout/sidebar/sidebar.css',
       'layout/sidebar/sidebar-navigation.utils.ts',
       'layout/sidebar/user-menu/user-menu.ts',
-      'layout/sidebar/user-preferences/user-preferences.ts',
       'layout/enums/sidebar-status.enum.ts',
       'providers/layout.providers.ts',
       'services/layout.service.ts',
@@ -64,6 +63,118 @@ describe('App Shell profile', () => {
     ]) {
       await expect(read(file), file).resolves.toContain('{');
     }
+  });
+
+  describe('design preferences page (ADR-0010)', () => {
+    const PAGE = 'src/app/features/preference-design';
+    const CORE = 'src/app/core/design-preferences';
+
+    it('replaces the preferences drawer: no drawer, no output, no preferences component', async () => {
+      await apply();
+      await expect(
+        read(`${SHELL}/layout/sidebar/user-preferences/user-preferences.ts`),
+      ).rejects.toThrow();
+      const sidebar = await read(`${SHELL}/layout/sidebar/sidebar.ts`);
+      expect(sidebar).not.toMatch(/UserPreferences|openUserPreferences/);
+      expect(await read(`${SHELL}/layout/sidebar/sidebar.html`)).not.toContain('user-preferences');
+      expect(await read(`${SHELL}/layout/sidebar/user-menu/user-menu.ts`)).not.toContain(
+        'preferencesClick',
+      );
+    });
+
+    it('opens the page from the user menu with a button called "Preferencias de Diseño"', async () => {
+      await apply();
+      const html = await read(`${SHELL}/layout/sidebar/user-menu/user-menu.html`);
+      expect(html).toContain('label="Preferencias de Diseño"');
+      expect(html).not.toContain('label="Preferencias"');
+      const ts = await read(`${SHELL}/layout/sidebar/user-menu/user-menu.ts`);
+      expect(ts).toContain("navigateByUrl('/preference-design')");
+    });
+
+    it('creates the feature with its routes, tabs, service and specs', async () => {
+      await apply();
+      for (const file of [
+        'preference-design.ts',
+        'preference-design.html',
+        'preference-design.routes.ts',
+        'preference-design.spec.ts',
+        'tabs/appearance-tab.ts',
+        'tabs/theme-tab.ts',
+        'tabs/ui-tab.ts',
+        'tabs/other-tab.ts',
+      ]) {
+        await expect(read(`${PAGE}/${file}`), file).resolves.toBeTypeOf('string');
+      }
+      expect(await read(`${PAGE}/preference-design.routes.ts`)).toContain(
+        'PREFERENCE_DESIGN_ROUTES',
+      );
+      for (const file of [
+        'design-preferences.service.ts',
+        'design-preferences.service.spec.ts',
+        'design-preferences.providers.ts',
+        'README.md',
+      ]) {
+        await expect(read(`${CORE}/${file}`), file).resolves.toBeTypeOf('string');
+      }
+      await expect(read('src/styles/features/design-preferences-styles.css')).resolves.toContain(
+        '--as-ui-radius-scale',
+      );
+    });
+
+    it('shows the four tabs of the demo with as-tabs, and the reset and save buttons', async () => {
+      await apply();
+      const html = await read(`${PAGE}/preference-design.html`);
+      expect(html).toContain('<as-tabs');
+      expect(html).toContain('Restablecer');
+      expect(html).toContain('Guardar cambios');
+      const ts = await read(`${PAGE}/preference-design.ts`);
+      for (const label of ['Apariencia', 'Tema', 'UI', 'Otros']) {
+        expect(ts).toContain(`label: '${label}'`);
+      }
+      expect(await read(`${PAGE}/tabs/appearance-tab.ts`)).toContain(
+        "from '@core/theme/theme.service'",
+      );
+      expect(await read(`${PAGE}/tabs/appearance-tab.ts`)).toContain('Flotante (ancho)');
+      expect(await read(`${PAGE}/tabs/appearance-tab.html`)).toContain('En construcción');
+    });
+
+    it('applies the preferences at start and in real time, persisting what is saved', async () => {
+      await apply();
+      const service = await read(`${CORE}/design-preferences.service.ts`);
+      expect(service).toContain('localStorage');
+      for (const token of [
+        '--as-ui-radius-scale',
+        '--as-ui-button-scale',
+        '--as-ui-density-scale',
+        '--as-ui-font-scale',
+      ]) {
+        expect(service).toContain(token);
+      }
+      expect(service).toContain('data-animations');
+      expect(await read('src/app/app.config.ts')).toContain('provideDesignPreferences()');
+    });
+
+    it('adds the route and a navigation entry with its breadcrumb', async () => {
+      await apply();
+      const routes = await read('src/app/app.routes.ts');
+      expect(routes).toContain('preference-design.routes');
+      expect(routes).toContain('PREFERENCE_DESIGN_ROUTES');
+      const tree = await read(`${SHELL}/navigation/navigation.data.ts`);
+      expect(tree).toContain("link: '/preference-design'");
+      expect(tree).toContain('Preferencias de Diseño');
+      const styles = await read('src/styles.css');
+      expect(styles).toContain("@import './styles/features/design-preferences-styles.css';");
+    });
+
+    it('lists its files for the verification stage', () => {
+      expect(appShellProfile.requiredFiles).toEqual(
+        expect.arrayContaining([
+          'src/app/features/preference-design/preference-design.ts',
+          'src/app/core/design-preferences/design-preferences.service.ts',
+          'src/styles/features/design-preferences-styles.css',
+        ]),
+      );
+    });
   });
 
   it('does not port the call widget or the business of the reference', async () => {
@@ -87,7 +198,6 @@ describe('App Shell profile', () => {
       'layout/sidebar/sidebar.spec.ts',
       'layout/sidebar/sidebar-navigation.utils.spec.ts',
       'layout/sidebar/user-menu/user-menu.spec.ts',
-      'layout/sidebar/user-preferences/user-preferences.spec.ts',
       'services/layout.service.spec.ts',
       'services/layout-navigation-state.utils.spec.ts',
     ]) {

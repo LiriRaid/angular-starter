@@ -5,11 +5,12 @@ import { componentsProfile } from '../components/components.js';
 import { addComponentProvider, addNavigationGroups, wrapRoutesInLayout } from '../edits/layout.js';
 import { planEdit, writeEdits, type PlannedEdit } from '../edits/planned.js';
 import { addFeatureStyles } from '../edits/styles.js';
-import { addNavigationItem, addRoutes, type RouteSpec } from '../edits/typescript.js';
+import { addNavigationItem, addProvider, addRoutes, type RouteSpec } from '../edits/typescript.js';
 import { pathExists } from '../fs.js';
 import { refreshGeneratedReadmes } from '../readme.js';
 
 const APP = 'src/app/app.ts';
+const APP_CONFIG = 'src/app/app.config.ts';
 const APP_ROUTES = 'src/app/app.routes.ts';
 const STYLES = 'src/styles.css';
 const TREE = 'src/app/features/app-shell/navigation/navigation.data.ts';
@@ -32,16 +33,33 @@ export const SHELL_COMPONENTS: readonly string[] = [
 /** The example pages that give the navigation something to show: `home` already exists. */
 export const SHELL_FEATURES = ['dashboard', 'users', 'reports', 'settings'] as const;
 
-/** Global stylesheets of the shell below `src/styles/features`, in the order they are imported. */
-const SHELL_STYLES = ['sidebar-styles', 'breadcrumb-styles', 'user-menu-styles'];
+/** The design preferences page of the user menu (ADR-0010); it is not one of the example pages. */
+export const PREFERENCE_DESIGN_FEATURE = 'preference-design';
 
-const FEATURE_ROUTES: readonly RouteSpec[] = SHELL_FEATURES.map((feature) => ({
-  path: feature,
-  lazy: {
-    file: `@features/${feature}/${feature}.routes`,
-    exportName: `${feature.toUpperCase()}_ROUTES`,
+/** Global stylesheets of the shell below `src/styles/features`, in the order they are imported. */
+const SHELL_STYLES = [
+  'sidebar-styles',
+  'breadcrumb-styles',
+  'user-menu-styles',
+  'design-preferences-styles',
+];
+
+const FEATURE_ROUTES: readonly RouteSpec[] = [
+  ...SHELL_FEATURES.map((feature) => ({
+    path: feature,
+    lazy: {
+      file: `@features/${feature}/${feature}.routes`,
+      exportName: `${feature.toUpperCase()}_ROUTES`,
+    },
+  })),
+  {
+    path: PREFERENCE_DESIGN_FEATURE,
+    lazy: {
+      file: `@features/${PREFERENCE_DESIGN_FEATURE}/${PREFERENCE_DESIGN_FEATURE}.routes`,
+      exportName: 'PREFERENCE_DESIGN_ROUTES',
+    },
   },
-}));
+];
 
 const LAYOUT = { file: '@features/app-shell/layout/main/main', exportName: 'Main' };
 
@@ -56,9 +74,10 @@ export interface AppShellProject {
 /**
  * The App Shell (ADR-0008): the layout, sidebar, header and breadcrumb of the reference application
  * without its business, the `provideLayout` providers of the root component, the layout route that
- * wraps the routes of the application, the stylesheets of the shell and five example pages (the
+ * wraps the routes of the application, the stylesheets of the shell, five example pages (the
  * `home` the architecture already has plus `dashboard`, `users`, `reports` and `settings`) in the
- * navigation tree. It brings the components it draws with; the design base and the starter routing
+ * navigation tree and the design preferences page the user menu opens (ADR-0010) with its
+ * `core/design-preferences` and the `provideDesignPreferences()` of the application config. It brings the components it draws with; the design base and the starter routing
  * must be there already.
  */
 export const appShellProfile = {
@@ -72,6 +91,8 @@ export const appShellProfile = {
     'src/app/features/app-shell/services/layout.service.ts',
     ...SHELL_STYLES.map((name) => `src/styles/features/${name}.css`),
     ...SHELL_FEATURES.map((feature) => `src/app/features/${feature}/${feature}.ts`),
+    `src/app/features/${PREFERENCE_DESIGN_FEATURE}/${PREFERENCE_DESIGN_FEATURE}.ts`,
+    'src/app/core/design-preferences/design-preferences.service.ts',
     ...componentsProfile.requiredFilesFor(SHELL_COMPONENTS),
   ],
 
@@ -155,6 +176,14 @@ async function planEdits(targetDir: string): Promise<PlannedEdit[]> {
         ],
       ),
     ),
+    await planEdit(targetDir, APP_CONFIG, (text) =>
+      addProvider(text, 'provideDesignPreferences()', [
+        {
+          module: '@core/design-preferences/design-preferences.providers',
+          names: ['provideDesignPreferences'],
+        },
+      ]),
+    ),
     await planEdit(targetDir, APP_ROUTES, (text) =>
       addRoutes(wrapRoutesInLayout(text, LAYOUT), FEATURE_ROUTES),
     ),
@@ -189,6 +218,12 @@ async function planEdits(targetDir: string): Promise<PlannedEdit[]> {
                     link: '/settings/notifications',
                   },
                 ],
+              },
+              {
+                id: PREFERENCE_DESIGN_FEATURE,
+                title: 'Preferencias de Diseño',
+                icon: 'SlidersHorizontal',
+                link: `/${PREFERENCE_DESIGN_FEATURE}`,
               },
             ],
           },

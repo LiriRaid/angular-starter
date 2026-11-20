@@ -33,7 +33,7 @@ describe('presence in the user menu template', () => {
   it('puts the status row between dividers, right before the preferences button', () => {
     const edited = addPresenceToUserMenuTemplate(html);
     const row = edited.indexOf('um-status-trigger');
-    const preferences = edited.indexOf('label="Preferencias"');
+    const preferences = edited.indexOf('label="Preferencias de Diseño"');
     expect(row).toBeGreaterThan(edited.indexOf('um-card'));
     expect(row).toBeLessThan(preferences);
     const between = edited.slice(row, preferences);
@@ -78,7 +78,7 @@ describe('presence in the user menu template', () => {
 
   it.each([
     ['</as-popover>', 'the popover'],
-    ['label="Preferencias"', 'the preferences button'],
+    ['label="Preferencias de Diseño"', 'the preferences button'],
   ])('names the missing anchor when the template has no %s', (anchor, name) => {
     expect(() => addPresenceToUserMenuTemplate(html.replace(anchor, ''))).toThrow(
       new RegExp(`${name}`),
