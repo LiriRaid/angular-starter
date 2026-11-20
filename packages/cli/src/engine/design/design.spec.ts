@@ -63,6 +63,16 @@ describe('design base', () => {
     }
   });
 
+  it('loads the Inter font of the reference application from index.html', async () => {
+    await designProfile.apply({ targetDir: project, name: 'demo', prefix: 'app' });
+    const html = await readFile(join(project, 'src/index.html'), 'utf8');
+    expect(html).toContain('family=Inter:wght@100..900');
+    expect(html.match(/family=Inter/g)).toHaveLength(1);
+    expect(await readFile(join(project, 'src/styles/base-elements-styles.css'), 'utf8')).toContain(
+      "font-family: 'Inter'",
+    );
+  });
+
   it('keeps the animations in shared/animations', async () => {
     await apply();
     expect(await read('src/app/shared/animations/animations.css')).toContain('@keyframes');

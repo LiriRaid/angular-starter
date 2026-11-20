@@ -67,6 +67,11 @@ the settings drawer that switches them at run time come later, one by one.
     option requires `rendering: csr`, so `--defaults --rendering ssr` leaves the shell out and an
     explicit `--app-shell starter --rendering ssr` is refused with a message. Dropping that one
     requirement is the change that enables it.
+11. **The font.** The reference sets `font-family: Inter` and loads it with one
+    `<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap">` in
+    `index.html`; the design base had the first but not the second, so the text fell back to
+    Helvetica or Arial. The design profile (shell or components) now adds that link to `src/index.html`;
+    a project without the design base keeps Angular's `index.html`.
 
 ## Alternatives considered
 

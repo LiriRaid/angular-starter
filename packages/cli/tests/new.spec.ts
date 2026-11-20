@@ -593,6 +593,37 @@ export const appConfig: ApplicationConfig = {
     ).toContain('AsSearch');
   });
 
+  it('loads the Inter font only with the design base, never in an Angular default project', async () => {
+    const withDesign = createFakeIo({ cwd });
+    await run(['new', 'with-design', '--defaults', '--no-install', '--no-git'], withDesign.io, {
+      run: createFakeRunner().run,
+    });
+    expect(await readFile(join(cwd, 'with-design/src/index.html'), 'utf8')).toContain(
+      'family=Inter:wght@100..900',
+    );
+
+    const plain = createFakeIo({ cwd });
+    const code = await run(
+      [
+        'new',
+        'plain',
+        '--defaults',
+        '--architecture',
+        'angular-default',
+        '--routing',
+        'angular',
+        '--components',
+        'none',
+        '--no-install',
+        '--no-git',
+      ],
+      plain.io,
+      { run: createFakeRunner().run },
+    );
+    expect(code, plain.err()).toBe(0);
+    expect(await readFile(join(cwd, 'plain/src/index.html'), 'utf8')).not.toContain('Inter');
+  });
+
   it('rejects the shell without the starter routing before doing anything', async () => {
     const fake = createFakeIo({ cwd });
     const runner = createFakeRunner();

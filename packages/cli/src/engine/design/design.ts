@@ -2,12 +2,14 @@ import { join } from 'node:path';
 import { BLUEPRINTS_ROOT, copyBlueprint } from '../blueprint.js';
 import { addTestSetupFile } from '../edits/angular-json.js';
 import { planEdit, writeEdits } from '../edits/planned.js';
+import { addInterFont } from '../edits/html.js';
 import { addDesignStyles } from '../edits/styles.js';
 import { addProvider } from '../edits/typescript.js';
 
 const ANGULAR_JSON = 'angular.json';
 const TEST_SETUP = 'src/test-setup.ts';
 const STYLES = 'src/styles.css';
+const INDEX_HTML = 'src/index.html';
 const APP_CONFIG = 'src/app/app.config.ts';
 
 export interface DesignProject {
@@ -42,6 +44,7 @@ export const designProfile = {
     // anything is written.
     const planned = [
       await planEdit(targetDir, STYLES, addDesignStyles),
+      await planEdit(targetDir, INDEX_HTML, addInterFont),
       await planEdit(targetDir, ANGULAR_JSON, (text) => addTestSetupFile(text, TEST_SETUP)),
       await planEdit(targetDir, APP_CONFIG, (text) =>
         addProvider(

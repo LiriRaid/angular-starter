@@ -27,6 +27,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- The design base (components or App Shell) loads the Inter font of the reference application from
+  `src/index.html`, so the text is no longer drawn with the fallback font; a project without the design
+  base keeps Angular's own `index.html`.
 - Angular Starter App Shell (`--app-shell starter`, `as add app-shell`; ADR-0008 and plan 0006), first
   layout mode of the reference application without its business: `features/app-shell` with the
   `Main` and `Empty` layouts, the sidebar (brand, search, navigation tree, user menu, preferences
