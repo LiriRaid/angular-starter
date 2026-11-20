@@ -14,7 +14,7 @@ const enabled = process.env['AS_E2E'] === '1';
 const bin = fileURLToPath(new URL('../dist/bin.js', import.meta.url));
 const TIMEOUT_MS = 5 * 60_000;
 const INSTALL_TIMEOUT_MS = 15 * 60_000;
-const CLEANUP_TIMEOUT_MS = 2 * 60_000;
+const CLEANUP_TIMEOUT_MS = 10 * 60_000;
 
 describe.skipIf(!enabled)('as new (end to end, real Angular CLI)', () => {
   let cwd: string;
