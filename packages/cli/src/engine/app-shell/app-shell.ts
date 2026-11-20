@@ -1,10 +1,13 @@
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { BLUEPRINTS_ROOT, copyBlueprint } from '../blueprint.js';
+import { BLUEPRINTS_ROOT, copyBlueprint, renderTemplate } from '../blueprint.js';
 import { componentsProfile } from '../components/components.js';
 import { addComponentProvider, addNavigationGroups, wrapRoutesInLayout } from '../edits/layout.js';
 import { planEdit, writeEdits, type PlannedEdit } from '../edits/planned.js';
 import { addFeatureStyles } from '../edits/styles.js';
 import { addNavigationItem, addRoutes, type RouteSpec } from '../edits/typescript.js';
+import { pathExists } from '../fs.js';
+import { refreshGeneratedReadmes } from '../readme.js';
 
 const APP = 'src/app/app.ts';
 const APP_ROUTES = 'src/app/app.routes.ts';
@@ -87,8 +90,52 @@ export const appShellProfile = {
     await componentsProfile.apply({ targetDir, name, prefix, set: SHELL_COMPONENTS });
     // Planned again: the components have added their own stylesheets to `styles.css` meanwhile.
     await writeEdits(await planEdits(targetDir));
+    await applyWelcomeHome({ targetDir, name, prefix });
+    await refreshGeneratedReadmes(targetDir);
   },
 };
+
+const HOME_FOLDER = 'src/app/features/home';
+const HOME_FILES = ['home.ts', 'home.html', 'home.css', 'home.spec.ts'] as const;
+const SCREAMING_HOME = join(BLUEPRINTS_ROOT, 'architectures', 'screaming', HOME_FOLDER);
+
+/** The blueprint file of a home file: TypeScript carries the `.tpl` suffix, the markup and styles do not. */
+const templateOf = (file: string): string => (file.endsWith('.ts') ? `${file}.tpl` : file);
+
+const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * True when `current` is the file of the architecture's blueprint, whatever the project name was
+ * when it was generated (`as add app-shell` knows the package name, `as new` the name typed).
+ */
+async function isPristine(targetDir: string, file: string, prefix: string): Promise<boolean> {
+  const current = await readFile(join(targetDir, HOME_FOLDER, file), 'utf8').catch(() => undefined);
+  if (current === undefined) return false;
+  const template = await readFile(join(SCREAMING_HOME, templateOf(file)), 'utf8');
+  const sentinel = '\u0000';
+  const rendered = renderTemplate(template, { PROJECT_NAME: sentinel, PREFIX: prefix });
+  const pattern = escapeRegExp(rendered).replaceAll(sentinel, '[^\\r\\n]*?');
+  return new RegExp(`^${pattern}$`).test(current.replaceAll('\r\n', '\n'));
+}
+
+/**
+ * Replaces the neutral home of the architecture with the welcome page (ADR-0009), only while the
+ * four files of `home` are still the ones the architecture wrote: a home the developer changed, or
+ * that Starter SSR added its deferred section to, is theirs and stays as it is.
+ */
+async function applyWelcomeHome({ targetDir, name, prefix }: AppShellProject): Promise<void> {
+  // A home.data.ts already there is the developer's: the copy would refuse it after the edits.
+  if (await pathExists(join(targetDir, HOME_FOLDER, 'home.data.ts'))) return;
+  for (const file of HOME_FILES) {
+    if (!(await isPristine(targetDir, file, prefix))) return;
+  }
+  await copyBlueprint({
+    source: join(BLUEPRINTS_ROOT, 'welcome'),
+    target: targetDir,
+    variables: { PROJECT_NAME: name, PREFIX: prefix },
+    overwrite: HOME_FILES.map((file) => `${HOME_FOLDER}/${file}`),
+  });
+}
 
 async function planEdits(targetDir: string): Promise<PlannedEdit[]> {
   return [

@@ -9,6 +9,7 @@ import {
   applyAppShell,
   applyComponents,
   applyDesign,
+  applyPresence,
   applyRendering,
   applyRouting,
   installDependencies,
@@ -26,6 +27,7 @@ export const ADDABLE: Readonly<Record<string, Extract<CapabilityCategory, keyof 
     components: 'components',
     routing: 'routing',
     'app-shell': 'appShell',
+    presence: 'presence',
     rendering: 'rendering',
   };
 
@@ -35,6 +37,7 @@ const NOT_ADDABLE: Readonly<Record<string, readonly string[]>> = {
   components: ['none'],
   routing: ['angular'],
   'app-shell': ['none'],
+  presence: ['none'],
   rendering: ['csr'],
 };
 
@@ -171,6 +174,8 @@ function stagesFor(
         writeStarterConfig,
         installDependencies,
       ];
+    case 'presence':
+      return [applyPresence, writeStarterConfig];
     default:
       return [writeStarterConfig];
   }

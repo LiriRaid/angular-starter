@@ -5,6 +5,7 @@ import { planEdit, writeEdits } from '../edits/planned.js';
 import { addInterFont } from '../edits/html.js';
 import { addDesignStyles } from '../edits/styles.js';
 import { addProvider } from '../edits/typescript.js';
+import { refreshGeneratedReadmes } from '../readme.js';
 
 const ANGULAR_JSON = 'angular.json';
 const TEST_SETUP = 'src/test-setup.ts';
@@ -66,5 +67,6 @@ export const designProfile = {
       variables: { PROJECT_NAME: name, PREFIX: prefix },
     });
     await writeEdits(planned);
+    await refreshGeneratedReadmes(targetDir);
   },
 };

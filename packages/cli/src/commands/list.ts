@@ -12,6 +12,7 @@ const TITLES: Record<CapabilityCategory, string> = {
   icons: 'Icon libraries',
   packageManager: 'Package managers',
   appShell: 'Application shells',
+  presence: 'Presence',
 };
 
 export function listCommand(io: CliIo, category?: string): void {

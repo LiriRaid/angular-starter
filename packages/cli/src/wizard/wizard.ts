@@ -20,6 +20,7 @@ const MESSAGES: Record<SelectKey, string> = {
   style: 'Select a stylesheet format:',
   rendering: 'Select a rendering strategy:',
   appShell: 'Which application shell would you like to use?',
+  presence: 'Which real-time presence would you like to use?',
   components: 'Which native UI components would you like to include?',
   icons: 'Select an icon library:',
   packageManager: 'Select a package manager:',
@@ -58,6 +59,8 @@ export async function runWizard(
       ),
       routing: String(known.routing ?? answers.routing ?? '') || undefined,
       rendering: String(known.rendering ?? answers.rendering ?? '') || undefined,
+      // Asked before presence: a shell that was not chosen (or cannot be) is no shell.
+      appShell: String(known.appShell ?? answers.appShell ?? 'none'),
       style: style === undefined ? undefined : String(style),
       // A stylesheet format that is not Tailwind CSS means there is no Tailwind CSS.
       tailwind: tailwind ?? (style === undefined ? undefined : false),
@@ -126,6 +129,7 @@ export async function runWizard(
   };
   const shell = await ask('appShell');
   impliedIcons('appShell', shell ?? known.appShell);
+  await ask('presence');
 
   const components = await ask('components');
   impliedIcons('components', components ?? known.components);

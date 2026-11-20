@@ -45,7 +45,11 @@ async function parseProject(root: string, text: string): Promise<StarterProject>
   } catch {
     throw invalid('it is not JSON.');
   }
-  const options = optionsSchema.safeParse((json as { options?: unknown } | null)?.options);
+  // A project made before an option existed has none of it: the option is then off.
+  const recorded = (json as { options?: Record<string, unknown> } | null)?.options;
+  const options = optionsSchema.safeParse(
+    recorded && typeof recorded === 'object' ? { presence: 'none', ...recorded } : recorded,
+  );
   if (!options.success) throw invalid(`\n${formatIssues(options.error)}`);
 
   const manifest = await readFile(join(root, 'package.json'), 'utf8').catch(() => '{}');

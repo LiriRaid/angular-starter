@@ -14,6 +14,7 @@ import {
   stylesOf,
 } from './manifest.js';
 import { componentsProfile } from './components.js';
+import { COMPONENT_DESCRIPTIONS } from './descriptions.js';
 
 const COMPONENTS_ROOT = join(BLUEPRINTS_ROOT, 'components');
 const SHARED = 'src/app/shared/components';
@@ -270,6 +271,43 @@ describe('components profile', () => {
     await writeFile(join(project, `${SHARED}/as-button/as-button.css`), '/* mine */');
     await apply('all');
     expect(await read(`${SHARED}/as-button/as-button.css`)).toBe('/* mine */');
+  });
+
+  it('lists in the README only the components and stylesheets that were generated', async () => {
+    await apply('recommended');
+    const readme = await read(`${SHARED}/README.md`);
+    for (const component of componentsOf('recommended')) {
+      expect(readme, component.id).toContain(`\`as-${component.id}\``);
+    }
+    expect(readme).not.toContain('`as-table`');
+    const styles = await read('src/styles/README.md');
+    expect(styles).toContain('`components/button-styles.css`');
+    expect(styles).not.toContain('table-styles.css');
+  });
+
+  it('refreshes the README when the collection grows and keeps what the developer wrote', async () => {
+    await apply('recommended');
+    const path = join(project, `${SHARED}/README.md`);
+    await writeFile(path, `${await read(`${SHARED}/README.md`)}\nMy own note.\n`);
+    await apply('all');
+    const readme = await read(`${SHARED}/README.md`);
+    expect(readme).toContain('`as-table`');
+    expect(readme).toContain('`as-button`');
+    expect(readme).toContain('My own note.');
+    expect(readme.match(/^- `as-button`/gm)).toHaveLength(1);
+  });
+
+  it('leaves a README without the generated block alone', async () => {
+    await apply('recommended');
+    await writeFile(join(project, `${SHARED}/README.md`), '# My components\n');
+    await apply('all');
+    expect(await read(`${SHARED}/README.md`)).toBe('# My components\n');
+  });
+
+  it('describes every component of the manifest', () => {
+    for (const component of COMPONENTS) {
+      expect(COMPONENT_DESCRIPTIONS[component.id], component.id).toMatch(/^[A-Z].+\.$/);
+    }
   });
 
   it('declares the files the verification stage must find', async () => {

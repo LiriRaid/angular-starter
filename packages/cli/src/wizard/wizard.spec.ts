@@ -33,6 +33,7 @@ describe('runWizard', () => {
       'tailwind',
       'csr',
       'starter',
+      'none',
       'recommended',
       'npm',
       true,
@@ -46,17 +47,19 @@ describe('runWizard', () => {
       'style',
       'rendering',
       'appShell',
+      'presence',
       'components',
       'packageManager',
       'git',
       'install',
     ]);
-    // Architecture, routing, the shell and components are the user's call: nothing is preselected.
-    expect(asked.slice(0, 6).map((question) => question.default)).toEqual([
+    // Architecture, routing, the shell, presence and components are the user's call: nothing is preselected.
+    expect(asked.slice(0, 7).map((question) => question.default)).toEqual([
       undefined,
       undefined,
       'tailwind',
       'csr',
+      undefined,
       undefined,
       undefined,
     ]);
@@ -67,6 +70,7 @@ describe('runWizard', () => {
       tailwind: true,
       rendering: 'csr',
       appShell: 'starter',
+      presence: 'none',
       components: 'recommended',
       icons: 'lucide',
       packageManager: 'npm',
@@ -206,7 +210,7 @@ describe('runWizard', () => {
   });
 
   it('asks for the application shell after the rendering and implies Lucide with it', async () => {
-    const { prompter, asked } = createFakePrompter(['starter', 'none']);
+    const { prompter, asked } = createFakePrompter(['starter', 'none', 'none']);
     const answers = await runWizard(
       {
         ...SETTLED,
@@ -220,12 +224,81 @@ describe('runWizard', () => {
       NO_ENV,
       FULL,
     );
-    expect(asked.map((question) => question.name)).toEqual(['appShell', 'components']);
+    expect(asked.map((question) => question.name)).toEqual(['appShell', 'presence', 'components']);
     expect(asked[0]?.choices).toEqual(['none', 'starter']);
     expect(asked[0]?.names?.[1]).toMatch(
       /^Angular Starter App Shell +\[ https:\/\/github\.com\/LiriRaid\/\S+0008-app-shell\.md +\]$/,
     );
-    expect(answers).toEqual({ appShell: 'starter', components: 'none', icons: 'lucide' });
+    expect(answers).toEqual({
+      appShell: 'starter',
+      presence: 'none',
+      components: 'none',
+      icons: 'lucide',
+    });
+  });
+
+  it('asks for presence right after the shell, with the link to its decision', async () => {
+    const { prompter, asked } = createFakePrompter(['starter', 'starter', 'none']);
+    const answers = await runWizard(
+      {
+        ...SETTLED,
+        architecture: 'screaming',
+        routing: 'starter',
+        style: 'css',
+        tailwind: true,
+        rendering: 'csr',
+      },
+      prompter,
+      NO_ENV,
+      FULL,
+    );
+    const presence = asked[1];
+    expect(presence?.name).toBe('presence');
+    expect(presence?.message).toBe('Which real-time presence would you like to use?');
+    expect(presence?.choices).toEqual(['none', 'starter']);
+    expect(presence?.default).toBeUndefined();
+    expect(presence?.names?.[1]).toMatch(
+      /^Angular Starter Presence +\[ https:\/\/github\.com\/LiriRaid\/\S+0009-\S+\.md +\]$/,
+    );
+    expect(answers).toMatchObject({ appShell: 'starter', presence: 'starter' });
+  });
+
+  it('does not ask for presence without the application shell', async () => {
+    const none = createFakePrompter(['none', 'none', 'none']);
+    await runWizard(
+      {
+        ...SETTLED,
+        architecture: 'screaming',
+        routing: 'starter',
+        style: 'css',
+        tailwind: true,
+        rendering: 'csr',
+      },
+      none.prompter,
+      NO_ENV,
+      FULL,
+    );
+    expect(none.asked.map((question) => question.name)).toEqual([
+      'appShell',
+      'components',
+      'icons',
+    ]);
+
+    const angular = createFakePrompter(['none', 'none']);
+    await runWizard(
+      {
+        ...SETTLED,
+        architecture: 'screaming',
+        routing: 'angular',
+        style: 'css',
+        tailwind: true,
+        rendering: 'csr',
+      },
+      angular.prompter,
+      NO_ENV,
+      FULL,
+    );
+    expect(angular.asked.map((question) => question.name)).not.toContain('presence');
   });
 
   it('does not ask for the application shell when the project cannot take it', async () => {
@@ -275,6 +348,7 @@ describe('runWizard', () => {
         tailwind: true,
         rendering: 'csr',
         appShell: 'starter',
+        presence: 'none',
         components: 'recommended',
       },
       prompter,
@@ -292,6 +366,7 @@ describe('runWizard', () => {
       'tailwind',
       'csr',
       'starter',
+      'none',
       'recommended',
       'npm',
       true,

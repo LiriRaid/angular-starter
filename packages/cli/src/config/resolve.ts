@@ -27,7 +27,8 @@ function pick<T extends string>(
  * Client-Side Rendering, Lucide, the Angular Starter App Shell and the essential components. Each
  * one is derived from what was already chosen so a default never conflicts with a choice: with
  * SCSS there is no Tailwind CSS, no shell and no component collection, without the Screaming
- * Architecture the routing is Angular's own and so there is no shell either.
+ * Architecture the routing is Angular's own and so there is no shell either. Presence is never a
+ * default: a project opts into it.
  */
 function defaultsFor(given: Partial<StarterOptions>): StarterOptions {
   const architecture = pick(given.architecture, 'architecture', {}, 'angular-default');
@@ -43,13 +44,15 @@ function defaultsFor(given: Partial<StarterOptions>): StarterOptions {
   );
   const rendering = pick(given.rendering, 'rendering', {}, 'csr');
   const context = { architecture, routing, rendering, style, tailwind, icons };
+  const appShell = pick(given.appShell, 'appShell', context, 'none');
   return {
     architecture,
     routing,
     style,
     tailwind,
     rendering,
-    appShell: pick(given.appShell, 'appShell', context, 'none'),
+    appShell,
+    presence: pick(given.presence, 'presence', { ...context, appShell }, 'none'),
     components: pick(given.components, 'components', context, 'none'),
     icons,
     packageManager: 'npm',

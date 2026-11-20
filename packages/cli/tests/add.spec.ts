@@ -46,7 +46,7 @@ describe('as add', () => {
     const result = await add(project, ['theme']);
     expect(result.code).toBe(2);
     expect(result.err).toContain('Unknown capability "theme"');
-    for (const name of ['icons', 'components', 'routing', 'app-shell', 'rendering']) {
+    for (const name of ['icons', 'components', 'routing', 'app-shell', 'presence', 'rendering']) {
       expect(result.err).toContain(name);
     }
   });
@@ -210,6 +210,68 @@ describe('as add', () => {
       expect(result.out).toContain('Dry run');
       expect(result.out).toContain('Adding the application shell');
       expect(await exists(join(project, 'src/app/features/app-shell/layout'))).toBe(false);
+    });
+  });
+
+  describe('presence', () => {
+    const MENU = 'src/app/features/app-shell/layout/sidebar/user-menu/user-menu.html';
+
+    it('adds the realtime presence on top of the shell and records it', async () => {
+      const project = await createStarterProject(cwd);
+      const result = await add(project, ['presence']);
+      expect(result.code, result.err).toBe(0);
+      expect(result.out).toContain('✓ Adding presence');
+      expect(await exists(join(project, 'src/app/core/presence/presence.service.ts'))).toBe(true);
+      expect(await exists(join(project, 'docs/presence.md'))).toBe(true);
+      expect((await readConfig(project)).presence).toBe('starter');
+      expect(await readFile(join(project, 'src/app/app.config.ts'), 'utf8')).toContain(
+        'providePresence()',
+      );
+      expect(await readFile(join(project, MENU), 'utf8')).toContain('um-status-trigger');
+      expect(result.calls.some((call) => call.args.includes('install'))).toBe(false);
+    });
+
+    it('works on a project whose configuration was written before presence existed', async () => {
+      const project = await createStarterProject(cwd);
+      const file = join(project, 'angular-starter.config.json');
+      const config = JSON.parse(await readFile(file, 'utf8'));
+      delete config.options.presence;
+      await writeFile(file, JSON.stringify(config));
+      const result = await add(project, ['presence']);
+      expect(result.code, result.err).toBe(0);
+    });
+
+    it('needs the application shell', async () => {
+      const project = await createStarterProject(cwd, ['--app-shell', 'none']);
+      const result = await add(project, ['presence']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('requires the app shell: starter');
+    });
+
+    it('refuses to add it twice', async () => {
+      const project = await createStarterProject(cwd, ['--presence', 'starter']);
+      const result = await add(project, ['presence']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('already');
+    });
+
+    it('leaves the project as it was when the user menu does not have the expected shape', async () => {
+      const project = await createStarterProject(cwd);
+      await writeFile(join(project, MENU), '<p>my own menu</p>\n');
+      const result = await add(project, ['presence']);
+      expect(result.code).not.toBe(0);
+      expect(result.err).toContain('user-menu.html');
+      expect(await exists(join(project, 'src/app/core/presence'))).toBe(false);
+      expect((await readConfig(project)).presence).toBe('none');
+      expect(await readFile(join(project, MENU), 'utf8')).toBe('<p>my own menu</p>\n');
+    });
+
+    it('shows the steps with --dry-run and changes nothing', async () => {
+      const project = await createStarterProject(cwd);
+      const result = await add(project, ['presence', '--dry-run']);
+      expect(result.code).toBe(0);
+      expect(result.out).toContain('Adding presence');
+      expect(await exists(join(project, 'src/app/core/presence'))).toBe(false);
     });
   });
 

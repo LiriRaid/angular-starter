@@ -1,7 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_OPTIONS } from '../config/resolve.js';
 import type { GenerationContext } from './pipeline.js';
-import { NEW_PROJECT_STAGES, applyAppShell, applyComponents, applyDesign } from './stages.js';
+import {
+  NEW_PROJECT_STAGES,
+  applyAppShell,
+  applyComponents,
+  applyDesign,
+  applyPresence,
+} from './stages.js';
 
 const contextWith = (
   components: 'none' | 'recommended' | 'all',
@@ -26,6 +32,13 @@ describe('new project stages', () => {
     expect(applyAppShell.enabled?.(contextWith('all', 'none'))).toBe(false);
   });
 
+  it('adds presence only when it was chosen', () => {
+    const context = (presence: 'none' | 'starter'): GenerationContext =>
+      ({ options: { ...DEFAULT_OPTIONS, presence } }) as GenerationContext;
+    expect(applyPresence.enabled?.(context('starter'))).toBe(true);
+    expect(applyPresence.enabled?.(context('none'))).toBe(false);
+  });
+
   it('runs in the order each stage needs', () => {
     const ids = NEW_PROJECT_STAGES.map((stage) => stage.id);
     const order = [
@@ -36,6 +49,7 @@ describe('new project stages', () => {
       'apply-design',
       'apply-components',
       'apply-app-shell',
+      'apply-presence',
       'add-icon-library',
       'write-starter-config',
       'install-dependencies',

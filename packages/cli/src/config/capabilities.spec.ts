@@ -57,7 +57,31 @@ describe('capability registry', () => {
       icons: ['lucide'],
       packageManager: [],
       appShell: [],
+      presence: [],
     });
+  });
+
+  it('offers presence like any other option, only on top of the application shell', () => {
+    expect(availableIds('presence')).toEqual(['none', 'starter']);
+    const starter = CAPABILITIES.presence.find((option) => option.id === 'starter');
+    expect(starter?.docs).toBe(
+      'https://github.com/LiriRaid/as-starter/blob/main/docs/adr/0009-presence-documentation-and-welcome-home.md',
+    );
+    expect(starter?.recommended).toBeUndefined();
+    expect(starter?.default).toBeUndefined();
+    expect(starter?.requires).toEqual({ appShell: ['starter'] });
+    expect(CAPABILITIES.presence.find((option) => option.id === 'none')?.docs).toBeDefined();
+  });
+
+  it('names the application shell that presence needs', () => {
+    const presence = CAPABILITIES.presence.find((option) => option.id === 'starter');
+    expect(unmetRequirements(presence!, { appShell: 'none' })).toEqual(['the app shell: starter']);
+    expect(unmetRequirements(presence!, { appShell: 'starter' })).toEqual([]);
+    expect(unmetRequirements(presence!, {})).toEqual([]);
+  });
+
+  it('leaves presence out of the default: it is a realtime layer a project opts into', () => {
+    expect(defaultOption('presence', { appShell: 'starter' })).toBeUndefined();
   });
 
   it('offers the application shell like any other option: none or the Angular Starter App Shell', () => {

@@ -58,9 +58,39 @@ describe('design base', () => {
       recursive: true,
       withFileTypes: true,
     });
-    for (const entry of entries.filter((item) => item.isFile())) {
+    for (const entry of entries.filter((item) => item.isFile() && item.name !== 'README.md')) {
       expect(entry.name, entry.name).toMatch(/-styles\.css$/);
     }
+  });
+
+  it('explains each piece it brings in a README next to it, in English', async () => {
+    await apply();
+    const expected: Readonly<Record<string, readonly string[]>> = {
+      'src/app/core/theme/README.md': ['ThemeService', 'theme-palettes', 'dark'],
+      'src/app/core/common/icons/README.md': ['as-icons.ts', 'AsIconsSVG', 'lucide-icons.ts'],
+      'src/app/shared/animations/README.md': ['animations.css', 'fade-in-out'],
+      'src/app/shared/components/README.md': ['@shared/components', 'as-'],
+      'src/styles/README.md': ['theme-styles.css', 'typography', 'legacy-overrides'],
+    };
+    for (const [file, topics] of Object.entries(expected)) {
+      const text = await read(file);
+      expect(text, file).toMatch(/^# /);
+      for (const topic of topics) expect(text, `${file}: ${topic}`).toContain(topic);
+      expect(text, file).not.toMatch(/\b(ahora|estado|ausente)\b/i);
+    }
+  });
+
+  it('lists in the README of the styles only the folders that exist', async () => {
+    await apply();
+    const styles = await read('src/styles/README.md');
+    expect(styles).toContain('`theme/theme-styles.css`');
+    expect(styles).not.toContain('components/');
+    expect(styles).not.toContain('features/');
+  });
+
+  it('mentions in the README of the components that none has been generated yet', async () => {
+    await apply();
+    expect(await read('src/app/shared/components/README.md')).toMatch(/No components/);
   });
 
   it('loads the Inter font of the reference application from index.html', async () => {

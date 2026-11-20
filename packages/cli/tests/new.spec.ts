@@ -560,6 +560,52 @@ export const appConfig: ApplicationConfig = {
     expect(config.options.appShell).toBe('starter');
   });
 
+  it('adds presence with --presence starter and leaves it out of the defaults', async () => {
+    const plain = createFakeIo({ cwd });
+    await run(['new', 'plain-app', '--defaults', '--no-install', '--no-git'], plain.io, {
+      run: createFakeRunner().run,
+    });
+    expect(await readFile(join(cwd, 'plain-app', 'angular-starter.config.json'), 'utf8')).toContain(
+      '"presence": "none"',
+    );
+    await expect(
+      readFile(join(cwd, 'plain-app', 'src/app/core/presence/presence.service.ts'), 'utf8'),
+    ).rejects.toThrow();
+
+    const fake = createFakeIo({ cwd });
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--presence', 'starter', '--no-install', '--no-git'],
+      fake.io,
+      { run: createFakeRunner().run },
+    );
+    expect(code, fake.err()).toBe(0);
+    const out = fake.out();
+    expect(out).toContain('Presence');
+    expect(out.indexOf('✓ Adding the application shell')).toBeLessThan(
+      out.indexOf('✓ Adding presence'),
+    );
+    const target = join(cwd, 'my-app');
+    expect(
+      await readFile(join(target, 'src/app/core/presence/presence.service.ts'), 'utf8'),
+    ).toContain('class PresenceService');
+    expect(await readFile(join(target, 'src/app/app.config.ts'), 'utf8')).toContain(
+      'providePresence()',
+    );
+    const config = JSON.parse(await readFile(join(target, 'angular-starter.config.json'), 'utf8'));
+    expect(config.options.presence).toBe('starter');
+  });
+
+  it('rejects --presence starter without the shell', async () => {
+    const fake = createFakeIo({ cwd });
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--app-shell', 'none', '--presence', 'starter'],
+      fake.io,
+      { run: createFakeRunner().run },
+    );
+    expect(code).toBe(2);
+    expect(fake.err()).toContain('presence: "starter" requires the app shell: starter');
+  });
+
   it('keeps the shell out with --app-shell none', async () => {
     const fake = createFakeIo({ cwd });
     const code = await run(

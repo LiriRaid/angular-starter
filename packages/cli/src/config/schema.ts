@@ -25,6 +25,7 @@ export const ICONS = [
 ] as const;
 export const PACKAGE_MANAGERS = ['npm', 'pnpm', 'yarn'] as const;
 export const APP_SHELLS = ['none', 'starter'] as const;
+export const PRESENCES = ['none', 'starter'] as const;
 
 /** Prefix reserved for the components distributed by Angular Starter. */
 export const RESERVED_PREFIX = 'as';
@@ -46,6 +47,7 @@ export const optionsSchema = z.strictObject({
   tailwind: z.boolean(),
   rendering: z.enum(RENDERING),
   appShell: z.enum(APP_SHELLS),
+  presence: z.enum(PRESENCES),
   components: z.enum(COMPONENTS),
   icons: z.enum(ICONS),
   packageManager: z.enum(PACKAGE_MANAGERS),

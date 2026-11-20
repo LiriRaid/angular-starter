@@ -246,6 +246,80 @@ describe('App Shell profile', () => {
     await expect(apply()).rejects.toThrow(/overwrite/);
   });
 
+  describe('welcome home', () => {
+    const HOME = 'src/app/features/home';
+
+    it('replaces the neutral home with a welcome page: logo, name, cards, AS Starter and GitHub', async () => {
+      await apply('Inventory System');
+      const html = await read(`${HOME}/home.html`);
+      expect(html).toContain('<svg');
+      expect(html).toContain('{{ projectName() }}');
+      expect(html).toContain('@for (card of cards');
+      expect(html).toContain('AS Starter');
+      expect(html).toContain('socialLinks');
+      const ts = await read(`${HOME}/home.ts`);
+      expect(ts).toContain("selector: 'app-home'");
+      expect(ts).toContain("signal('Inventory System')");
+      const data = await read(`${HOME}/home.data.ts`);
+      expect(data).toContain('WELCOME_CARDS');
+      expect(data).toContain('https://angular.dev');
+      expect(data).toContain('https://github.com/LiriRaid/as-starter');
+      expect(data).not.toMatch(/twitter|linkedin|facebook|instagram/i);
+      expect(await read(`${HOME}/home.spec.ts`)).toContain('Inventory System');
+    });
+
+    it('links the cards to the pages the project really has', async () => {
+      await apply();
+      const data = await read(`${HOME}/home.data.ts`);
+      const tree = await read(`${SHELL}/navigation/navigation.data.ts`);
+      const routes = [...data.matchAll(/route: '([^']+)'/g)].map((match) => match[1]);
+      expect(routes).toContain('/dashboard');
+      for (const route of routes) expect(tree, route).toContain(`link: '${route}'`);
+      expect(data).not.toContain('/presence');
+    });
+
+    it('keeps the routes of the home as the architecture wrote them', async () => {
+      const before = await read(`${HOME}/home.routes.ts`);
+      await apply();
+      expect(await read(`${HOME}/home.routes.ts`)).toBe(before);
+    });
+
+    it.each([
+      ['home.ts', '// mine\n'],
+      ['home.html', '<main>mine</main>\n'],
+      ['home.css', '/* mine */\n'],
+      ['home.spec.ts', '// mine\n'],
+    ])('leaves the home alone when the developer changed %s', async (file, text) => {
+      await writeFile(join(project, HOME, file), text);
+      await apply();
+      expect(await read(`${HOME}/${file}`)).toBe(text);
+      await expect(read(`${HOME}/home.data.ts`)).rejects.toThrow();
+      for (const other of ['home.ts', 'home.html', 'home.css', 'home.spec.ts']) {
+        if (other !== file) expect(await read(`${HOME}/${other}`)).not.toContain('WELCOME');
+      }
+      // The shell itself is there: only the welcome page was skipped.
+      await expect(read(`${SHELL}/layout/main/main.ts`)).resolves.toBeTypeOf('string');
+    });
+
+    it('leaves a home alone that Starter SSR changed with its deferred section', async () => {
+      const html = await read(`${HOME}/home.html`);
+      await writeFile(
+        join(project, HOME, 'home.html'),
+        `${html}\n@defer (hydrate on viewport) {\n  <app-home-details />\n}\n`,
+      );
+      await apply();
+      expect(await read(`${HOME}/home.html`)).toContain('@defer (hydrate on viewport)');
+      expect(await read(`${HOME}/home.html`)).not.toContain('@for (card of cards');
+    });
+
+    it('leaves no unresolved placeholder in the welcome page', async () => {
+      await apply();
+      for (const file of ['home.ts', 'home.html', 'home.css', 'home.spec.ts', 'home.data.ts']) {
+        expect(await read(`${HOME}/${file}`), file).not.toMatch(/__[A-Z_]+__/);
+      }
+    });
+  });
+
   it('lists the files the verification stage must find', () => {
     expect(appShellProfile.requiredFiles).toEqual(
       expect.arrayContaining([

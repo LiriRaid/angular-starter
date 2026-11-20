@@ -5,6 +5,7 @@ import { addDependencies } from '../edits/package-json.js';
 import { planEdit, writeEdits } from '../edits/planned.js';
 import { addComponentStyles } from '../edits/styles.js';
 import { pathExists } from '../fs.js';
+import { refreshGeneratedReadmes } from '../readme.js';
 import {
   barrelLines,
   componentsOf,
@@ -66,5 +67,6 @@ export const componentsProfile = {
       });
     }
     await writeEdits(planned);
+    await refreshGeneratedReadmes(targetDir);
   },
 };

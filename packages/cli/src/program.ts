@@ -79,7 +79,7 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
     .description('List available options with what each one is and its documentation')
     .argument(
       '[category]',
-      'architecture, routing, style, rendering, components, icons, packageManager or appShell',
+      'architecture, routing, style, rendering, components, icons, packageManager, appShell or presence',
     )
     .addHelpText(
       'after',
@@ -170,6 +170,7 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     .option('--no-tailwind', 'Do not integrate Tailwind CSS')
     .option('--rendering <strategy>', `Rendering strategy (${valuesOf('rendering')})`)
     .option('--app-shell <id>', `Application shell (${valuesOf('appShell')})`)
+    .option('--presence <id>', `Real-time presence (${valuesOf('presence')})`)
     .option('--components <set>', `Native UI components (${valuesOf('components')})`)
     .option('--icons <library>', `Icon library (${valuesOf('icons')})`)
     .option('--package-manager <name>', `Package manager (${valuesOf('packageManager')})`)
@@ -215,6 +216,10 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
       'app-shell',
       'Angular Starter App Shell: sidebar, header and breadcrumb (needs the starter routing)',
     ],
+    [
+      'presence',
+      'Real-time user status in the shell, with a transport contract and a Redis guide (needs the app shell)',
+    ],
     ['rendering', 'Server-side rendering'],
   ];
   program
@@ -237,6 +242,7 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
           ['as add icons lucide', 'Install Lucide Icons'],
           ['as add routing starter', 'Navigation tree, titles and breadcrumbs'],
           ['as add app-shell', 'Floating sidebar, header and example pages'],
+          ['as add presence', 'User status in the shell, in memory or over a WebSocket'],
           ['as add rendering starter-ssr', 'Angular SSR with incremental hydration'],
           ['as add components all --dry-run', 'See the steps without changing anything'],
         ])

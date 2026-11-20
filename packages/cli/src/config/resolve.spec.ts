@@ -98,6 +98,20 @@ describe('resolveOptions', () => {
     expect(resolveOptions({ flags: { rendering: 'starter-ssr' } }).appShell).toBe('none');
   });
 
+  it('keeps presence out of the defaults and accepts it on top of the shell', () => {
+    expect(DEFAULT_OPTIONS.presence).toBe('none');
+    expect(resolveOptions({ flags: { presence: 'starter' } }).presence).toBe('starter');
+  });
+
+  it('rejects presence without the application shell', () => {
+    expect(() => resolveOptions({ flags: { presence: 'starter', appShell: 'none' } })).toThrow(
+      /presence: "starter" requires the app shell: starter/,
+    );
+    expect(() => resolveOptions({ flags: { presence: 'starter', routing: 'angular' } })).toThrow(
+      /presence: "starter" requires/,
+    );
+  });
+
   it('rejects the application shell without what it reads or draws with', () => {
     const without = (flags: Partial<StarterOptions>) => () =>
       resolveOptions({ flags: { appShell: 'starter', ...flags } });

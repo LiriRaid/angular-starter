@@ -23,6 +23,10 @@ app-shell/
   `Main` layout route. To show a page without the shell, add a route outside of it that loads `Empty`.
 - The user menu and the preferences drawer show an example identity held in the component: replace
   it with the user of your session when the project has authentication.
+- `as add presence` adds the status of the user (online, away, busy, invisible) to the user menu and the
+  presence dot to its avatars; see `core/presence`.
+- `features/home` is a welcome page (`home.data.ts` holds its cards and links): edit it or replace it
+  with your own start page.
 - The shell is client-side only for now: it reads `window` while it is built.
 - The `dashboard`, `users`, `reports` and `settings` pages are examples to try the navigation; replace
   them with your product.

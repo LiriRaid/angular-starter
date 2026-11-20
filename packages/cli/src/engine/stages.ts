@@ -18,6 +18,7 @@ import { ARCHITECTURE_PROFILES } from './architectures/index.js';
 import { componentsProfile } from './components/components.js';
 import { designProfile } from './design/design.js';
 import { appShellProfile } from './app-shell/app-shell.js';
+import { presenceProfile } from './presence/presence.js';
 import { buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
 import { pathExists } from './fs.js';
@@ -180,6 +181,15 @@ export const applyAppShell: Stage = {
   },
 };
 
+export const applyPresence: Stage = {
+  id: 'apply-presence',
+  title: 'Adding presence',
+  enabled: ({ options }) => options.presence === 'starter',
+  async run({ name, options, targetDir }) {
+    await presenceProfile.apply({ targetDir, name, prefix: options.prefix });
+  },
+};
+
 export const addIconLibrary: Stage = {
   id: 'add-icon-library',
   title: 'Adding icon library',
@@ -261,6 +271,7 @@ export const verifyProject: Stage = {
         ? []
         : designProfile.requiredFiles),
       ...(options.appShell === 'starter' ? appShellProfile.requiredFiles : []),
+      ...(options.presence === 'starter' ? presenceProfile.requiredFiles : []),
       ...(options.components === 'none'
         ? []
         : componentsProfile.requiredFilesFor(options.components === 'all' ? 'all' : 'recommended')),
@@ -287,6 +298,7 @@ export const NEW_PROJECT_STAGES: readonly Stage[] = [
   applyDesign,
   applyComponents,
   applyAppShell,
+  applyPresence,
   addIconLibrary,
   writeStarterConfig,
   installDependencies,

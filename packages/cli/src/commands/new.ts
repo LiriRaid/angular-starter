@@ -25,6 +25,7 @@ export interface NewFlags {
   tailwind?: boolean;
   rendering?: string;
   appShell?: string;
+  presence?: string;
   components?: string;
   icons?: string;
   packageManager?: string;
@@ -133,6 +134,7 @@ const OPTION_FLAGS = [
   'tailwind',
   'rendering',
   'appShell',
+  'presence',
   'components',
   'icons',
   'packageManager',
@@ -170,6 +172,7 @@ function printSummary(io: CliIo, name: string, options: StarterOptions): void {
     ['Tailwind CSS', toggle(options.tailwind)],
     ['Rendering', labelOf('rendering', options.rendering)],
     ['App shell', labelOf('appShell', options.appShell)],
+    ['Presence', labelOf('presence', options.presence)],
     ['Components', labelOf('components', options.components)],
     ['Icons', labelOf('icons', options.icons)],
     ['Package manager', options.packageManager],
@@ -216,6 +219,11 @@ async function runDryRun(context: GenerationContext): Promise<void> {
       ? []
       : [
           `Add the ${labelOf('appShell', options.appShell)} (layout, sidebar, header, breadcrumb and example pages)`,
+        ]),
+    ...(options.presence === 'none'
+      ? []
+      : [
+          `Add ${labelOf('presence', options.presence)} (core/presence, the status of the user menu and docs/presence.md)`,
         ]),
     ...(ICON_PACKAGES[options.icons]
       ? [

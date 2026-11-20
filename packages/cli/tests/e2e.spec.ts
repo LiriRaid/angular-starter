@@ -386,6 +386,52 @@ ${result.stderr}`,
   );
 
   it(
+    'creates a project with presence and the welcome home that builds and passes its tests',
+    async () => {
+      const project = await createInstalled('e2e-presence', '--presence', 'starter');
+      for (const file of [
+        'src/app/core/presence/presence.service.ts',
+        'src/app/core/presence/web-socket-presence.transport.ts',
+        'src/app/features/app-shell/layout/sidebar/user-menu/user-status.ts',
+        'src/styles/features/presence-styles.css',
+        'docs/presence.md',
+        'src/app/core/theme/README.md',
+        'src/app/shared/components/README.md',
+        'src/styles/README.md',
+      ]) {
+        expect(existsSync(join(project, file)), file).toBe(true);
+      }
+      expect(await read(project, 'src/app/app.config.ts')).toContain('providePresence()');
+      expect(await read(project, 'src/app/features/home/home.html')).toContain(
+        '@for (card of cards',
+      );
+      expect(await read(project, 'src/app/features/home/home.data.ts')).toContain("id: 'presence'");
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'adds presence to an existing project that builds and passes its tests',
+    async () => {
+      const project = await createInstalled('e2e-add-presence');
+      await asProject(project, 'add', 'presence');
+      expect(JSON.parse(await read(project, 'angular-starter.config.json')).options.presence).toBe(
+        'starter',
+      );
+      expect(
+        await read(project, 'src/app/features/app-shell/layout/sidebar/user-menu/user-menu.html'),
+      ).toContain('um-status-trigger');
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
     'installs the Lucide Icons package and still builds',
     async () => {
       const project = await createInstalled('e2e-lucide', '--icons', 'lucide');

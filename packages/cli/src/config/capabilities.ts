@@ -6,13 +6,16 @@ export type CapabilityCategory =
   | 'components'
   | 'icons'
   | 'packageManager'
-  | 'appShell';
+  | 'appShell'
+  | 'presence';
 
 /** What an option needs from the rest of the project; any value is accepted when a key is absent. */
 export interface OptionRequirements {
   readonly architecture?: readonly string[];
   readonly routing?: readonly string[];
   readonly rendering?: readonly string[];
+  /** The application shell the option is built on. */
+  readonly appShell?: readonly string[];
   /** Stylesheet format (`css` also covers Tailwind CSS). */
   readonly style?: readonly string[];
   /** True when the option only works in a project that uses Tailwind CSS. */
@@ -43,12 +46,14 @@ export interface RequirementContext {
   architecture?: string;
   routing?: string;
   rendering?: string;
+  appShell?: string;
   style?: string;
   tailwind?: boolean;
   icons?: string;
 }
 
 const STARTER_DOCS = 'https://github.com/LiriRaid/as-starter/blob/main/docs/adr';
+const STARTER_PRESENCE_DOCS = `${STARTER_DOCS}/0009-presence-documentation-and-welcome-home.md`;
 
 /**
  * Single registry of everything `as new` can offer. Setting `available` to true is the only change
@@ -310,6 +315,25 @@ export const CAPABILITIES: Registry = {
       },
     },
   ],
+  presence: [
+    {
+      id: 'none',
+      label: 'None',
+      description:
+        'No presence: the user menu has no status. You can add it later with as add presence.',
+      docs: STARTER_PRESENCE_DOCS,
+      available: true,
+    },
+    {
+      id: 'starter',
+      label: 'Angular Starter Presence',
+      description:
+        'The user status of the reference (online, away, busy, invisible, with a duration) in the user menu, automatic away on inactivity, and a transport contract with an in-memory mock and a WebSocket transport, plus a guide to connect Redis and your API. Needs the application shell.',
+      docs: STARTER_PRESENCE_DOCS,
+      available: true,
+      requires: { appShell: ['starter'] },
+    },
+  ],
 };
 
 export const CATEGORIES = Object.keys(CAPABILITIES) as CapabilityCategory[];
@@ -330,12 +354,13 @@ export function isAvailable(category: CapabilityCategory, id: string): boolean {
 }
 
 const REQUIREMENT_TEXT: Record<
-  'architecture' | 'routing' | 'rendering' | 'style' | 'icons',
+  'architecture' | 'routing' | 'rendering' | 'appShell' | 'style' | 'icons',
   string
 > = {
   architecture: 'the architecture',
   routing: 'the routing',
   rendering: 'the rendering',
+  appShell: 'the app shell',
   style: 'the stylesheet format',
   icons: 'the icons',
 };
