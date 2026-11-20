@@ -8,7 +8,12 @@ const TITLES: Record<CapabilityCategory, string> = {
   routing: 'Routing systems',
   style: 'Stylesheet formats',
   rendering: 'Rendering strategies',
+  ssrPurpose: 'Purposes of the Starter SSR',
+  appShell: 'Application shells',
+  layout: 'Layout modes of the application shell',
+  presence: 'Presence',
   components: 'Native UI components',
+  uiSystem: 'UI Systems',
   icons: 'Icon libraries',
   packageManager: 'Package managers',
 };

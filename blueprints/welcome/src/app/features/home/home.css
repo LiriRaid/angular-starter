@@ -1,0 +1,34 @@
+:host {
+  display: block;
+}
+
+.home-card {
+  background: var(--app-panel-bg);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.home-card:hover {
+  border-color: var(--as-primary-color);
+  box-shadow: var(--app-surface-shadow-soft);
+}
+
+.home-link:hover {
+  text-decoration: underline;
+}
+
+.home-social {
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.home-social:hover {
+  background: var(--app-action-hover-bg);
+  color: var(--app-text-color);
+}
+
+code {
+  font-family: ui-monospace, monospace;
+}

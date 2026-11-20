@@ -24,7 +24,12 @@ export interface NewFlags {
   style?: string;
   tailwind?: boolean;
   rendering?: string;
+  ssrPurpose?: string;
+  appShell?: string;
+  layout?: string;
+  presence?: string;
   components?: string;
+  uiSystem?: string;
   icons?: string;
   packageManager?: string;
   prefix?: string;
@@ -131,7 +136,12 @@ const OPTION_FLAGS = [
   'style',
   'tailwind',
   'rendering',
+  'ssrPurpose',
+  'appShell',
+  'layout',
+  'presence',
   'components',
+  'uiSystem',
   'icons',
   'packageManager',
   'prefix',
@@ -167,7 +177,14 @@ function printSummary(io: CliIo, name: string, options: StarterOptions): void {
     ['Stylesheet', labelOf('style', options.style)],
     ['Tailwind CSS', toggle(options.tailwind)],
     ['Rendering', labelOf('rendering', options.rendering)],
+    ...(options.ssrPurpose === 'none'
+      ? []
+      : [['Starter SSR for', labelOf('ssrPurpose', options.ssrPurpose)] as const]),
+    ['App shell', labelOf('appShell', options.appShell)],
+    ['Layout', labelOf('layout', options.layout)],
+    ['Presence', labelOf('presence', options.presence)],
     ['Components', labelOf('components', options.components)],
+    ['UI System', labelOf('uiSystem', options.uiSystem)],
     ['Icons', labelOf('icons', options.icons)],
     ['Package manager', options.packageManager],
     ['Selector prefix', options.prefix],
@@ -203,11 +220,26 @@ async function runDryRun(context: GenerationContext): Promise<void> {
           `Add incremental hydration, event replay and view transitions (${labelOf('rendering', options.rendering)})`,
         ]
       : []),
+    ...(options.components === 'none' && options.appShell === 'none'
+      ? []
+      : ['Add the design base: tokens, theme, typography, animations, utilities and pipes']),
     ...(options.components === 'none'
       ? []
+      : [`Add the ${labelOf('components', options.components)} (as- components)`]),
+    ...(options.appShell === 'none'
+      ? []
       : [
-          'Add the design base: tokens, theme, typography, animations, utilities and pipes',
-          `Add the ${labelOf('components', options.components)} (as- components)`,
+          `Add the ${labelOf('appShell', options.appShell)} (layout, sidebar, header, breadcrumb and example pages)`,
+        ]),
+    ...(options.presence === 'none'
+      ? []
+      : [
+          `Add ${labelOf('presence', options.presence)} (core/presence, the status of the user menu and docs/presence.md)`,
+        ]),
+    ...(options.uiSystem === 'none'
+      ? []
+      : [
+          `Add the ${labelOf('uiSystem', options.uiSystem)} (a catalog of the components with live previews in the UI tab of the design preferences)`,
         ]),
     ...(ICON_PACKAGES[options.icons]
       ? [

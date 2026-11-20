@@ -1,0 +1,94 @@
+/* ── Design preferences (ADR-0010) ───────────────────────────────────────────
+   The tokens that features/preference-design changes in real time. `DesignPreferencesService` sets the
+   four --as-ui-* scales on <html>; the variables of Tailwind CSS that the utilities read are derived
+   from them here, so every rounded-*, spacing utility and rem size follows without touching a
+   component. These rules are outside any @layer: they win over the theme layer of Tailwind CSS. */
+
+:root {
+  --as-ui-radius-scale: 1;
+  --as-ui-button-scale: 1;
+  --as-ui-density-scale: 1;
+  --as-ui-font-scale: 1;
+
+  --radius-xs: calc(0.125rem * var(--as-ui-radius-scale));
+  --radius-sm: calc(0.25rem * var(--as-ui-radius-scale));
+  --radius-md: calc(0.375rem * var(--as-ui-radius-scale));
+  --radius-lg: calc(0.5rem * var(--as-ui-radius-scale));
+  --radius-xl: calc(0.75rem * var(--as-ui-radius-scale));
+  --radius-2xl: calc(1rem * var(--as-ui-radius-scale));
+  --radius-3xl: calc(1.5rem * var(--as-ui-radius-scale));
+  --radius-4xl: calc(2rem * var(--as-ui-radius-scale));
+
+  --spacing: calc(0.25rem * var(--as-ui-density-scale));
+}
+
+html {
+  font-size: calc(100% * var(--as-ui-font-scale));
+}
+
+/* These rules live in the layer of the component styles, one notch more specific, so that the
+   utility classes a consumer passes (rounded-full, h-8...) still win over them. */
+@layer legacy-overrides {
+  /* Radius of the components that draw it in their own stylesheet instead of with rounded-*. */
+  :root .as-btn:not(.as-btn-r-lg):not(.as-btn-r-full) {
+    border-radius: calc(0.75rem * var(--as-ui-radius-scale));
+  }
+  :root .as-btn.as-btn-r-lg {
+    border-radius: calc(1rem * var(--as-ui-radius-scale));
+  }
+  :root as-select .as-select-field {
+    border-radius: calc(0.5rem * var(--as-ui-radius-scale));
+  }
+  :root .as-popover {
+    border-radius: calc(0.85rem * var(--as-ui-radius-scale));
+  }
+  :root .as-tooltip__text {
+    border-radius: calc(0.9rem * var(--as-ui-radius-scale));
+  }
+
+  /* Button sizes: the fixed heights of as-button, scaled. */
+  :root .as-btn.as-btn-xsmall {
+    height: calc(1.75rem * var(--as-ui-button-scale));
+  }
+  :root .as-btn.as-btn-small {
+    height: calc(2.375rem * var(--as-ui-button-scale));
+  }
+  :root .as-btn.as-btn-medium {
+    height: calc(2.5rem * var(--as-ui-button-scale));
+  }
+  :root .as-btn.as-btn-high {
+    height: calc(2.625rem * var(--as-ui-button-scale));
+  }
+  :root .as-btn.as-btn-large {
+    height: calc(2.75rem * var(--as-ui-button-scale));
+  }
+  :root .as-btn.as-btn-icon.as-btn-xsmall {
+    width: calc(1.75rem * var(--as-ui-button-scale));
+    min-width: calc(1.75rem * var(--as-ui-button-scale));
+  }
+  :root .as-btn.as-btn-icon.as-btn-small {
+    width: calc(2.375rem * var(--as-ui-button-scale));
+    min-width: calc(2.375rem * var(--as-ui-button-scale));
+  }
+  :root .as-btn.as-btn-icon.as-btn-medium {
+    width: calc(2.5rem * var(--as-ui-button-scale));
+    min-width: calc(2.5rem * var(--as-ui-button-scale));
+  }
+  :root .as-btn.as-btn-icon.as-btn-high {
+    width: calc(2.625rem * var(--as-ui-button-scale));
+    min-width: calc(2.625rem * var(--as-ui-button-scale));
+  }
+  :root .as-btn.as-btn-icon.as-btn-large {
+    width: calc(2.75rem * var(--as-ui-button-scale));
+    min-width: calc(2.75rem * var(--as-ui-button-scale));
+  }
+}
+
+/* "Animaciones y transiciones" off. */
+:root[data-animations='off'] *,
+:root[data-animations='off'] *::before,
+:root[data-animations='off'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}

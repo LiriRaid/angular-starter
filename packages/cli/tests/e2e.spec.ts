@@ -136,6 +136,8 @@ ${result.stderr}`,
         'screaming',
         '--rendering',
         rendering,
+        '--app-shell',
+        'none',
       );
 
       for (const file of [
@@ -169,6 +171,8 @@ ${result.stderr}`,
         'starter',
         '--rendering',
         rendering,
+        '--app-shell',
+        'none',
       );
 
       for (const file of [
@@ -267,7 +271,7 @@ ${result.stderr}`,
   );
 
   it(
-    'creates the recommended project: Screaming, routing, Tailwind CSS, Lucide and the components',
+    'creates the recommended project: Screaming, routing, Tailwind CSS, Lucide, the components and the App Shell',
     async () => {
       const project = await createInstalled('e2e-recommended');
       for (const file of [
@@ -294,6 +298,23 @@ ${result.stderr}`,
       expect(await read(project, 'angular.json')).not.toContain('theme-styles');
       expect(await read(project, 'angular.json')).toContain('src/test-setup.ts');
 
+      // The App Shell: layout, sidebar, header and breadcrumb, the example pages and their routes.
+      for (const file of [
+        'src/app/features/app-shell/layout/main/main.ts',
+        'src/app/features/app-shell/layout/sidebar/sidebar.ts',
+        'src/app/features/app-shell/layout/header/header.ts',
+        'src/app/features/app-shell/components/breadcrumb/breadcrumb.ts',
+        'src/styles/features/sidebar-styles.css',
+        'src/app/features/dashboard/dashboard.ts',
+        'src/app/features/settings/general/settings-general.ts',
+      ]) {
+        expect(existsSync(join(project, file)), file).toBe(true);
+      }
+      expect(await read(project, 'src/app/app.ts')).toContain('provideLayout(APP_NAVIGATION');
+      expect(await read(project, 'src/app/app.routes.ts')).toContain(
+        "import('@features/app-shell/layout/main/main')",
+      );
+
       await ng(project, 'build');
       await ng(project, 'test', '--watch=false');
     },
@@ -309,6 +330,8 @@ ${result.stderr}`,
         'all',
         '--rendering',
         'starter-ssr',
+        '--app-shell',
+        'none',
       );
       expect(await read(project, 'package.json')).toContain('@angular/cdk');
       expect(await read(project, 'src/styles.css')).toContain('table-styles.css');
@@ -321,6 +344,147 @@ ${result.stderr}`,
       ]) {
         expect(existsSync(join(project, file)), file).toBe(true);
       }
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'adds the App Shell to an existing project and generates a feature inside it that build and test',
+    async () => {
+      const project = await createInstalled(
+        'e2e-add-shell',
+        '--app-shell',
+        'none',
+        '--components',
+        'none',
+        '--icons',
+        'none',
+      );
+      await asProject(project, 'add', 'app-shell');
+      await asProject(project, 'generate', 'feature', 'billing');
+      await asProject(project, 'add', 'components', 'all');
+
+      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      expect(config.options).toMatchObject({
+        appShell: 'starter',
+        icons: 'lucide',
+        components: 'all',
+      });
+      const routes = await read(project, 'src/app/app.routes.ts');
+      expect(routes.indexOf("path: 'billing'")).toBeGreaterThan(routes.indexOf('children: ['));
+      expect(existsSync(join(project, 'src/app/shared/components/as-table/as-table.ts'))).toBe(
+        true,
+      );
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'creates a project with presence and the welcome home that builds and passes its tests',
+    async () => {
+      const project = await createInstalled('e2e-presence', '--presence', 'starter');
+      for (const file of [
+        'src/app/core/presence/presence.service.ts',
+        'src/app/core/presence/web-socket-presence.transport.ts',
+        'src/app/features/app-shell/layout/sidebar/user-menu/user-status.ts',
+        'src/styles/features/presence-styles.css',
+        'docs/presence.md',
+        'src/app/core/theme/README.md',
+        'src/app/shared/components/README.md',
+        'src/styles/README.md',
+      ]) {
+        expect(existsSync(join(project, file)), file).toBe(true);
+      }
+      expect(await read(project, 'src/app/app.config.ts')).toContain('providePresence()');
+      expect(await read(project, 'src/app/features/home/home.html')).toContain(
+        '@for (card of cards',
+      );
+      expect(await read(project, 'src/app/features/home/home.data.ts')).toContain("id: 'presence'");
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'adds presence to an existing project that builds and passes its tests',
+    async () => {
+      const project = await createInstalled('e2e-add-presence');
+      await asProject(project, 'add', 'presence');
+      expect(JSON.parse(await read(project, 'angular-starter.config.json')).options.presence).toBe(
+        'starter',
+      );
+      expect(
+        await read(project, 'src/app/features/app-shell/layout/sidebar/user-menu/user-menu.html'),
+      ).toContain('um-status-trigger');
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'creates the default Angular structure as plain Angular: no Lucide, no shell, no layout',
+    async () => {
+      const project = await createInstalled('e2e-plain', '--architecture', 'angular-default');
+      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      expect(config.options).toMatchObject({
+        icons: 'none',
+        appShell: 'none',
+        layout: 'none',
+        uiSystem: 'none',
+        ssrPurpose: 'none',
+      });
+      expect(await read(project, 'package.json')).not.toContain('lucide');
+      expect(existsSync(join(project, 'src/app/features'))).toBe(false);
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'creates a project with the design preferences page and the UI System that builds and passes its tests',
+    async () => {
+      const project = await createInstalled('e2e-ui-system', '--ui-system', 'starter');
+      for (const file of [
+        'src/app/features/preference-design/preference-design.ts',
+        'src/app/features/preference-design/ui-system/ui-system.catalog.ts',
+        'src/app/core/design-preferences/design-preferences.service.ts',
+        'src/styles/features/design-preferences-styles.css',
+      ]) {
+        expect(existsSync(join(project, file)), file).toBe(true);
+      }
+      expect(await read(project, 'src/app/app.config.ts')).toContain('provideDesignPreferences()');
+      expect(await read(project, 'src/app/features/preference-design/tabs/ui-tab.html')).toContain(
+        '<app-ui-system />',
+      );
+      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      expect(config.options).toMatchObject({ uiSystem: 'starter', layout: 'floating-wide' });
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'adds the UI System to an existing project that builds and passes its tests',
+    async () => {
+      const project = await createInstalled('e2e-add-ui-system');
+      await asProject(project, 'add', 'ui-system');
+      expect(JSON.parse(await read(project, 'angular-starter.config.json')).options.uiSystem).toBe(
+        'starter',
+      );
 
       await ng(project, 'build');
       await ng(project, 'test', '--watch=false');

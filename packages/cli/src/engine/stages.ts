@@ -17,6 +17,9 @@ import { CLI_VERSION } from '../version.js';
 import { ARCHITECTURE_PROFILES } from './architectures/index.js';
 import { componentsProfile } from './components/components.js';
 import { designProfile } from './design/design.js';
+import { appShellProfile } from './app-shell/app-shell.js';
+import { presenceProfile } from './presence/presence.js';
+import { uiSystemProfile } from './ui-system/ui-system.js';
 import { buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
 import { pathExists } from './fs.js';
@@ -150,7 +153,7 @@ export const applyRendering: Stage = {
 export const applyDesign: Stage = {
   id: 'apply-design',
   title: 'Adding the design base',
-  enabled: ({ options }) => options.components !== 'none',
+  enabled: ({ options }) => options.components !== 'none' || options.appShell === 'starter',
   async run({ name, options, targetDir }) {
     await designProfile.apply({ targetDir, name, prefix: options.prefix });
   },
@@ -167,6 +170,33 @@ export const applyComponents: Stage = {
       prefix: options.prefix,
       set: options.components === 'all' ? 'all' : 'recommended',
     });
+  },
+};
+
+export const applyAppShell: Stage = {
+  id: 'apply-app-shell',
+  title: 'Adding the application shell',
+  enabled: ({ options }) => options.appShell === 'starter',
+  async run({ name, options, targetDir }) {
+    await appShellProfile.apply({ targetDir, name, prefix: options.prefix });
+  },
+};
+
+export const applyPresence: Stage = {
+  id: 'apply-presence',
+  title: 'Adding presence',
+  enabled: ({ options }) => options.presence === 'starter',
+  async run({ name, options, targetDir }) {
+    await presenceProfile.apply({ targetDir, name, prefix: options.prefix });
+  },
+};
+
+export const applyUiSystem: Stage = {
+  id: 'apply-ui-system',
+  title: 'Adding the UI System',
+  enabled: ({ options }) => options.uiSystem === 'starter',
+  async run({ name, options, targetDir }) {
+    await uiSystemProfile.apply({ targetDir, name, prefix: options.prefix });
   },
 };
 
@@ -247,7 +277,12 @@ export const verifyProject: Stage = {
       ...(ARCHITECTURE_PROFILES[options.architecture]?.requiredFiles ?? []),
       ...(ROUTING_PROFILES[options.routing]?.requiredFiles ?? []),
       ...(RENDERING_PROFILES[options.rendering]?.requiredFilesFor(options.architecture) ?? []),
-      ...(options.components === 'none' ? [] : designProfile.requiredFiles),
+      ...(options.components === 'none' && options.appShell === 'none'
+        ? []
+        : designProfile.requiredFiles),
+      ...(options.appShell === 'starter' ? appShellProfile.requiredFiles : []),
+      ...(options.presence === 'starter' ? presenceProfile.requiredFiles : []),
+      ...(options.uiSystem === 'starter' ? uiSystemProfile.requiredFiles : []),
       ...(options.components === 'none'
         ? []
         : componentsProfile.requiredFilesFor(options.components === 'all' ? 'all' : 'recommended')),
@@ -273,6 +308,9 @@ export const NEW_PROJECT_STAGES: readonly Stage[] = [
   applyRendering,
   applyDesign,
   applyComponents,
+  applyAppShell,
+  applyPresence,
+  applyUiSystem,
   addIconLibrary,
   writeStarterConfig,
   installDependencies,

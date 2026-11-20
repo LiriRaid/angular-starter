@@ -1,0 +1,47 @@
+@layer legacy-overrides {
+  .um-card-meta,
+  .um-card-name,
+  .um-card-email {
+    transition:
+      opacity 0.4s ease,
+      transform 0.4s ease,
+      max-width 0.4s ease;
+  }
+
+  .um-chevron {
+    transition:
+      opacity 0.4s ease,
+      max-width 0.4s ease;
+  }
+
+  .um-chevron--hidden {
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .um-text-hidden {
+    opacity: 0;
+    transform: translateX(-6px);
+    max-width: 0;
+    pointer-events: none;
+  }
+
+  .um-status-item.as-btn {
+    width: 100%;
+    justify-content: flex-start;
+    gap: 0.625rem;
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--app-text-color);
+  }
+
+  .um-status-item .as-btn__label {
+    color: var(--app-text-color);
+  }
+
+  .um-status-item.as-btn:not(:disabled):hover {
+    background: var(--app-sidebar-hover-bg);
+  }
+}

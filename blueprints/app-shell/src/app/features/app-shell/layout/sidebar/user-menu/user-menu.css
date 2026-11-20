@@ -1,0 +1,21 @@
+__PREFIX__-user-menu {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+__PREFIX__-user-menu .um-trigger.as-btn {
+  width: 100% !important;
+  height: 3rem !important;
+  padding: 0.25rem !important;
+  justify-content: flex-start !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0.625rem !important;
+  overflow: hidden !important;
+}
+
+__PREFIX__-user-menu .um-trigger.as-btn:hover {
+  background: color-mix(in srgb, var(--app-text-subtle) 8%, transparent) !important;
+}

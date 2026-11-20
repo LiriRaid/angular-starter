@@ -1,0 +1,25 @@
+__PREFIX__-header {
+  display: block;
+}
+
+/* Botón circular de acción (tema, paleta de colores) — fuera de @layer para ganar a las utilities de Tailwind. */
+.as-btn.header-theme-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-width: 2px !important;
+  border-radius: 9999px !important;
+  box-sizing: border-box !important;
+  line-height: 0 !important;
+  cursor: pointer !important;
+}
+
+.as-btn.header-theme-btn :is(.as-btn__icon, as-icon, svg),
+.as-btn.header-theme-btn as-icon * {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+.as-btn.header-theme-btn .as-btn__label {
+  border-radius: inherit;
+}

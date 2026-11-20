@@ -2,6 +2,8 @@ export interface Choice<T extends string> {
   value: T;
   name: string;
   description?: string;
+  /** Listed but not selectable; the text is shown next to the choice, for example "Under construction". */
+  disabled?: string;
 }
 
 export interface InputQuestion {
@@ -54,6 +56,7 @@ export function createInquirerPrompter(): Prompter {
           value: choice.value,
           name: choice.name,
           description: choice.description,
+          disabled: choice.disabled,
         })),
       });
     },

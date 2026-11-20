@@ -1,0 +1,36 @@
+# app-shell
+
+The application shell: the layout that frames every page. It follows the reference application
+(ADR-0008) in its first mode, a wide sidebar that floats with the header and the content floating too.
+
+```
+app-shell/
+  layout/
+    main/                 the layout route: sidebar + header + the routed page (<router-outlet>)
+    empty/                a layout with no chrome, for pages such as a sign-in
+    header/               sidebar toggle, breadcrumb, colour picker and light/dark mode
+    sidebar/              brand, search, the navigation tree and the user menu
+    enums/                SidebarStatus (expanded, collapsed)
+  components/breadcrumb/  breadcrumb of the current page, with a menu for the crumbs that do not fit
+  providers/              provideLayout(tree, state): what the layout needs in app.ts
+  services/               LayoutService (sidebar state, mobile), the state of the folders, dropdowns
+  navigation/             the navigation tree: titles, breadcrumbs and the sidebar read it
+```
+
+- The sidebar draws `navigation/navigation.data.ts`. Add a page there and it shows up, with its
+  breadcrumb and title (`as generate feature <name>` does both for you).
+- `app.ts` provides the layout (`provideLayout`) and `app.routes.ts` loads every page inside the
+  `Main` layout route. To show a page without the shell, add a route outside of it that loads `Empty`.
+- The user menu shows an example identity held in the component: replace it with the user of your
+  session when the project has authentication.
+- "Preferencias de Diseño" in the user menu opens `/preference-design` (`features/preference-design`):
+  a page with the tabs Apariencia, Tema, UI and Otros whose changes apply in real time. The logic is
+  `core/design-preferences` (ADR-0010); only the floating wide layout is built, the others are shown
+  as under construction.
+- `as add presence` adds the status of the user (online, away, busy, invisible) to the user menu and the
+  presence dot to its avatars; see `core/presence`.
+- `features/home` is a welcome page (`home.data.ts` holds its cards and links): edit it or replace it
+  with your own start page.
+- The shell is client-side only for now: it reads `window` while it is built.
+- The `dashboard`, `users`, `reports` and `settings` pages are examples to try the navigation; replace
+  them with your product.

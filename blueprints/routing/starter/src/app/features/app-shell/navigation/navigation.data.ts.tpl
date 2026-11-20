@@ -1,14 +1,14 @@
 import type { NavigationGroup } from '@core/navigation/navigation.types';
 
 /**
- * The navigation tree of the application. Page titles and breadcrumbs read it today and the sidebar
- * will read it with the App Shell. Links are plain strings: the routes themselves stay in each
+ * The navigation tree of the application. Page titles and breadcrumbs read it, and so does the
+ * sidebar when the App Shell is added. Links are plain strings: the routes themselves stay in each
  * feature's `<feature>.routes.ts`.
  */
 export const APP_NAVIGATION: readonly NavigationGroup[] = [
   {
     label: 'General',
-    items: [{ id: 'home', title: 'Home', icon: 'house', type: 'basic', link: '/home' }],
+    items: [{ id: 'home', title: 'Home', icon: 'Home', type: 'basic', link: '/home' }],
   },
   // Items nest to any depth, can be hidden from the sidebar and can require a permission:
   // {

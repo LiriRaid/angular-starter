@@ -1,4 +1,9 @@
-import { CAPABILITIES, availableIds, type CapabilityCategory } from '../config/capabilities.js';
+import {
+  CAPABILITIES,
+  availableIds,
+  defaultOption,
+  type CapabilityCategory,
+} from '../config/capabilities.js';
 import { resolveOptions } from '../config/resolve.js';
 import type { StarterOptions } from '../config/schema.js';
 import type { ProgramDeps } from '../deps.js';
@@ -6,10 +11,13 @@ import { runPipeline, type GenerationContext, type Stage } from '../engine/pipel
 import {
   addAngularSsr,
   addIconLibrary,
+  applyAppShell,
   applyComponents,
   applyDesign,
+  applyPresence,
   applyRendering,
   applyRouting,
+  applyUiSystem,
   installDependencies,
   writeStarterConfig,
 } from '../engine/stages.js';
@@ -24,6 +32,9 @@ export const ADDABLE: Readonly<Record<string, Extract<CapabilityCategory, keyof 
     icons: 'icons',
     components: 'components',
     routing: 'routing',
+    'app-shell': 'appShell',
+    presence: 'presence',
+    'ui-system': 'uiSystem',
     rendering: 'rendering',
   };
 
@@ -32,6 +43,9 @@ const NOT_ADDABLE: Readonly<Record<string, readonly string[]>> = {
   icons: ['none'],
   components: ['none'],
   routing: ['angular'],
+  'app-shell': ['none'],
+  presence: ['none'],
+  'ui-system': ['none'],
   rendering: ['csr'],
 };
 
@@ -83,12 +97,14 @@ export async function addCommand(
   }
 
   const label = CAPABILITIES[category].find((option) => option.id === choice);
-  // The components draw their icons with Lucide, so adding them adds it too.
-  const implied = category === 'components' ? label?.requires?.icons?.[0] : undefined;
+  // The components and the shell draw their icons with Lucide, so adding them adds it too.
+  const implied =
+    category === 'components' || category === 'appShell' ? label?.requires?.icons?.[0] : undefined;
   const options = resolveOptions({
     file: {
       ...project.options,
       ...(implied ? { icons: implied as StarterOptions['icons'] } : {}),
+      ...dependentChoices(category, choice),
       [category]: choice,
       install: flags.install !== false,
     },
@@ -110,6 +126,19 @@ export async function addCommand(
   println(io.stdout);
   println(io.stdout, style.green(`${label?.label ?? choice} added.`));
   if (label?.docs) println(io.stdout, `Documentation: ${label.docs}`);
+}
+
+/** What the new choice settles for the options that only mean something next to it (ADR-0010). */
+function dependentChoices(category: CapabilityCategory, choice: string): Partial<StarterOptions> {
+  if (category === 'appShell') {
+    const layout = defaultOption('layout', { appShell: choice })?.id;
+    return layout ? { layout: layout as StarterOptions['layout'] } : {};
+  }
+  if (category === 'rendering') {
+    const ssrPurpose = defaultOption('ssrPurpose', { rendering: choice })?.id;
+    return ssrPurpose ? { ssrPurpose: ssrPurpose as StarterOptions['ssrPurpose'] } : {};
+  }
+  return {};
 }
 
 function chooseValue(capability: string, value: string | undefined): string {
@@ -152,12 +181,25 @@ function stagesFor(
     case 'components':
       return [
         ...(before.icons === options.icons ? [] : [addIconLibrary]),
-        // The design base arrives with the first collection; a bigger one only adds components.
-        ...(current === 'none' ? [applyDesign] : []),
+        // The design base arrives with the first collection or the shell; a bigger collection only
+        // adds components.
+        ...(before.components === 'none' && before.appShell === 'none' ? [applyDesign] : []),
         applyComponents,
         writeStarterConfig,
         installDependencies,
       ];
+    case 'appShell':
+      return [
+        ...(before.icons === options.icons ? [] : [addIconLibrary]),
+        ...(before.components === 'none' ? [applyDesign] : []),
+        applyAppShell,
+        writeStarterConfig,
+        installDependencies,
+      ];
+    case 'presence':
+      return [applyPresence, writeStarterConfig];
+    case 'uiSystem':
+      return [applyUiSystem, writeStarterConfig];
     default:
       return [writeStarterConfig];
   }

@@ -1,0 +1,4 @@
+:host {
+  --breadcrumb-font-size: 0.875rem;
+  --breadcrumb-item-gap: 0.5rem;
+}

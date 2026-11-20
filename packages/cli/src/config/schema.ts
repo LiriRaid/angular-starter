@@ -14,6 +14,8 @@ export const ARCHITECTURES = [
 export const ROUTING = ['angular', 'starter'] as const;
 export const STYLES = ['css', 'scss', 'sass', 'less'] as const;
 export const RENDERING = ['csr', 'ssr', 'starter-ssr'] as const;
+/** What the Starter SSR is for; `none` for every other rendering (ADR-0010). */
+export const SSR_PURPOSES = ['none', 'landing', 'ecommerce', 'backoffice'] as const;
 export const COMPONENTS = ['none', 'recommended', 'all'] as const;
 export const ICONS = [
   'none',
@@ -24,6 +26,19 @@ export const ICONS = [
   'bootstrap-icons',
 ] as const;
 export const PACKAGE_MANAGERS = ['npm', 'pnpm', 'yarn'] as const;
+export const APP_SHELLS = ['none', 'starter'] as const;
+export const PRESENCES = ['none', 'starter'] as const;
+/** The layout modes of the application shell; `none` when the project has no shell. */
+export const LAYOUTS = [
+  'none',
+  'wide-joined',
+  'compact-joined',
+  'floating-wide',
+  'floating-compact',
+  'transparent-joined',
+  'transparent-floating',
+] as const;
+export const UI_SYSTEMS = ['none', 'starter'] as const;
 
 /** Prefix reserved for the components distributed by Angular Starter. */
 export const RESERVED_PREFIX = 'as';
@@ -44,8 +59,12 @@ export const optionsSchema = z.strictObject({
   style: z.enum(STYLES),
   tailwind: z.boolean(),
   rendering: z.enum(RENDERING),
-  appShell: z.boolean(),
+  ssrPurpose: z.enum(SSR_PURPOSES),
+  appShell: z.enum(APP_SHELLS),
+  layout: z.enum(LAYOUTS),
+  presence: z.enum(PRESENCES),
   components: z.enum(COMPONENTS),
+  uiSystem: z.enum(UI_SYSTEMS),
   icons: z.enum(ICONS),
   packageManager: z.enum(PACKAGE_MANAGERS),
   prefix: prefixSchema,

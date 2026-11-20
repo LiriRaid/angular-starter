@@ -5,7 +5,7 @@ const TREE: NavigationGroup[] = [
   {
     label: 'General',
     items: [
-      { id: 'home', title: 'Home', link: '/home', icon: 'house' },
+      { id: 'home', title: 'Home', link: '/home', icon: 'Home' },
       { id: 'secret', title: 'Secret', link: '/secret', hidden: () => true },
     ],
   },

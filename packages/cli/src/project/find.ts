@@ -35,6 +35,20 @@ export async function findProject(startDir: string): Promise<StarterProject> {
   );
 }
 
+/**
+ * What a project made before an option existed has instead of it: the option was off, or it was the
+ * one thing the project could be (the purpose of a Starter SSR was the backoffice, the layout of a
+ * shell was the floating wide one).
+ */
+function absentOptions(recorded: Record<string, unknown>): Record<string, string> {
+  return {
+    presence: 'none',
+    ssrPurpose: recorded['rendering'] === 'starter-ssr' ? 'backoffice' : 'none',
+    layout: recorded['appShell'] === 'starter' ? 'floating-wide' : 'none',
+    uiSystem: 'none',
+  };
+}
+
 async function parseProject(root: string, text: string): Promise<StarterProject> {
   const invalid = (reason: string): UsageError =>
     new UsageError(`${PROJECT_CONFIG_FILE} is not valid: ${reason}`);
@@ -45,7 +59,12 @@ async function parseProject(root: string, text: string): Promise<StarterProject>
   } catch {
     throw invalid('it is not JSON.');
   }
-  const options = optionsSchema.safeParse((json as { options?: unknown } | null)?.options);
+  const recorded = (json as { options?: Record<string, unknown> } | null)?.options;
+  const options = optionsSchema.safeParse(
+    recorded && typeof recorded === 'object'
+      ? { ...absentOptions(recorded), ...recorded }
+      : recorded,
+  );
   if (!options.success) throw invalid(`\n${formatIssues(options.error)}`);
 
   const manifest = await readFile(join(root, 'package.json'), 'utf8').catch(() => '{}');
