@@ -168,7 +168,7 @@ export const CAPABILITIES: Registry = {
       description:
         'Default SSR plus incremental hydration, event replay and view transitions, with a @defer (hydrate on viewport) example as in the maintainer portfolio. Use it for content-heavy public sites.',
       docs: 'https://angular.dev/guide/incremental-hydration',
-      available: false,
+      available: true,
     },
   ],
   components: [

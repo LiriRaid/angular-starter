@@ -19,6 +19,7 @@ import { buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
 import { pathExists } from './fs.js';
 import type { GenerationContext, Stage } from './pipeline.js';
+import { RENDERING_PROFILES } from './rendering/index.js';
 import { ROUTING_PROFILES } from './routing/index.js';
 
 const PROBE_TIMEOUT_MS = 15_000;
@@ -107,6 +108,20 @@ export const applyRouting: Stage = {
   },
 };
 
+export const applyRendering: Stage = {
+  id: 'apply-rendering',
+  title: 'Applying Angular Starter SSR',
+  enabled: ({ options }) => RENDERING_PROFILES[options.rendering] !== undefined,
+  async run({ name, options, targetDir }) {
+    await RENDERING_PROFILES[options.rendering]?.apply({
+      targetDir,
+      name,
+      prefix: options.prefix,
+      architecture: options.architecture,
+    });
+  },
+};
+
 export const addIconLibrary: Stage = {
   id: 'add-icon-library',
   title: 'Adding icon library',
@@ -183,6 +198,7 @@ export const verifyProject: Stage = {
       PROJECT_CONFIG_FILE,
       ...(ARCHITECTURE_PROFILES[options.architecture]?.requiredFiles ?? []),
       ...(ROUTING_PROFILES[options.routing]?.requiredFiles ?? []),
+      ...(RENDERING_PROFILES[options.rendering]?.requiredFilesFor(options.architecture) ?? []),
     ];
     const missing: string[] = [];
     for (const file of required) {
@@ -202,6 +218,7 @@ export const NEW_PROJECT_STAGES: readonly Stage[] = [
   createWorkspace,
   applyArchitecture,
   applyRouting,
+  applyRendering,
   addIconLibrary,
   writeStarterConfig,
   installDependencies,

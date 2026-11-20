@@ -1,0 +1,8 @@
+<section class="home-details">
+  <h2>Incremental hydration</h2>
+  <p>
+    The server renders this section; the browser makes it interactive only when it scrolls into
+    view. Clicks made before that are replayed.
+  </p>
+  <button type="button" (click)="increment()">Clicked {{ clicks() }} times</button>
+</section>

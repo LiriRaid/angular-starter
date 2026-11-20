@@ -71,6 +71,10 @@ describe('capability registry', () => {
     expect(starter?.description).toMatch(/portfolio/i);
   });
 
+  it('offers the three rendering strategies', () => {
+    expect(availableIds('rendering')).toEqual(['csr', 'ssr', 'starter-ssr']);
+  });
+
   it('keeps planned options out of the available ids', () => {
     expect(availableIds('architecture')).toEqual(['angular-default', 'screaming']);
     expect(availableIds('icons')).not.toContain('heroicons');

@@ -485,6 +485,56 @@ describe('as new (non-interactive)', () => {
     expect(fake.out()).toMatch(/^ {2}Icons +Lucide Icons$/m);
   });
 
+  it('applies the Starter SSR profile after the routing and before the icon library', async () => {
+    const fake = createFakeIo({ cwd });
+    const runner = createFakeRunner({
+      files: {
+        'src/app/app.config.ts': `import { ApplicationConfig } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideClientHydration } from '@angular/platform-browser';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideRouter([]), provideClientHydration()],
+};
+`,
+      },
+    });
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--rendering', 'starter-ssr', '--no-install', '--no-git'],
+      fake.io,
+      { run: runner.run },
+    );
+    expect(code, fake.err()).toBe(0);
+    const out = fake.out();
+    const order = [
+      'Adding Angular Starter routing',
+      'Applying Angular Starter SSR',
+      'Adding icon library',
+    ].map((title) => out.indexOf(`✓ ${title}`));
+    expect(order.every((index) => index >= 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(runner.calls.find((call) => call.args.includes('new'))?.args).toContain('--ssr');
+    expect(await readFile(join(cwd, 'my-app/src/app/app.config.ts'), 'utf8')).toContain(
+      'withIncrementalHydration()',
+    );
+  });
+
+  it('mentions the Starter SSR in the --dry-run plan', async () => {
+    const fake = createFakeIo({ cwd });
+    await run(['new', 'my-app', '--defaults', '--rendering', 'starter-ssr', '--dry-run'], fake.io, {
+      run: createFakeRunner().run,
+    });
+    expect(fake.out()).toContain('Add incremental hydration, event replay and view transitions');
+  });
+
+  it('does not run the Starter SSR stage for the other rendering strategies', async () => {
+    const fake = createFakeIo({ cwd });
+    await run(['new', 'my-app', '--defaults', '--no-install', '--no-git'], fake.io, {
+      run: createFakeRunner().run,
+    });
+    expect(fake.out()).not.toContain('Starter SSR');
+  });
+
   it('lists only the values that can be used in the help of `new`', async () => {
     const fake = createFakeIo();
     expect(await run(['new', '--help'], fake.io)).toBe(0);
@@ -495,7 +545,7 @@ describe('as new (non-interactive)', () => {
     expect(out).toContain('--config');
     expect(out).toContain('screaming');
     expect(out).not.toContain('modular');
-    expect(out).not.toContain('starter-ssr');
+    expect(out).toContain('starter-ssr');
   });
 });
 

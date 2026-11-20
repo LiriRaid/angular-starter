@@ -40,19 +40,62 @@ function parseSource(source: string): SourceFile {
 
 /** Imports `feature` from `@angular/router` and passes `feature()` to `provideRouter(...)`. */
 export function addRouterFeature(source: string, feature: string): string {
+  return addCallArgument(source, 'provideRouter', `${feature}()`, [
+    { module: ROUTER_MODULE, names: [feature] },
+  ]);
+}
+
+/**
+ * Passes `expression` (for example `withEventReplay()`) to the call `callName(...)` and adds the
+ * imports it needs. An argument that starts like the expression (same function name) is already
+ * there and is left alone.
+ */
+export function addCallArgument(
+  source: string,
+  callName: string,
+  expression: string,
+  imports: readonly ImportSpec[],
+): string {
   const file = parseSource(source);
   const call = file
     .getDescendantsOfKind(SyntaxKind.CallExpression)
-    .find((candidate) => candidate.getExpression().getText() === 'provideRouter');
-  if (!call) {
-    throw new Error('Could not find a provideRouter(...) call to add the router feature to.');
-  }
+    .find((candidate) => candidate.getExpression().getText() === callName);
+  if (!call) throw new Error(`Could not find a ${callName}(...) call to add ${expression} to.`);
 
-  if (!call.getArguments().some((argument) => argument.getText().startsWith(`${feature}(`))) {
-    call.addArgument(`${feature}()`);
+  const head = expression.slice(0, expression.indexOf('(') + 1);
+  if (!call.getArguments().some((argument) => argument.getText().startsWith(head))) {
+    call.addArgument(expression);
   }
+  for (const spec of imports) addNamedImports(file, spec);
+  return file.getFullText();
+}
 
-  addNamedImports(file, { module: ROUTER_MODULE, names: [feature] });
+/** Adds `name` to the `imports` of the `@Component` of `className`, importing it from `module`. */
+export function addComponentImport(
+  source: string,
+  className: string,
+  name: string,
+  module: string,
+): string {
+  const file = parseSource(source);
+  const declaration = file.getClass(className);
+  if (!declaration) throw new Error(`Could not find the class "${className}".`);
+  const metadata = declaration
+    .getDecorator('Component')
+    ?.getArguments()[0]
+    ?.asKind(SyntaxKind.ObjectLiteralExpression);
+  if (!metadata) throw new Error(`The class "${className}" has no @Component({ ... }) metadata.`);
+
+  const array = metadata
+    .getProperty('imports')
+    ?.asKind(SyntaxKind.PropertyAssignment)
+    ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression);
+  if (!array) {
+    metadata.addPropertyAssignment({ name: 'imports', initializer: `[${name}]` });
+  } else if (!array.getElements().some((element) => element.getText() === name)) {
+    array.addElement(name);
+  }
+  addNamedImports(file, { module, names: [name] });
   return file.getFullText();
 }
 

@@ -7,6 +7,7 @@ import type { StarterOptions } from '../config/schema.js';
 import type { ProgramDeps } from '../deps.js';
 import { buildNgCommand } from '../engine/angular-cli.js';
 import { ARCHITECTURE_PROFILES } from '../engine/architectures/index.js';
+import { RENDERING_PROFILES } from '../engine/rendering/index.js';
 import { ROUTING_PROFILES } from '../engine/routing/index.js';
 import { runPipeline, type GenerationContext } from '../engine/pipeline.js';
 import { NEW_PROJECT_STAGES, validateEnvironment } from '../engine/stages.js';
@@ -195,6 +196,11 @@ async function runDryRun(context: GenerationContext): Promise<void> {
     ...(ROUTING_PROFILES[options.routing]
       ? [
           `Add the ${labelOf('routing', options.routing)} (navigation tree, page titles and breadcrumbs)`,
+        ]
+      : []),
+    ...(RENDERING_PROFILES[options.rendering]
+      ? [
+          `Add incremental hydration, event replay and view transitions (${labelOf('rendering', options.rendering)})`,
         ]
       : []),
     ...(ICON_PACKAGES[options.icons]

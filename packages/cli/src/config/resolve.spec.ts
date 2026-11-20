@@ -68,7 +68,6 @@ describe('resolveOptions', () => {
   });
 
   it.each([
-    [{ rendering: 'starter-ssr' }],
     [{ components: 'recommended' }],
     [{ icons: 'heroicons' }],
     [{ appShell: true }],

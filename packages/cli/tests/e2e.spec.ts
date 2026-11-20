@@ -176,6 +176,35 @@ ${result.stderr}`,
   );
 
   it(
+    'creates a Starter SSR project with incremental hydration that builds and passes its tests',
+    async () => {
+      const project = await createInstalled(
+        'e2e-starter-ssr',
+        '--architecture',
+        'screaming',
+        '--routing',
+        'starter',
+        '--rendering',
+        'starter-ssr',
+        '--icons',
+        'none',
+        '--components',
+        'none',
+      );
+      const config = await read(project, 'src/app/app.config.ts');
+      expect(config).toContain('withIncrementalHydration()');
+      expect(await read(project, 'src/app/features/home/home.html')).toContain(
+        '@defer (hydrate on viewport)',
+      );
+      expect(existsSync(join(project, 'src', 'main.server.ts'))).toBe(true);
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
     'installs the Lucide Icons package and still builds',
     async () => {
       const project = await createInstalled('e2e-lucide', '--icons', 'lucide');

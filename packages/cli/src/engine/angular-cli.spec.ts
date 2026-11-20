@@ -50,6 +50,12 @@ describe('buildNgCommand', () => {
     expect(args).not.toContain('--ssr=false');
   });
 
+  it('starts the Starter SSR strategy from the Angular SSR setup', () => {
+    const args = buildNgCommand('a', { ...DEFAULT_OPTIONS, rendering: 'starter-ssr' }).args;
+    expect(args).toContain('--ssr');
+    expect(args).not.toContain('--ssr=false');
+  });
+
   it('forwards the package manager and prefix', () => {
     const args = buildNgCommand('a', {
       ...DEFAULT_OPTIONS,

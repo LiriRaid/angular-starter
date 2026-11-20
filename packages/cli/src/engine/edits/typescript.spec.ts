@@ -1,6 +1,13 @@
 import { Project } from 'ts-morph';
 import { describe, expect, it } from 'vitest';
-import { addProvider, addRouterFeature, addRoutes, removeClassProperty } from './typescript.js';
+import {
+  addCallArgument,
+  addComponentImport,
+  addProvider,
+  addRouterFeature,
+  addRoutes,
+  removeClassProperty,
+} from './typescript.js';
 
 /** The files exactly as `ng new` (Angular CLI 22.3) writes them. */
 const APP_CONFIG = `import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
@@ -189,5 +196,98 @@ describe('addProvider', () => {
     expect(() => addProvider('export const appConfig = {};\n', PROVIDER, IMPORTS)).toThrow(
       /providers/,
     );
+  });
+});
+
+const SSR_CONFIG = `import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { routes } from './app.routes';
+import { provideClientHydration } from '@angular/platform-browser';
+
+export const appConfig: ApplicationConfig = {
+  providers: [
+    provideBrowserGlobalErrorListeners(),
+    provideRouter(routes), provideClientHydration()
+  ]
+};
+`;
+
+describe('addCallArgument', () => {
+  const IMPORT = [{ module: '@angular/platform-browser', names: ['withEventReplay'] }];
+
+  it('passes the expression to the call and imports what it uses', () => {
+    const result = addCallArgument(
+      SSR_CONFIG,
+      'provideClientHydration',
+      'withEventReplay()',
+      IMPORT,
+    );
+    expect(result).toContain('provideClientHydration(withEventReplay())');
+    expect(result).toContain(
+      "import { provideClientHydration, withEventReplay } from '@angular/platform-browser';",
+    );
+    expect(syntaxErrors(result)).toBe(0);
+  });
+
+  it('appends after the arguments that are already there and keeps the rest', () => {
+    const once = addCallArgument(SSR_CONFIG, 'provideClientHydration', 'withEventReplay()', IMPORT);
+    const twice = addCallArgument(once, 'provideClientHydration', 'withIncrementalHydration()', [
+      { module: '@angular/platform-browser', names: ['withIncrementalHydration'] },
+    ]);
+    expect(twice).toContain(
+      'provideClientHydration(withEventReplay(), withIncrementalHydration())',
+    );
+    expect(twice).toContain('provideBrowserGlobalErrorListeners(),');
+  });
+
+  it('accepts arguments for the feature', () => {
+    const result = addCallArgument(
+      SSR_CONFIG,
+      'provideRouter',
+      'withViewTransitions({ skipInitialTransition: true })',
+      [{ module: '@angular/router', names: ['withViewTransitions'] }],
+    );
+    expect(result).toContain(
+      'provideRouter(routes, withViewTransitions({ skipInitialTransition: true }))',
+    );
+  });
+
+  it('is idempotent', () => {
+    const once = addCallArgument(SSR_CONFIG, 'provideClientHydration', 'withEventReplay()', IMPORT);
+    expect(addCallArgument(once, 'provideClientHydration', 'withEventReplay()', IMPORT)).toBe(once);
+  });
+
+  it('fails clearly when the call is not there', () => {
+    expect(() =>
+      addCallArgument(APP_CONFIG, 'provideClientHydration', 'withEventReplay()', []),
+    ).toThrow(/provideClientHydration/);
+  });
+});
+
+describe('addComponentImport', () => {
+  it('adds the class to the imports of the component and imports it', () => {
+    const result = addComponentImport(APP, 'App', 'HomeDetails', './home-details/home-details');
+    expect(result).toContain('imports: [RouterOutlet, HomeDetails]');
+    expect(result).toContain("import { HomeDetails } from './home-details/home-details';");
+    expect(syntaxErrors(result)).toBe(0);
+  });
+
+  it('creates the imports property when the component has none', () => {
+    const source =
+      "import { Component } from '@angular/core';\n\n@Component({ selector: 'a-b', template: '' })\nexport class AB {}\n";
+    const result = addComponentImport(source, 'AB', 'X', './x');
+    expect(result).toContain('imports: [X]');
+    expect(syntaxErrors(result)).toBe(0);
+  });
+
+  it('is idempotent', () => {
+    const once = addComponentImport(APP, 'App', 'HomeDetails', './home-details/home-details');
+    expect(addComponentImport(once, 'App', 'HomeDetails', './home-details/home-details')).toBe(
+      once,
+    );
+  });
+
+  it('fails clearly when the class is not there', () => {
+    expect(() => addComponentImport(APP_ROUTES, 'App', 'X', './x')).toThrow(/App/);
   });
 });
