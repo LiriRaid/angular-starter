@@ -27,6 +27,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Angular Starter Presence (`--presence starter`, `as add presence`; ADR-0009 and plan 0007), an option of
+  the App Shell that is not part of `--defaults`: `core/presence` with the `PresenceService` of the
+  reference application without its authentication, HTTP client and vendor socket (status with a
+  duration, automatic away on inactivity or a hidden tab, the status of the other users), the
+  `PresenceTransport` contract with an in-memory transport and a WebSocket transport with a JSON
+  protocol, `LivePresenceService`, the status row and sub-panels of the user menu (added by planned
+  edits that stop with the file named when the menu was reshaped) and `docs/presence.md`, which
+  explains the protocol, the Redis keys with their TTL, the snapshot, the grace period and a minimal
+  Node server.
+- A README next to each piece a project brings: `core/theme`, `core/common/icons`,
+  `shared/animations`, `shared/components` and `src/styles` (the lists of components and stylesheets
+  are a generated block that `as add` refreshes) and `core/presence`.
+- The `home` page is a welcome page when the project has the App Shell: the logo, the project name,
+  cards to explore, links to AS Starter and a GitHub link. It replaces the neutral home only while
+  its four files are still the ones the architecture generated.
 - The design base (components or App Shell) loads the Inter font of the reference application from
   `src/index.html`, so the text is no longer drawn with the fallback font; a project without the design
   base keeps Angular's own `index.html`.
