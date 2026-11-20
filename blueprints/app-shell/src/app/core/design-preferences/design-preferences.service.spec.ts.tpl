@@ -86,6 +86,13 @@ describe('DesignPreferencesService', () => {
     expect(service.preferences()).toEqual(DEFAULT_DESIGN_PREFERENCES);
   });
 
+  it('ignores the keys of Object.prototype as values', () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ radius: 'constructor', density: 'toString' }));
+    create();
+    service.initialize();
+    expect(service.preferences()).toEqual(DEFAULT_DESIGN_PREFERENCES);
+  });
+
   it('resets to the defaults, clears what was saved and restores the theme', () => {
     create();
     service.initialize();

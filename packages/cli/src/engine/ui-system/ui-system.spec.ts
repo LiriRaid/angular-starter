@@ -124,7 +124,7 @@ describe('UI System profile (ADR-0010)', () => {
 
   it('needs the design preferences page: the shell comes first', async () => {
     await rm(join(project, PAGE), { recursive: true, force: true });
-    await expect(apply()).rejects.toThrow(/ui-tab/);
+    await expect(apply()).rejects.toThrow(/design preferences page/);
   });
 
   it('refuses to overwrite files that already exist', async () => {

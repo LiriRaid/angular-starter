@@ -58,6 +58,14 @@ describe('presence in the user menu template', () => {
     expect(edited).toContain('Volver en');
   });
 
+  it('still finds the preferences button of a menu generated before the page existed', () => {
+    const old = html.replace('label="Preferencias de Diseño"', 'label="Preferencias"');
+    const edited = addPresenceToUserMenuTemplate(old);
+    expect(edited.indexOf('um-status-trigger')).toBeLessThan(
+      edited.indexOf('label="Preferencias"'),
+    );
+  });
+
   it('is idempotent', () => {
     const once = addPresenceToUserMenuTemplate(html);
     expect(addPresenceToUserMenuTemplate(once)).toBe(once);

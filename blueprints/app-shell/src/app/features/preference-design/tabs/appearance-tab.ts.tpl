@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { PRIMARY_COLORS } from '@core/theme/theme-palettes';
 import { ThemeService } from '@core/theme/theme.service';
-import { AsIcon } from '@shared/components';
+import { ColorSwatches, ModeSwitch } from './theme-controls';
 
 export interface LayoutMode {
   readonly id: string;
@@ -27,7 +27,7 @@ export const LAYOUT_MODES: readonly LayoutMode[] = [
 
 @Component({
   selector: '__PREFIX__-appearance-tab',
-  imports: [AsIcon],
+  imports: [ColorSwatches, ModeSwitch],
   templateUrl: './appearance-tab.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -37,5 +37,4 @@ export class AppearanceTab {
   readonly layoutModes = LAYOUT_MODES;
   readonly activeLayout = LAYOUT_MODES.find((mode) => mode.built)?.id ?? '';
   readonly colors = PRIMARY_COLORS;
-  readonly isDark = computed(() => this.themeService.mode() === 'dark');
 }

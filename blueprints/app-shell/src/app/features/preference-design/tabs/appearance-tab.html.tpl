@@ -37,22 +37,11 @@
 
   <section class="flex items-center justify-between gap-3 border-t border-(--app-border-color) pt-4">
     <span class="text-caption-1-semibold text-(--app-text-color)">Esquema de colores</span>
-    <div class="flex flex-wrap justify-end gap-1.5" role="group" aria-label="Esquema de colores">
-      @for (color of colors; track color.key) {
-        <button type="button" class="size-6 rounded-lg border-2 border-white shadow-[0_0_0_1px_var(--app-border-color)]" [class.outline-2]="themeService.primaryColorKey() === color.key" [class.outline-offset-2]="themeService.primaryColorKey() === color.key" [class.outline-(--as-primary-color)]="themeService.primaryColorKey() === color.key" [style.background]="color.swatch" [attr.aria-label]="'Color ' + color.label" [attr.aria-pressed]="themeService.primaryColorKey() === color.key" (click)="themeService.applyColor(color.key)"></button>
-      }
-    </div>
+    <__PREFIX__-color-swatches [colors]="colors" [current]="themeService.primaryColorKey()" label="Esquema de colores" (chosen)="themeService.applyColor($event)" />
   </section>
 
   <section class="flex items-center justify-between gap-3 border-t border-(--app-border-color) pt-4">
     <span class="text-caption-1-semibold text-(--app-text-color)">Tema</span>
-    <div class="flex gap-1 rounded-xl border border-(--app-border-color) p-1" role="group" aria-label="Tema">
-      <button type="button" class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-caption-2-semibold" [class.bg-(--as-primary-color)]="!isDark()" [class.text-(--as-primary-contrast-color)]="!isDark()" [class.text-(--app-text-color)]="isDark()" [attr.aria-pressed]="!isDark()" (click)="themeService.setMode('light')">
-        <as-icon name="Sun" size="14" />Claro
-      </button>
-      <button type="button" class="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-caption-2-semibold" [class.bg-(--as-primary-color)]="isDark()" [class.text-(--as-primary-contrast-color)]="isDark()" [class.text-(--app-text-color)]="!isDark()" [attr.aria-pressed]="isDark()" (click)="themeService.setMode('dark')">
-        <as-icon name="Moon" size="14" />Oscuro
-      </button>
-    </div>
+    <__PREFIX__-mode-switch label="Tema" />
   </section>
 </div>

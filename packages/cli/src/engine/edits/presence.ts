@@ -8,8 +8,11 @@ import { addNamedImports, parseSource } from './typescript.js';
 
 const STATUS_ROW_MARKER = 'um-status-trigger';
 
-/** The button of the user menu that opens the design preferences page (ADR-0010). */
-const PREFERENCES_BUTTON = 'label="Preferencias de Diseño"';
+/**
+ * The button of the user menu that opens the design preferences page (ADR-0010), or the drawer in the
+ * menus generated before it: both are anchors, so presence can still be added to an older project.
+ */
+const PREFERENCES_BUTTONS = ['label="Preferencias de Diseño"', 'label="Preferencias"'] as const;
 
 const eolOf = (text: string): string => (text.includes('\r\n') ? '\r\n' : '\n');
 
@@ -93,11 +96,11 @@ export function addPresenceToUserMenuTemplate(html: string): string {
   if (avatars.length === 0) {
     throw new Error('Could not find the <as-avatar> of the user menu to give the presence dot.');
   }
-  const preferences = html.indexOf(PREFERENCES_BUTTON);
+  const preferences = Math.max(...PREFERENCES_BUTTONS.map((anchor) => html.indexOf(anchor)));
   const button = preferences < 0 ? -1 : html.lastIndexOf('<as-button', preferences);
   if (button < 0) {
     throw new Error(
-      `Could not find the preferences button (${PREFERENCES_BUTTON}) to put the status row before.`,
+      `Could not find the preferences button (${PREFERENCES_BUTTONS[0]}) to put the status row before.`,
     );
   }
 

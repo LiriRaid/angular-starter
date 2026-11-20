@@ -166,6 +166,14 @@ describe('App Shell profile', () => {
       expect(styles).toContain("@import './styles/features/design-preferences-styles.css';");
     });
 
+    it('keeps the radius and size rules in the layer of the components, so utility classes win', async () => {
+      await apply();
+      const css = await read('src/styles/features/design-preferences-styles.css');
+      const layered = css.slice(css.indexOf('@layer legacy-overrides {'));
+      expect(layered).toContain(':root .as-btn.as-btn-medium');
+      expect(css.slice(0, css.indexOf('@layer legacy-overrides {'))).not.toContain('.as-btn');
+    });
+
     it('leaves a marker in the UI tab where the UI System puts its catalog', async () => {
       await apply();
       expect(await read(`${PAGE}/tabs/ui-tab.html`)).toContain('<!-- as:ui-system -->');

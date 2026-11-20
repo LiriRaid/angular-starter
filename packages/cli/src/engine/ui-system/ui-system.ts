@@ -1,5 +1,7 @@
 import { join } from 'node:path';
+import { RuntimeError } from '../../errors.js';
 import { BLUEPRINTS_ROOT, copyBlueprint } from '../blueprint.js';
+import { pathExists } from '../fs.js';
 import { planEdit, writeEdits } from '../edits/planned.js';
 import { addUiSystemToUiTabClass, addUiSystemToUiTabTemplate } from '../edits/ui-system.js';
 
@@ -33,6 +35,12 @@ export const uiSystemProfile = {
   async apply({ targetDir, name, prefix }: UiSystemProject): Promise<void> {
     // Plan every edit first: a tab that does not have the expected shape stops the stage before
     // anything is written.
+    if (!(await pathExists(join(targetDir, `${TAB}.html`)))) {
+      throw new RuntimeError(
+        `The design preferences page (${PAGE}) is not in this project: the UI System goes in its UI tab.`,
+        'Projects made before ADR-0010 have the preferences drawer instead; add the shell again in a new project to get the page.',
+      );
+    }
     const planned = [
       await planEdit(targetDir, `${TAB}.html`, (text) => addUiSystemToUiTabTemplate(text, prefix)),
       await planEdit(targetDir, `${TAB}.ts`, addUiSystemToUiTabClass),

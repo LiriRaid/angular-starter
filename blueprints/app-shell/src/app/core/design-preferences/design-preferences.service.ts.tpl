@@ -38,7 +38,7 @@ const STORAGE_KEY = '__PROJECT_NAME__:design-preferences';
 const readStored = (): DesignPreferences => {
   try {
     const text = globalThis.localStorage?.getItem(STORAGE_KEY);
-    return text ? sanitize(JSON.parse(text) as Partial<DesignPreferences>) : DEFAULT_DESIGN_PREFERENCES;
+    return text ? sanitize(JSON.parse(text) as Partial<Record<keyof DesignPreferences, unknown>>) : DEFAULT_DESIGN_PREFERENCES;
   } catch {
     return DEFAULT_DESIGN_PREFERENCES;
   }
@@ -53,14 +53,19 @@ const writeStored = (preferences: DesignPreferences | null): void => {
   }
 };
 
+/** The value when it is one of the keys of `allowed` (its own, not the ones of Object.prototype), else the fallback. */
+const oneOf = <T extends string>(value: unknown, allowed: Record<T, unknown>, fallback: T): T => (typeof value === 'string' && Object.hasOwn(allowed, value) ? (value as T) : fallback);
+
+const flag = (value: unknown, fallback: boolean): boolean => (typeof value === 'boolean' ? value : fallback);
+
 /** Keeps only valid values, so an old or edited entry never breaks the page. */
-const sanitize = (stored: Partial<DesignPreferences>): DesignPreferences => ({
-  radius: stored.radius && stored.radius in RADIUS_SCALE ? stored.radius : DEFAULT_DESIGN_PREFERENCES.radius,
-  buttonSize: stored.buttonSize && stored.buttonSize in BUTTON_SCALE ? stored.buttonSize : DEFAULT_DESIGN_PREFERENCES.buttonSize,
-  density: stored.density && stored.density in DENSITY_SCALE ? stored.density : DEFAULT_DESIGN_PREFERENCES.density,
-  fontSize: stored.fontSize && stored.fontSize in FONT_SCALE ? stored.fontSize : DEFAULT_DESIGN_PREFERENCES.fontSize,
-  showBreadcrumb: typeof stored.showBreadcrumb === 'boolean' ? stored.showBreadcrumb : DEFAULT_DESIGN_PREFERENCES.showBreadcrumb,
-  animations: typeof stored.animations === 'boolean' ? stored.animations : DEFAULT_DESIGN_PREFERENCES.animations,
+const sanitize = (stored: Partial<Record<keyof DesignPreferences, unknown>>): DesignPreferences => ({
+  radius: oneOf(stored.radius, RADIUS_SCALE, DEFAULT_DESIGN_PREFERENCES.radius),
+  buttonSize: oneOf(stored.buttonSize, BUTTON_SCALE, DEFAULT_DESIGN_PREFERENCES.buttonSize),
+  density: oneOf(stored.density, DENSITY_SCALE, DEFAULT_DESIGN_PREFERENCES.density),
+  fontSize: oneOf(stored.fontSize, FONT_SCALE, DEFAULT_DESIGN_PREFERENCES.fontSize),
+  showBreadcrumb: flag(stored.showBreadcrumb, DEFAULT_DESIGN_PREFERENCES.showBreadcrumb),
+  animations: flag(stored.animations, DEFAULT_DESIGN_PREFERENCES.animations),
 });
 
 const sameAs = (a: DesignPreferences, b: DesignPreferences): boolean => (Object.keys(a) as (keyof DesignPreferences)[]).every((key) => a[key] === b[key]);
