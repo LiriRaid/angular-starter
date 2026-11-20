@@ -42,6 +42,15 @@ describe('addDesignStyles', () => {
     expect(result).toContain('button-styles.css');
   });
 
+  it('adds only the design imports that are missing, without repeating the variant or the layers', () => {
+    const partial = `${NG_NEW}\n@custom-variant dark (&:where(.dark, .dark *));\n@layer base, components, legacy-overrides, utilities;\n@import './styles/theme/theme-styles.css';\n`;
+    const result = addDesignStyles(partial);
+    expect(result.match(/@custom-variant/g)).toHaveLength(1);
+    expect(result.match(/@layer base/g)).toHaveLength(1);
+    expect(result.match(/theme-styles\.css/g)).toHaveLength(1);
+    for (const file of DESIGN_STYLE_IMPORTS) expect(result).toContain(`@import '${file}';`);
+  });
+
   it('does nothing the second time', () => {
     const once = addDesignStyles(NG_NEW);
     expect(addDesignStyles(once)).toBe(once);

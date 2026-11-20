@@ -34,16 +34,20 @@ export function addDesignStyles(text: string): string {
       "it does not import Tailwind CSS (@import 'tailwindcss'), which the design needs.",
     );
   }
-  if (text.includes(DESIGN_STYLE_IMPORTS[0] ?? '')) return text;
+  const imports = DESIGN_STYLE_IMPORTS.map((file) => `@import '${file}';`).filter(
+    (line) => !text.includes(line),
+  );
+  if (imports.length === 0) return text;
   const eol = eolOf(text);
 
+  // Only what is missing is added, so a stylesheet the developer already edited keeps its own.
+  const variant = '@custom-variant dark (&:where(.dark, .dark *));';
+  const layers = '@layer base, components, legacy-overrides, utilities;';
   const block = [
     '',
-    '@custom-variant dark (&:where(.dark, .dark *));',
-    '',
-    '@layer base, components, legacy-overrides, utilities;',
-    '',
-    ...DESIGN_STYLE_IMPORTS.map((file) => `@import '${file}';`),
+    ...(text.includes('@custom-variant dark') ? [] : [variant, '']),
+    ...(text.includes('@layer base, components') ? [] : [layers, '']),
+    ...imports,
   ].join(eol);
   const end = tailwind.index + tailwind[0].length;
   return `${text.slice(0, end)}${eol}${block}${text.slice(end)}`;
