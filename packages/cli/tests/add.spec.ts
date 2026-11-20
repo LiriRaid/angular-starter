@@ -178,11 +178,51 @@ describe('as add', () => {
   });
 
   describe('components', () => {
-    it('is not available until the component collection exists', async () => {
+    it('adds the design base, the components and the icon library they need', async () => {
+      const project = await createStarterProject(cwd, ['--components', 'none', '--icons', 'none']);
+      const result = await add(project, ['components', 'recommended']);
+      expect(result.code, result.err).toBe(0);
+      for (const title of [
+        'Adding native components',
+        'Adding the design base',
+        'Adding icon library',
+      ]) {
+        expect(result.out).toContain(`✓ ${title}`);
+      }
+      expect(await exists(join(project, 'src/styles/design.css'))).toBe(true);
+      expect(await exists(join(project, 'src/app/shared/components/as-button/as-button.ts'))).toBe(
+        true,
+      );
+      expect(await readFile(join(project, 'src/app/shared/components/index.ts'), 'utf8')).toContain(
+        'AsButton',
+      );
+      expect(await readFile(join(project, 'src/app/app.config.ts'), 'utf8')).toContain(
+        'provideThemeInitializer()',
+      );
+      const options = await readConfig(project);
+      expect(options).toMatchObject({ components: 'recommended', icons: 'lucide' });
+      expect(result.calls).toContainEqual({ command: 'npm', args: ['install'], cwd: project });
+    });
+
+    it('needs the stylesheet the design is written in', async () => {
+      const project = await createStarterProject(cwd, ['--style', 'scss']);
+      const result = await add(project, ['components', 'recommended']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('requires the stylesheet format: css');
+    });
+
+    it('needs the Screaming architecture', async () => {
+      const project = await createStarterProject(cwd, ['--architecture', 'angular-default']);
+      const result = await add(project, ['components', 'recommended']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('requires the architecture: screaming');
+    });
+
+    it('refuses what the project already has', async () => {
       const project = await createStarterProject(cwd);
       const result = await add(project, ['components', 'recommended']);
       expect(result.code).toBe(2);
-      expect(result.err).toContain('not available yet');
+      expect(result.err).toContain('already');
     });
   });
 

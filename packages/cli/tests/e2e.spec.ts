@@ -261,6 +261,63 @@ ${result.stderr}`,
   );
 
   it(
+    'creates the recommended project: Screaming, routing, Tailwind CSS, Lucide and the components',
+    async () => {
+      const project = await createInstalled('e2e-recommended');
+      for (const file of [
+        'src/styles/design.css',
+        'src/styles/tailwind.css',
+        'src/app/core/theme/theme.service.ts',
+        'src/app/shared/components/as-button/as-button.ts',
+        'src/app/shared/components/as-modal/as-modal.ts',
+        'src/app/shared/utils/slugify.ts',
+      ]) {
+        expect(existsSync(join(project, file)), file).toBe(true);
+      }
+      // The root is composed in app.ts: no welcome page of Angular is left.
+      expect(existsSync(join(project, 'src/app/app.html'))).toBe(false);
+      expect(await read(project, 'src/app/app.ts')).toContain("template: '<router-outlet />'");
+      expect(await read(project, 'angular.json')).toContain('src/styles/design.css');
+      expect(await read(project, 'src/styles.css')).toContain("@import './styles/tailwind.css';");
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'creates a project with every component, plain CSS and the Starter SSR that builds and passes its tests',
+    async () => {
+      const project = await createInstalled(
+        'e2e-all-components',
+        '--style',
+        'css',
+        '--components',
+        'all',
+        '--rendering',
+        'starter-ssr',
+      );
+      // Plain CSS: nothing of Tailwind CSS is installed or imported.
+      expect(await read(project, 'package.json')).not.toContain('tailwindcss');
+      expect(existsSync(join(project, 'src/styles/tailwind.css'))).toBe(false);
+      for (const file of [
+        'src/app/shared/components/as-table/as-table.ts',
+        'src/app/shared/components/as-datepicker/as-datepicker.ts',
+        'src/app/shared/components/as-theme-color-picker/as-theme-color-picker.ts',
+        'src/app/shared/components/as-weekly-schedule/as-weekly-schedule.ts',
+        'src/app/features/home/home-details/home-details.ts',
+      ]) {
+        expect(existsSync(join(project, file)), file).toBe(true);
+      }
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
     'installs the Lucide Icons package and still builds',
     async () => {
       const project = await createInstalled('e2e-lucide', '--icons', 'lucide');

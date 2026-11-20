@@ -1,0 +1,22 @@
+.as-textarea__control {
+  align-items: stretch;
+  padding-block: 0.25rem;
+}
+
+.as-textarea__input {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.as-textarea__footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.as-textarea__count {
+  margin-left: auto;
+  color: var(--as-text-subtle);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,79 @@
+/* Base elements: sensible defaults that read the design tokens. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--as-bg);
+  color: var(--as-text);
+  font-family: var(--as-font-sans);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--as-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--as-primary-hover);
+  text-decoration: underline;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+code,
+kbd,
+pre {
+  font-family: var(--as-font-mono);
+}
+
+:focus-visible {
+  outline: 2px solid var(--as-focus-ring);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--as-primary-soft);
+}
+
+[hidden] {
+  display: none !important;
+}

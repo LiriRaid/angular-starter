@@ -56,8 +56,8 @@ the single source of the wizard, `--help` and `as list`, but it only carried `id
   `angular-starter.config.json` and flag would change for no gain; a mapping is enough.
 - Keep `--defaults` as Angular's defaults: rejected by the maintainer; the product promise is a
   project ready to build business on.
-- Static prerendering (`outputMode: static`, as the portfolio does) for `starter-ssr`: see ADR-0004
-  follow-up in the plan; the server output mode is kept by default because a prerendered shell cannot
+- Static prerendering (`outputMode: static`, as the portfolio does) for `starter-ssr`: rejected by the
+  maintainer; the server output mode of `ng new --ssr` is kept because a prerendered shell cannot
   serve dynamic, authenticated routes.
 - Translate the wizard: rejected, the CLI texts are in English by decision.
 

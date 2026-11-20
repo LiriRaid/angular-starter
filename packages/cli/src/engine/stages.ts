@@ -15,6 +15,8 @@ import {
 import { RuntimeError, UsageError } from '../errors.js';
 import { CLI_VERSION } from '../version.js';
 import { ARCHITECTURE_PROFILES } from './architectures/index.js';
+import { componentsProfile } from './components/components.js';
+import { designProfile } from './design/design.js';
 import { buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
 import { pathExists } from './fs.js';
@@ -145,6 +147,34 @@ export const applyRendering: Stage = {
   },
 };
 
+export const applyDesign: Stage = {
+  id: 'apply-design',
+  title: 'Adding the design base',
+  enabled: ({ options }) => options.components !== 'none',
+  async run({ name, options, targetDir }) {
+    await designProfile.apply({
+      targetDir,
+      name,
+      prefix: options.prefix,
+      tailwind: options.tailwind,
+    });
+  },
+};
+
+export const applyComponents: Stage = {
+  id: 'apply-components',
+  title: 'Adding native components',
+  enabled: ({ options }) => options.components !== 'none',
+  async run({ name, options, targetDir }) {
+    await componentsProfile.apply({
+      targetDir,
+      name,
+      prefix: options.prefix,
+      set: options.components === 'all' ? 'all' : 'recommended',
+    });
+  },
+};
+
 export const addIconLibrary: Stage = {
   id: 'add-icon-library',
   title: 'Adding icon library',
@@ -222,6 +252,10 @@ export const verifyProject: Stage = {
       ...(ARCHITECTURE_PROFILES[options.architecture]?.requiredFiles ?? []),
       ...(ROUTING_PROFILES[options.routing]?.requiredFiles ?? []),
       ...(RENDERING_PROFILES[options.rendering]?.requiredFilesFor(options.architecture) ?? []),
+      ...(options.components === 'none' ? [] : designProfile.requiredFiles),
+      ...(options.components === 'none'
+        ? []
+        : componentsProfile.requiredFilesFor(options.components === 'all' ? 'all' : 'recommended')),
     ];
     const missing: string[] = [];
     for (const file of required) {
@@ -242,6 +276,8 @@ export const NEW_PROJECT_STAGES: readonly Stage[] = [
   applyArchitecture,
   applyRouting,
   applyRendering,
+  applyDesign,
+  applyComponents,
   addIconLibrary,
   writeStarterConfig,
   installDependencies,

@@ -6,6 +6,8 @@ import { runPipeline, type GenerationContext, type Stage } from '../engine/pipel
 import {
   addAngularSsr,
   addIconLibrary,
+  applyComponents,
+  applyDesign,
   applyRendering,
   applyRouting,
   installDependencies,
@@ -69,17 +71,29 @@ export async function addCommand(
   if (current === choice) {
     throw new UsageError(`"${choice}" is already in this project (${capability}).`);
   }
+  if (capability === 'components' && current === 'all') {
+    throw new UsageError(
+      'This project already has all the components; a smaller collection cannot replace them.',
+    );
+  }
   if (capability === 'rendering' && current === 'starter-ssr') {
     throw new UsageError(
       `This project already has the Angular Starter SSR; "${choice}" cannot replace it.`,
     );
   }
 
-  const options = resolveOptions({
-    file: { ...project.options, [category]: choice, install: flags.install !== false },
-  });
-  const stages = stagesFor(category, current, options);
   const label = CAPABILITIES[category].find((option) => option.id === choice);
+  // The components draw their icons with Lucide, so adding them adds it too.
+  const implied = category === 'components' ? label?.requires?.icons?.[0] : undefined;
+  const options = resolveOptions({
+    file: {
+      ...project.options,
+      ...(implied ? { icons: implied as StarterOptions['icons'] } : {}),
+      [category]: choice,
+      install: flags.install !== false,
+    },
+  });
+  const stages = stagesFor(category, current, options, project.options);
   const style = createStyler(io.color);
 
   if (flags.dryRun) {
@@ -121,6 +135,7 @@ function stagesFor(
   category: Extract<CapabilityCategory, keyof StarterOptions>,
   current: string,
   options: StarterOptions,
+  before: StarterOptions,
 ): Stage[] {
   switch (category) {
     case 'icons':
@@ -133,6 +148,15 @@ function stagesFor(
         ...(current === 'csr' ? [addAngularSsr] : []),
         ...(options.rendering === 'starter-ssr' ? [applyRendering] : []),
         writeStarterConfig,
+      ];
+    case 'components':
+      return [
+        ...(before.icons === options.icons ? [] : [addIconLibrary]),
+        // The design base arrives with the first collection; a bigger one only adds components.
+        ...(current === 'none' ? [applyDesign] : []),
+        applyComponents,
+        writeStarterConfig,
+        installDependencies,
       ];
     default:
       return [writeStarterConfig];

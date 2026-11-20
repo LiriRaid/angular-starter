@@ -1,0 +1,41 @@
+:host {
+  display: block;
+}
+
+.as-media-preview__media {
+  display: block;
+  max-width: 100%;
+  max-height: 24rem;
+  border-radius: var(--as-radius-md);
+  object-fit: contain;
+}
+
+.as-media-preview__audio {
+  width: 100%;
+}
+
+.as-media-preview__document {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--as-border);
+  border-radius: var(--as-radius-md);
+  background: var(--as-panel);
+  color: var(--as-text);
+  text-decoration: none;
+}
+
+.as-media-preview__document:hover {
+  border-color: var(--as-primary);
+  color: var(--as-text);
+  text-decoration: none;
+}
+
+.as-media-preview__name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -12,7 +12,31 @@ export const GENERATED_FILES: Readonly<Record<string, string>> = {
   }
 }
 `,
-  'angular.json': '{}\n',
+  'angular.json': `{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "version": 1,
+  "projects": {
+    "demo": {
+      "projectType": "application",
+      "architect": {
+        "build": {
+          "builder": "@angular/build:application",
+          "options": {
+            "browser": "src/main.ts",
+            "styles": [
+              "src/styles.css"
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+`,
+  'src/styles.css': `/* You can add global styles to this file, and also import other style files */
+
+@import 'tailwindcss';
+`,
   'tsconfig.json': `/* To learn more about Typescript configuration file: https://www.typescriptlang.org/docs/handbook/tsconfig-json.html. */
 {
   "compileOnSave": false,

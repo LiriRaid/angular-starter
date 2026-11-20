@@ -185,7 +185,7 @@ export const CAPABILITIES: Registry = {
       description:
         'Design tokens, light and dark theme, utilities and 16 as- components: icon, button, input, textarea, checkbox, toggle, select, avatar, divider, skeleton, tooltip, modal, drawer, toast, tabs and popover.',
       docs: `${STARTER_DOCS}/0005-design-base-and-native-components.md`,
-      available: false,
+      available: true,
       recommended: true,
       requires: { architecture: ['screaming'], style: ['css'], icons: ['lucide'] },
     },
@@ -195,7 +195,7 @@ export const CAPABILITIES: Registry = {
       description:
         'The recommended collection plus table, search, datepicker, section-nav, selectable-item, reorder-list, preview, media-preview, theme-color-picker and weekly-schedule.',
       docs: `${STARTER_DOCS}/0005-design-base-and-native-components.md`,
-      available: false,
+      available: true,
       requires: { architecture: ['screaming'], style: ['css'], icons: ['lucide'] },
     },
   ],

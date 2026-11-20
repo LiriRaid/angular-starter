@@ -1,0 +1,167 @@
+:host {
+  display: inline-block;
+}
+
+:host(.as-button--block) {
+  display: block;
+}
+
+:host(.as-button--block) .as-btn {
+  width: 100%;
+}
+
+.as-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--as-radius-md);
+  font-weight: 500;
+  line-height: 1.25;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.as-btn:hover {
+  text-decoration: none;
+}
+
+.as-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--as-focus-ring);
+}
+
+/* Sizes. */
+.as-btn--sm {
+  padding: 0.25rem 0.625rem;
+  font-size: 0.75rem;
+}
+
+.as-btn--md {
+  padding: 0.5rem 0.875rem;
+  font-size: 0.875rem;
+}
+
+.as-btn--lg {
+  padding: 0.625rem 1.125rem;
+  font-size: 1rem;
+}
+
+.as-btn--icon-only.as-btn--sm {
+  padding: 0.25rem;
+}
+
+.as-btn--icon-only.as-btn--md {
+  padding: 0.5rem;
+}
+
+.as-btn--icon-only.as-btn--lg {
+  padding: 0.625rem;
+}
+
+/* Severities: each one sets the three colors the variants use. */
+.as-btn--primary {
+  --as-btn-color: var(--as-primary);
+  --as-btn-hover: var(--as-primary-hover);
+  --as-btn-active: var(--as-primary-active);
+  --as-btn-on: var(--as-on-primary);
+}
+
+.as-btn--secondary {
+  --as-btn-color: var(--as-text-muted);
+  --as-btn-hover: var(--as-text);
+  --as-btn-active: var(--as-text);
+  --as-btn-on: var(--as-panel);
+}
+
+.as-btn--success {
+  --as-btn-color: var(--as-success);
+  --as-btn-hover: color-mix(in srgb, var(--as-success) 85%, black);
+  --as-btn-active: color-mix(in srgb, var(--as-success) 70%, black);
+  --as-btn-on: #ffffff;
+}
+
+.as-btn--info {
+  --as-btn-color: var(--as-info);
+  --as-btn-hover: color-mix(in srgb, var(--as-info) 85%, black);
+  --as-btn-active: color-mix(in srgb, var(--as-info) 70%, black);
+  --as-btn-on: #ffffff;
+}
+
+.as-btn--warn {
+  --as-btn-color: var(--as-warning);
+  --as-btn-hover: color-mix(in srgb, var(--as-warning) 85%, black);
+  --as-btn-active: color-mix(in srgb, var(--as-warning) 70%, black);
+  --as-btn-on: #ffffff;
+}
+
+.as-btn--danger {
+  --as-btn-color: var(--as-danger);
+  --as-btn-hover: color-mix(in srgb, var(--as-danger) 85%, black);
+  --as-btn-active: color-mix(in srgb, var(--as-danger) 70%, black);
+  --as-btn-on: #ffffff;
+}
+
+/* Variants. */
+.as-btn--solid {
+  background: var(--as-btn-color);
+  border-color: var(--as-btn-color);
+  color: var(--as-btn-on);
+}
+
+.as-btn--solid:hover {
+  background: var(--as-btn-hover);
+  border-color: var(--as-btn-hover);
+}
+
+.as-btn--solid:active {
+  background: var(--as-btn-active);
+  border-color: var(--as-btn-active);
+}
+
+.as-btn--outlined {
+  background: transparent;
+  border-color: var(--as-btn-color);
+  color: var(--as-btn-color);
+}
+
+.as-btn--outlined:hover {
+  background: color-mix(in srgb, var(--as-btn-color) 12%, transparent);
+}
+
+.as-btn--outlined:active {
+  background: color-mix(in srgb, var(--as-btn-color) 20%, transparent);
+}
+
+.as-btn--text {
+  background: transparent;
+  color: var(--as-btn-color);
+}
+
+.as-btn--text:hover {
+  background: color-mix(in srgb, var(--as-btn-color) 10%, transparent);
+}
+
+.as-btn--text:active {
+  background: color-mix(in srgb, var(--as-btn-color) 18%, transparent);
+}
+
+/* Disabled and loading. */
+.as-btn:disabled,
+.as-btn--inactive {
+  cursor: not-allowed;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.as-btn[aria-busy='true'] {
+  cursor: progress;
+}

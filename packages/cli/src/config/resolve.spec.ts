@@ -67,13 +67,12 @@ describe('resolveOptions', () => {
     expect(run).toThrow(/routing: "starter" requires the architecture: screaming/);
   });
 
-  it.each([
-    [{ components: 'recommended' }],
-    [{ icons: 'heroicons' }],
-    [{ appShell: true }],
-  ] as const)('rejects unavailable option %j', (flags) => {
-    expect(() => resolveOptions({ flags })).toThrow(/not available yet/);
-  });
+  it.each([[{ icons: 'heroicons' }], [{ appShell: true }]] as const)(
+    'rejects unavailable option %j',
+    (flags) => {
+      expect(() => resolveOptions({ flags })).toThrow(/not available yet/);
+    },
+  );
 
   it('rejects unknown values and lists every issue', () => {
     expect(() => resolveOptions({ flags: { style: 'stylus' as never } })).toThrow(/style/);

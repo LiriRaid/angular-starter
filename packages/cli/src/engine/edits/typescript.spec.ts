@@ -7,6 +7,7 @@ import {
   addProvider,
   addRouterFeature,
   addRoutes,
+  inlineComponentTemplate,
   removeClassProperty,
 } from './typescript.js';
 
@@ -325,5 +326,33 @@ describe('addNavigationItem', () => {
 
   it('fails clearly when the tree is not there', () => {
     expect(() => addNavigationItem(APP_ROUTES, ITEM)).toThrow(/APP_NAVIGATION/);
+  });
+});
+
+describe('inlineComponentTemplate', () => {
+  it('replaces the template and style files with an inline template', () => {
+    const result = inlineComponentTemplate(APP, 'App', '<router-outlet />');
+    expect(result).toContain("template: '<router-outlet />'");
+    expect(result).not.toContain('templateUrl');
+    expect(result).not.toContain('styleUrl');
+    expect(result).toContain("selector: 'app-root'");
+    expect(result).toContain('imports: [RouterOutlet]');
+    expect(syntaxErrors(result)).toBe(0);
+  });
+
+  it('makes the component OnPush and imports what that needs', () => {
+    const result = inlineComponentTemplate(APP, 'App', '<router-outlet />');
+    expect(result).toContain('changeDetection: ChangeDetectionStrategy.OnPush');
+    expect(result).toContain('ChangeDetectionStrategy');
+    expect(result).toMatch(/import \{[^}]*ChangeDetectionStrategy[^}]*\} from '@angular\/core';/);
+  });
+
+  it('is idempotent', () => {
+    const once = inlineComponentTemplate(APP, 'App', '<router-outlet />');
+    expect(inlineComponentTemplate(once, 'App', '<router-outlet />')).toBe(once);
+  });
+
+  it('fails clearly when the class is not a component', () => {
+    expect(() => inlineComponentTemplate(APP_ROUTES, 'App', '<a />')).toThrow(/App/);
   });
 });

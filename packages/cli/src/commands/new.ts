@@ -203,6 +203,12 @@ async function runDryRun(context: GenerationContext): Promise<void> {
           `Add incremental hydration, event replay and view transitions (${labelOf('rendering', options.rendering)})`,
         ]
       : []),
+    ...(options.components === 'none'
+      ? []
+      : [
+          'Add the design base: tokens, theme, typography, animations, utilities and pipes',
+          `Add the ${labelOf('components', options.components)} (as- components)`,
+        ]),
     ...(ICON_PACKAGES[options.icons]
       ? [
           `Add the ${labelOf('icons', options.icons)} package (${ICON_PACKAGES[options.icons]?.name})`,

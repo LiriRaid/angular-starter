@@ -1,6 +1,6 @@
 # AS Starter
 
-> **Status: pre-alpha.** The CLI core exists and creates Angular applications with the default structure or the Screaming Architecture profile; the app shell and the native UI are not available yet. Names, scope and commands are provisional.
+> **Status: pre-alpha.** The CLI creates Angular applications with the recommended structure (Screaming Architecture, navigation tree, design base and native `as-` components) and can add or generate more in an existing project. The app shell is not available yet. Names, scope and commands are provisional.
 
 AS Starter is an independent, community-driven ecosystem of developer tools for [Angular](https://angular.dev/). Its goal is to remove the repetitive work every Angular team redoes when starting an application: architecture, routing, app shell, layouts, theming and reusable UI.
 
@@ -17,7 +17,20 @@ The generated code belongs entirely to the developer. AS Starter is not a runtim
 | Component registry                     | A single metadata source for the CLI, docs, playground and AI skills               |
 | Documentation site                     | Interactive docs built with the project's own components                           |
 
-The first architecture profile, **Screaming Architecture** (`core/`, `features/`, `shared/`, standalone components, Signals, one lazy route file per feature), is available with `--architecture screaming`; see [ADR-0002](docs/adr/0002-screaming-architecture-profile.md). Other profiles come later. **Angular Starter Routing** (`--routing starter`, Screaming only) adds one navigation tree that drives page titles and breadcrumbs (`TitleStrategy`, `BreadcrumbService`), ready for the sidebar of the app shell; see [ADR-0003](docs/adr/0003-starter-routing.md). Lucide icons (`--icons lucide`) are the first icon library offered.
+## What `as new` generates
+
+`as new Demo` asks for each option with its official documentation and a description (the recommended choice is preselected), or takes the **recommended set** with `--defaults`:
+
+| Option       | Recommended                              | Other choices                                                                   |
+| ------------ | ---------------------------------------- | ------------------------------------------------------------------------------- |
+| Architecture | **Screaming Architecture**               | Angular default structure                                                       |
+| Routing      | **Angular Starter Routing**              | Default Angular Routing                                                         |
+| Stylesheet   | **Tailwind CSS**                         | CSS, SCSS, Sass (indented), Less                                                |
+| Rendering    | **Client-Side Rendering** (back offices) | Default Angular SSR; Angular Starter SSR + Incremental Hydration (public sites) |
+| Components   | **Recommended collection** (16 `as-`)    | All available (26), none                                                        |
+| Icons        | **Lucide Icons**                         | None                                                                            |
+
+What you get, without any business logic: the **Screaming Architecture** ([ADR-0002](docs/adr/0002-screaming-architecture-profile.md)); a navigation tree with page titles and breadcrumbs ([ADR-0003](docs/adr/0003-starter-routing.md)); a **design base** in plain CSS (tokens, light and dark theme, typography, animations, form styles), a `ThemeService`, the icon registration, utilities, pipes and a focus trap; and the **`as-` components** (button, input, select, modal, drawer, toast, tabs, table, datepicker, ...), each with its spec ([ADR-0005](docs/adr/0005-design-base-and-native-components.md)). The root component is composed in `app.ts` (`<router-outlet />`): there is no welcome page. Authentication, guards and interceptors are yours to build. The design base and the components need the Screaming Architecture, a CSS or Tailwind CSS stylesheet and Lucide Icons; the wizard enforces it ([ADR-0004](docs/adr/0004-explicit-wizard-and-recommended-defaults.md)).
 
 ## Install the CLI
 
@@ -41,10 +54,10 @@ Requires Node.js `^22.22.3 || ^24.15.0 || >=26.0.0` (the range of the Angular CL
 pnpm install
 pnpm build
 node packages/cli/dist/bin.js new my-app            # interactive wizard
-node packages/cli/dist/bin.js new my-app --defaults # no prompts
+node packages/cli/dist/bin.js new my-app --defaults # recommended set, no prompts
 node packages/cli/dist/bin.js new my-app --dry-run  # show the plan, create nothing
-node packages/cli/dist/bin.js new my-app --architecture screaming --defaults
-node packages/cli/dist/bin.js new my-app --architecture screaming --routing starter --defaults
+node packages/cli/dist/bin.js new my-app --style scss --rendering ssr
+node packages/cli/dist/bin.js new my-app --defaults --architecture angular-default --routing angular --components none
 ```
 
 `as new` runs the official `ng new` (Angular CLI 22.3.0, the tested version) with every option set
@@ -52,13 +65,19 @@ explicitly, then installs dependencies and creates the initial Git commit. Inter
 non-interactive runs (`--defaults`, flags, `--config <file>`) produce the same validated
 configuration, which is saved in `angular-starter.config.json` inside the new project.
 
-| Command                                    | Status        |
-| ------------------------------------------ | ------------- |
-| `new`, `list`, `info`, `doctor`, `version` | Available     |
-| `generate`, `add`, `config`, `update`      | Not available |
+`as --help` groups the commands by what they do and `as <command> --help` shows their flags and examples:
 
-Only options that can really be generated are offered. `as list` shows what is available and what is
-planned. The package installs two binaries, `as-starter` and the short alias `as`; on macOS and
+| Command                            | What it does                                                               |
+| ---------------------------------- | -------------------------------------------------------------------------- |
+| `new`                              | Create a project (wizard, flags, `--defaults`, `--config`, `--dry-run`)    |
+| `add <capability> [value]`         | Add `icons`, `components`, `routing` or `rendering` to an existing project |
+| `generate` (`g`) `<kind> <name>`   | Create a `feature` (folder, lazy route, navigation entry) or a `component` |
+| `list`, `info`, `config`, `doctor` | See what each option is, the project's options and the environment         |
+| `update`                           | Planned                                                                    |
+
+Only `as new` decides the architecture, the stylesheet format, Tailwind CSS, the package manager and
+the selector prefix. Only options that can really be generated are offered; `as list` shows what each
+one is, its official documentation and what is planned ([ADR-0006](docs/adr/0006-project-commands.md)). The package installs two binaries, `as-starter` and the short alias `as`; on macOS and
 Linux `as` is normally the system assembler, so prefer `as-starter` or `npx @as-starter/cli` there.
 
 To install your clone as a global command (no publishing involved), after `pnpm build`:

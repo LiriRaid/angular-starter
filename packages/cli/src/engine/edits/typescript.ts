@@ -70,6 +70,18 @@ export function addCallArgument(
   return file.getFullText();
 }
 
+/** The object passed to `@Component({ ... })` on `className`. */
+function componentMetadata(file: SourceFile, className: string): ObjectLiteralExpression {
+  const declaration = file.getClass(className);
+  if (!declaration) throw new Error(`Could not find the class "${className}".`);
+  const metadata = declaration
+    .getDecorator('Component')
+    ?.getArguments()[0]
+    ?.asKind(SyntaxKind.ObjectLiteralExpression);
+  if (!metadata) throw new Error(`The class "${className}" has no @Component({ ... }) metadata.`);
+  return metadata;
+}
+
 /** Adds `name` to the `imports` of the `@Component` of `className`, importing it from `module`. */
 export function addComponentImport(
   source: string,
@@ -78,13 +90,7 @@ export function addComponentImport(
   module: string,
 ): string {
   const file = parseSource(source);
-  const declaration = file.getClass(className);
-  if (!declaration) throw new Error(`Could not find the class "${className}".`);
-  const metadata = declaration
-    .getDecorator('Component')
-    ?.getArguments()[0]
-    ?.asKind(SyntaxKind.ObjectLiteralExpression);
-  if (!metadata) throw new Error(`The class "${className}" has no @Component({ ... }) metadata.`);
+  const metadata = componentMetadata(file, className);
 
   const array = metadata
     .getProperty('imports')
@@ -96,6 +102,35 @@ export function addComponentImport(
     array.addElement(name);
   }
   addNamedImports(file, { module, names: [name] });
+  return file.getFullText();
+}
+
+/**
+ * Gives the component an inline `template` instead of template and style files, and makes it
+ * `OnPush`. The files themselves are for the caller to delete.
+ */
+export function inlineComponentTemplate(
+  source: string,
+  className: string,
+  template: string,
+): string {
+  const file = parseSource(source);
+  const metadata = componentMetadata(file, className);
+
+  for (const name of ['templateUrl', 'styleUrl', 'styleUrls', 'styles']) {
+    metadata.getProperty(name)?.remove();
+  }
+  const current = metadata.getProperty('template')?.asKind(SyntaxKind.PropertyAssignment);
+  if (current) current.setInitializer(quote(template));
+  else metadata.addPropertyAssignment({ name: 'template', initializer: quote(template) });
+
+  if (!metadata.getProperty('changeDetection')) {
+    metadata.addPropertyAssignment({
+      name: 'changeDetection',
+      initializer: 'ChangeDetectionStrategy.OnPush',
+    });
+    addNamedImports(file, { module: '@angular/core', names: ['ChangeDetectionStrategy'] });
+  }
   return file.getFullText();
 }
 

@@ -1,0 +1,126 @@
+:host {
+  display: block;
+}
+
+.as-table__scroll {
+  overflow-x: auto;
+  border: 1px solid var(--as-border);
+  border-radius: var(--as-radius-lg);
+  background: var(--as-panel);
+}
+
+.as-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--as-text);
+}
+
+.as-table__caption {
+  padding: 0.75rem 1rem;
+  color: var(--as-text-muted);
+  text-align: left;
+}
+
+.as-table__head {
+  padding: 0.625rem 1rem;
+  background: var(--as-panel-muted);
+  color: var(--as-text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.as-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.as-table__sort:hover {
+  color: var(--as-text);
+}
+
+.as-table__cell {
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--as-border);
+}
+
+.as-table__cell--start {
+  text-align: left;
+}
+
+.as-table__cell--center {
+  text-align: center;
+}
+
+.as-table__cell--end {
+  text-align: right;
+}
+
+.as-table__row--data {
+  cursor: default;
+}
+
+.as-table__row--data:hover {
+  background: var(--as-panel-muted);
+}
+
+.as-table__empty {
+  padding: 2rem 1rem;
+  border-top: 1px solid var(--as-border);
+  color: var(--as-text-subtle);
+  text-align: center;
+}
+
+.as-table__skeleton {
+  display: block;
+  height: 0.875rem;
+  border-radius: var(--as-radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--as-panel-muted) 25%,
+    var(--as-border) 50%,
+    var(--as-panel-muted) 75%
+  );
+  background-size: 200% 100%;
+  animation: as-shimmer 1.4s ease-in-out infinite;
+}
+
+.as-table__pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.625rem 0.25rem;
+  color: var(--as-text-muted);
+  font-size: 0.8125rem;
+}
+
+.as-table__range {
+  margin-right: auto;
+}
+
+.as-table__page {
+  display: inline-flex;
+  padding: 0.375rem;
+  border: 1px solid var(--as-border);
+  border-radius: var(--as-radius-md);
+  background: var(--as-panel);
+  color: var(--as-text);
+  cursor: pointer;
+}
+
+.as-table__page:disabled {
+  color: var(--as-disabled-text);
+  cursor: not-allowed;
+}
