@@ -1,22 +1,109 @@
-.as-textarea__control {
-  align-items: stretch;
-  padding-block: 0.25rem;
+:host {
+  display: block;
 }
 
-.as-textarea__input {
-  resize: vertical;
-  line-height: 1.5;
+fieldset {
+  border-style: solid;
 }
 
-.as-textarea__footer {
+.as-textarea-wrapper {
   display: flex;
-  justify-content: space-between;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
 }
 
-.as-textarea__count {
-  margin-left: auto;
-  color: var(--as-text-subtle);
+/* Reserva el alto del label flotante-arriba (`variant="over"`) — mismo criterio que
+   `.as-input-over`/`.as-input-over-float`. */
+.as-textarea-over {
+  transition: padding-top 150ms ease;
+}
+
+.as-textarea-over-float {
+  padding-top: 1rem;
+}
+
+.as-textarea-field {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  appearance: none;
+  border-radius: 0;
+  padding: 0.625rem 1rem;
+  resize: none;
+  /* <textarea> es inline-block por defecto: el fieldset reserva ~5px extra abajo para el
+     descendente de línea (el mismo gap fantasma clásico de imágenes/inputs sin display:block).
+     Por eso el fieldset medía 45px con el textarea en 40px. Con block, ambos miden igual. */
+  display: block;
+  /* Hereda tipografía del wrapper (que tiene text-caption-1-medium) */
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  font-family: inherit;
+  color: var(--app-control-surface-text);
+  color-scheme: inherit;
+  width: 100%;
+  cursor: text;
+  transition: color 0.18s ease;
+}
+
+.as-textarea-field:focus,
+.as-textarea-field:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.as-textarea-field::placeholder {
+  color: var(--app-placeholder-color);
+  opacity: 1;
+  transition: color 0.18s ease;
+}
+
+.as-textarea-field:disabled {
+  color: var(--app-control-disabled-text);
+  cursor: not-allowed;
+  resize: none;
+}
+
+.as-textarea-invalid .as-textarea-field {
+  border-color: var(--app-error-color);
+}
+
+.as-textarea-invalid label {
+  color: var(--app-error-color);
+}
+
+/* Grip decorativo en la esquina inferior derecha, igual al de portfolio-liriraid:
+   puramente visual (pointer-events: none), el resize real está deshabilitado. */
+.as-textarea-grip::after {
+  content: '';
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 8px;
+  height: 8px;
+  opacity: 0.55;
+  pointer-events: none;
+  background-image: linear-gradient(
+    135deg,
+    transparent 0,
+    transparent 45%,
+    var(--app-text-muted) 45%,
+    var(--app-text-muted) 55%,
+    transparent 55%,
+    transparent 70%,
+    var(--app-text-muted) 70%,
+    var(--app-text-muted) 80%,
+    transparent 80%,
+    transparent 95%,
+    var(--app-text-muted) 95%
+  );
+}
+
+.as-textarea-error {
+  color: var(--app-error-color);
   font-size: 0.75rem;
-  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+  padding-left: 1.25rem;
 }

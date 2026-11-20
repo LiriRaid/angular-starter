@@ -3,30 +3,39 @@ import type { ParseError } from 'jsonc-parser';
 
 const FORMATTING = { insertSpaces: true, tabSize: 2 } as const;
 
+interface TestTarget {
+  options?: { setupFiles?: unknown };
+}
+
 /**
- * Adds a global stylesheet to the `styles` of the build target of the application, after the ones
- * that are already there. The file is edited as JSON with comments, so the rest of angular.json
- * keeps its formatting; a stylesheet that is already listed is not added twice.
+ * Registers a file in the `setupFiles` of the test target of the application: it runs before every
+ * spec, which is where the test environment gets what the application provides at startup. The file
+ * is edited as JSON with comments, so the rest of angular.json keeps its formatting; a file that is
+ * already listed is not added twice.
  */
-export function addStyleEntry(text: string, entry: string): string {
+export function addTestSetupFile(text: string, file: string): string {
   const errors: ParseError[] = [];
   const config = parse(text, errors, { allowTrailingComma: true }) as {
-    projects?: Record<string, { architect?: { build?: { options?: { styles?: unknown } } } }>;
+    projects?: Record<string, { architect?: { test?: TestTarget } }>;
   };
   if (errors.length > 0) throw new Error('The angular.json file is not valid JSON.');
 
   const [project, definition] = Object.entries(config.projects ?? {})[0] ?? [];
-  const styles = definition?.architect?.build?.options?.styles;
-  if (project === undefined || !Array.isArray(styles)) {
-    throw new Error('Could not find the "styles" list of the build target in angular.json.');
+  const test = definition?.architect?.test;
+  if (project === undefined || !test) {
+    throw new Error('Could not find the "test" target of the application in angular.json.');
   }
-  if (styles.includes(entry)) return text;
 
+  const current = test.options?.setupFiles;
+  const files = Array.isArray(current) ? (current as string[]) : [];
+  if (files.includes(file)) return text;
+
+  const path = ['projects', project, 'architect', 'test', 'options', 'setupFiles'];
   return applyEdits(
     text,
-    modify(text, ['projects', project, 'architect', 'build', 'options', 'styles', -1], entry, {
+    modify(text, files.length > 0 ? [...path, -1] : path, files.length > 0 ? file : [file], {
       formattingOptions: FORMATTING,
-      isArrayInsertion: true,
+      isArrayInsertion: files.length > 0,
     }),
   );
 }

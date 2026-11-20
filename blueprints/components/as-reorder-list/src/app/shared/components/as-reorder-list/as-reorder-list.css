@@ -1,66 +1,65 @@
-:host {
+/* Contenedor neutro: el único chrome visual lo pone el template de cada fila
+   que pasa el consumidor, esto solo estira a lo ancho y separa filas con gap.
+   El host (`as-reorder-list`, custom element) solo necesita `display:block`
+   porque por default los custom elements son `inline` — el gap real entre filas
+   lo pone `.as-reorder-list` con flex, DEBE quedar en una regla propia porque
+   `as-reorder-list .as-reorder-list` (con el tag) tiene más especificidad
+   que `.as-reorder-list` sola y le ganaría el `display:block` de arriba,
+   dejando el `gap` sin ningún efecto (display:block lo ignora por completo). */
+as-reorder-list {
   display: block;
+  width: 100%;
 }
 
-.as-reorder {
+.as-reorder-list {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
+  width: 100%;
   gap: 0.375rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
-.as-reorder__row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.625rem;
-  border: 1px solid var(--as-border);
-  border-radius: var(--as-radius-md);
-  background: var(--as-panel);
-  color: var(--as-text);
+.as-reorder-item {
+  display: block;
+  width: 100%;
 }
 
-.as-reorder__row--dragging {
-  opacity: 0.5;
+.as-reorder-item > * {
+  width: 100%;
 }
 
-.as-reorder__row--over {
-  border-color: var(--as-primary);
-  background: var(--as-primary-soft);
+/* Durante el arrastre, CDK saca el preview (el que sigue al cursor) y el
+   placeholder (el hueco que deja) del árbol del componente y los cuelga
+   directo del <body> — por eso este bloque no puede ir anclado con el tag del
+   componente como el resto del archivo. Se ancla en cambio con .as-reorder-item
+   y .cdk-drop-list-dragging, las clases reales de @angular/cdk/drag-drop. Sin
+   width acá a propósito: el preview usa position:fixed sin ningún ancestro que
+   lo contenga, así que un width:100% se resuelve contra el viewport completo
+   (probado: lo dejaba del ancho de toda la pantalla). CDK ya le pone un width
+   en píxeles exacto, copiado del tamaño real de la fila al momento de
+   levantarla — no hay que tocarlo. */
+.as-reorder-item.cdk-drag-preview {
+  box-sizing: border-box;
+  border-radius: 0.75rem;
+  box-shadow:
+    0 8px 24px -4px rgba(0, 0, 0, 0.35),
+    0 2px 8px -2px rgba(0, 0, 0, 0.25);
 }
 
-.as-reorder__handle,
-.as-reorder__move {
-  display: inline-flex;
-  padding: 0.25rem;
-  border: 0;
-  border-radius: var(--as-radius-sm);
-  background: transparent;
-  color: var(--as-text-subtle);
-  cursor: pointer;
+.as-reorder-item.cdk-drag-placeholder {
+  width: 100% !important;
+  opacity: 0.35;
 }
 
-.as-reorder__handle {
-  cursor: grab;
+/* Al soltar, CDK lleva el preview a la posición del placeholder antes de
+   reconstruir la fila real. Este elemento ya no está dentro del drop list,
+   por eso no recibe la regla `.cdk-drop-list-dragging` de abajo. Sin esta
+   transición, el preview se elimina en el mismo frame y la fila parece saltar
+   desde arriba al reordenar hacia arriba. */
+.as-reorder-item.cdk-drag-animating {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }
 
-.as-reorder__handle:hover,
-.as-reorder__move:hover:not(:disabled) {
-  color: var(--as-text);
-}
-
-.as-reorder__move:disabled {
-  color: var(--as-disabled-text);
-  cursor: not-allowed;
-}
-
-.as-reorder__content {
-  flex: 1;
-  min-width: 0;
-}
-
-.as-reorder__buttons {
-  display: flex;
+.cdk-drop-list-dragging .as-reorder-item:not(.cdk-drag-preview) {
+  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
 }

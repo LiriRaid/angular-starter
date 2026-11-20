@@ -3,6 +3,7 @@ import {
   CAPABILITIES,
   CATEGORIES,
   availableIds,
+  defaultOption,
   recommendedOption,
   unmetRequirements,
 } from './capabilities.js';
@@ -42,20 +43,26 @@ describe('capability registry', () => {
     );
   });
 
-  it('marks exactly the recommended choices', () => {
+  it('recommends only what has one best answer and leaves the project shape to the user', () => {
     const recommended = CATEGORIES.map((category) => [
       category,
       CAPABILITIES[category].filter((option) => option.recommended).map((option) => option.id),
     ]);
     expect(Object.fromEntries(recommended)).toEqual({
-      architecture: ['screaming'],
-      routing: ['starter'],
+      architecture: [],
+      routing: [],
       style: ['tailwind'],
       rendering: ['csr'],
-      components: ['recommended'],
+      components: [],
       icons: ['lucide'],
       packageManager: [],
     });
+  });
+
+  it('documents the Screaming Architecture with the ADR of this project, not an article', () => {
+    expect(CAPABILITIES.architecture.find((option) => option.id === 'screaming')?.docs).toBe(
+      'https://github.com/LiriRaid/as-starter/blob/main/docs/adr/0002-screaming-architecture-profile.md',
+    );
   });
 
   it('explains the three rendering strategies with their documentation', () => {
@@ -82,16 +89,34 @@ describe('capability registry', () => {
 });
 
 describe('recommendedOption', () => {
-  it('returns the recommended option that is available and whose requirements are met', () => {
-    expect(recommendedOption('architecture', {})?.id).toBe('screaming');
-    expect(
-      recommendedOption('routing', { architecture: 'screaming', style: 'css', icons: 'lucide' })
-        ?.id,
-    ).toBe('starter');
+  it('returns the recommended option that is available', () => {
+    expect(recommendedOption('style', {})?.id).toBe('tailwind');
+    expect(recommendedOption('rendering', {})?.id).toBe('csr');
+    expect(recommendedOption('icons', {})?.id).toBe('lucide');
   });
 
-  it('falls back to undefined when the recommended option cannot be used', () => {
-    expect(recommendedOption('routing', { architecture: 'angular-default' })).toBeUndefined();
+  it('has none where the user decides what to work with', () => {
+    expect(recommendedOption('architecture', {})).toBeUndefined();
+    expect(recommendedOption('routing', { architecture: 'screaming' })).toBeUndefined();
+    expect(recommendedOption('components', { architecture: 'screaming' })).toBeUndefined();
+  });
+});
+
+describe('defaultOption', () => {
+  const context = { architecture: 'screaming', style: 'css', tailwind: true, icons: 'lucide' };
+
+  it('names the silent choice of --defaults for every category', () => {
+    expect(defaultOption('architecture', {})?.id).toBe('screaming');
+    expect(defaultOption('routing', context)?.id).toBe('starter');
+    expect(defaultOption('components', context)?.id).toBe('recommended');
+    expect(defaultOption('style', {})?.id).toBe('tailwind');
+  });
+
+  it('falls back to undefined when the default cannot be used', () => {
+    expect(defaultOption('routing', { architecture: 'angular-default' })).toBeUndefined();
+    expect(
+      defaultOption('components', { architecture: 'screaming', style: 'css', tailwind: false }),
+    ).toBeUndefined();
   });
 });
 
@@ -113,11 +138,17 @@ describe('unmetRequirements', () => {
       unmetRequirements(components!, {
         architecture: 'angular-default',
         style: 'scss',
+        tailwind: false,
         icons: 'none',
       }),
-    ).toEqual(['the architecture: screaming', 'the stylesheet format: css', 'the icons: lucide']);
+    ).toEqual(['the architecture: screaming', 'the icons: lucide', 'Tailwind CSS']);
     expect(
-      unmetRequirements(components!, { architecture: 'screaming', style: 'css', icons: 'lucide' }),
+      unmetRequirements(components!, {
+        architecture: 'screaming',
+        style: 'css',
+        tailwind: true,
+        icons: 'lucide',
+      }),
     ).toEqual([]);
   });
 });

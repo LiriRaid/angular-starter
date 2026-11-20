@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- The design base and the `as-` components are now the structure of the reference application
+  without its business (ADR-0007, which supersedes ADR-0005): `src/styles.css` imports the
+  `src/styles/**/*-styles.css` files (theme, base elements, mixins, scrollbars, typography, one
+  stylesheet per component) and `shared/animations/animations.css`; `core/theme`,
+  `core/common/icons`, `shared/utils`, `shared/data` and the 26 generic components are ported whole
+  (the ripple of the button, the config and entity files and the specs included), not rewritten.
+  They need Tailwind CSS, add `@angular/cdk`, and a test setup provides the icons to the specs.
+- The wizard no longer marks Architecture, Routing or Components as recommended and preselects
+  nothing there; `--defaults` still picks Screaming, Angular Starter Routing and the essential
+  components. The Screaming Architecture option links to this repository's ADR-0002 and the
+  collection is called "Essential component collection".
+- `style: tailwind` is accepted in a configuration file, like `--style tailwind`.
+
 ### Added
 
 - Explicit wizard: every option shows its name, the official documentation of what it installs

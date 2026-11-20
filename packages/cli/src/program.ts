@@ -42,7 +42,7 @@ const HELP_SECTIONS: readonly {
 
 const ROOT_EXAMPLES: readonly (readonly [string, string])[] = [
   ['as new InventorySystem', 'Create a project; choose each option in the wizard'],
-  ['as new Shop --defaults --no-git', 'The recommended set, no questions'],
+  ['as new Shop --defaults --no-git', 'The default set, no questions'],
   ['as add icons lucide', 'Add Lucide Icons to a project you already have'],
   ['as add routing starter', 'Add the navigation tree, titles and breadcrumbs'],
   ['as generate feature billing', 'A feature with its routes, ready to build on'],
@@ -177,21 +177,18 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     .option('--no-git', 'Do not initialize a Git repository')
     .option('--install', 'Install dependencies (default)')
     .option('--no-install', 'Do not install dependencies')
-    .option(
-      '--defaults',
-      'Never prompt: use the recommended choice for every option that was not provided',
-    )
+    .option('--defaults', 'Never prompt: use the default for every option that was not provided')
     .option('--config <file>', 'Read options from a JSON file (flags override it)')
     .option('--dry-run', 'Show what would be done without creating anything')
     .option('--verbose', 'Show the output of the commands that are run')
     .addHelpText(
       'after',
-      '\nThe choices marked (Recommended) are preselected: Screaming Architecture, Angular Starter Routing,\n' +
-        'Tailwind CSS, Client-Side Rendering, Lucide Icons and the recommended component collection.\n' +
+      '\nOnly Tailwind CSS, Client-Side Rendering and Lucide Icons are marked (Recommended) and preselected.\n' +
+        'The defaults also use the Screaming Architecture, Angular Starter Routing and the essential components.\n' +
         'Run "as list" to see what each option is and where its documentation lives.\n' +
         examples([
           ['as new InventorySystem', 'Ask for each option'],
-          ['as new Shop --defaults', 'The recommended set, no questions'],
+          ['as new Shop --defaults', 'The default set, no questions'],
           ['as new Shop --style scss --rendering ssr', 'Pick some options, be asked the rest'],
           [
             'as new Shop --defaults --architecture angular-default --routing angular',

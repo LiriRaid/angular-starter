@@ -6,6 +6,8 @@ export interface OptionRequirements {
   readonly architecture?: readonly string[];
   /** Stylesheet format (`css` also covers Tailwind CSS). */
   readonly style?: readonly string[];
+  /** True when the option only works in a project that uses Tailwind CSS. */
+  readonly tailwind?: true;
   readonly icons?: readonly string[];
 }
 
@@ -18,7 +20,10 @@ export interface CapabilityOption {
   readonly docs?: string;
   /** False for options that are planned but cannot be generated yet. */
   readonly available: boolean;
+  /** Badge and preselection in the wizard: only for what has one best answer. */
   readonly recommended?: boolean;
+  /** What `--defaults` and a flag-less run pick, without any badge in the wizard. */
+  readonly default?: boolean;
   readonly requires?: OptionRequirements;
 }
 
@@ -28,6 +33,7 @@ export type Registry = Readonly<Record<CapabilityCategory, readonly CapabilityOp
 export interface RequirementContext {
   architecture?: string;
   style?: string;
+  tailwind?: boolean;
   icons?: string;
 }
 
@@ -53,9 +59,9 @@ export const CAPABILITIES: Registry = {
       label: 'Screaming Architecture',
       description:
         'core/ for infrastructure, features/ with one folder per business capability and shared/ for reusable pieces, with @core, @features and @shared aliases.',
-      docs: 'https://blog.cleancoder.com/uncle-bob/2011/09/30/Screaming-Architecture.html',
+      docs: `${STARTER_DOCS}/0002-screaming-architecture-profile.md`,
       available: true,
-      recommended: true,
+      default: true,
     },
     {
       id: 'modular',
@@ -101,7 +107,7 @@ export const CAPABILITIES: Registry = {
         'One navigation tree that feeds page titles and breadcrumbs, ready for a sidebar. Needs the Screaming Architecture.',
       docs: `${STARTER_DOCS}/0003-starter-routing.md`,
       available: true,
-      recommended: true,
+      default: true,
       requires: { architecture: ['screaming'] },
     },
   ],
@@ -176,27 +182,27 @@ export const CAPABILITIES: Registry = {
       id: 'none',
       label: 'None',
       description: 'No native components. You can add them later with as add components.',
-      docs: `${STARTER_DOCS}/0005-design-base-and-native-components.md`,
+      docs: `${STARTER_DOCS}/0007-omni-structure-design-and-components.md`,
       available: true,
     },
     {
       id: 'recommended',
-      label: 'Recommended component collection',
+      label: 'Essential component collection',
       description:
-        'Design tokens, light and dark theme, utilities and 16 as- components: icon, button, input, textarea, checkbox, toggle, select, avatar, divider, skeleton, tooltip, modal, drawer, toast, tabs and popover.',
-      docs: `${STARTER_DOCS}/0005-design-base-and-native-components.md`,
+        'The design base (tokens, light and dark theme, typography, animations) and 16 as- components: icon, button, input, textarea, checkbox, toggle, select, avatar, divider, skeleton, tooltip, modal, drawer, toast, tabs and popover. Needs Tailwind CSS.',
+      docs: `${STARTER_DOCS}/0007-omni-structure-design-and-components.md`,
       available: true,
-      recommended: true,
-      requires: { architecture: ['screaming'], style: ['css'], icons: ['lucide'] },
+      default: true,
+      requires: { architecture: ['screaming'], tailwind: true, icons: ['lucide'] },
     },
     {
       id: 'all',
       label: 'All available components',
       description:
-        'The recommended collection plus table, search, datepicker, section-nav, selectable-item, reorder-list, preview, media-preview, theme-color-picker and weekly-schedule.',
-      docs: `${STARTER_DOCS}/0005-design-base-and-native-components.md`,
+        'The essential collection plus table, search, datepicker, section-nav, selectable-item, reorder-list, preview, media-preview, theme-color-picker and weekly-schedule. Needs Tailwind CSS.',
+      docs: `${STARTER_DOCS}/0007-omni-structure-design-and-components.md`,
       available: true,
-      requires: { architecture: ['screaming'], style: ['css'], icons: ['lucide'] },
+      requires: { architecture: ['screaming'], tailwind: true, icons: ['lucide'] },
     },
   ],
   icons: [
@@ -289,24 +295,33 @@ export function isAvailable(category: CapabilityCategory, id: string): boolean {
   return CAPABILITIES[category].some((option) => option.id === id && option.available);
 }
 
-const REQUIREMENT_TEXT: Record<keyof OptionRequirements, string> = {
+const REQUIREMENT_TEXT: Record<'architecture' | 'style' | 'icons', string> = {
   architecture: 'the architecture',
   style: 'the stylesheet format',
   icons: 'the icons',
 };
 
-/** What `option` needs that `context` does not provide, as "the architecture: screaming". */
+/**
+ * What `option` needs that `context` does not provide, as "the architecture: screaming". A choice
+ * the context does not know yet is not checked.
+ */
 export function unmetRequirements(option: CapabilityOption, context: RequirementContext): string[] {
   const unmet: string[] = [];
-  for (const key of Object.keys(REQUIREMENT_TEXT) as (keyof OptionRequirements)[]) {
-    const accepted = option.requires?.[key];
+  const { requires } = option;
+  if (!requires) return unmet;
+  for (const key of Object.keys(REQUIREMENT_TEXT) as (keyof typeof REQUIREMENT_TEXT)[]) {
+    const accepted = requires[key];
     const actual = context[key];
     if (accepted && actual !== undefined && !accepted.includes(actual)) {
       unmet.push(`${REQUIREMENT_TEXT[key]}: ${accepted.join(', ')}`);
     }
   }
+  if (requires.tailwind && context.tailwind === false) unmet.push('Tailwind CSS');
   return unmet;
 }
+
+const usable = (option: CapabilityOption, context: RequirementContext): boolean =>
+  unmetRequirements(option, context).length === 0;
 
 /** The recommended option of a category that can be generated with what `context` already holds. */
 export function recommendedOption(
@@ -315,6 +330,19 @@ export function recommendedOption(
   registry: Registry = CAPABILITIES,
 ): CapabilityOption | undefined {
   return availableOptions(category, registry).find(
-    (option) => option.recommended && unmetRequirements(option, context).length === 0,
+    (option) => option.recommended && usable(option, context),
   );
+}
+
+/**
+ * The option `--defaults` picks for a category: the default, or the recommended one when the
+ * category has no default, among those `context` allows.
+ */
+export function defaultOption(
+  category: CapabilityCategory,
+  context: RequirementContext,
+  registry: Registry = CAPABILITIES,
+): CapabilityOption | undefined {
+  const options = availableOptions(category, registry).filter((option) => usable(option, context));
+  return options.find((option) => option.default) ?? options.find((option) => option.recommended);
 }

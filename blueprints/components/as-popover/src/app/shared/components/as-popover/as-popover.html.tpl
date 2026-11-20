@@ -1,29 +1,21 @@
-<ng-content select="[asPopoverTrigger]" />
+<as-button [icon]="triggerIcon()" [iconSize]="triggerIconSize()" [size]="triggerSize()" [variant]="triggerVariant()" [styleClass]="triggerClass()" [ariaLabel]="triggerAriaLabel()" [ariaExpanded]="isOpen()" [asTooltip]="$any(triggerTooltip()) || undefined" [tooltipPosition]="triggerTooltipPosition()" [tooltipStyleClass]="triggerTooltipStyleClass()" [showDelay]="triggerTooltipDelay()" (onClick)="toggle($event)">
+  <ng-content select="[popover-trigger]" />
+</as-button>
 
-@if (open()) {
-  <div class="as-popover__panel as-popover__panel--{{ placement() }} as-animate-fade-in">
-    @if (items().length > 0) {
-      <ul class="as-popover__menu" role="menu">
-        @for (item of items(); track item.id) {
-          <li role="none">
-            <button
-              type="button"
-              class="as-popover__item"
-              role="menuitem"
-              [class.as-popover__item--danger]="item.danger"
-              [disabled]="item.disabled"
-              (click)="choose(item)"
-            >
-              @if (item.icon) {
-                <as-icon [name]="item.icon" [size]="16" />
-              }
-              <span>{{ item.label }}</span>
-            </button>
-          </li>
+<div #popoverPanel popover="manual" [class]="panelClass()" (toggle)="onPopoverToggle($event)">
+  <div class="as-popover-content">
+    @if (actions()) {
+      <div class="as-popover-actions">
+        @for (action of items(); track trackAction($index, action); let last = $last) {
+          <as-button [label]="action.label" [icon]="action.icon" [iconSize]="action.iconSize ?? '16'" [disabled]="action.disabled ?? false" [variant]="actionVariant(action)" [styleClass]="actionClass(action)" (onClick)="onActionClick(action)" />
+
+          @if (!last) {
+            <hr class="as-popover-divider" aria-hidden="true" />
+          }
         }
-      </ul>
+      </div>
     } @else {
-      <div class="as-popover__content"><ng-content /></div>
+      <ng-content select=":not([popover-trigger])" />
     }
   </div>
-}
+</div>

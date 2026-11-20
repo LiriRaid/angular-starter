@@ -1,125 +1,241 @@
-import { NgTemplateOutlet } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Directive,
-  TemplateRef,
-  computed,
-  contentChildren,
-  inject,
-  input,
-  model,
-  output,
-} from '@angular/core';
+import { NgClass, NgTemplateOutlet } from '@angular/common';
+import { ChangeDetectionStrategy, Component, TemplateRef, ViewEncapsulation, computed, input, linkedSignal, model, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+import { AsCheckbox } from '../as-checkbox/as-checkbox';
 import { AsIcon } from '../as-icon/as-icon';
+import { AsSelect } from '../as-select/as-select';
+import { AsSkeleton } from '../as-skeleton/as-skeleton';
+import { buildPageItems, cellClass as buildCellClass, headerClass as buildHeaderClass, type AsTableAlign, type AsTableColumn, type AsTablePageEvent } from './as-table.config';
 
-export interface AsTableColumn {
-  /** The property of each row to show, and the id of the column. */
-  key: string;
-  label: string;
-  align?: 'start' | 'center' | 'end';
-  /** Any CSS width (`8rem`, `20%`). */
-  width?: string;
-  sortable?: boolean;
-}
+export type { AsTableAlign, AsTableColumn, AsTablePageEvent };
 
-export interface AsTableSort {
-  key: string;
-  direction: 'asc' | 'desc';
-}
-
-export interface AsTablePage {
-  /** The page, starting at 1. */
-  page: number;
-  pageSize: number;
-}
-
-/** `<ng-template asCell="status" let-row>...</ng-template>` draws the cells of that column. */
-@Directive({ selector: 'ng-template[asCell]' })
-export class AsTableCell {
-  readonly column = input.required<string>({ alias: 'asCell' });
-  readonly template = inject<TemplateRef<{ $implicit: Record<string, unknown> }>>(TemplateRef);
-}
-
-/**
- * A data table with sortable columns, custom cells, an empty state, loading rows and pagination.
- * It does not sort or page your data: it tells you what the user asked for and you answer with the
- * rows to show (from a server, or sorted and sliced in the page).
- *
- * ```html
- * <as-table [columns]="columns" [rows]="customers()" [total]="total()" [(sort)]="sort" [(page)]="page">
- *   <ng-template asCell="status" let-row><span>{{ row.status }}</span></ng-template>
- * </as-table>
- * ```
- */
 @Component({
   selector: 'as-table',
-  imports: [AsIcon, NgTemplateOutlet],
+  standalone: true,
+  imports: [NgClass, NgTemplateOutlet, FormsModule, AsCheckbox, AsSelect, AsSkeleton, AsIcon],
   templateUrl: './as-table.html',
   styleUrl: './as-table.css',
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsTable {
+export class AsTable<T = Record<string, unknown>> {
+  readonly value = input<T[]>([]);
   readonly columns = input<readonly AsTableColumn[]>([]);
-  readonly rows = input<readonly Record<string, unknown>[]>([]);
-  /** The property that identifies a row; it keeps rows stable while they change. */
-  readonly rowKey = input<string>('id');
-  readonly loading = input(false);
-  readonly emptyText = input<string>('Nothing to show');
-  /** The number of rows there are in total, for the pagination. Without it there is no pagination. */
-  readonly total = input<number | null>(null);
-  readonly caption = input<string>('');
+  readonly dataKey = input<string | undefined>(undefined);
 
-  /** The sorted column. Two-way: `[(sort)]="sort"`. */
-  readonly sort = model<AsTableSort | null>(null);
-  /** The page shown. Two-way: `[(page)]="page"`. */
-  readonly page = model<AsTablePage>({ page: 1, pageSize: 10 });
-  readonly rowClick = output<Record<string, unknown>>();
+  readonly cellTemplates = input<Record<string, TemplateRef<unknown>>>({});
 
-  private readonly cells = contentChildren(AsTableCell);
+  readonly loading = input<boolean>(false);
+  /** Override manual. Si no se define, la cantidad de filas skeleton se adapta al total real conocido (ver effectiveSkeletonRows). */
+  readonly skeletonRows = input<number | null>(null);
+  readonly skeletonCellTemplates = input<Record<string, TemplateRef<unknown>>>({});
 
-  protected readonly pageCount = computed(() => {
-    const total = this.total();
-    return total === null ? 1 : Math.max(1, Math.ceil(total / this.page().pageSize));
+  readonly paginator = input<boolean>(true);
+  readonly rows = input<number>(10);
+  readonly rowsPerPageOptions = input<number[]>([10, 25, 50]);
+
+  /** Modo server-side: la tabla no pagina el array, usa totalRecords del API */
+  readonly lazy = input<boolean>(false);
+  readonly lazyTotalRecords = input<number | null>(null);
+  readonly pageChange = output<AsTablePageEvent>();
+
+  readonly itemLabel = input<string>('registros');
+  readonly tableMinWidth = input<string>('60rem');
+
+  readonly clickableRows = input<boolean>(false);
+  readonly rowClass = input<((row: T) => string) | undefined>(undefined);
+  readonly emptyMessage = input<string>('No se encontraron resultados.');
+
+  readonly expandable = input<boolean>(false);
+  /**
+   * 'column' (default) agrega la columna final con chevron para expandir cada fila.
+   * 'external' no agrega esa columna: el consumidor dispara el expand desde su propio
+   * template (ej. un botón "N campos" en la celda de acciones) llamando a `toggleExpand(row)`.
+   */
+  readonly expandTrigger = input<'column' | 'external'>('column');
+  readonly showExpandColumn = computed(() => this.expandable() && this.expandTrigger() === 'column');
+  readonly rowExpansionTemplate = input<TemplateRef<unknown> | null>(null);
+  /** Pie de la tabla (ej. una fila "Agregar"): se pinta en un `<tfoot>` con una celda que abarca todas las columnas y recibe `colspan` en su contexto. */
+  readonly footerTemplate = input<TemplateRef<{ colspan: number }> | null>(null);
+  /** Columnas reales de la tabla: las de datos más la de selección y la de expandir cuando existen. */
+  readonly totalColspan = computed(() => this.columns().length + (this.selectable() ? 1 : 0) + (this.showExpandColumn() ? 1 : 0));
+
+  readonly rowClick = output<T>();
+
+  readonly selectable = input<boolean>(false);
+  readonly selection = model<unknown[]>([]);
+
+  isRowSelected(row: T): boolean {
+    const key = this.rowKey(row);
+    return this.selection().some((selected) => this.rowKey(selected as T) === key);
+  }
+
+  toggleRowSelection(row: T): void {
+    const key = this.rowKey(row);
+    const current = this.selection();
+    const isSelected = current.some((selected) => this.rowKey(selected as T) === key);
+
+    this.selection.set(isSelected ? current.filter((selected) => this.rowKey(selected as T) !== key) : [...current, row]);
+  }
+
+  readonly allPageSelected = computed(() => {
+    const rows = this.pagedValue();
+    return rows.length > 0 && rows.every((row) => this.isRowSelected(row));
   });
-  protected readonly range = computed(() => {
-    const { page, pageSize } = this.page();
-    const total = this.total() ?? this.rows().length;
-    return total === 0 ? '0' : `${(page - 1) * pageSize + 1}-${Math.min(page * pageSize, total)} of ${total}`;
+
+  readonly somePageSelected = computed(() => this.pagedValue().some((row) => this.isRowSelected(row)) && !this.allPageSelected());
+
+  toggleSelectAll(): void {
+    const rows = this.pagedValue();
+    const current = this.selection();
+
+    if (this.allPageSelected()) {
+      const pageKeys = new Set(rows.map((row) => this.rowKey(row)));
+      this.selection.set(current.filter((selected) => !pageKeys.has(this.rowKey(selected as T))));
+      return;
+    }
+
+    const currentKeys = new Set(current.map((selected) => this.rowKey(selected as T)));
+    this.selection.set([...current, ...rows.filter((row) => !currentKeys.has(this.rowKey(row)))]);
+  }
+
+  private readonly expandedKeys = signal<Set<unknown>>(new Set());
+
+  private rowKey(row: T): unknown {
+    const key = this.dataKey();
+    return key ? this.resolveField(row, key) : row;
+  }
+
+  isExpanded(row: T): boolean {
+    return this.expandedKeys().has(this.rowKey(row));
+  }
+
+  toggleExpand(row: T): void {
+    const key = this.rowKey(row);
+    this.expandedKeys.update((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  readonly safeDataKey = computed(() => (this.loading() ? '__sk' : (this.dataKey() ?? undefined)));
+
+  readonly pageReset = input<number>(0);
+
+  readonly pageSize = linkedSignal(() => this.rows());
+  private readonly currentPage = linkedSignal<number>(() => {
+    this.pageReset();
+    return 0;
   });
-  protected readonly skeletons = [0, 1, 2, 3, 4];
 
-  protected cellFor(key: string): TemplateRef<{ $implicit: Record<string, unknown> }> | null {
-    return this.cells().find((cell) => cell.column() === key)?.template ?? null;
+  readonly totalRecords = computed(() => (this.lazy() && this.lazyTotalRecords() !== null ? this.lazyTotalRecords()! : this.value().length));
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalRecords() / this.pageSize())));
+  readonly safePage = computed(() => Math.min(this.currentPage(), this.totalPages() - 1));
+  readonly first = computed(() => this.safePage() * this.pageSize());
+
+  /** Cuántas filas skeleton mostrar mientras carga: el total real ya conocido (de una carga previa) acotado a lo que cabe en la página actual, o el tamaño de página completo si todavía no se conoce ningún total (primera carga). */
+  readonly effectiveSkeletonRows = computed(() => {
+    const explicit = this.skeletonRows();
+    if (explicit != null) return explicit;
+
+    const size = this.pageSize();
+    const total = this.lazy() ? this.lazyTotalRecords() : this.value().length || null;
+    if (total == null) return size;
+
+    const remaining = total - this.first();
+    return remaining > 0 ? Math.min(size, remaining) : size;
+  });
+
+  readonly skeletonItems = computed(() => Array.from({ length: Math.max(1, this.effectiveSkeletonRows()) }, (_, index) => ({ __sk: index })));
+
+  readonly rangeStart = computed(() => (this.totalRecords() === 0 ? 0 : this.first() + 1));
+  readonly rangeEnd = computed(() => {
+    if (this.lazy()) return this.first() + this.value().length;
+    return Math.min(this.first() + this.pageSize(), this.totalRecords());
+  });
+
+  private readonly pagedValue = computed<T[]>(() => {
+    if (this.lazy()) return this.value();
+    return this.paginator() ? this.value().slice(this.first(), this.first() + this.pageSize()) : this.value();
+  });
+
+  readonly displayValue = computed<T[]>(() => (this.loading() ? (this.skeletonItems() as unknown as T[]) : this.pagedValue()));
+
+  readonly showPaginator = computed(() => this.paginator() && !this.loading() && this.totalRecords() > 0);
+
+  readonly pageItems = computed<(number | 'ellipsis')[]>(() => buildPageItems(this.safePage() + 1, this.totalPages()));
+
+  goToPage(page: number): void {
+    const next = Math.min(Math.max(page - 1, 0), this.totalPages() - 1);
+    this.currentPage.set(next);
+    if (this.lazy()) this.pageChange.emit({ page: next + 1, perPage: this.pageSize() });
   }
 
-  protected valueOf(row: Record<string, unknown>, key: string): string {
-    const value = row[key];
-    return value === null || value === undefined ? '' : String(value);
+  firstPage(): void {
+    this.currentPage.set(0);
+    if (this.lazy()) this.pageChange.emit({ page: 1, perPage: this.pageSize() });
+  }
+  prevPage(): void {
+    const next = Math.max(this.safePage() - 1, 0);
+    this.currentPage.set(next);
+    if (this.lazy()) this.pageChange.emit({ page: next + 1, perPage: this.pageSize() });
+  }
+  nextPage(): void {
+    const next = Math.min(this.safePage() + 1, this.totalPages() - 1);
+    this.currentPage.set(next);
+    if (this.lazy()) this.pageChange.emit({ page: next + 1, perPage: this.pageSize() });
+  }
+  lastPage(): void {
+    const next = this.totalPages() - 1;
+    this.currentPage.set(next);
+    if (this.lazy()) this.pageChange.emit({ page: next + 1, perPage: this.pageSize() });
   }
 
-  protected identify(row: Record<string, unknown>, index: number): unknown {
-    return row[this.rowKey()] ?? index;
+  setPageSize(value: number): void {
+    if (value > 0) {
+      this.pageSize.set(value);
+      this.currentPage.set(0);
+      if (this.lazy()) this.pageChange.emit({ page: 1, perPage: value });
+    }
   }
 
-  protected ariaSort(column: AsTableColumn): 'ascending' | 'descending' | 'none' | null {
-    if (!column.sortable) return null;
-    const sort = this.sort();
-    if (sort?.key !== column.key) return 'none';
-    return sort.direction === 'asc' ? 'ascending' : 'descending';
+  readonly rowTrackByFn = computed(() => {
+    const key = this.safeDataKey();
+    if (!key) return (_index: number, row: T) => row;
+    return (_index: number, row: T) => (row as Record<string, unknown>)[key];
+  });
+
+  templateFor(field: string): TemplateRef<unknown> | undefined {
+    return this.cellTemplates()[field];
   }
 
-  /** Ascending, then descending, then back to the order the data comes in. */
-  protected toggleSort(column: AsTableColumn): void {
-    if (!column.sortable) return;
-    const sort = this.sort();
-    if (sort?.key !== column.key) this.sort.set({ key: column.key, direction: 'asc' });
-    else if (sort.direction === 'asc') this.sort.set({ key: column.key, direction: 'desc' });
-    else this.sort.set(null);
+  skeletonTemplateFor(field: string): TemplateRef<unknown> | undefined {
+    return this.skeletonCellTemplates()[field];
   }
 
-  protected goTo(page: number): void {
-    const target = Math.min(Math.max(1, page), this.pageCount());
-    if (target !== this.page().page) this.page.set({ ...this.page(), page: target });
+  cellContext(row: T): { $implicit: T } {
+    return { $implicit: row };
+  }
+
+  resolveField(row: T, field: string): unknown {
+    return (row as Record<string, unknown>)[field];
+  }
+
+  headerClass(column: AsTableColumn): string {
+    return buildHeaderClass(column);
+  }
+
+  cellClass(column: AsTableColumn): string {
+    return buildCellClass(column);
+  }
+
+  onRowClick(row: T, event: MouseEvent): void {
+    if (this.loading()) return;
+    if (!this.clickableRows()) return;
+    if ((event.target as HTMLElement).closest('[data-no-row-click]')) return;
+    this.rowClick.emit(row);
   }
 }

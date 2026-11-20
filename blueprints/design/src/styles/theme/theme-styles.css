@@ -1,0 +1,370 @@
+:root {
+  color-scheme: light;
+
+  /* Los colores fijos (red, blue, green, amber, etc. — antes generados por
+     @primeuix/themes/aura/base) ya no se declaran acá: son exactamente los
+     mismos que trae Tailwind por defecto, así que se usan directo sus propias
+     variables (--color-red-500, --color-blue-600, etc.), sin duplicarlas. */
+
+  /* Handle del toggle switch: siempre blanco, no depende de tema ni paleta. */
+  --as-toggleswitch-handle-background: #ffffff;
+  --as-toggleswitch-handle-hover-background: #ffffff;
+  --as-toggleswitch-handle-checked-background: #ffffff;
+  --as-toggleswitch-handle-checked-hover-background: #ffffff;
+  --as-toggleswitch-handle-disabled-background: #ffffff;
+
+  /* ── General ──────────────────────────────────────────────────────────── */
+  --app-shell-bg: var(--as-surface-200);
+  --app-panel-bg: var(--as-surface-0);
+  --app-panel-muted-bg: var(--as-surface-50);
+  --app-surface-bg: var(--as-surface-100);
+  --app-border-color: var(--as-surface-300);
+
+  --app-text-color: var(--as-surface-900);
+  --app-text-muted: var(--as-surface-600);
+  --app-text-subtle: var(--as-surface-500);
+  --app-text-primary: var(--as-primary-color);
+  --app-text-primary-hover: var(--as-primary-hover-color);
+
+  --app-icon-primary: var(--as-primary-color);
+  --app-strong-bg: var(--as-surface-900);
+  --app-strong-text: #ffffff;
+
+  --app-container-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+  --app-container-border: transparent;
+  --app-header-focus-ring: var(--as-primary-hover-color);
+  --app-overlay-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --app-surface-shadow-soft: 0 8px 20px rgba(15, 23, 42, 0.04);
+
+  --app-action-icon-color: var(--app-text-subtle);
+  --app-action-hover-bg: var(--app-panel-muted-bg);
+  --app-action-hover-color: var(--as-primary-color);
+
+  --app-overlay-bg: var(--app-panel-bg);
+  --app-overlay-border: var(--app-border-color);
+  --app-overlay-text: var(--app-text-color);
+
+  --app-disabled-text: var(--as-surface-700);
+
+  --app-placeholder-color: var(--as-surface-400);
+  --app-caret-color: var(--as-primary-600);
+  --app-accent-soft-bg: color-mix(in srgb, var(--as-primary-color) 12%, transparent);
+  --app-badge-soft-bg: color-mix(in srgb, var(--as-primary-color) 12%, var(--app-panel-bg));
+  --app-badge-soft-text: var(--as-primary-color);
+
+  --app-scrollbar-thumb: var(--as-primary-color);
+
+  /* ── Sidebar ──────────────────────────────────────────────────────────── */
+  --app-sidebar-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+  --app-sidebar-bg: var(--app-panel-bg);
+  --app-sidebar-backdrop-bg: rgba(0, 0, 0, 0.5);
+  --app-sidebar-hover-bg: color-mix(in srgb, var(--as-primary-color) 15%, var(--app-panel-bg));
+  --app-sidebar-active-bg: color-mix(in srgb, var(--as-primary-color) 15%, var(--app-panel-bg));
+  --app-sidebar-active-text: var(--as-primary-color);
+  --app-sidebar-active-border: var(--as-primary-color);
+  --app-sidebar-tree-line: hsl(225, 2%, 53%);
+  --app-sidebar-tree-line-active: color-mix(in srgb, var(--as-primary-color) 75%, transparent);
+  --app-sidebar-footer-settings-text: var(--app-text-muted);
+  --app-sidebar-footer-settings-bg: color-mix(
+    in srgb,
+    var(--as-primary-color) 18%,
+    var(--app-panel-bg)
+  );
+  --app-sidebar-footer-settings-hover-bg: color-mix(
+    in srgb,
+    var(--as-primary-color) 25%,
+    var(--app-panel-bg)
+  );
+  --app-sidebar-footer-settings-hover-text: var(--app-text-color);
+  --app-sidebar-user-avatar-bg: var(--as-primary-200);
+  --app-sidebar-user-avatar-text: var(--as-primary-color);
+
+  /* ── Controls ─────────────────────────────────────────────────────────── */
+  --app-control-surface-bg: var(--as-surface-0);
+  --app-control-surface-border: var(--as-surface-300);
+  --app-control-surface-text: var(--as-surface-900);
+  --app-control-focus-ring: color-mix(in srgb, var(--as-primary-color) 60%, transparent);
+  --app-control-disabled-bg: color-mix(in srgb, var(--app-panel-muted-bg) 82%, white);
+  --app-control-disabled-border: var(--as-surface-200);
+  --app-control-disabled-text: var(--as-surface-700);
+
+  --app-search-input-bg: var(--as-surface-0);
+  --app-search-input-border: var(--as-surface-300);
+  --app-search-input-text: var(--as-surface-900);
+  --app-search-input-prefix: var(--as-surface-900);
+
+  --app-checkbox-bg: var(--as-surface-50);
+  --app-checkbox-border: var(--as-surface-300);
+  --app-checkbox-disabled-bg: var(--as-surface-100);
+  --app-checkbox-disabled-border: var(--as-surface-100);
+  --app-checkbox-accent: var(--as-primary-500);
+  --app-checkbox-hover-border: var(--as-primary-600);
+
+  /* ── Buttons ──────────────────────────────────────────────────────────── */
+  --app-primary-button-bg: var(--as-primary-color);
+  --app-primary-button-disabled-text: var(--as-surface-0);
+
+  --app-outline-button-bg: var(--as-surface-0);
+  --app-outline-button-border: var(--app-border-color);
+  --app-outline-button-text: var(--as-surface-900);
+  --app-outline-button-hover-bg: var(--as-primary-color);
+  --app-outline-button-hover-text: var(--as-surface-0);
+  --app-outline-button-disabled-bg: rgba(0, 0, 0, 0.3);
+  --app-outline-button-disabled-text: var(--as-surface-0);
+
+  /* ── Components ───────────────────────────────────────────────────────── */
+  --app-status-online: #22c55e;
+  --app-status-away: #f59e0b;
+  --app-status-busy: #ef4444;
+  --app-status-critical: #f97316;
+  --app-status-invisible: #94a3b8;
+
+  --app-error-color: var(--color-red-500);
+  --app-error-ring: color-mix(in srgb, var(--color-red-500) 25%, transparent);
+
+  --app-table-header-bg: var(--as-primary-200);
+
+  --app-textarea-bg: var(--app-panel-bg);
+  --app-textarea-border: var(--as-surface-300);
+  --app-textarea-focus-outline: solid 3px
+    color-mix(in srgb, var(--as-primary-color) 30%, transparent);
+
+  --app-toggleswitch-disabled-checked-bg: color-mix(in srgb, var(--as-primary-color) 62%, #000000);
+  --app-toggleswitch-handle-bg: var(--as-surface-0);
+  --app-toggle-track-bg: var(--as-surface-300);
+  --app-toggle-track-hover-bg: var(--as-surface-400);
+  --app-toggle-track-disabled-bg: var(--as-surface-200);
+
+  --app-chip-bg: color-mix(in srgb, var(--as-surface-200) 72%, var(--app-panel-bg));
+  --app-chip-border: color-mix(in srgb, var(--as-surface-300) 74%, transparent);
+  --app-chip-text: var(--as-surface-700);
+
+  --app-expansion-card-bg: var(--as-surface-100);
+  --app-expansion-card-border: color-mix(
+    in srgb,
+    var(--app-border-color) 88%,
+    var(--as-primary-color) 12%
+  );
+
+  --app-tooltip-bg: var(--app-overlay-bg);
+  --app-tooltip-border: var(--app-overlay-border);
+  --app-tooltip-text: var(--app-overlay-text);
+
+  --app-breadcrumb-color-default: var(--as-surface-400);
+  --app-breadcrumb-color-clickable: var(--as-surface-700);
+  --app-breadcrumb-color-clickable-hover: var(--as-surface-800);
+  --app-breadcrumb-color-current: var(--as-primary-color);
+  --app-breadcrumb-color-separator: var(--as-surface-500);
+  --app-breadcrumb-hover-bg: var(--as-surface-100);
+  --app-breadcrumb-dropdown-hover: var(--as-surface-50);
+
+  --app-toast-title-text: var(--as-surface-950);
+  --app-toast-message-text: var(--as-surface-900);
+
+  /* ── as-btn ───────────────────────────────────────────────── */
+  --as-btn-primary-background: var(--as-primary-500);
+  --as-btn-primary-hover-background: var(--as-primary-600);
+  --as-btn-primary-active-background: var(--as-primary-700);
+  --as-btn-primary-border-color: var(--as-primary-500);
+  --as-btn-primary-hover-border-color: var(--as-primary-600);
+  --as-btn-primary-active-border-color: var(--as-primary-700);
+  --as-btn-outlined-primary-border-color: var(--as-primary-500);
+  --as-btn-outlined-primary-color: var(--as-primary-500);
+  --as-btn-outlined-primary-hover-background: color-mix(
+    in srgb,
+    var(--as-primary-500) 12%,
+    transparent
+  );
+  --as-btn-outlined-primary-active-background: color-mix(
+    in srgb,
+    var(--as-primary-500) 20%,
+    transparent
+  );
+  --as-btn-text-primary-color: var(--as-primary-500);
+  --as-btn-text-primary-hover-background: color-mix(
+    in srgb,
+    var(--as-primary-500) 10%,
+    transparent
+  );
+  --as-btn-text-primary-active-background: color-mix(
+    in srgb,
+    var(--as-primary-500) 18%,
+    transparent
+  );
+  --as-btn-link-color: var(--as-primary-500);
+  --as-btn-link-hover-color: var(--as-primary-600);
+
+  /* ── Toggle switch — color del "handle" (thumb) del switch ─────────────── */
+  --as-toggleswitch-handle-background: var(--app-toggleswitch-handle-bg);
+  --as-toggleswitch-handle-hover-background: var(--app-toggleswitch-handle-bg);
+  --as-toggleswitch-handle-checked-background: var(--app-toggleswitch-handle-bg);
+  --as-toggleswitch-handle-checked-hover-background: var(--app-toggleswitch-handle-bg);
+  --as-toggleswitch-handle-disabled-background: var(--app-toggleswitch-handle-bg);
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* ── General ──────────────────────────────────────────────────────────── */
+  --app-shell-bg: color-mix(in srgb, var(--as-surface-950) 88%, black);
+  --app-panel-bg: color-mix(in srgb, var(--as-surface-900) 84%, var(--as-surface-950));
+  --app-panel-muted-bg: color-mix(in srgb, var(--as-surface-800) 78%, var(--as-surface-900));
+  --app-surface-bg: var(--as-surface-800);
+  --app-border-color: color-mix(in srgb, var(--as-surface-700) 72%, rgba(255, 255, 255, 0.18));
+
+  --app-text-color: var(--as-surface-0);
+  --app-text-muted: var(--as-surface-200);
+  --app-text-subtle: var(--as-surface-400);
+  --app-text-primary: var(--as-primary-500);
+  --app-text-primary-hover: var(--as-primary-color);
+
+  --app-strong-bg: var(--as-surface-0);
+  --app-strong-text: var(--as-surface-950);
+
+  --app-container-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --app-container-border: var(--app-border-color);
+  --app-header-focus-ring: var(--as-primary-400);
+  --app-overlay-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.35);
+  --app-surface-shadow-soft: 0 8px 20px rgba(0, 0, 0, 0.18);
+
+  --app-action-icon-color: var(--as-surface-0);
+
+  --app-overlay-border: color-mix(in srgb, var(--app-border-color) 82%, rgba(255, 255, 255, 0.18));
+
+  --app-disabled-text: var(--as-surface-400);
+
+  --app-placeholder-color: color-mix(in srgb, var(--as-surface-200) 68%, rgba(255, 255, 255, 0.32));
+  --app-caret-color: var(--as-primary-400);
+  --app-accent-soft-bg: color-mix(in srgb, var(--as-primary-color) 16%, transparent);
+
+  /* ── Sidebar ──────────────────────────────────────────────────────────── */
+  --app-sidebar-bg: color-mix(in srgb, var(--as-surface-900) 82%, var(--as-surface-950));
+  --app-sidebar-hover-bg: color-mix(in srgb, var(--as-primary-color) 18%, var(--app-panel-bg));
+  --app-sidebar-active-bg: color-mix(in srgb, var(--as-primary-color) 28%, var(--app-panel-bg));
+  --app-sidebar-active-text: var(--as-primary-300);
+  --app-sidebar-active-border: color-mix(in srgb, var(--as-primary-300) 82%, #ffffff);
+  --app-sidebar-tree-line: rgba(255, 255, 255, 0.32);
+  --app-sidebar-footer-settings-bg: color-mix(
+    in srgb,
+    var(--as-primary-color) 24%,
+    var(--app-panel-bg)
+  );
+  --app-sidebar-footer-settings-hover-bg: color-mix(
+    in srgb,
+    var(--as-primary-color) 32%,
+    var(--app-panel-bg)
+  );
+
+  /* ── Controls ─────────────────────────────────────────────────────────── */
+  --app-control-surface-bg: var(--app-panel-bg);
+  --app-control-surface-border: color-mix(
+    in srgb,
+    var(--app-border-color) 75%,
+    rgba(255, 255, 255, 0.2)
+  );
+  --app-control-surface-text: var(--app-text-color);
+  --app-control-disabled-bg: color-mix(in srgb, var(--app-panel-muted-bg) 80%, black);
+  --app-control-disabled-border: var(--app-border-color);
+  --app-control-disabled-text: var(--as-surface-400);
+
+  --app-search-input-bg: var(--app-panel-muted-bg);
+  --app-search-input-border: var(--app-overlay-border);
+  --app-search-input-text: var(--app-text-color);
+  --app-search-input-prefix: var(--app-text-color);
+
+  --app-checkbox-bg: var(--as-surface-800);
+  --app-checkbox-border: var(--as-surface-500);
+  --app-checkbox-hover-border: var(--as-primary-400);
+  --app-checkbox-disabled-bg: var(--app-panel-muted-bg);
+  --app-checkbox-disabled-border: var(--as-surface-600);
+  --app-checkbox-accent: var(--as-primary-color);
+
+  /* ── Buttons ──────────────────────────────────────────────────────────── */
+  --app-outline-button-bg: var(--app-panel-bg);
+  --app-outline-button-text: var(--app-text-color);
+  --app-outline-button-disabled-bg: rgba(255, 255, 255, 0.12);
+  --app-outline-button-disabled-text: var(--app-text-color);
+
+  /* ── Components ───────────────────────────────────────────────────────── */
+  --app-status-online: #38d39f;
+  --app-status-critical: #fb923c;
+
+  --app-textarea-border: var(--app-overlay-border);
+
+  --app-toggleswitch-disabled-checked-bg: color-mix(in srgb, var(--as-primary-color) 55%, #000000);
+  --app-toggle-track-bg: var(--as-surface-700);
+  --app-toggle-track-hover-bg: var(--as-surface-600);
+  --app-toggle-track-disabled-bg: var(--as-surface-800);
+
+  --app-chip-bg: color-mix(in srgb, var(--as-surface-0) 8%, transparent);
+  --app-chip-border: color-mix(in srgb, var(--app-border-color) 68%, rgba(255, 255, 255, 0.12));
+  --app-chip-text: var(--app-text-muted);
+
+  --app-expansion-card-bg: color-mix(in srgb, var(--as-surface-800) 55%, var(--app-panel-muted-bg));
+  --app-expansion-card-border: color-mix(
+    in srgb,
+    var(--app-border-color) 88%,
+    rgba(255, 255, 255, 0.16)
+  );
+
+  --app-breadcrumb-color-clickable: var(--as-surface-0);
+  --app-breadcrumb-color-clickable-hover: var(--as-surface-0);
+  --app-breadcrumb-color-current: var(--app-sidebar-active-text);
+  --app-breadcrumb-color-separator: rgba(255, 255, 255, 0.52);
+  --app-breadcrumb-hover-bg: rgba(255, 255, 255, 0.06);
+  --app-breadcrumb-dropdown-hover: rgba(255, 255, 255, 0.04);
+  --app-breadcrumb-current-bg: color-mix(in srgb, var(--as-primary-color) 22%, transparent);
+  --app-breadcrumb-current-border: color-mix(in srgb, var(--as-primary-color) 36%, transparent);
+
+  --app-toast-title-text: var(--as-surface-0);
+  --app-toast-message-text: var(--as-surface-0);
+
+  /* ── as-btn ───────────────────────────────────────────────── */
+  --as-btn-outlined-primary-border-color: var(--as-primary-300);
+  --as-btn-outlined-primary-color: var(--as-primary-300);
+  --as-btn-outlined-primary-hover-background: color-mix(
+    in srgb,
+    var(--as-primary-400) 16%,
+    transparent
+  );
+  --as-btn-outlined-primary-active-background: color-mix(
+    in srgb,
+    var(--as-primary-400) 26%,
+    transparent
+  );
+  --as-btn-text-primary-color: var(--as-primary-300);
+  --as-btn-text-primary-hover-background: color-mix(
+    in srgb,
+    var(--as-primary-400) 14%,
+    transparent
+  );
+  --as-btn-text-primary-active-background: color-mix(
+    in srgb,
+    var(--as-primary-400) 22%,
+    transparent
+  );
+  --as-btn-link-color: var(--as-primary-300);
+  --as-btn-link-hover-color: var(--as-primary-200);
+}
+
+/* Overrides de sidebar para la variante de color primario negro. */
+.dark[data-primary-color='black'] {
+  --app-sidebar-hover-bg: color-mix(in srgb, var(--as-surface-0) 10%, var(--app-panel-bg));
+  --app-sidebar-active-bg: color-mix(in srgb, var(--as-surface-0) 14%, var(--app-panel-bg));
+  --app-sidebar-active-text: var(--as-surface-0);
+  --app-sidebar-active-border: color-mix(in srgb, var(--as-surface-0) 76%, transparent);
+  --app-sidebar-tree-line-active: color-mix(in srgb, var(--as-surface-0) 52%, transparent);
+  --app-sidebar-footer-settings-bg: color-mix(
+    in srgb,
+    var(--as-surface-0) 10%,
+    var(--app-panel-bg)
+  );
+  --app-sidebar-footer-settings-hover-bg: color-mix(
+    in srgb,
+    var(--as-surface-0) 14%,
+    var(--app-panel-bg)
+  );
+  --app-accent-soft-bg: color-mix(in srgb, var(--as-surface-0) 9%, transparent);
+  --app-badge-soft-bg: color-mix(in srgb, var(--as-surface-0) 9%, var(--app-panel-bg));
+  --app-badge-soft-text: var(--as-surface-100);
+}

@@ -6,6 +6,7 @@ import {
   type CapabilityCategory,
   type CapabilityOption,
   type Registry,
+  type RequirementContext,
 } from '../config/capabilities.js';
 import { DEFAULT_OPTIONS } from '../config/resolve.js';
 import { PACKAGE_MANAGERS, type StarterOptions } from '../config/schema.js';
@@ -48,13 +49,16 @@ export async function runWizard(
   ): CapabilityOption | undefined => registry[category].find((option) => option.id === id);
 
   /** What the choices made so far say about the project, for the requirements of the options. */
-  function context(): { architecture?: string; style?: string; icons?: string } {
-    const style = known.style ?? answers.style ?? (known.tailwind ? 'css' : undefined);
+  function context(): RequirementContext {
+    const tailwind = known.tailwind ?? (answers.tailwind as boolean | undefined);
+    const style = known.style ?? answers.style ?? (tailwind ? 'css' : undefined);
     return {
       architecture: String(
         known.architecture ?? answers.architecture ?? DEFAULT_OPTIONS.architecture,
       ),
       style: style === undefined ? undefined : String(style),
+      // A stylesheet format that is not Tailwind CSS means there is no Tailwind CSS.
+      tailwind: tailwind ?? (style === undefined ? undefined : false),
       icons: String(known.icons ?? answers.icons ?? '') || undefined,
     };
   }
@@ -87,11 +91,8 @@ export async function runWizard(
     if (options.length < 2) return;
 
     const detected = key === 'packageManager' ? detectPackageManager(env) : undefined;
-    const preselected =
-      options.find((option) => option.recommended)?.id ??
-      detected ??
-      options.find((option) => option.id === DEFAULT_OPTIONS[key])?.id ??
-      options[0]?.id;
+    // Only a category with one best answer starts on it; elsewhere the user chooses from the top.
+    const preselected = options.find((option) => option.recommended)?.id ?? detected;
     const answer = await prompter.select({
       name: key,
       message: MESSAGES[key],

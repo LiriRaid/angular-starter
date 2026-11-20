@@ -1,0 +1,125 @@
+@layer legacy-overrides {
+  .as-tooltip {
+    /* Reset del estilo por defecto que el navegador aplica a un elemento [popover]
+       (fondo opaco, borde, margin:auto, padding) — el look real vive en .as-tooltip__text. */
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: transparent;
+    inset: auto;
+    overflow: visible;
+    --as-tooltip-arrow-size-outer: 9px;
+    --as-tooltip-arrow-size-inner: 8px;
+    --as-tooltip-gutter: 0px;
+    --as-tooltip-surface: var(--app-tooltip-bg);
+    --as-tooltip-foreground: var(--app-tooltip-text);
+    --as-tooltip-border: var(--app-tooltip-border, transparent);
+    --_ao: var(--as-tooltip-arrow-size-outer);
+    --_ai: var(--as-tooltip-arrow-size-inner);
+    color: var(--as-tooltip-foreground);
+    pointer-events: none;
+  }
+
+  .as-tooltip--right {
+    padding-left: calc(var(--as-tooltip-gutter) + var(--_ao) - 1px);
+  }
+  .as-tooltip--left {
+    padding-right: calc(var(--as-tooltip-gutter) + var(--_ao) - 1px);
+  }
+  .as-tooltip--top {
+    padding-bottom: calc(var(--as-tooltip-gutter) + var(--_ao) - 1px);
+  }
+  .as-tooltip--bottom {
+    padding-top: calc(var(--as-tooltip-gutter) + var(--_ao) - 1px);
+  }
+
+  .as-tooltip__text {
+    position: relative;
+    overflow: visible;
+    border: 1px solid var(--as-tooltip-border);
+    border-radius: 0.9rem;
+    background: var(--as-tooltip-surface);
+    color: inherit;
+    box-shadow: var(--app-overlay-shadow);
+    padding: 0.625rem;
+    width: max-content;
+    max-width: none;
+    display: flex;
+    white-space: pre-line;
+    word-break: break-word;
+  }
+
+  .as-tooltip__text::before,
+  .as-tooltip__text::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    pointer-events: none;
+  }
+
+  .as-tooltip--right .as-tooltip__text::before,
+  .as-tooltip--right .as-tooltip__text::after,
+  .as-tooltip--left .as-tooltip__text::before,
+  .as-tooltip--left .as-tooltip__text::after {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .as-tooltip--top .as-tooltip__text::before,
+  .as-tooltip--top .as-tooltip__text::after,
+  .as-tooltip--bottom .as-tooltip__text::before,
+  .as-tooltip--bottom .as-tooltip__text::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .as-tooltip--right .as-tooltip__text::before {
+    left: calc(var(--_ao) * -1);
+    margin-top: -2px;
+    border-width: var(--_ao) var(--_ao) var(--_ao) 0;
+    border-color: transparent var(--as-tooltip-border) transparent transparent;
+  }
+  .as-tooltip--right .as-tooltip__text::after {
+    left: calc(var(--_ai) * -1);
+    border-width: var(--_ai) var(--_ai) var(--_ai) 0;
+    border-color: transparent var(--as-tooltip-surface) transparent transparent;
+  }
+
+  .as-tooltip--left .as-tooltip__text::before {
+    right: calc(var(--_ao) * -1);
+    margin-top: -2px;
+    border-width: var(--_ao) 0 var(--_ao) var(--_ao);
+    border-color: transparent transparent transparent var(--as-tooltip-border);
+  }
+  .as-tooltip--left .as-tooltip__text::after {
+    right: calc(var(--_ai) * -1);
+    border-width: var(--_ai) 0 var(--_ai) var(--_ai);
+    border-color: transparent transparent transparent var(--as-tooltip-surface);
+  }
+
+  .as-tooltip--top .as-tooltip__text::before {
+    bottom: calc(var(--_ao) * -1);
+    margin-left: -2px;
+    border-width: var(--_ao) var(--_ao) 0 var(--_ao);
+    border-color: var(--as-tooltip-border) transparent transparent transparent;
+  }
+  .as-tooltip--top .as-tooltip__text::after {
+    bottom: calc(var(--_ai) * -1);
+    border-width: var(--_ai) var(--_ai) 0 var(--_ai);
+    border-color: var(--as-tooltip-surface) transparent transparent transparent;
+  }
+
+  .as-tooltip--bottom .as-tooltip__text::before {
+    top: calc(var(--_ao) * -1);
+    margin-left: -2px;
+    border-width: 0 var(--_ao) var(--_ao) var(--_ao);
+    border-color: transparent transparent var(--as-tooltip-border) transparent;
+  }
+  .as-tooltip--bottom .as-tooltip__text::after {
+    top: calc(var(--_ai) * -1);
+    border-width: 0 var(--_ai) var(--_ai) var(--_ai);
+    border-color: transparent transparent var(--as-tooltip-surface) transparent;
+  }
+}

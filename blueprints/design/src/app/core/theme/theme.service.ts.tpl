@@ -1,78 +1,108 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, inject, signal } from '@angular/core';
-import { getPrimaryColor, getSurfaceColor } from './theme-palettes';
-import {
-  getStoredMode,
-  getStoredPrimaryKey,
-  getStoredSurfaceKey,
-  setStoredMode,
-  setStoredPrimaryKey,
-  setStoredSurfaceKey,
-  type ThemeMode,
-} from './theme-storage';
+import { DEFAULT_PRIMARY_COLOR_KEY, DEFAULT_SURFACE_COLOR_KEY, getPrimaryColor, getSurfaceColor } from './theme-palettes';
+import { getStoredPrimaryColorKey, getStoredSurfaceColorKey, getStoredThemeMode, setStoredPrimaryColorKey, setStoredSurfaceColorKey, setStoredThemeMode } from './theme-preferences.storage';
 
-export type { ThemeMode } from './theme-storage';
+export type ThemeMode = 'light' | 'dark';
 
-/**
- * Light and dark mode, the primary (accent) color and the surface (neutral) color of the app.
- *
- * The design tokens in `src/styles/tokens.css` already define a default theme, so the first paint
- * is right; this service only changes them at run time: `dark` class on `<html>`, the
- * `--as-primary-*` and `--as-surface-*` ramps, and the preference saved in the browser.
- */
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
-  private readonly root = inject(DOCUMENT).documentElement;
+  private readonly document = inject(DOCUMENT);
+  private readonly rootElement = this.document.documentElement;
 
-  readonly mode = signal<ThemeMode>('light');
-  readonly primaryColorKey = signal('');
-  readonly surfaceColorKey = signal('');
+  readonly mode = signal<ThemeMode>('dark');
+  readonly primaryColorKey = signal<string>(DEFAULT_PRIMARY_COLOR_KEY);
+  readonly surfaceColorKey = signal<string>(DEFAULT_SURFACE_COLOR_KEY);
 
-  /** Applies the saved preference, or the one the operating system asks for. */
   initialize(): void {
-    const preferred = globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    this.applyMode(getStoredMode() ?? preferred);
-    this.applyPrimary(getStoredPrimaryKey());
-    this.applySurface(getStoredSurfaceKey());
+    this.initMode();
+    this.initColor();
+    this.initSurface();
   }
 
-  setMode(mode: ThemeMode): void {
-    this.applyMode(mode);
-    setStoredMode(mode);
-  }
+  // ── Mode ──────────────────────────────────────────────
 
   toggleMode(): void {
     this.setMode(this.mode() === 'dark' ? 'light' : 'dark');
   }
 
-  setPrimaryColor(key: string): void {
-    this.applyPrimary(key);
-    setStoredPrimaryKey(this.primaryColorKey());
+  setMode(mode: ThemeMode): void {
+    this.applyMode(mode, true);
+    setStoredThemeMode(mode);
   }
 
-  setSurfaceColor(key: string): void {
-    this.applySurface(key);
-    setStoredSurfaceKey(this.surfaceColorKey());
-  }
+  // ── Primary color ─────────────────────────────────────
 
-  private applyMode(mode: ThemeMode): void {
-    this.mode.set(mode);
-    this.root.classList.toggle('dark', mode === 'dark');
-  }
-
-  private applyPrimary(key: string): void {
+  applyColor(key: string): void {
     const color = getPrimaryColor(key);
-    for (const [shade, value] of Object.entries(color.palette)) {
-      this.root.style.setProperty(`--as-primary-${shade}`, value);
-    }
+    this.applyPrimaryPaletteVars(color.palette);
+    // Attributes, not `dataset`: the DOM of the server renderer has no `dataset`.
+    this.rootElement.setAttribute('data-primary-color', color.key);
     this.primaryColorKey.set(color.key);
+    setStoredPrimaryColorKey(color.key);
   }
 
-  private applySurface(key: string): void {
+  // ── Surface color ─────────────────────────────────────
+
+  applySurface(key: string): void {
     const color = getSurfaceColor(key);
-    for (const [shade, value] of Object.entries(color.palette)) {
-      this.root.style.setProperty(`--as-surface-${shade}`, value);
-    }
+    this.applySurfacePaletteVars(color.palette);
+    this.rootElement.setAttribute('data-surface-color', color.key);
     this.surfaceColorKey.set(color.key);
+    setStoredSurfaceColorKey(color.key);
+  }
+
+  // ── Private ───────────────────────────────────────────
+
+  private initMode(): void {
+    const saved = getStoredThemeMode();
+    const resolved = saved ? saved : globalThis.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    this.applyMode(resolved, false);
+  }
+
+  private initColor(): void {
+    this.applyColor(getStoredPrimaryColorKey());
+  }
+
+  private initSurface(): void {
+    this.applySurface(getStoredSurfaceColorKey());
+  }
+
+  private applyMode(mode: ThemeMode, withTransitionGuard: boolean): void {
+    if (withTransitionGuard) this.rootElement.classList.add('theme-switching');
+    this.mode.set(mode);
+    this.rootElement.classList.toggle('dark', mode === 'dark');
+    this.updatePrimaryContrastColor();
+    if (withTransitionGuard) {
+      requestAnimationFrame(() => requestAnimationFrame(() => this.rootElement.classList.remove('theme-switching')));
+    }
+  }
+
+  /** Sets the 50-950 ramp of the chosen palette and the semantic tokens derived from it:
+   *  color = 500, hover = 600, active = 700, the same in light and dark. */
+  private applyPrimaryPaletteVars(palette: Record<string, string>): void {
+    for (const [shade, value] of Object.entries(palette)) {
+      this.rootElement.style.setProperty(`--as-primary-${shade}`, value);
+    }
+
+    this.rootElement.style.setProperty('--as-primary-color', palette['500']);
+    this.rootElement.style.setProperty('--as-primary-hover-color', palette['600']);
+    this.rootElement.style.setProperty('--as-primary-active-color', palette['700']);
+  }
+
+  /** Sets the 50-950 ramp of the chosen surface palette. */
+  private applySurfacePaletteVars(palette: Record<string, string>): void {
+    for (const [shade, value] of Object.entries(palette)) {
+      this.rootElement.style.setProperty(`--as-surface-${shade}`, value);
+    }
+
+    this.updatePrimaryContrastColor();
+  }
+
+  /** The one semantic token that changes between light and dark: white in light, the 900 shade
+   *  of the chosen surface palette in dark. */
+  private updatePrimaryContrastColor(): void {
+    const contrast = this.mode() === 'dark' ? (getSurfaceColor(this.surfaceColorKey()).palette['900'] ?? '#171717') : '#ffffff';
+    this.rootElement.style.setProperty('--as-primary-contrast-color', contrast);
   }
 }

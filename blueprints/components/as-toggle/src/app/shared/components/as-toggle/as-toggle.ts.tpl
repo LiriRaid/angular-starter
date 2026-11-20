@@ -1,39 +1,24 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  booleanAttribute,
-  computed,
-  forwardRef,
-  input,
-} from '@angular/core';
-import { NG_VALUE_ACCESSOR } from '@angular/forms';
-import { AsFormControl } from '../as-form-control/as-form-control';
+import { ChangeDetectionStrategy, Component, ViewEncapsulation, input, linkedSignal, output } from '@angular/core';
 
-/**
- * An on/off switch with its label. A form control of `boolean`.
- *
- * ```html
- * <as-toggle label="Email notifications" [formControl]="notifications" />
- * ```
- */
 @Component({
   selector: 'as-toggle',
+  standalone: true,
   templateUrl: './as-toggle.html',
   styleUrl: './as-toggle.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => AsToggle), multi: true }],
+  encapsulation: ViewEncapsulation.None,
 })
-export class AsToggle extends AsFormControl<boolean> {
-  readonly label = input<string>('');
-  readonly disabled = input(false, { transform: booleanAttribute });
+export class AsToggle {
+  readonly checked = input<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  readonly ariaLabel = input<string | undefined>(undefined);
+  readonly changed = output<boolean>();
 
-  protected readonly isDisabled = computed(() => this.disabled() || this.disabledByForm());
+  protected readonly localChecked = linkedSignal(() => this.checked());
 
-  protected override empty(): boolean {
-    return false;
-  }
-
-  protected toggle(): void {
-    if (!this.isDisabled()) this.update(!this.value());
+  onToggle(): void {
+    const next = !this.localChecked();
+    this.localChecked.set(next);
+    this.changed.emit(next);
   }
 }

@@ -1,77 +1,63 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  DestroyRef,
-  ElementRef,
-  booleanAttribute,
-  inject,
-  input,
-  output,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, ViewEncapsulation, booleanAttribute, input, output, signal, viewChild } from '@angular/core';
+
+import type { LucideIconName } from '@core/common/icons/lucide-icons';
+import { AsButton } from '../as-button/as-button';
 import { AsIcon } from '../as-icon/as-icon';
+import { AsModal } from '../as-modal/as-modal';
 
 /**
- * A square to choose and preview an image, for avatars, logos and covers. It shows the picture as
- * soon as the user picks it and tells you which file it is; you upload it and may set `imageUrl`.
- *
- * ```html
- * <as-preview label="logo" [imageUrl]="company.logo" (fileSelected)="upload($event)" (removed)="clear()" />
- * ```
+ * Caja de subida + preview de una sola imagen (logo, icono, avatar, etc).
+ * Vacía: dropzone clickeable con ícono e instrucciones.
+ * Con imagen: solo la imagen (sin instrucciones), clic abre as-modal en variant="preview"
+ * (panel ajustado al tamaño natural de la imagen, sin header, botón de cerrar flotando encima).
+ * La validación de archivo (tipo/tamaño) queda del lado de quien lo consume, vía `fileSelected`.
  */
 @Component({
   selector: 'as-preview',
-  imports: [AsIcon],
+  standalone: true,
+  imports: [AsIcon, AsModal, AsButton],
   templateUrl: './as-preview.html',
   styleUrl: './as-preview.css',
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AsPreview {
-  /** URL of the current image, when there is one. */
   readonly imageUrl = input<string | null>(null);
-  readonly label = input<string>('image');
+  readonly label = input<string>('imagen');
   readonly hint = input<string>('');
-  /** Icon shown while there is no image. */
-  readonly placeholderIcon = input<string>('image');
-  readonly accept = input<string>('image/*');
+  readonly placeholderIcon = input<LucideIconName>('Image');
   readonly disabled = input(false, { transform: booleanAttribute });
 
   readonly fileSelected = output<File>();
   readonly removed = output<void>();
 
-  private readonly picker = viewChild<ElementRef<HTMLInputElement>>('picker');
-  private readonly chosen = signal<string | null>(null);
+  private readonly fileInput = viewChild.required<ElementRef<HTMLInputElement>>('fileInput');
 
-  protected readonly shown = () => this.chosen() ?? this.imageUrl();
+  readonly isPreviewOpen = signal(false);
 
-  constructor() {
-    inject(DestroyRef).onDestroy(() => this.release());
+  onBoxClick(): void {
+    if (this.imageUrl()) {
+      this.isPreviewOpen.set(true);
+      return;
+    }
+
+    if (this.disabled()) return;
+    this.fileInput().nativeElement.click();
   }
 
-  protected open(): void {
-    if (!this.disabled()) this.picker()?.nativeElement.click();
-  }
-
-  protected onPicked(event: Event): void {
+  onFileInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (!file) return;
-    this.release();
-    this.chosen.set(URL.createObjectURL(file));
-    this.fileSelected.emit(file);
-    // Choosing the same file again must fire a new change.
     input.value = '';
+    if (file) this.fileSelected.emit(file);
   }
 
-  protected remove(): void {
-    this.release();
+  onRemoveClick(event: MouseEvent): void {
+    event.stopPropagation();
     this.removed.emit();
   }
 
-  private release(): void {
-    const url = this.chosen();
-    if (url) URL.revokeObjectURL(url);
-    this.chosen.set(null);
+  closePreview(): void {
+    this.isPreviewOpen.set(false);
   }
 }

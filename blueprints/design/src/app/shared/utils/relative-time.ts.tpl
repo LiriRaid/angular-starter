@@ -1,34 +1,22 @@
-const UNITS: readonly (readonly [Intl.RelativeTimeFormatUnit, number])[] = [
-  ['year', 365 * 24 * 3600],
-  ['month', 30 * 24 * 3600],
-  ['week', 7 * 24 * 3600],
-  ['day', 24 * 3600],
-  ['hour', 3600],
+const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
+  ['year', 31_536_000],
+  ['month', 2_592_000],
+  ['week', 604_800],
+  ['day', 86_400],
+  ['hour', 3_600],
   ['minute', 60],
 ];
 
-export interface RelativeTimeOptions {
-  /** BCP 47 language tag; the language of the browser when absent. */
-  locale?: string;
-  /** The moment to measure from, in milliseconds; now when absent. Useful in tests. */
-  now?: number;
-}
+const rtf = new Intl.RelativeTimeFormat('es', { numeric: 'always' });
 
-/**
- * How long ago (or from now) a moment is, in the user's language: "3 hours ago", "in 2 days",
- * "now". Accepts a Date, an ISO string or milliseconds.
- */
-export function formatRelativeTime(
-  value: Date | string | number,
-  { locale, now = Date.now() }: RelativeTimeOptions = {},
-): string {
-  const time = new Date(value).getTime();
-  if (Number.isNaN(time)) return '';
+export function formatRelativeTime(iso: string): string {
+  const diffSeconds = Math.max(0, (Date.now() - new Date(iso).getTime()) / 1000);
+  if (diffSeconds < 60) return 'hace instantes';
 
-  const format = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' });
-  const seconds = (time - now) / 1000;
-  for (const [unit, size] of UNITS) {
-    if (Math.abs(seconds) >= size) return format.format(Math.trunc(seconds / size), unit);
+  for (const [unit, secondsInUnit] of UNITS) {
+    const value = Math.floor(diffSeconds / secondsInUnit);
+    if (value >= 1) return rtf.format(-value, unit);
   }
-  return format.format(0, 'second');
+
+  return 'hace instantes';
 }

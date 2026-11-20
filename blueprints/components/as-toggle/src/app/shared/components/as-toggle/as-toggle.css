@@ -1,65 +1,71 @@
-.as-toggle {
+as-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.625rem;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--as-text);
-  cursor: pointer;
 }
 
-.as-toggle:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+/* Switch nativo — mismas dimensiones y colores que traía p-toggleswitch con el preset
+   Aura (track 2.5rem × 1.5rem radio 30px, handle 1rem con inset 0.25rem, slide 0.2s).
+   Los colores del track viven como tokens --app-toggle-* en theme-styles.css (con su
+   variante .dark); el handle reutiliza --app-toggleswitch-handle-bg que ya existía. */
+.as-toggle {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 30px;
+  background: var(--app-toggle-track-bg);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    outline-color 0.2s;
+}
+
+.as-toggle:not(:disabled):hover {
+  background: var(--app-toggle-track-hover-bg);
+}
+
+.as-toggle--checked {
+  background: var(--as-primary-color);
+}
+
+.as-toggle--checked:not(:disabled):hover {
+  background: var(--as-primary-hover-color);
 }
 
 .as-toggle:focus-visible {
-  outline: none;
+  outline: 1px solid var(--as-primary-color);
+  outline-offset: 2px;
 }
 
-.as-toggle:focus-visible .as-toggle__track {
-  box-shadow: 0 0 0 3px var(--as-focus-ring);
+.as-toggle:disabled {
+  cursor: default;
+  opacity: 0.6;
+  background: var(--app-toggle-track-disabled-bg);
 }
 
-.as-toggle__track {
-  position: relative;
-  flex: none;
-  width: 2.25rem;
-  height: 1.25rem;
-  border-radius: var(--as-radius-full);
-  background: var(--as-border);
-  transition: background-color 150ms ease;
+/* Un toggle encendido pero bloqueado no se atenúa — mantiene un tinte del primario
+   (mismo comportamiento que ya tenía el override sobre p-toggleswitch). */
+.as-toggle--checked:disabled {
+  opacity: 1;
+  background: var(--app-toggleswitch-disabled-checked-bg);
 }
 
-.as-toggle:hover:not(:disabled) .as-toggle__track {
-  background: var(--as-text-subtle);
-}
-
-.as-toggle[aria-checked='true'] .as-toggle__track,
-.as-toggle[aria-checked='true']:hover:not(:disabled) .as-toggle__track {
-  background: var(--as-primary);
-}
-
-.as-toggle__thumb {
+.as-toggle-handle {
   position: absolute;
-  top: 0.125rem;
-  left: 0.125rem;
+  top: 50%;
+  left: 0.25rem;
   width: 1rem;
   height: 1rem;
-  border-radius: var(--as-radius-full);
-  background: #ffffff;
-  box-shadow: var(--as-shadow-sm);
-  transition: transform 150ms ease;
+  border-radius: 50%;
+  background: var(--app-toggleswitch-handle-bg);
+  transform: translateY(-50%);
+  transition: left 0.2s;
 }
 
-.as-toggle[aria-checked='true'] .as-toggle__thumb {
-  transform: translateX(1rem);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .as-toggle__track,
-  .as-toggle__thumb {
-    transition: none;
-  }
+.as-toggle--checked .as-toggle-handle {
+  left: calc(100% - 1rem - 0.25rem);
 }

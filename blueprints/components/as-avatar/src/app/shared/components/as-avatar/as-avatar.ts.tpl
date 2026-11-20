@@ -1,49 +1,67 @@
-import { ChangeDetectionStrategy, Component, computed, input, signal } from '@angular/core';
-import { deriveInitials } from '../../utils/derive-initials';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-export type AsAvatarSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
-export type AsAvatarStatus = 'online' | 'away' | 'busy' | 'offline';
+import { AsIcon } from '../as-icon/as-icon';
 
-/**
- * A person or entity: its picture, or its initials when there is no picture (or it fails to load).
- *
- * ```html
- * <as-avatar name="Ada Lovelace" />
- * <as-avatar name="Ada Lovelace" src="/ada.png" size="lg" status="online" />
- * ```
- */
+/** Icon drawn in the presence dot for each status; `online` has none. */
+const PRESENCE_STATUS_ICONS: Readonly<Record<string, string | null>> = {
+  online: null,
+  away: 'Moon',
+  busy: 'CircleMinus',
+  invisible: 'CircleDot',
+};
+
+function presenceStatusIcon(status: string | null | undefined): string | null {
+  return PRESENCE_STATUS_ICONS[status ?? ''] ?? null;
+}
+
+export type AsAvatarMode = 'avatar' | 'presence';
+
 @Component({
   selector: 'as-avatar',
+  standalone: true,
+  imports: [AsIcon],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './as-avatar.html',
   styleUrl: './as-avatar.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class]': '"as-avatar--" + size() + " as-avatar--" + shape()',
-    '[attr.role]': '"img"',
-    '[attr.aria-label]': 'name() || "Avatar"',
-    '[style.--as-avatar-hue]': 'hue()',
+    '[style.borderRadius]': 'radius()',
+    '[style.position]': "mode() === 'presence' ? 'relative' : null",
   },
 })
 export class AsAvatar {
-  readonly name = input<string>('');
-  readonly src = input<string>('');
-  readonly size = input<AsAvatarSize>('md');
-  readonly shape = input<'circle' | 'square'>('circle');
-  readonly status = input<AsAvatarStatus | ''>('');
+  readonly label = input<string>('');
+  readonly imageUrl = input<string | null>(null);
+  readonly background = input<string>('var(--app-text-subtle)');
+  readonly color = input<string>('#ffffff');
+  readonly size = input<number>(40);
+  readonly cssSize = input<string | null>(null);
+  readonly shape = input<'circle' | 'rounded'>('circle');
+  readonly textClass = input<string>('text-caption-1-bold');
+  readonly alt = input<string>('');
 
-  private readonly failed = signal<string | null>(null);
+  /** 'presence' agrega el punto de estado (online/away/busy/invisible) sobre el avatar,
+   *  reemplazando el <span class="presence-dot"> que antes se repetía en cada feature. */
+  readonly mode = input<AsAvatarMode>('avatar');
+  readonly presenceStatus = input<string | null | undefined>(undefined);
+  /** Overrides manuales — si no se definen, el tamaño del punto se calcula en base a size(). */
+  readonly dotSize = input<string | null>(null);
+  readonly dotIconSize = input<number | null>(null);
+  /** El "anillo" del punto normalmente combina con el fondo del panel — algunos contextos
+   *  (sidebar, overlay de un popover, panel muted) necesitan un color distinto para no dejar un cuadro visible. */
+  readonly dotBackground = input<string | null>(null);
 
-  protected readonly showImage = computed(() => !!this.src() && this.failed() !== this.src());
-  protected readonly initials = computed(() => deriveInitials(this.name()));
+  protected readonly sizeValue = computed(() => this.cssSize() ?? `${this.size()}px`);
 
-  /** A stable color for each name, so the same person always has the same avatar. */
-  protected readonly hue = computed(() => {
-    let hash = 0;
-    for (const character of this.name()) hash = (hash * 31 + character.charCodeAt(0)) % 360;
-    return hash;
+  protected readonly radius = computed(() => {
+    if (this.shape() === 'circle') return '9999px';
+    return this.cssSize() ? '28%' : `${Math.round(this.size() * 0.28)}px`;
   });
+  protected readonly initialsClass = computed(() => `as-avatar as-avatar--initials ${this.textClass()}`);
 
-  protected onError(): void {
-    this.failed.set(this.src());
-  }
+  protected readonly resolvedDotSize = computed(() => this.dotSize() ?? (this.size() <= 40 ? '0.875rem' : '1rem'));
+  protected readonly resolvedDotIconSize = computed(() => this.dotIconSize() ?? (this.size() <= 40 ? 10 : 12));
+  /** El punto queda muy pegado hacia arriba en avatares chicos (40px, user-menu/Teams) con
+   *  el "bottom" default compartido — se baja un poco más solo para ese bucket de tamaño. */
+  protected readonly resolvedDotBottom = computed(() => (this.dotSize() ? null : this.size() <= 40 ? '-2px' : null));
+  protected readonly dotIcon = computed(() => presenceStatusIcon(this.presenceStatus() ?? null));
 }

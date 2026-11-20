@@ -1,0 +1,222 @@
+/* Shared Animations Library */
+
+/* Fade In / Fade Out */
+
+.fade-in-out-enter {
+  opacity: 0;
+  animation: fade-in-out-enter 350ms ease-out forwards;
+}
+
+.fade-in-out-leave {
+  opacity: 1;
+  animation: fade-in-out-leave 200ms ease-in forwards;
+}
+
+@keyframes fade-in-out-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in-out-leave {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+/* Soft Fade In / Out */
+
+.soft-fade-in-out-enter {
+  opacity: 0;
+  animation: soft-fade-in-out-enter 250ms ease-in forwards;
+}
+
+.soft-fade-in-out-leave {
+  opacity: 1;
+  animation: soft-fade-in-out-leave 200ms ease-out forwards;
+}
+
+@keyframes soft-fade-in-out-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes soft-fade-in-out-leave {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+/* Route Fade Transition */
+
+.route-transition {
+  contain: layout paint;
+}
+
+.route-transition.route-entering {
+  animation: route-fade-in 220ms ease-out both;
+}
+
+@keyframes route-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .route-transition.route-entering {
+    animation: none;
+  }
+}
+
+/* Slide In / Out (acordeón de altura desconocida) */
+/* Anima `grid-template-rows` (0fr↔1fr) del wrapper — truco estándar para animar la altura de
+   contenido de tamaño variable con CSS puro (display:grid + min-height:0 en el hijo directo).
+   Usar con `animate.enter="slide-in-out-enter"`/`animate.leave="slide-in-out-leave"` en un
+   `@if` — ej. el buscador colapsable de Conversaciones. */
+
+.slide-in-out-enter,
+.slide-in-out-leave {
+  display: grid;
+  overflow: hidden;
+}
+
+.slide-in-out-enter > *,
+.slide-in-out-leave > * {
+  min-height: 0;
+}
+
+.slide-in-out-enter {
+  animation: slide-in-out-enter 450ms ease-in-out forwards;
+}
+
+.slide-in-out-leave {
+  animation: slide-in-out-leave 350ms ease-in-out forwards;
+}
+
+@keyframes slide-in-out-enter {
+  from {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+
+  to {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-out-leave {
+  from {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  to {
+    grid-template-rows: 0fr;
+    opacity: 0;
+  }
+}
+
+/* Collapse por transición (acordeón de contenido que NUNCA se crea/destruye) */
+/* Mismo truco de `grid-template-rows` (0fr↔1fr) que slide-in-out-*, pero para el otro caso de
+   uso: una tarjeta/sección que siempre está montada en el DOM y solo cambia entre
+   mostrada/colapsada con un booleano a lo largo del tiempo (ej. las tarjetas colapsables del
+   detalle de ticket, mismo patrón que ya usa `as-table-expansion-grid`/`.is-open` en
+   as-table.css — revisar ahí primero antes de tocar esto).
+   NO usar `slide-in-out-enter/leave` para esto: esas clases están pensadas para contenido que
+   realmente aparece/desaparece del DOM vía `@if` (ej. el buscador de Conversaciones) — Angular
+   dispara su animación en CADA montaje, incluida la primera carga de la página, así que un
+   acordeón "siempre expandido por defecto" terminaba animando su apertura al cargar en vez de
+   aparecer ya abierto. Acá el contenido siempre existe; solo `grid-template-rows` cambia por
+   TRANSICIÓN cuando el usuario expande/colapsa — nunca al montar. */
+
+.as-collapse-grid {
+  display: grid;
+  overflow: hidden;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 320ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.as-collapse-grid.is-collapsed {
+  grid-template-rows: 0fr;
+}
+
+.as-collapse-grid > * {
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .as-collapse-grid {
+    transition: none;
+  }
+}
+
+/* Slide In From Bottom (paneles que emergen desde el borde inferior) */
+/* Para contenido que aparece/desaparece del DOM vía @if y debe subir desde abajo (ej. un panel
+   anclado al borde inferior). Usar con `animate.enter="slide-in-from-bottom-enter"` y
+   `animate.leave="slide-in-from-bottom-leave"`. La salida es un poco más corta que la entrada
+   para que el cierre se sienta ágil. */
+
+.slide-in-from-bottom-enter {
+  animation: slide-in-from-bottom-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.slide-in-from-bottom-leave {
+  animation: slide-in-from-bottom-leave 220ms ease-in forwards;
+}
+
+@keyframes slide-in-from-bottom-enter {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slide-in-from-bottom-leave {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+}
+
+/* Con reduced-motion NO se usa `animation: none`: Angular espera el `animationend` del leave para
+   quitar el nodo del DOM, y sin animación el elemento podría quedarse colgado. Se deja una
+   duración casi nula para que el evento siga disparando sin movimiento perceptible. */
+@media (prefers-reduced-motion: reduce) {
+  .slide-in-from-bottom-enter,
+  .slide-in-from-bottom-leave {
+    animation-duration: 1ms;
+  }
+}

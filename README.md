@@ -19,18 +19,18 @@ The generated code belongs entirely to the developer. AS Starter is not a runtim
 
 ## What `as new` generates
 
-`as new Demo` asks for each option with its official documentation and a description (the recommended choice is preselected), or takes the **recommended set** with `--defaults`:
+`as new Demo` asks for each option with its official documentation and a description, or takes the **default set** with `--defaults`. Only what has one best answer is marked _Recommended_ (and preselected); the shape of the project is your call:
 
-| Option       | Recommended                              | Other choices                                                                   |
-| ------------ | ---------------------------------------- | ------------------------------------------------------------------------------- |
-| Architecture | **Screaming Architecture**               | Angular default structure                                                       |
-| Routing      | **Angular Starter Routing**              | Default Angular Routing                                                         |
-| Stylesheet   | **Tailwind CSS**                         | CSS, SCSS, Sass (indented), Less                                                |
-| Rendering    | **Client-Side Rendering** (back offices) | Default Angular SSR; Angular Starter SSR + Incremental Hydration (public sites) |
-| Components   | **Recommended collection** (16 `as-`)    | All available (26), none                                                        |
-| Icons        | **Lucide Icons**                         | None                                                                            |
+| Option       | Default of `--defaults`                 | Other choices                                                                   |
+| ------------ | --------------------------------------- | ------------------------------------------------------------------------------- |
+| Architecture | Screaming Architecture                  | Angular default structure                                                       |
+| Routing      | Angular Starter Routing                 | Default Angular Routing                                                         |
+| Stylesheet   | **Tailwind CSS** (recommended)          | CSS, SCSS, Sass (indented), Less                                                |
+| Rendering    | **Client-Side Rendering** (recommended) | Default Angular SSR; Angular Starter SSR + Incremental Hydration (public sites) |
+| Components   | Essential collection (16 `as-`)         | All available (26), none                                                        |
+| Icons        | **Lucide Icons** (recommended)          | None                                                                            |
 
-What you get, without any business logic: the **Screaming Architecture** ([ADR-0002](docs/adr/0002-screaming-architecture-profile.md)); a navigation tree with page titles and breadcrumbs ([ADR-0003](docs/adr/0003-starter-routing.md)); a **design base** in plain CSS (tokens, light and dark theme, typography, animations, form styles), a `ThemeService`, the icon registration, utilities, pipes and a focus trap; and the **`as-` components** (button, input, select, modal, drawer, toast, tabs, table, datepicker, ...), each with its spec ([ADR-0005](docs/adr/0005-design-base-and-native-components.md)). The root component is composed in `app.ts` (`<router-outlet />`): there is no welcome page. Authentication, guards and interceptors are yours to build. The design base and the components need the Screaming Architecture, a CSS or Tailwind CSS stylesheet and Lucide Icons; the wizard enforces it ([ADR-0004](docs/adr/0004-explicit-wizard-and-recommended-defaults.md)).
+What you get, without any business logic: the **Screaming Architecture** ([ADR-0002](docs/adr/0002-screaming-architecture-profile.md)); a navigation tree with page titles and breadcrumbs ([ADR-0003](docs/adr/0003-starter-routing.md)); and, with the components, the structure of the reference application ([ADR-0007](docs/adr/0007-omni-structure-design-and-components.md)): `src/styles.css` importing the `src/styles/**/*-styles.css` files (theme tokens, typography, scrollbars, one stylesheet per component) and `shared/animations`, `core/theme` (`ThemeService`, palettes), `core/common/icons` (Lucide registration), the generic utilities of `shared`, and the **`as-` components** (button, input, select, modal, drawer, toast, tabs, table, datepicker, ...) ported whole, each with its spec. The design and the components are Tailwind CSS code, so they need Tailwind CSS, the Screaming Architecture and Lucide Icons; the wizard enforces it ([ADR-0004](docs/adr/0004-explicit-wizard-and-recommended-defaults.md)). The root component is composed in `app.ts` (`<router-outlet />`): there is no welcome page. Authentication, guards and interceptors are yours to build.
 
 ## Install the CLI
 
@@ -54,7 +54,7 @@ Requires Node.js `^22.22.3 || ^24.15.0 || >=26.0.0` (the range of the Angular CL
 pnpm install
 pnpm build
 node packages/cli/dist/bin.js new my-app            # interactive wizard
-node packages/cli/dist/bin.js new my-app --defaults # recommended set, no prompts
+node packages/cli/dist/bin.js new my-app --defaults # default set, no prompts
 node packages/cli/dist/bin.js new my-app --dry-run  # show the plan, create nothing
 node packages/cli/dist/bin.js new my-app --style scss --rendering ssr
 node packages/cli/dist/bin.js new my-app --defaults --architecture angular-default --routing angular --components none

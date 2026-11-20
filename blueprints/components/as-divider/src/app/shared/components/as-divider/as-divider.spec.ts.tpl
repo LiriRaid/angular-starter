@@ -1,37 +1,46 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, expect, it, beforeEach } from 'vitest';
+import { ComponentRef } from '@angular/core';
 import { AsDivider } from './as-divider';
 
 describe('AsDivider', () => {
-  function render(inputs: Record<string, unknown> = {}) {
-    TestBed.configureTestingModule({ imports: [AsDivider] });
-    const fixture = TestBed.createComponent(AsDivider);
-    for (const [key, value] of Object.entries(inputs)) fixture.componentRef.setInput(key, value);
+  let fixture: ComponentFixture<AsDivider>;
+  let component: AsDivider;
+  let ref: ComponentRef<AsDivider>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [AsDivider],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AsDivider);
+    component = fixture.componentInstance;
+    ref = fixture.componentRef;
     fixture.detectChanges();
-    return fixture.nativeElement as HTMLElement;
-  }
-
-  it('is a separator for assistive technology', () => {
-    const element = render();
-    expect(element.getAttribute('role')).toBe('separator');
-    expect(element.getAttribute('aria-orientation')).toBe('horizontal');
   });
 
-  it('shows its label and where it sits', () => {
-    const element = render({ label: 'or', align: 'start' });
-    expect(element.textContent).toContain('or');
-    expect(element.getAttribute('data-align')).toBe('start');
+  it('creates the component', () => {
+    expect(component).toBeTruthy();
   });
 
-  it('has no label element without a label', () => {
-    const element = render();
-    expect(element.querySelector('.as-divider__label')).toBeNull();
-    expect(element.hasAttribute('data-align')).toBe(false);
+  it('defaults to a horizontal solid divider aligned left', () => {
+    expect(component.hostClasses()).toBe('as-divider as-divider-horizontal as-divider-solid as-divider-left');
   });
 
-  it('can be vertical or dashed', () => {
-    const element = render({ orientation: 'vertical', style: 'dashed' });
-    expect(element.getAttribute('aria-orientation')).toBe('vertical');
-    expect(element.classList).toContain('as-divider--vertical');
-    expect(element.classList).toContain('as-divider--dashed');
+  it('reflects layout, type and align inputs in the host classes', () => {
+    ref.setInput('layout', 'vertical');
+    ref.setInput('type', 'dashed');
+    ref.setInput('align', 'bottom');
+    fixture.detectChanges();
+
+    expect(component.hostClasses()).toBe('as-divider as-divider-vertical as-divider-dashed as-divider-bottom');
+  });
+
+  it('exposes aria-orientation matching the layout', () => {
+    ref.setInput('layout', 'vertical');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.getAttribute('aria-orientation')).toBe('vertical');
+    expect(fixture.nativeElement.getAttribute('role')).toBe('separator');
   });
 });

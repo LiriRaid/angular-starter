@@ -481,7 +481,7 @@ describe('as new (non-interactive)', () => {
     await run(['new', 'my-app', '--defaults', '--dry-run'], fake.io, {
       run: createFakeRunner().run,
     });
-    expect(fake.out()).toMatch(/^ {2}Components +Recommended component collection$/m);
+    expect(fake.out()).toMatch(/^ {2}Components +Essential component collection$/m);
     expect(fake.out()).toMatch(/^ {2}Icons +Lucide Icons$/m);
   });
 

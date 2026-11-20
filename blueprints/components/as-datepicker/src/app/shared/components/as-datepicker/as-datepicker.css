@@ -1,113 +1,115 @@
-.as-datepicker {
-  position: relative;
-}
-
-.as-datepicker__trigger {
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-}
-
-.as-datepicker__text--placeholder {
-  color: var(--as-placeholder);
-}
-
-.as-datepicker__panel {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: var(--as-z-dropdown);
-  width: 17.5rem;
-  margin-top: 0.25rem;
-  padding: 0.75rem;
-  border: 1px solid var(--as-border);
-  border-radius: var(--as-radius-lg);
-  background: var(--as-panel);
-  box-shadow: var(--as-shadow-md);
-}
-
-.as-datepicker__header {
+:host {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.5rem;
-}
-
-.as-datepicker__title {
-  font-weight: 600;
-  text-transform: capitalize;
-}
-
-.as-datepicker__nav {
-  display: inline-flex;
-  padding: 0.375rem;
-  border: 0;
-  border-radius: var(--as-radius-sm);
-  background: transparent;
-  color: var(--as-text-muted);
-  cursor: pointer;
-}
-
-.as-datepicker__nav:hover {
-  background: var(--as-primary-soft);
-  color: var(--as-text);
-}
-
-.as-datepicker__grid {
+  flex-direction: column;
+  gap: 0.25rem;
   width: 100%;
-  border-collapse: collapse;
 }
 
-.as-datepicker__weekday {
-  padding: 0.25rem 0;
-  color: var(--as-text-subtle);
-  font-size: 0.6875rem;
-  font-weight: 500;
-  text-transform: uppercase;
+/* Reserva el alto del label flotante-arriba (`variant="over"`) — mismo criterio que
+   `.as-input-over`/`.as-input-over-float` (no se reusan esas clases directo para no
+   acoplar este componente a la hoja de estilos privada de `as-input`). Van en el wrapper
+   completo (no en el campo bordeado), igual que en `as-input-wrapper`. */
+.as-datepicker-over {
+  transition: padding-top 150ms ease;
 }
 
-.as-datepicker__day {
-  width: 100%;
-  aspect-ratio: 1;
-  border: 0;
-  border-radius: var(--as-radius-full);
-  background: transparent;
-  color: var(--as-text);
-  font-size: 0.8125rem;
-  cursor: pointer;
+.as-datepicker-over-float {
+  padding-top: 1rem;
 }
 
-.as-datepicker__day:hover:not(:disabled) {
-  background: var(--as-primary-soft);
-}
-
-.as-datepicker__day--outside {
-  color: var(--as-text-subtle);
-}
-
-.as-datepicker__day--today {
-  box-shadow: inset 0 0 0 1px var(--as-primary);
-}
-
-.as-datepicker__day--selected,
-.as-datepicker__day--selected:hover:not(:disabled) {
-  background: var(--as-primary);
-  color: var(--as-on-primary);
-}
-
-.as-datepicker__day:disabled {
-  color: var(--as-disabled-text);
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.as-datepicker__clear {
-  display: block;
-  margin: 0.5rem 0 0 auto;
+/* Mismo reset de input "plano" que ya usan otros campos custom (`.as-input-field`,
+   `.as-select-field-label`) — se duplica en vez de importar la clase de `as-input`
+   directo porque ese es el patrón ya establecido en el repo (cada componente trae el suyo). */
+.as-datepicker-input {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  appearance: none;
+  border-radius: 0;
   padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--as-primary);
-  font-size: 0.8125rem;
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  font-family: inherit;
+  color: var(--app-control-surface-text);
+  width: 100%;
+  cursor: text;
+  transition: color 0.18s ease;
+}
+
+.as-datepicker-input:disabled {
+  color: var(--app-control-disabled-text);
+  cursor: not-allowed;
+}
+
+.as-datepicker-input::placeholder {
+  color: var(--app-placeholder-color);
+  opacity: 1;
+}
+
+/* Clase propia en vez de la utilidad `cursor-pointer` de Tailwind: los estilos de componente de
+   Angular quedan sin `@layer` (fuera de `base/components/legacy-overrides/utilities` de
+   styles.css), y una regla sin capa le gana en cascada a cualquier regla con capa sin importar el
+   orden — por eso un `cursor-pointer` de Tailwind (capa `utilities`) nunca podría pisar el
+   `cursor: text` de arriba. */
+.as-datepicker-input--pickable {
   cursor: pointer;
+}
+
+.as-datepicker-error {
+  padding-left: 1.25rem;
+  color: var(--app-error-color);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+/* Mismo "chrome" de overlay que `.as-select-panel` (select-styles.css) — fondo, borde,
+   radio y sombra consistentes con el resto de los paneles flotantes de la app. */
+.as-datepicker-panel {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  padding: 0;
+  width: 24rem;
+  background: var(--app-overlay-bg);
+  border: 1px solid var(--app-border-color);
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.35);
+  overflow: hidden;
+  z-index: 1090;
+  /* Antes de que el primer `requestAnimationFrame` calcule top/left reales, el popover recién
+     abierto no tiene ninguna posición fija propia (queda en su lugar "estático" del DOM, cerca de
+     donde vive el `<div popover>` en el template) — sin esto se ve un salto visible de ahí hacia
+     la posición final. Mismo patrón que `as-theme-color-picker` (`[data-positioned]`). */
+  opacity: 0;
+}
+
+.as-datepicker-panel[data-positioned='true'] {
+  opacity: 1;
+}
+
+.as-datepicker-day {
+  border: 1px solid transparent;
+}
+
+.as-datepicker-day:not(:disabled):hover {
+  background: color-mix(in srgb, var(--as-primary-color) 12%, transparent);
+}
+
+.as-datepicker-hour-input {
+  width: 4rem;
+  padding: 0.375rem 0.5rem;
+  border: 1px solid var(--app-control-surface-border);
+  border-radius: 0.5rem;
+  background: var(--app-control-surface-bg);
+  color: var(--app-control-surface-text);
+  font-size: var(--font-size-caption-1, 0.875rem);
+  text-align: center;
+  outline: none;
+}
+
+.as-datepicker-hour-input:focus {
+  border-color: var(--app-control-focus-ring);
+  box-shadow: inset 0 0 0 1px var(--app-control-focus-ring);
 }

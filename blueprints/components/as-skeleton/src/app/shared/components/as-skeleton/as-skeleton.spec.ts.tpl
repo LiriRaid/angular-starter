@@ -1,36 +1,74 @@
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, expect, it, beforeEach } from 'vitest';
+import { ComponentRef } from '@angular/core';
 import { AsSkeleton } from './as-skeleton';
 
+type AsSkeletonInternals = {
+  resolvedRadius: () => string;
+  lineClass: () => string;
+  fillWidth: () => string;
+  fillHeight: () => string;
+};
+
 describe('AsSkeleton', () => {
-  function render(inputs: Record<string, unknown> = {}) {
-    TestBed.configureTestingModule({ imports: [AsSkeleton] });
-    const fixture = TestBed.createComponent(AsSkeleton);
-    for (const [key, value] of Object.entries(inputs)) fixture.componentRef.setInput(key, value);
+  let fixture: ComponentFixture<AsSkeleton>;
+  let component: AsSkeleton;
+  let internals: AsSkeletonInternals;
+  let ref: ComponentRef<AsSkeleton>;
+
+  beforeEach(async () => {
+    TestBed.overrideComponent(AsSkeleton, { set: { imports: [], template: '' } });
+
+    await TestBed.configureTestingModule({
+      imports: [AsSkeleton],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(AsSkeleton);
+    component = fixture.componentInstance;
+    internals = component as unknown as AsSkeletonInternals;
+    ref = fixture.componentRef;
     fixture.detectChanges();
-    return fixture.nativeElement as HTMLElement;
-  }
-
-  it('tells assistive technology that content is loading', () => {
-    const element = render();
-    expect(element.getAttribute('role')).toBe('status');
-    expect(element.getAttribute('aria-busy')).toBe('true');
   });
 
-  it('draws one block by default', () => {
-    expect(render().querySelectorAll('.as-skeleton__block')).toHaveLength(1);
+  it('creates the component', () => {
+    expect(component).toBeTruthy();
   });
 
-  it('draws the lines of a text skeleton, the last one shorter', () => {
-    const element = render({ shape: 'text', lines: 3 });
-    const blocks = element.querySelectorAll('.as-skeleton__block');
-    expect(blocks).toHaveLength(3);
-    expect(blocks[2]?.classList).toContain('as-skeleton__block--short');
-    expect(blocks[0]?.classList).not.toContain('as-skeleton__block--short');
+  it('resolvedRadius returns the radius input for rectangles', () => {
+    ref.setInput('radius', '1rem');
+    fixture.detectChanges();
+    expect(internals.resolvedRadius()).toBe('1rem');
   });
 
-  it('takes its size from the inputs', () => {
-    const element = render({ width: '12rem', height: '2rem' });
-    expect(element.style.getPropertyValue('--as-skeleton-width')).toBe('12rem');
-    expect(element.style.getPropertyValue('--as-skeleton-height')).toBe('2rem');
+  it('resolvedRadius returns 50% when shape is circle', () => {
+    ref.setInput('shape', 'circle');
+    fixture.detectChanges();
+    expect(internals.resolvedRadius()).toBe('50%');
+  });
+
+  it('lineClass combines base class with textClass input', () => {
+    ref.setInput('textClass', 'text-body-2');
+    fixture.detectChanges();
+    expect(internals.lineClass()).toContain('text-body-2');
+    expect(internals.lineClass()).toContain('as-skeleton-line');
+  });
+
+  it('fillWidth returns 100% when fill is true', () => {
+    ref.setInput('fill', true);
+    fixture.detectChanges();
+    expect(internals.fillWidth()).toBe('100%');
+  });
+
+  it('fillWidth returns the width input when fill is false', () => {
+    ref.setInput('fill', false);
+    ref.setInput('width', '200px');
+    fixture.detectChanges();
+    expect(internals.fillWidth()).toBe('200px');
+  });
+
+  it('fillHeight returns 100% when fill is true', () => {
+    ref.setInput('fill', true);
+    fixture.detectChanges();
+    expect(internals.fillHeight()).toBe('100%');
   });
 });

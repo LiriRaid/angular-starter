@@ -1,108 +1,113 @@
-import { Component, signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
-import { provideAsIcons } from '@core/icons/icons.provider';
-import { AsTable, AsTableCell, type AsTableColumn, type AsTablePage, type AsTableSort } from './as-table';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { describe, expect, it, vi, beforeEach } from 'vitest';
+import { ComponentRef } from '@angular/core';
+import { AsTable } from './as-table';
 
-const COLUMNS: AsTableColumn[] = [
-  { key: 'name', label: 'Name', sortable: true },
-  { key: 'status', label: 'Status', align: 'center' },
-];
-
-@Component({
-  imports: [AsTable, AsTableCell],
-  template: `
-    <as-table
-      [columns]="columns"
-      [rows]="rows()"
-      [total]="total"
-      [loading]="loading()"
-      emptyText="No customers"
-      [(sort)]="sort"
-      [(page)]="page"
-      (rowClick)="clicked = $event"
-    >
-      <ng-template asCell="status" let-row><b class="status">{{ row['status'] }}</b></ng-template>
-    </as-table>
-  `,
-})
-class Host {
-  columns = COLUMNS;
-  rows = signal<Record<string, unknown>[]>([
-    { id: 1, name: 'Ada', status: 'active' },
-    { id: 2, name: 'Grace', status: 'paused' },
-  ]);
-  loading = signal(false);
-  total = 25;
-  sort = signal<AsTableSort | null>(null);
-  page = signal<AsTablePage>({ page: 1, pageSize: 10 });
-  clicked: Record<string, unknown> | null = null;
-}
+type TestRow = { id: number; name: string };
 
 describe('AsTable', () => {
-  function render() {
-    TestBed.configureTestingModule({ imports: [Host], providers: [provideAsIcons()] });
-    const fixture = TestBed.createComponent(Host);
+  let fixture: ComponentFixture<AsTable<TestRow>>;
+  let component: AsTable<TestRow>;
+  let ref: ComponentRef<AsTable<TestRow>>;
+
+  const ITEMS = Array.from({ length: 25 }, (_, i) => ({ id: i + 1, name: `Item ${i + 1}` }));
+
+  beforeEach(async () => {
+    TestBed.overrideComponent(AsTable, { set: { imports: [], template: '' } });
+
+    await TestBed.configureTestingModule({
+      imports: [AsTable],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent<AsTable<TestRow>>(AsTable);
+    component = fixture.componentInstance;
+    ref = fixture.componentRef;
+    ref.setInput('value', ITEMS);
+    ref.setInput('rows', 10);
     fixture.detectChanges();
-    const element = fixture.nativeElement as HTMLElement;
-    const text = (selector: string) => Array.from(element.querySelectorAll(selector)).map((node) => node.textContent?.trim());
-    return { fixture, host: fixture.componentInstance, element, text };
-  }
-
-  it('shows the headers and one row per item', () => {
-    const { text } = render();
-    expect(text('th')).toEqual(['Name', 'Status']);
-    expect(text('tbody tr td:first-child')).toEqual(['Ada', 'Grace']);
   });
 
-  it('draws the cells of a column with the template given', () => {
-    const { text } = render();
-    expect(text('.status')).toEqual(['active', 'paused']);
+  it('creates the component', () => {
+    expect(component).toBeTruthy();
   });
 
-  it('sorts ascending, then descending, then not at all', () => {
-    const { fixture, host, element } = render();
-    const button = element.querySelector('.as-table__sort') as HTMLButtonElement;
-    button.click();
+  it('first page shows first 10 items', () => {
+    expect(component.displayValue().length).toBe(10);
+    expect((component.displayValue()[0] as TestRow).id).toBe(1);
+  });
+
+  it('nextPage advances to the second page', () => {
+    component.nextPage();
     fixture.detectChanges();
-    expect(host.sort()).toEqual({ key: 'name', direction: 'asc' });
-    expect(element.querySelector('th')?.getAttribute('aria-sort')).toBe('ascending');
-
-    button.click();
-    expect(host.sort()).toEqual({ key: 'name', direction: 'desc' });
-    button.click();
-    expect(host.sort()).toBeNull();
+    expect((component.displayValue()[0] as TestRow).id).toBe(11);
   });
 
-  it('reports the row that is clicked', () => {
-    const { host, element } = render();
-    (element.querySelectorAll('.as-table__row--data')[1] as HTMLElement).click();
-    expect(host.clicked).toEqual({ id: 2, name: 'Grace', status: 'paused' });
-  });
-
-  it('pages with the buttons and shows the range', () => {
-    const { fixture, host, element } = render();
-    expect(element.querySelector('.as-table__range')?.textContent).toBe('1-10 of 25');
-    expect(element.querySelector('.as-table__current')?.textContent).toBe('1 / 3');
-    expect((element.querySelector('[aria-label="Previous page"]') as HTMLButtonElement).disabled).toBe(true);
-
-    (element.querySelector('[aria-label="Next page"]') as HTMLButtonElement).click();
+  it('lastPage navigates to the last page', () => {
+    component.lastPage();
     fixture.detectChanges();
-    expect(host.page().page).toBe(2);
-    expect(element.querySelector('.as-table__range')?.textContent).toBe('11-20 of 25');
+    expect((component.displayValue()[0] as TestRow).id).toBe(21);
   });
 
-  it('shows the empty message when there are no rows', () => {
-    const { fixture, host, element } = render();
-    host.rows.set([]);
+  it('firstPage returns to page 1 from last', () => {
+    component.lastPage();
+    component.firstPage();
     fixture.detectChanges();
-    expect(element.querySelector('.as-table__empty')?.textContent).toBe('No customers');
+    expect((component.displayValue()[0] as TestRow).id).toBe(1);
   });
 
-  it('shows placeholder rows while it is loading', () => {
-    const { fixture, host, element } = render();
-    host.loading.set(true);
+  it('totalPages is calculated from totalRecords and rows', () => {
+    expect(component.totalPages()).toBe(3);
+  });
+
+  it('resolveField returns the correct field value from a row', () => {
+    const row = { id: 42, name: 'Test' };
+    expect(component.resolveField(row, 'name')).toBe('Test');
+  });
+
+  it('skeletonItems returns an array of the skeletonRows length', () => {
+    ref.setInput('skeletonRows', 6);
     fixture.detectChanges();
-    expect(element.querySelectorAll('.as-table__skeleton').length).toBeGreaterThan(0);
-    expect(element.querySelector('.as-table__row--data')).toBeNull();
+    expect(component.skeletonItems().length).toBe(6);
+  });
+
+  it('displayValue returns skeleton items when loading', () => {
+    ref.setInput('loading', true);
+    ref.setInput('skeletonRows', 4);
+    fixture.detectChanges();
+    expect(component.displayValue().length).toBe(4);
+  });
+
+  it('toggleExpand expands then collapses a row', () => {
+    const row = ITEMS[0];
+    expect(component.isExpanded(row)).toBe(false);
+    component.toggleExpand(row);
+    expect(component.isExpanded(row)).toBe(true);
+    component.toggleExpand(row);
+    expect(component.isExpanded(row)).toBe(false);
+  });
+
+  it('headerClass contains the alignment class for right-aligned column', () => {
+    const cls = component.headerClass({ field: 'id', header: 'ID', align: 'right' });
+    expect(cls).toContain('text-right');
+  });
+
+  it('cellClass contains the alignment class for center-aligned column', () => {
+    const cls = component.cellClass({ field: 'id', header: 'ID', align: 'center' });
+    expect(cls).toContain('text-center');
+  });
+
+  it('goToPage navigates to the correct page', () => {
+    component.goToPage(2);
+    fixture.detectChanges();
+    expect((component.displayValue()[0] as TestRow).id).toBe(11);
+  });
+
+  it('onRowClick does not emit when loading', () => {
+    const spy = vi.spyOn(component.rowClick, 'emit');
+    ref.setInput('loading', true);
+    ref.setInput('clickableRows', true);
+    fixture.detectChanges();
+    component.onRowClick(ITEMS[0], new MouseEvent('click'));
+    expect(spy).not.toHaveBeenCalled();
   });
 });

@@ -1,28 +1,31 @@
-import type { DestroyRef } from '@angular/core';
+import { DestroyRef } from '@angular/core';
 
-/** Runs `handler` once after `ms`; the timer is cleared if the owner is destroyed first. Returns a cancel function. */
+/** One-shot timeout auto-cleared on component destroy. Returns a cancel function. */
 export function safeTimeout(handler: () => void, ms: number, destroyRef: DestroyRef): () => void {
   const id = setTimeout(handler, ms);
-  const cancel = (): void => clearTimeout(id);
+  const cancel = () => clearTimeout(id);
   destroyRef.onDestroy(cancel);
   return cancel;
 }
 
-/** A timer you can set again: every `set` replaces the pending call, and destroying the owner clears it. */
+/** Re-settable timer that auto-clears its previous pending call and cancels on destroy. */
 export function createTimer(destroyRef: DestroyRef): {
   set: (handler: () => void, ms: number) => void;
   clear: () => void;
 } {
-  let id: ReturnType<typeof setTimeout> | undefined;
+  let id: ReturnType<typeof setTimeout> | null = null;
 
-  const clear = (): void => {
-    clearTimeout(id);
-    id = undefined;
+  const clear = () => {
+    if (id !== null) {
+      clearTimeout(id);
+      id = null;
+    }
   };
+
   destroyRef.onDestroy(clear);
 
   return {
-    set: (handler, ms) => {
+    set: (handler: () => void, ms: number) => {
       clear();
       id = setTimeout(handler, ms);
     },

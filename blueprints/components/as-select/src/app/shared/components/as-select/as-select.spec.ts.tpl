@@ -1,98 +1,93 @@
-import { Component } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { provideAsIcons } from '@core/icons/icons.provider';
-import { AsSelect, type AsSelectOption } from './as-select';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-const OPTIONS: AsSelectOption[] = [
-  { value: 'hn', label: 'Honduras' },
-  { value: 'mx', label: 'Mexico' },
-  { value: 'xx', label: 'Closed', disabled: true },
+import { AsSelect } from './as-select';
+
+const OPTIONS = [
+  { label: 'Apple', value: 'a' },
+  { label: 'Banana', value: 'b' },
+  { label: 'Cherry', value: 'c' },
 ];
 
-@Component({
-  imports: [AsSelect, ReactiveFormsModule],
-  template: `<as-select label="Country" [options]="options" [formControl]="control" />`,
-})
-class Host {
-  options = OPTIONS;
-  control = new FormControl<string | null>(null);
-}
-
 describe('AsSelect', () => {
-  function render() {
-    TestBed.configureTestingModule({ imports: [Host], providers: [provideAsIcons()] });
-    const fixture = TestBed.createComponent(Host);
-    fixture.detectChanges();
-    const element = fixture.nativeElement as HTMLElement;
-    const trigger = element.querySelector('.as-select__trigger') as HTMLButtonElement;
-    const options = () => Array.from(element.querySelectorAll<HTMLElement>('[role="option"]'));
-    return { fixture, host: fixture.componentInstance, element, trigger, options };
-  }
+  let fixture: ComponentFixture<AsSelect>;
+  let component: AsSelect;
 
-  it('shows the placeholder until something is chosen, with the list closed', () => {
-    const { trigger, options } = render();
-    expect(trigger.textContent).toContain('Select...');
-    expect(trigger.getAttribute('aria-expanded')).toBe('false');
-    expect(options()).toHaveLength(0);
+  beforeEach(async () => {
+    TestBed.overrideComponent(AsSelect, { set: { imports: [], template: '' } });
+
+    await TestBed.configureTestingModule({ imports: [AsSelect] }).compileComponents();
+
+    fixture = TestBed.createComponent(AsSelect);
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('options', OPTIONS);
+    fixture.componentRef.setInput('optionLabel', 'label');
+    fixture.componentRef.setInput('optionValue', 'value');
+    fixture.detectChanges();
   });
 
-  it('opens the list and writes the chosen value to the form control', () => {
-    const { fixture, host, trigger, options } = render();
-    trigger.click();
-    fixture.detectChanges();
-    expect(options().map((option) => option.textContent?.trim())).toEqual(['Honduras', 'Mexico', 'Closed']);
-
-    options()[1]?.click();
-    fixture.detectChanges();
-    expect(host.control.value).toBe('mx');
-    expect(trigger.textContent).toContain('Mexico');
-    expect(options()).toHaveLength(0);
+  it('creates the component', () => {
+    expect(component).toBeTruthy();
   });
 
-  it('does not choose a disabled option', () => {
-    const { fixture, host, trigger, options } = render();
-    trigger.click();
+  it('optionPresenceOf lee el estado de presencia del campo indicado y es undefined sin él', () => {
+    const agent = { label: 'Ana', value: 'a', presence: 'busy' };
+
+    expect(component.optionPresenceOf(agent)).toBeUndefined();
+
+    fixture.componentRef.setInput('optionPresence', 'presence');
     fixture.detectChanges();
-    options()[2]?.click();
-    expect(host.control.value).toBeNull();
+
+    expect(component.optionPresenceOf(agent)).toBe('busy');
+    expect(component.optionPresenceOf({ label: 'Luis', value: 'l' })).toBeUndefined();
   });
 
-  it('works with the keyboard', () => {
-    const { fixture, host, element, trigger } = render();
-    const press = (key: string) => {
-      trigger.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
-      fixture.detectChanges();
-    };
-    press('ArrowDown');
-    expect(element.querySelector('[role="listbox"]')).not.toBeNull();
-    press('ArrowDown');
-    press('Enter');
-    expect(host.control.value).toBe('mx');
+  it('reflects the written value', () => {
+    component.writeValue('b');
+    expect(component.value()).toBe('b');
+    expect(component.hasValue()).toBe(true);
 
-    press('ArrowDown');
-    press('Escape');
-    expect(element.querySelector('[role="listbox"]')).toBeNull();
+    component.writeValue(null);
+    expect(component.hasValue()).toBe(false);
   });
 
-  it('closes when the user clicks somewhere else', () => {
-    const { fixture, element, trigger } = render();
-    trigger.click();
-    fixture.detectChanges();
-    document.body.click();
-    fixture.detectChanges();
-    expect(element.querySelector('[role="listbox"]')).toBeNull();
+  it('shows all options when not searchable', () => {
+    expect(component.displayOptions()).toEqual(OPTIONS);
   });
 
-  it('follows a value set from the form and can be disabled by it', async () => {
-    const { fixture, host, trigger } = render();
-    host.control.setValue('hn');
-    fixture.detectChanges();
-    await fixture.whenStable();
-    expect(trigger.textContent).toContain('Honduras');
+  it('filters options by the typed text when searchable', () => {
+    fixture.componentRef.setInput('searchable', true);
 
-    host.control.disable();
-    fixture.detectChanges();
-    expect(trigger.disabled).toBe(true);
+    // Texto que no coincide con ningún value => se trata como término de búsqueda.
+    component.onSelectChange('ban');
+
+    expect(component.displayOptions()).toEqual([{ label: 'Banana', value: 'b' }]);
+  });
+
+  it('commits the value when selecting a real option', () => {
+    fixture.componentRef.setInput('searchable', true);
+    const emitSpy = vi.spyOn(component.valueChange, 'emit');
+
+    component.onSelectChange('a');
+
+    expect(component.value()).toBe('a');
+    expect(emitSpy).toHaveBeenCalledWith('a');
+  });
+
+  it('exposes the label color by state', () => {
+    expect(component.labelColor()).toBe('var(--app-text-subtle)');
+
+    component.writeValue('a');
+    expect(component.labelColor()).toBe('var(--app-text-muted)');
+
+    component.isFocused.set(true);
+    expect(component.labelColor()).toBe('var(--app-text-primary)');
+  });
+
+  it('floats the label when it has a value', () => {
+    expect(component.shouldFloat()).toBe(false);
+
+    component.writeValue('a');
+
+    expect(component.shouldFloat()).toBe(true);
   });
 });

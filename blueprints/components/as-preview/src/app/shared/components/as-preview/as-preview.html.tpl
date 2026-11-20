@@ -1,29 +1,32 @@
-<div class="as-preview" [class.as-preview--disabled]="disabled()">
-  <button
-    type="button"
-    class="as-preview__frame"
-    [attr.aria-label]="shown() ? 'Change ' + label() : 'Choose ' + label()"
-    [disabled]="disabled()"
-    (click)="open()"
-  >
-    @if (shown(); as url) {
-      <img class="as-preview__image" [src]="url" [alt]="label()" />
-    } @else {
-      <as-icon class="as-preview__placeholder" [name]="placeholderIcon()" [size]="32" />
-    }
-  </button>
+<div class="as-preview-box flex min-h-32 flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-(--app-border-color) p-4 text-center" [class.as-preview-box--filled]="imageUrl()" [class.as-preview-box--readonly]="disabled()" (click)="onBoxClick()">
+  @if (imageUrl(); as url) {
+    <div class="as-preview-media">
+      <img [src]="url" [alt]="label()" class="as-preview-image" />
 
-  <div class="as-preview__side">
+      <div class="as-preview-zoom">
+        <as-icon name="ZoomIn" size="24" color="white" />
+      </div>
+
+      @if (!disabled()) {
+        <as-button icon="Cancel" iconSize="18" size="small" styleClass="as-preview-remove as-icon-overlay-btn" [ariaLabel]="'Quitar ' + label()" (onClick)="onRemoveClick($event)" />
+      }
+    </div>
+  } @else if (disabled()) {
+    <as-icon name="ImageOff" size="28" color="var(--app-text-subtle)" />
+    <span class="text-caption-2-regular text-(--app-text-muted)">No hay {{ label() }} subido</span>
+  } @else {
+    <as-icon [name]="placeholderIcon()" size="28" color="var(--app-text-subtle)" />
+    <span class="text-caption-2-regular text-(--app-text-muted)">Subir {{ label() }}</span>
     @if (hint()) {
-      <p class="as-preview__hint">{{ hint() }}</p>
+      <span class="text-caption-2-regular text-(--app-text-subtle)">{{ hint() }}</span>
     }
-    @if (shown() && !disabled()) {
-      <button type="button" class="as-preview__remove" (click)="remove()">
-        <as-icon name="trash-2" [size]="14" />
-        Remove {{ label() }}
-      </button>
-    }
-  </div>
+  }
 
-  <input #picker class="as-preview__input" type="file" tabindex="-1" aria-hidden="true" [accept]="accept()" (change)="onPicked($event)" />
+  <input #fileInput type="file" accept="image/*" class="hidden" (click)="$event.stopPropagation()" (change)="onFileInputChange($event)" />
 </div>
+
+<as-modal [(visible)]="isPreviewOpen" variant="preview" [dismissableMask]="true" (hide)="closePreview()">
+  @if (imageUrl(); as url) {
+    <img [src]="url" [alt]="label()" />
+  }
+</as-modal>

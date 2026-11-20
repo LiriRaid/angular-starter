@@ -7,7 +7,7 @@ describe('resolveOptions', () => {
     expect(resolveOptions({})).toEqual(DEFAULT_OPTIONS);
   });
 
-  it('defaults to the recommended set', () => {
+  it('defaults to Screaming, Starter routing, Tailwind CSS, CSR, Lucide and the recommended components', () => {
     expect(DEFAULT_OPTIONS).toMatchObject({
       architecture: 'screaming',
       routing: 'starter',
@@ -15,7 +15,19 @@ describe('resolveOptions', () => {
       tailwind: true,
       rendering: 'csr',
       icons: 'lucide',
+      components: 'recommended',
     });
+  });
+
+  it('accepts the Tailwind CSS alias of the stylesheet list in a configuration file', () => {
+    const options = resolveOptions({ file: { style: 'tailwind' as never } });
+    expect(options).toMatchObject({ style: 'css', tailwind: true });
+  });
+
+  it('requires Tailwind CSS for the component collections', () => {
+    const run = () =>
+      resolveOptions({ flags: { style: 'css', tailwind: false, components: 'all' } });
+    expect(run).toThrow(/components: "all" requires Tailwind CSS/);
   });
 
   it('derives the defaults from what was given, so they never conflict', () => {

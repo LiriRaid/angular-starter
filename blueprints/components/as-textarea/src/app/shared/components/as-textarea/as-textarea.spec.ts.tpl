@@ -1,44 +1,45 @@
-import { Component } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { TestBed, type ComponentFixture } from '@angular/core/testing';
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import { AsTextarea } from './as-textarea';
 
-@Component({
-  imports: [AsTextarea, ReactiveFormsModule],
-  template: `<as-textarea label="Notes" [maxlength]="20" [formControl]="control" />`,
-})
-class Host {
-  control = new FormControl('Hello', { nonNullable: true });
-}
+describe('AsTextarea · label en reposo', () => {
+  let fixture: ComponentFixture<AsTextarea>;
+  const label = (): HTMLLabelElement => fixture.nativeElement.querySelector('label');
 
-describe('AsTextarea', () => {
-  function render() {
-    TestBed.configureTestingModule({ imports: [Host] });
-    const fixture = TestBed.createComponent(Host);
-    fixture.detectChanges();
-    const element = fixture.nativeElement as HTMLElement;
-    return { fixture, host: fixture.componentInstance, textarea: element.querySelector('textarea') as HTMLTextAreaElement, element };
-  }
-
-  it('shows the label and the value of the form control', () => {
-    const { textarea, element } = render();
-    expect(element.querySelector('label')?.textContent).toContain('Notes');
-    expect(textarea.value).toBe('Hello');
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [AsTextarea] }).compileComponents();
+    fixture = TestBed.createComponent(AsTextarea);
+    fixture.componentRef.setInput('label', 'Mensaje');
   });
 
-  it('writes what the user types to the form control', () => {
-    const { fixture, host, textarea, element } = render();
-    textarea.value = 'Hello there';
+  it('con una sola fila el label vacío se centra verticalmente, como en un input', () => {
+    fixture.componentRef.setInput('rows', 1);
+    fixture.detectChanges();
+
+    expect(label().classList.contains('top-1/2')).toBe(true);
+    expect(label().classList.contains('-translate-y-1/2')).toBe(true);
+  });
+
+  it('con varias filas el label vacío queda arriba, junto a la primera línea, y no flotando en el centro del campo', () => {
+    fixture.componentRef.setInput('rows', 4);
+    fixture.detectChanges();
+
+    expect(label().classList.contains('top-1/2')).toBe(false);
+    expect(label().classList.contains('-translate-y-1/2')).toBe(false);
+    expect(label().classList.contains('top-3')).toBe(true);
+  });
+
+  it('al escribir, el label flota igual que en las demás variantes (no se toca el estado flotante)', () => {
+    fixture.componentRef.setInput('rows', 4);
+    fixture.componentRef.setInput('value', 'Hola');
+    fixture.detectChanges();
+    const textarea: HTMLTextAreaElement = fixture.nativeElement.querySelector('textarea');
+    textarea.value = 'Hola';
     textarea.dispatchEvent(new Event('input'));
     fixture.detectChanges();
-    expect(host.control.value).toBe('Hello there');
-    expect(element.querySelector('.as-textarea__count')?.textContent).toContain('11/20');
-  });
 
-  it('is disabled when the form disables it', () => {
-    const { fixture, host, textarea } = render();
-    host.control.disable();
-    fixture.detectChanges();
-    expect(textarea.disabled).toBe(true);
+    expect(label().classList.contains('text-caption-2-bold')).toBe(true);
+    expect(label().classList.contains('top-3')).toBe(false);
   });
 });

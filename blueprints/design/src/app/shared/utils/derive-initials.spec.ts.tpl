@@ -1,18 +1,17 @@
+import { describe, expect, it } from 'vitest';
 import { deriveInitials } from './derive-initials';
 
 describe('deriveInitials', () => {
-  it('takes the first letter of the first two words', () => {
-    expect(deriveInitials('Ada Lovelace')).toBe('AL');
-    expect(deriveInitials('grace brewster murray hopper')).toBe('GB');
+  it('usa la primera letra de nombre y apellido para nombres de dos o más palabras', () => {
+    expect(deriveInitials('Gabriel Cruz')).toBe('GC');
+    expect(deriveInitials('Josselin Alexandra Rapalo')).toBe('JA');
   });
 
-  it('takes the first two letters of a single word', () => {
-    expect(deriveInitials('Plato')).toBe('PL');
-    expect(deriveInitials('x')).toBe('X');
+  it('usa las primeras dos letras cuando es una sola palabra', () => {
+    expect(deriveInitials('Gabriel')).toBe('GA');
   });
 
-  it('ignores extra spaces and returns an empty string for an empty name', () => {
-    expect(deriveInitials('  Ada    Lovelace ')).toBe('AL');
-    expect(deriveInitials('   ')).toBe('');
+  it('siempre retorna en mayúsculas', () => {
+    expect(deriveInitials('gabriel cruz')).toBe('GC');
   });
 });

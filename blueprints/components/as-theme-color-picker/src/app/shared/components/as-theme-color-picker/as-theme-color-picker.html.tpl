@@ -1,72 +1,33 @@
-<as-popover [(open)]="open" placement="bottom-end">
-  <button
-    asPopoverTrigger
-    type="button"
-    class="as-theme-picker__trigger"
-    aria-label="Theme"
-    [attr.aria-expanded]="open()"
-    (click)="open.set(!open())"
-  >
-    <as-icon name="palette" [size]="18" />
-  </button>
+<div #panel popover="manual" class="as-color-picker-panel" (toggle)="onPanelToggle($event)">
+  <div class="color-picker-content">
+    <div class="color-picker-section">
+      <p class="color-picker-label text-caption-2-semibold">Colores Primarios</p>
 
-  <div class="as-theme-picker">
-    <section class="as-theme-picker__section">
-      <h3 class="as-theme-picker__heading">Mode</h3>
-      <div class="as-theme-picker__modes" role="group" aria-label="Mode">
-        <button
-          type="button"
-          class="as-theme-picker__mode"
-          [class.as-theme-picker__mode--active]="theme.mode() === 'light'"
-          [attr.aria-pressed]="theme.mode() === 'light'"
-          (click)="theme.setMode('light')"
-        >
-          <as-icon name="sun" [size]="16" /> Light
-        </button>
-        <button
-          type="button"
-          class="as-theme-picker__mode"
-          [class.as-theme-picker__mode--active]="theme.mode() === 'dark'"
-          [attr.aria-pressed]="theme.mode() === 'dark'"
-          (click)="theme.setMode('dark')"
-        >
-          <as-icon name="moon" [size]="16" /> Dark
-        </button>
-      </div>
-    </section>
-
-    <section class="as-theme-picker__section">
-      <h3 class="as-theme-picker__heading">Accent color</h3>
-      <div class="as-theme-picker__swatches" role="group" aria-label="Accent color">
+      <div class="color-picker-grid">
         @for (color of primaryColors; track color.key) {
-          <button
-            type="button"
-            class="as-theme-picker__swatch"
-            [class.as-theme-picker__swatch--active]="theme.primaryColorKey() === color.key"
-            [style.background]="color.swatch"
-            [attr.aria-label]="color.label"
-            [attr.aria-pressed]="theme.primaryColorKey() === color.key"
-            (click)="theme.setPrimaryColor(color.key)"
-          ></button>
+          <button type="button" class="color-swatch" [class.active]="currentPrimaryKey() === color.key" [style.background]="color.swatch" [asTooltip]="color.label" tooltipPosition="top" [attr.aria-label]="'Seleccionar color ' + color.label" [attr.aria-pressed]="currentPrimaryKey() === color.key" (click)="selectPrimary(color.key, panel)">
+            @if (currentPrimaryKey() === color.key) {
+              <span class="check text-caption-2-bold" aria-hidden="true">✓</span>
+            }
+          </button>
         }
       </div>
-    </section>
+    </div>
 
-    <section class="as-theme-picker__section">
-      <h3 class="as-theme-picker__heading">Surface color</h3>
-      <div class="as-theme-picker__swatches" role="group" aria-label="Surface color">
-        @for (color of surfaceColors; track color.key) {
-          <button
-            type="button"
-            class="as-theme-picker__swatch"
-            [class.as-theme-picker__swatch--active]="theme.surfaceColorKey() === color.key"
-            [style.background]="color.swatch"
-            [attr.aria-label]="color.label"
-            [attr.aria-pressed]="theme.surfaceColorKey() === color.key"
-            (click)="theme.setSurfaceColor(color.key)"
-          ></button>
+    <div class="color-picker-section">
+      <p class="color-picker-label text-caption-2-semibold">Surface</p>
+
+      <div class="color-picker-grid color-picker-grid--surface">
+        @for (surface of surfaceColors; track surface.key) {
+          <button type="button" class="color-swatch" [class.active]="currentSurfaceKey() === surface.key" [style.background]="surface.swatch" [asTooltip]="surface.label" tooltipPosition="top" [attr.aria-label]="'Seleccionar superficie ' + surface.label" [attr.aria-pressed]="currentSurfaceKey() === surface.key" (click)="selectSurface(surface.key)">
+            @if (currentSurfaceKey() === surface.key) {
+              <span class="check text-caption-2-bold" aria-hidden="true">✓</span>
+            }
+          </button>
         }
       </div>
-    </section>
+    </div>
   </div>
-</as-popover>
+</div>
+
+<as-button icon="Palette" variant="outlined" [size]="size()" iconSize="20" [styleClass]="pickerButtonClass()" ariaLabel="Seleccionar paleta de colores" [asTooltip]="$any(triggerTooltip()) || undefined" [tooltipPosition]="triggerTooltipPosition()" [tooltipStyleClass]="triggerTooltipStyleClass()" [showDelay]="triggerTooltipDelay()" (onClick)="toggle(panel, $event)" />

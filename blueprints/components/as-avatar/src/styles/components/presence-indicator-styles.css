@@ -1,0 +1,53 @@
+@layer legacy-overrides {
+  /* Shared presence badge used by user menu, profile and admin users table. */
+  .presence-dot {
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    background: var(--app-panel-bg);
+    padding: 2px;
+  }
+
+  .presence-dot::before {
+    content: '';
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 9999px;
+    background: var(--app-status-invisible);
+  }
+
+  .presence-dot[data-status='online']::before {
+    background: var(--app-status-online);
+  }
+
+  .presence-dot:not([data-status='online']) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .presence-dot:not([data-status='online'])::before {
+    display: none;
+  }
+
+  .presence-dot[data-status='away'] {
+    color: var(--app-status-away);
+  }
+
+  .presence-dot[data-status='busy'] {
+    color: var(--app-status-busy);
+  }
+
+  .presence-dot[data-status='invisible'] {
+    color: var(--app-status-invisible);
+  }
+
+  .presence-dot as-icon {
+    display: inline-flex;
+    line-height: 0;
+  }
+}

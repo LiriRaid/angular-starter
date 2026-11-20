@@ -4,40 +4,47 @@ import {
   CAPABILITIES,
   CATEGORIES,
   availableIds,
+  defaultOption,
   isAvailable,
-  recommendedOption,
   unmetRequirements,
+  type CapabilityCategory,
+  type RequirementContext,
 } from './capabilities.js';
 import { formatIssues } from './issues.js';
 import { optionsSchema, type StarterOptions } from './schema.js';
 
+/** A given value, else the registry's default for the category among what `context` allows. */
+function pick<T extends string>(
+  given: T | undefined,
+  category: CapabilityCategory,
+  context: RequirementContext,
+  fallback: T,
+): T {
+  return given ?? (defaultOption(category, context)?.id as T | undefined) ?? fallback;
+}
+
 /**
- * The defaults for everything that was not given. They are the recommended set, and each one is
- * derived from what was already chosen so a default never conflicts with a choice: with SCSS there
- * is no Tailwind CSS and no component collection, without the Screaming Architecture the routing
- * is Angular's own.
+ * The defaults for everything that was not given: Screaming, Angular Starter Routing, Tailwind CSS,
+ * Client-Side Rendering, Lucide and the essential components. Each one is derived from what was
+ * already chosen so a default never conflicts with a choice: with SCSS there is no Tailwind CSS and
+ * no component collection, without the Screaming Architecture the routing is Angular's own.
  */
 function defaultsFor(given: Partial<StarterOptions>): StarterOptions {
-  const architecture = given.architecture ?? recommendedOption('architecture', {})?.id;
+  const architecture = pick(given.architecture, 'architecture', {}, 'angular-default');
   const style = given.style ?? 'css';
-  const icons = given.icons ?? recommendedOption('icons', {})?.id;
-  const context = { architecture, style, icons };
+  // An explicit stylesheet format means no Tailwind CSS unless it was asked for.
+  const tailwind = given.tailwind ?? given.style === undefined;
+  const icons = pick(given.icons, 'icons', {}, 'none');
+  const context = { architecture, style, tailwind, icons };
   return {
-    architecture: (architecture ?? 'angular-default') as StarterOptions['architecture'],
-    routing: (given.routing ??
-      recommendedOption('routing', context)?.id ??
-      'angular') as StarterOptions['routing'],
+    architecture,
+    routing: pick(given.routing, 'routing', context, 'angular'),
     style,
-    // An explicit CSS format means plain CSS; Tailwind CSS is the default only when nothing was said.
-    tailwind: given.tailwind ?? given.style === undefined,
-    rendering: (given.rendering ??
-      recommendedOption('rendering', {})?.id ??
-      'csr') as StarterOptions['rendering'],
+    tailwind,
+    rendering: pick(given.rendering, 'rendering', {}, 'csr'),
     appShell: false,
-    components: (given.components ??
-      recommendedOption('components', context)?.id ??
-      'none') as StarterOptions['components'],
-    icons: (icons ?? 'none') as StarterOptions['icons'],
+    components: pick(given.components, 'components', context, 'none'),
+    icons,
     packageManager: 'npm',
     prefix: 'app',
     git: true,
@@ -59,7 +66,10 @@ export interface OptionLayers {
  * both end here, so the generation engine only ever sees this one shape.
  */
 export function resolveOptions(layers: OptionLayers = {}): StarterOptions {
-  const merged = { ...withoutUndefined(layers.file), ...withoutUndefined(layers.flags) };
+  const merged = withStyleAlias({
+    ...withoutUndefined(layers.file),
+    ...withoutUndefined(layers.flags),
+  });
   const candidate = { ...defaultsFor(merged), ...merged };
 
   const parsed = optionsSchema.safeParse(candidate);
@@ -74,6 +84,12 @@ export function resolveOptions(layers: OptionLayers = {}): StarterOptions {
     );
   }
   return parsed.data;
+}
+
+/** A configuration file may spell the "Tailwind CSS" entry of the stylesheet list as `style: tailwind`. */
+function withStyleAlias(options: Partial<StarterOptions>): Partial<StarterOptions> {
+  const { style, tailwind } = normalizeStyleChoice(options.style, options.tailwind);
+  return withoutUndefined({ ...options, style, tailwind } as Partial<StarterOptions>);
 }
 
 function withoutUndefined<T extends object>(value: T | undefined): Partial<T> {

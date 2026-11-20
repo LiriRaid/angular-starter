@@ -1,80 +1,152 @@
-<div class="as-field as-datepicker">
-  @if (label()) {
-    <label class="as-field__label" [attr.id]="uid + '-label'">
-      {{ label() }}
-      @if (required()) {
-        <span class="as-field__required" aria-hidden="true">*</span>
-      }
-    </label>
-  }
-  <button
-    type="button"
-    class="as-field__control as-datepicker__trigger"
-    [class.as-field__control--invalid]="!!error()"
-    [class.as-field__control--disabled]="isDisabled()"
-    aria-haspopup="dialog"
-    [attr.aria-expanded]="open()"
-    [attr.aria-labelledby]="label() ? uid + '-label' : null"
-    [disabled]="isDisabled()"
-    (click)="toggle()"
-  >
-    <as-icon class="as-field__icon" name="calendar" [size]="16" />
-    <span class="as-datepicker__text" [class.as-datepicker__text--placeholder]="!text()">{{ text() || placeholder() }}</span>
-  </button>
+<div
+  class="flex w-full flex-col gap-1"
+  [class]="{
+    'as-datepicker-on': variant() === 'on',
+    'as-datepicker-in': variant() === 'in',
+    'as-datepicker-over': variant() === 'over',
+    'as-datepicker-over-float': variant() === 'over' && !!label(),
+  }"
+>
+  <ng-template #fieldContent>
+    @if (allowManualTime()) {
+      <input
+        [id]="resolvedInputId()"
+        type="text"
+        inputmode="numeric"
+        [disabled]="isDisabled()"
+        [value]="inputValue()"
+        (input)="onInputChange($event)"
+        (focus)="onFocusInput()"
+        (blur)="onBlurInput()"
+        (keydown)="onKeyDown($event)"
+        [attr.placeholder]="placeholderAttr()"
+        [attr.aria-invalid]="hasErrors() ? 'true' : null"
+        [attr.aria-describedby]="describedBy()"
+        [attr.aria-expanded]="isOpen()"
+        class="as-datepicker-input peer"
+        [style]="inputFieldStyles()"
+      />
 
-  @if (open()) {
-    <div class="as-datepicker__panel as-animate-slide-down" role="dialog" aria-label="Choose a date">
-      <div class="as-datepicker__header">
-        <button type="button" class="as-datepicker__nav" aria-label="Previous month" (click)="shiftMonth(-1)">
-          <as-icon name="chevron-left" [size]="16" />
-        </button>
-        <span class="as-datepicker__title" aria-live="polite">{{ title() }}</span>
-        <button type="button" class="as-datepicker__nav" aria-label="Next month" (click)="shiftMonth(1)">
-          <as-icon name="chevron-right" [size]="16" />
-        </button>
-      </div>
-      <table class="as-datepicker__grid" role="grid" (keydown)="onGridKeydown($event)">
-        <thead>
-          <tr>
-            @for (weekday of weekdays(); track $index) {
-              <th scope="col" class="as-datepicker__weekday">{{ weekday }}</th>
-            }
-          </tr>
-        </thead>
-        <tbody>
-          @for (week of weeks(); track $index) {
-            <tr>
-              @for (day of week; track day.date.getTime()) {
-                <td>
-                  <button
-                    type="button"
-                    class="as-datepicker__day"
-                    [class.as-datepicker__day--outside]="!day.inMonth"
-                    [class.as-datepicker__day--today]="day.today"
-                    [class.as-datepicker__day--selected]="day.selected"
-                    [attr.data-active]="day.date.getTime() === active().getTime()"
-                    [attr.tabindex]="day.date.getTime() === active().getTime() ? 0 : -1"
-                    [attr.aria-selected]="day.selected"
-                    [disabled]="day.disabled"
-                    (click)="pick(day)"
-                  >
-                    {{ day.date.getDate() }}
-                  </button>
-                </td>
-              }
-            </tr>
+      <button type="button" class="absolute inset-y-0 right-0 flex items-center px-3 transition-colors duration-150" [class]="isDisabled() ? 'text-(--app-control-disabled-text)' : 'text-(--app-action-icon-color) hover:text-(--app-text-primary)'" [disabled]="isDisabled()" (click)="toggleCalendar($event)">
+        <as-icon name="Calendar" size="18" />
+      </button>
+    } @else {
+      <!-- Sin hora manual no hay nada que tipear — el campo entero ES el botón (no un input +
+           un botón de ícono repitiendo la misma acción): un solo elemento, un solo click handler,
+           y el hover de "todo el campo" pinta el ícono vía `group-hover` en vez de necesitar su
+           propio :hover aparte. -->
+      <button
+        type="button"
+        [id]="resolvedInputId()"
+        class="group relative flex w-full items-center rounded-lg text-left as-datepicker-input peer"
+        [class.as-datepicker-input--pickable]="!isDisabled()"
+        [style]="inputFieldStyles()"
+        [disabled]="isDisabled()"
+        [attr.aria-haspopup]="true"
+        [attr.aria-invalid]="hasErrors() ? 'true' : null"
+        [attr.aria-describedby]="describedBy()"
+        [attr.aria-expanded]="isOpen()"
+        (click)="toggleCalendar($event)"
+        (focus)="onFocusInput()"
+        (blur)="onBlurInput()"
+      >
+        <span class="truncate" [class]="{ 'text-(--app-placeholder-color)': !inputValue() }">{{ inputValue() || placeholder() }}</span>
+
+        <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 transition-colors duration-150" [class]="isDisabled() ? 'text-(--app-control-disabled-text)' : 'text-(--app-action-icon-color) group-hover:text-(--app-text-primary)'">
+          <as-icon name="Calendar" size="18" />
+        </span>
+      </button>
+    }
+  </ng-template>
+
+  <div class="relative w-full">
+    @if (label() && variant() === 'on') {
+      <fieldset #triggerRef class="relative w-full rounded-lg border-0 text-caption-1-medium transition-all duration-180" style="padding: 0; margin: 0; min-inline-size: 0" [class]="fieldsetClasses()" [style.box-shadow]="fieldsetBoxShadow()">
+        <legend class="h-0 invisible overflow-hidden whitespace-nowrap block leading-none" style="padding: 0" [style.margin-left]="legendOffset()" [style.max-width]="legendMaxWidth()" [style.transition]="legendTransition()">
+          <span class="px-2 text-caption-2-bold">{{ label() }}</span>
+        </legend>
+
+        <ng-container *ngTemplateOutlet="fieldContent" />
+
+        <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-180 rounded-tl-md rounded-tr-md" [class]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
+          {{ label() }}
+          @if (required()) {
+            <span class="text-(--app-error-color)">*</span>
           }
-        </tbody>
-      </table>
-      @if (value()) {
-        <button type="button" class="as-datepicker__clear" (click)="clear()">Clear</button>
+        </label>
+      </fieldset>
+    } @else {
+      <div #triggerRef class="relative flex w-full items-stretch rounded-lg text-caption-1-medium transition-all duration-180" [class]="fieldsetClasses()" [style.box-shadow]="fieldsetBoxShadow()">
+        <ng-container *ngTemplateOutlet="fieldContent" />
+      </div>
+
+      @if (label()) {
+        <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-150 rounded-tl-md rounded-tr-md" [class]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
+          {{ label() }}
+          @if (required()) {
+            <span class="text-(--app-error-color)">*</span>
+          }
+        </label>
       }
-    </div>
+    }
+  </div>
+
+  @if (hasErrors() && showErrorMessage()) {
+    <small [id]="errorId()" class="as-datepicker-error">{{ errorMessage() }}</small>
   }
 
-  @if (error()) {
-    <p class="as-field__error" role="alert">{{ error() }}</p>
-  } @else if (hint()) {
-    <p class="as-field__hint">{{ hint() }}</p>
-  }
+  <div #panelRef popover="manual" [id]="resolvedInputId() + '-panel'" class="as-datepicker-panel" (toggle)="onPanelToggle($event)">
+    <div class="flex flex-col gap-2 p-3">
+      <div class="flex items-center justify-between gap-1.5">
+        <as-button icon="ChevronLeft" variant="text" size="small" ariaLabel="Mes anterior" (onClick)="previousMonth()" />
+
+        <div class="flex min-w-0 flex-1 items-center justify-center gap-2">
+          <as-select class="w-[9.5rem]" [formControl]="monthCtrl" [options]="monthOptions" optionLabel="label" optionValue="value" [searchable]="false" [showErrorMessage]="false" variant="compact" />
+          <as-select class="w-28" [formControl]="yearCtrl" [options]="yearOptions()" optionLabel="label" optionValue="value" [searchable]="false" [showErrorMessage]="false" variant="compact" />
+        </div>
+
+        <as-button icon="ChevronRight" variant="text" size="small" ariaLabel="Mes siguiente" (onClick)="nextMonth()" />
+      </div>
+
+      <div class="grid grid-cols-7 gap-1">
+        @for (day of weekdayNames; track day) {
+          <span class="py-1 text-center text-caption-2-medium text-(--app-text-subtle)">{{ day }}</span>
+        }
+      </div>
+
+      <div class="grid grid-cols-7 gap-1 justify-items-center">
+        @for (day of calendarDays(); track day.date.getTime()) {
+          <button type="button" class="as-datepicker-day flex h-8 w-8 items-center justify-center rounded-full text-caption-2-medium transition-colors duration-150" [disabled]="!day.enabled" [class]="dayClass(day)" (click)="selectDate(day)">
+            {{ day.date.getDate() }}
+          </button>
+        }
+      </div>
+
+      @if (allowManualTime() && hasSelectedDate()) {
+        <div class="flex items-center gap-2 rounded-lg border border-(--color-blue-200) bg-(--color-blue-50) px-3 py-2">
+          <as-icon name="Info" size="14" color="var(--color-blue-600)" />
+          <span class="text-caption-2-regular text-(--app-text-muted)">Fecha seleccionada: {{ formattedSelectedDate() }}</span>
+        </div>
+      }
+
+      <hr class="border-(--app-border-color)" />
+
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2">
+          <as-button label="Hoy" variant="text" size="small" (onClick)="selectToday()" />
+
+          @if (allowManualTime()) {
+            <div class="flex items-center gap-1.5">
+              <input type="text" class="as-datepicker-hour-input" maxlength="5" placeholder="HH:MM" [value]="manualHour()" (input)="onHourInputChange($event)" (keydown)="onHourKeyDown($event)" />
+              <as-select class="w-24" [formControl]="amPmCtrl" [options]="amPmOptions" optionLabel="label" optionValue="value" [searchable]="false" [showErrorMessage]="false" variant="compact" />
+            </div>
+          } @else if (showCurrentTime()) {
+            <span class="text-caption-1-regular text-(--app-text-subtle)">{{ currentTime() }}</span>
+          }
+        </div>
+
+        <as-button label="Cerrar" variant="outlined" size="small" (onClick)="closeCalendar()" />
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,7 +1,7 @@
-import { readFile, rm, writeFile } from 'node:fs/promises';
+import { rm } from 'node:fs/promises';
 import { join } from 'node:path';
-import { RuntimeError } from '../../errors.js';
 import { BLUEPRINTS_ROOT, copyBlueprint } from '../blueprint.js';
+import { planEdit, writeEdits } from '../edits/planned.js';
 import { addPathAliases } from '../edits/tsconfig.js';
 import {
   addRouterFeature,
@@ -53,18 +53,10 @@ export const screamingProfile: ArchitectureProfile = {
   ],
 
   async apply({ targetDir, name, prefix }) {
-    // Compute every edit first: a file that does not have the expected shape stops the stage
-    // before anything is written.
-    const edited: [path: string, text: string][] = [];
-    for (const [file, edit] of EDITS) {
-      const path = join(targetDir, file);
-      try {
-        edited.push([path, edit(await readFile(path, 'utf8'))]);
-      } catch (error) {
-        const reason = error instanceof Error ? error.message : String(error);
-        throw new RuntimeError(`Could not adapt ${file}: ${reason}`);
-      }
-    }
+    // Plan every edit first: a file that does not have the expected shape stops the stage before
+    // anything is written.
+    const planned = [];
+    for (const [file, edit] of EDITS) planned.push(await planEdit(targetDir, file, edit));
 
     await copyBlueprint({
       source: join(BLUEPRINTS_ROOT, 'architectures', 'screaming'),
@@ -72,7 +64,7 @@ export const screamingProfile: ArchitectureProfile = {
       variables: { PROJECT_NAME: name, PREFIX: prefix },
       overwrite: PLACEHOLDERS,
     });
-    for (const [path, text] of edited) await writeFile(path, text);
+    await writeEdits(planned);
     for (const file of REMOVED) await rm(join(targetDir, file), { force: true });
   },
 };
