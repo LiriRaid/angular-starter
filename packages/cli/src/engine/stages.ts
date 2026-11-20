@@ -17,6 +17,7 @@ import { CLI_VERSION } from '../version.js';
 import { ARCHITECTURE_PROFILES } from './architectures/index.js';
 import { componentsProfile } from './components/components.js';
 import { designProfile } from './design/design.js';
+import { appShellProfile } from './app-shell/app-shell.js';
 import { buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
 import { pathExists } from './fs.js';
@@ -150,7 +151,7 @@ export const applyRendering: Stage = {
 export const applyDesign: Stage = {
   id: 'apply-design',
   title: 'Adding the design base',
-  enabled: ({ options }) => options.components !== 'none',
+  enabled: ({ options }) => options.components !== 'none' || options.appShell === 'starter',
   async run({ name, options, targetDir }) {
     await designProfile.apply({ targetDir, name, prefix: options.prefix });
   },
@@ -167,6 +168,15 @@ export const applyComponents: Stage = {
       prefix: options.prefix,
       set: options.components === 'all' ? 'all' : 'recommended',
     });
+  },
+};
+
+export const applyAppShell: Stage = {
+  id: 'apply-app-shell',
+  title: 'Adding the application shell',
+  enabled: ({ options }) => options.appShell === 'starter',
+  async run({ name, options, targetDir }) {
+    await appShellProfile.apply({ targetDir, name, prefix: options.prefix });
   },
 };
 
@@ -247,7 +257,10 @@ export const verifyProject: Stage = {
       ...(ARCHITECTURE_PROFILES[options.architecture]?.requiredFiles ?? []),
       ...(ROUTING_PROFILES[options.routing]?.requiredFiles ?? []),
       ...(RENDERING_PROFILES[options.rendering]?.requiredFilesFor(options.architecture) ?? []),
-      ...(options.components === 'none' ? [] : designProfile.requiredFiles),
+      ...(options.components === 'none' && options.appShell === 'none'
+        ? []
+        : designProfile.requiredFiles),
+      ...(options.appShell === 'starter' ? appShellProfile.requiredFiles : []),
       ...(options.components === 'none'
         ? []
         : componentsProfile.requiredFilesFor(options.components === 'all' ? 'all' : 'recommended')),
@@ -273,6 +286,7 @@ export const NEW_PROJECT_STAGES: readonly Stage[] = [
   applyRendering,
   applyDesign,
   applyComponents,
+  applyAppShell,
   addIconLibrary,
   writeStarterConfig,
   installDependencies,

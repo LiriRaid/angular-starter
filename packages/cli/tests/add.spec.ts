@@ -46,7 +46,7 @@ describe('as add', () => {
     const result = await add(project, ['theme']);
     expect(result.code).toBe(2);
     expect(result.err).toContain('Unknown capability "theme"');
-    for (const name of ['icons', 'components', 'routing', 'rendering']) {
+    for (const name of ['icons', 'components', 'routing', 'app-shell', 'rendering']) {
       expect(result.err).toContain(name);
     }
   });
@@ -123,9 +123,99 @@ describe('as add', () => {
     });
   });
 
+  describe('app-shell', () => {
+    const PLAIN = ['--app-shell', 'none', '--components', 'none', '--icons', 'none'];
+
+    it('adds the design base, the components it uses, Lucide and the shell, and records it', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      const result = await add(project, ['app-shell']);
+      expect(result.code, result.err).toBe(0);
+      for (const title of [
+        'Adding icon library',
+        'Adding the design base',
+        'Adding the application shell',
+      ]) {
+        expect(result.out).toContain(`✓ ${title}`);
+      }
+      expect(await exists(join(project, 'src/app/features/app-shell/layout/main/main.ts'))).toBe(
+        true,
+      );
+      expect(await exists(join(project, 'src/app/shared/components/as-search/as-search.ts'))).toBe(
+        true,
+      );
+      expect(await exists(join(project, 'src/app/shared/components/as-table'))).toBe(false);
+      const options = await readConfig(project);
+      expect(options).toMatchObject({ appShell: 'starter', components: 'none', icons: 'lucide' });
+      expect(await readFile(join(project, 'src/app/app.ts'), 'utf8')).toContain('provideLayout(');
+      expect(result.calls).toContainEqual({ command: 'npm', args: ['install'], cwd: project });
+    });
+
+    it('needs the starter routing', async () => {
+      const project = await createStarterProject(cwd, [...PLAIN, '--routing', 'angular']);
+      const result = await add(project, ['app-shell', 'starter']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('requires the routing: starter');
+    });
+
+    it('works on a project that already has the components, without adding the design twice', async () => {
+      const project = await createStarterProject(cwd, [
+        '--app-shell',
+        'none',
+        '--components',
+        'recommended',
+      ]);
+      const result = await add(project, ['app-shell']);
+      expect(result.code, result.err).toBe(0);
+      expect(result.out).not.toContain('Adding the design base');
+      expect((await readConfig(project)).components).toBe('recommended');
+    });
+
+    it('lets a bigger component collection be added later without touching the shell', async () => {
+      const project = await createStarterProject(cwd);
+      const main = join(project, 'src/app/features/app-shell/layout/main/main.ts');
+      const before = await readFile(main, 'utf8');
+      const result = await add(project, ['components', 'all']);
+      expect(result.code, result.err).toBe(0);
+      expect(await exists(join(project, 'src/app/shared/components/as-table/as-table.ts'))).toBe(
+        true,
+      );
+      expect(await readFile(main, 'utf8')).toBe(before);
+    });
+
+    it('is refused with server rendering, which the shell does not support yet', async () => {
+      const project = await createStarterProject(cwd, [...PLAIN, '--rendering', 'ssr']);
+      const result = await add(project, ['app-shell']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('requires the rendering: csr');
+    });
+
+    it('blocks adding server rendering to a project that has the shell', async () => {
+      const project = await createStarterProject(cwd);
+      const result = await add(project, ['rendering', 'ssr']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('requires the rendering: csr');
+    });
+
+    it('refuses to add it twice', async () => {
+      const project = await createStarterProject(cwd);
+      const result = await add(project, ['app-shell']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('already');
+    });
+
+    it('shows the steps with --dry-run and changes nothing', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      const result = await add(project, ['app-shell', '--dry-run']);
+      expect(result.code).toBe(0);
+      expect(result.out).toContain('Dry run');
+      expect(result.out).toContain('Adding the application shell');
+      expect(await exists(join(project, 'src/app/features/app-shell/layout'))).toBe(false);
+    });
+  });
+
   describe('rendering', () => {
     it('adds Angular SSR with the official ng add and records it', async () => {
-      const project = await createStarterProject(cwd);
+      const project = await createStarterProject(cwd, ['--app-shell', 'none']);
       const result = await add(project, ['rendering', 'ssr']);
       expect(result.code, result.err).toBe(0);
       expect(result.calls).toContainEqual({
@@ -143,7 +233,7 @@ describe('as add', () => {
     });
 
     it('adds the Starter SSR on top of the SSR that ng add leaves', async () => {
-      const project = await createStarterProject(cwd);
+      const project = await createStarterProject(cwd, ['--app-shell', 'none']);
       const result = await add(project, ['rendering', 'starter-ssr'], {
         onRun: async (call) => {
           if (call.args.includes('add')) {

@@ -1,5 +1,5 @@
 import { IndentationText, Node, Project, QuoteKind, SyntaxKind, Writers } from 'ts-morph';
-import type { ObjectLiteralExpression, SourceFile } from 'ts-morph';
+import type { ArrayLiteralExpression, ObjectLiteralExpression, SourceFile } from 'ts-morph';
 
 /**
  * Edits to generated TypeScript files. Every function takes the file's text and returns the new
@@ -26,7 +26,7 @@ const ROUTER_MODULE = '@angular/router';
 let project: Project | undefined;
 
 /** One in-memory project is reused: creating it loads the TypeScript compiler. */
-function parseSource(source: string): SourceFile {
+export function parseSource(source: string): SourceFile {
   project ??= new Project({
     useInMemoryFileSystem: true,
     skipLoadingLibFiles: true,
@@ -71,7 +71,7 @@ export function addCallArgument(
 }
 
 /** The object passed to `@Component({ ... })` on `className`. */
-function componentMetadata(file: SourceFile, className: string): ObjectLiteralExpression {
+export function componentMetadata(file: SourceFile, className: string): ObjectLiteralExpression {
   const declaration = file.getClass(className);
   if (!declaration) throw new Error(`Could not find the class "${className}".`);
   const metadata = declaration
@@ -193,13 +193,43 @@ export function addNavigationItem(source: string, spec: NavigationItemSpec): str
   return file.getFullText();
 }
 
-/** Appends routes to the exported `routes` array, skipping those that are already declared. */
-export function addRoutes(source: string, routes: readonly RouteSpec[]): string {
-  const file = parseSource(source);
+/** The exported `routes` array of `app.routes.ts`. */
+export function routesArray(file: SourceFile): ArrayLiteralExpression {
   const array = file
     .getVariableDeclaration('routes')
     ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression);
   if (!array) throw new Error('Could not find the "routes" array to add routes to.');
+  return array;
+}
+
+/**
+ * The `children` of the layout route: the route that lazy-loads a component of the application
+ * shell (`@features/app-shell/layout/...`). The routes of the application live inside it.
+ */
+export function layoutChildren(routes: ArrayLiteralExpression): ArrayLiteralExpression | undefined {
+  return routes
+    .getElements()
+    .filter(Node.isObjectLiteralExpression)
+    .filter((route) =>
+      (route.getProperty('loadComponent')?.getText() ?? '').includes('@features/app-shell/layout/'),
+    )
+    .map((route) =>
+      route
+        .getProperty('children')
+        ?.asKind(SyntaxKind.PropertyAssignment)
+        ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression),
+    )
+    .find((children) => children !== undefined);
+}
+
+/**
+ * Appends routes to the exported `routes` array, skipping those that are already declared. With
+ * the application shell they go to the children of its layout route, so the shell wraps them.
+ */
+export function addRoutes(source: string, routes: readonly RouteSpec[]): string {
+  const file = parseSource(source);
+  const top = routesArray(file);
+  const array = layoutChildren(top) ?? top;
 
   for (const route of routes) {
     const declared = array
@@ -258,7 +288,7 @@ export function removeClassProperty(
   return file.getFullText();
 }
 
-function addNamedImports(file: SourceFile, { module, names }: ImportSpec): void {
+export function addNamedImports(file: SourceFile, { module, names }: ImportSpec): void {
   const declaration =
     file.getImportDeclaration((candidate) => candidate.getModuleSpecifierValue() === module) ??
     file.addImportDeclaration({ moduleSpecifier: module });
@@ -269,7 +299,7 @@ function addNamedImports(file: SourceFile, { module, names }: ImportSpec): void 
   }
 }
 
-function stringProperty(route: ObjectLiteralExpression, name: string): string | undefined {
+export function stringProperty(route: ObjectLiteralExpression, name: string): string | undefined {
   const initializer = route
     .getProperty(name)
     ?.asKind(SyntaxKind.PropertyAssignment)

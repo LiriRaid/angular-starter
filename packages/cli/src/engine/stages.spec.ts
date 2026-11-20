@@ -1,10 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_OPTIONS } from '../config/resolve.js';
 import type { GenerationContext } from './pipeline.js';
-import { NEW_PROJECT_STAGES, applyComponents, applyDesign } from './stages.js';
+import { NEW_PROJECT_STAGES, applyAppShell, applyComponents, applyDesign } from './stages.js';
 
-const contextWith = (components: 'none' | 'recommended' | 'all'): GenerationContext =>
-  ({ options: { ...DEFAULT_OPTIONS, components } }) as GenerationContext;
+const contextWith = (
+  components: 'none' | 'recommended' | 'all',
+  appShell: 'none' | 'starter' = 'none',
+): GenerationContext =>
+  ({ options: { ...DEFAULT_OPTIONS, components, appShell } }) as GenerationContext;
 
 describe('new project stages', () => {
   it('adds the design base and the components only with a component collection', () => {
@@ -13,6 +16,14 @@ describe('new project stages', () => {
       expect(stage.enabled?.(contextWith('recommended'))).toBe(true);
       expect(stage.enabled?.(contextWith('all'))).toBe(true);
     }
+  });
+
+  it('adds the design base for the application shell too, and the shell only when chosen', () => {
+    expect(applyDesign.enabled?.(contextWith('none', 'starter'))).toBe(true);
+    expect(applyDesign.enabled?.(contextWith('none', 'none'))).toBe(false);
+    expect(applyComponents.enabled?.(contextWith('none', 'starter'))).toBe(false);
+    expect(applyAppShell.enabled?.(contextWith('none', 'starter'))).toBe(true);
+    expect(applyAppShell.enabled?.(contextWith('all', 'none'))).toBe(false);
   });
 
   it('runs in the order each stage needs', () => {
@@ -24,6 +35,7 @@ describe('new project stages', () => {
       'apply-rendering',
       'apply-design',
       'apply-components',
+      'apply-app-shell',
       'add-icon-library',
       'write-starter-config',
       'install-dependencies',

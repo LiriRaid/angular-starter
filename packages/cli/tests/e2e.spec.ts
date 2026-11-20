@@ -136,6 +136,8 @@ ${result.stderr}`,
         'screaming',
         '--rendering',
         rendering,
+        '--app-shell',
+        'none',
       );
 
       for (const file of [
@@ -169,6 +171,8 @@ ${result.stderr}`,
         'starter',
         '--rendering',
         rendering,
+        '--app-shell',
+        'none',
       );
 
       for (const file of [
@@ -267,7 +271,7 @@ ${result.stderr}`,
   );
 
   it(
-    'creates the recommended project: Screaming, routing, Tailwind CSS, Lucide and the components',
+    'creates the recommended project: Screaming, routing, Tailwind CSS, Lucide, the components and the App Shell',
     async () => {
       const project = await createInstalled('e2e-recommended');
       for (const file of [
@@ -294,6 +298,23 @@ ${result.stderr}`,
       expect(await read(project, 'angular.json')).not.toContain('theme-styles');
       expect(await read(project, 'angular.json')).toContain('src/test-setup.ts');
 
+      // The App Shell: layout, sidebar, header and breadcrumb, the example pages and their routes.
+      for (const file of [
+        'src/app/features/app-shell/layout/main/main.ts',
+        'src/app/features/app-shell/layout/sidebar/sidebar.ts',
+        'src/app/features/app-shell/layout/header/header.ts',
+        'src/app/features/app-shell/components/breadcrumb/breadcrumb.ts',
+        'src/styles/features/sidebar-styles.css',
+        'src/app/features/dashboard/dashboard.ts',
+        'src/app/features/settings/general/settings-general.ts',
+      ]) {
+        expect(existsSync(join(project, file)), file).toBe(true);
+      }
+      expect(await read(project, 'src/app/app.ts')).toContain('provideLayout(APP_NAVIGATION');
+      expect(await read(project, 'src/app/app.routes.ts')).toContain(
+        "import('@features/app-shell/layout/main/main')",
+      );
+
       await ng(project, 'build');
       await ng(project, 'test', '--watch=false');
     },
@@ -309,6 +330,8 @@ ${result.stderr}`,
         'all',
         '--rendering',
         'starter-ssr',
+        '--app-shell',
+        'none',
       );
       expect(await read(project, 'package.json')).toContain('@angular/cdk');
       expect(await read(project, 'src/styles.css')).toContain('table-styles.css');
@@ -321,6 +344,40 @@ ${result.stderr}`,
       ]) {
         expect(existsSync(join(project, file)), file).toBe(true);
       }
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'adds the App Shell to an existing project and generates a feature inside it that build and test',
+    async () => {
+      const project = await createInstalled(
+        'e2e-add-shell',
+        '--app-shell',
+        'none',
+        '--components',
+        'none',
+        '--icons',
+        'none',
+      );
+      await asProject(project, 'add', 'app-shell');
+      await asProject(project, 'generate', 'feature', 'billing');
+      await asProject(project, 'add', 'components', 'all');
+
+      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      expect(config.options).toMatchObject({
+        appShell: 'starter',
+        icons: 'lucide',
+        components: 'all',
+      });
+      const routes = await read(project, 'src/app/app.routes.ts');
+      expect(routes.indexOf("path: 'billing'")).toBeGreaterThan(routes.indexOf('children: ['));
+      expect(existsSync(join(project, 'src/app/shared/components/as-table/as-table.ts'))).toBe(
+        true,
+      );
 
       await ng(project, 'build');
       await ng(project, 'test', '--watch=false');

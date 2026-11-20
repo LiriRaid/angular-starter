@@ -24,6 +24,7 @@ export const ICONS = [
   'bootstrap-icons',
 ] as const;
 export const PACKAGE_MANAGERS = ['npm', 'pnpm', 'yarn'] as const;
+export const APP_SHELLS = ['none', 'starter'] as const;
 
 /** Prefix reserved for the components distributed by Angular Starter. */
 export const RESERVED_PREFIX = 'as';
@@ -44,7 +45,7 @@ export const optionsSchema = z.strictObject({
   style: z.enum(STYLES),
   tailwind: z.boolean(),
   rendering: z.enum(RENDERING),
-  appShell: z.boolean(),
+  appShell: z.enum(APP_SHELLS),
   components: z.enum(COMPONENTS),
   icons: z.enum(ICONS),
   packageManager: z.enum(PACKAGE_MANAGERS),

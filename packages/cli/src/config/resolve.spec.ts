@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { UsageError } from '../errors.js';
 import { DEFAULT_OPTIONS, normalizeStyleChoice, resolveOptions } from './resolve.js';
+import type { StarterOptions } from './schema.js';
 
 describe('resolveOptions', () => {
   it('returns the defaults when nothing is provided', () => {
@@ -79,12 +80,35 @@ describe('resolveOptions', () => {
     expect(run).toThrow(/routing: "starter" requires the architecture: screaming/);
   });
 
-  it.each([[{ icons: 'heroicons' }], [{ appShell: true }]] as const)(
-    'rejects unavailable option %j',
-    (flags) => {
-      expect(() => resolveOptions({ flags })).toThrow(/not available yet/);
-    },
-  );
+  it.each([[{ icons: 'heroicons' }]] as const)('rejects unavailable option %j', (flags) => {
+    expect(() => resolveOptions({ flags })).toThrow(/not available yet/);
+  });
+
+  it('includes the application shell in the defaults when the project can take it', () => {
+    expect(DEFAULT_OPTIONS.appShell).toBe('starter');
+    expect(resolveOptions({ flags: { appShell: 'none' } }).appShell).toBe('none');
+  });
+
+  it('leaves the application shell out of the defaults when something it needs is missing', () => {
+    expect(resolveOptions({ flags: { routing: 'angular' } }).appShell).toBe('none');
+    expect(resolveOptions({ flags: { architecture: 'angular-default' } }).appShell).toBe('none');
+    expect(resolveOptions({ flags: { style: 'scss' } }).appShell).toBe('none');
+    expect(resolveOptions({ flags: { icons: 'none' } }).appShell).toBe('none');
+    expect(resolveOptions({ flags: { rendering: 'ssr' } }).appShell).toBe('none');
+    expect(resolveOptions({ flags: { rendering: 'starter-ssr' } }).appShell).toBe('none');
+  });
+
+  it('rejects the application shell without what it reads or draws with', () => {
+    const without = (flags: Partial<StarterOptions>) => () =>
+      resolveOptions({ flags: { appShell: 'starter', ...flags } });
+    expect(without({ routing: 'angular' })).toThrow(
+      /appShell: "starter" requires the routing: starter/,
+    );
+    expect(without({ icons: 'none' })).toThrow(/the icons: lucide/);
+    expect(without({ rendering: 'ssr' })).toThrow(/the rendering: csr/);
+    expect(without({ style: 'scss' })).toThrow(/appShell: "starter" requires/);
+    expect(without({ architecture: 'angular-default' })).toThrow(/the architecture: screaming/);
+  });
 
   it('rejects unknown values and lists every issue', () => {
     expect(() => resolveOptions({ flags: { style: 'stylus' as never } })).toThrow(/style/);

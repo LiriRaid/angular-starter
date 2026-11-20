@@ -72,6 +72,22 @@ describe('as generate feature', () => {
     expect(tree).toContain("id: 'home'");
   });
 
+  it('registers the lazy route inside the layout route when the project has the application shell', async () => {
+    await mkdir(join(cwd, 'shell'));
+    const withShell = await createStarterProject(join(cwd, 'shell'), ['--app-shell', 'starter']);
+    const result = await generate(['feature', 'billing'], withShell);
+    expect(result.code, result.err).toBe(0);
+    const routes = await readFile(join(withShell, 'src/app/app.routes.ts'), 'utf8');
+    expect(routes.indexOf("path: 'billing'")).toBeGreaterThan(routes.indexOf('children: ['));
+    expect(routes.match(/loadComponent/g)).toHaveLength(1);
+    expect(
+      await readFile(
+        join(withShell, 'src/app/features/app-shell/navigation/navigation.data.ts'),
+        'utf8',
+      ),
+    ).toContain("link: '/billing'");
+  });
+
   it('names the class and the routes after the feature', async () => {
     await generate(['feature', 'user-profiles']);
     expect(await read('src/app/features/user-profiles/user-profiles.ts')).toContain(

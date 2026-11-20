@@ -11,6 +11,7 @@ const TITLES: Record<CapabilityCategory, string> = {
   components: 'Native UI components',
   icons: 'Icon libraries',
   packageManager: 'Package managers',
+  appShell: 'Application shells',
 };
 
 export function listCommand(io: CliIo, category?: string): void {

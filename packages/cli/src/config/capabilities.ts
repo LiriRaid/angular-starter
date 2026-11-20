@@ -1,9 +1,18 @@
 export type CapabilityCategory =
-  'architecture' | 'routing' | 'style' | 'rendering' | 'components' | 'icons' | 'packageManager';
+  | 'architecture'
+  | 'routing'
+  | 'style'
+  | 'rendering'
+  | 'components'
+  | 'icons'
+  | 'packageManager'
+  | 'appShell';
 
 /** What an option needs from the rest of the project; any value is accepted when a key is absent. */
 export interface OptionRequirements {
   readonly architecture?: readonly string[];
+  readonly routing?: readonly string[];
+  readonly rendering?: readonly string[];
   /** Stylesheet format (`css` also covers Tailwind CSS). */
   readonly style?: readonly string[];
   /** True when the option only works in a project that uses Tailwind CSS. */
@@ -32,6 +41,8 @@ export type Registry = Readonly<Record<CapabilityCategory, readonly CapabilityOp
 /** The choices that decide whether an option can be used; unknown ones are not checked. */
 export interface RequirementContext {
   architecture?: string;
+  routing?: string;
+  rendering?: string;
   style?: string;
   tailwind?: boolean;
   icons?: string;
@@ -273,10 +284,33 @@ export const CAPABILITIES: Registry = {
       available: true,
     },
   ],
+  appShell: [
+    {
+      id: 'none',
+      label: 'None',
+      description:
+        'No application shell: the root component is just the router outlet. You can add it later with as add app-shell.',
+      docs: `${STARTER_DOCS}/0008-app-shell.md`,
+      available: true,
+    },
+    {
+      id: 'starter',
+      label: 'Angular Starter App Shell',
+      description:
+        'A wide sidebar that floats, with the header and the content floating too, reading the navigation tree, with five example pages to try it. Needs the starter routing, Tailwind CSS and client-side rendering (server rendering is not supported yet).',
+      docs: `${STARTER_DOCS}/0008-app-shell.md`,
+      available: true,
+      default: true,
+      requires: {
+        architecture: ['screaming'],
+        routing: ['starter'],
+        rendering: ['csr'],
+        tailwind: true,
+        icons: ['lucide'],
+      },
+    },
+  ],
 };
-
-/** The App Shell is a yes/no capability, so it lives outside the option lists. */
-export const APP_SHELL_AVAILABLE = false;
 
 export const CATEGORIES = Object.keys(CAPABILITIES) as CapabilityCategory[];
 
@@ -295,8 +329,13 @@ export function isAvailable(category: CapabilityCategory, id: string): boolean {
   return CAPABILITIES[category].some((option) => option.id === id && option.available);
 }
 
-const REQUIREMENT_TEXT: Record<'architecture' | 'style' | 'icons', string> = {
+const REQUIREMENT_TEXT: Record<
+  'architecture' | 'routing' | 'rendering' | 'style' | 'icons',
+  string
+> = {
   architecture: 'the architecture',
+  routing: 'the routing',
+  rendering: 'the rendering',
   style: 'the stylesheet format',
   icons: 'the icons',
 };

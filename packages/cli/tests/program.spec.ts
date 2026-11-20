@@ -102,7 +102,14 @@ describe('as (program)', () => {
     const fake = createFakeIo();
     await run(['new', '--help'], fake.io);
     const out = fake.out();
-    for (const flag of ['--architecture', '--routing', '--style', '--tailwind', '--rendering']) {
+    for (const flag of [
+      '--architecture',
+      '--routing',
+      '--style',
+      '--tailwind',
+      '--rendering',
+      '--app-shell',
+    ]) {
       expect(out).toContain(flag);
     }
     expect(out).toContain('(css, tailwind, scss, sass, less)');
@@ -117,12 +124,13 @@ describe('as (program)', () => {
     expect(await run(['add', '--help'], fake.io)).toBe(0);
     const out = fake.out();
     expect(out).toContain('Usage: as add <capability> [value]');
-    for (const capability of ['icons', 'components', 'routing', 'rendering']) {
+    for (const capability of ['icons', 'components', 'routing', 'app-shell', 'rendering']) {
       expect(out).toMatch(new RegExp(`^ {2}${capability} `, 'm'));
     }
     expect(out).toContain('--dry-run');
     expect(out).toContain('--no-install');
     expect(out).toContain('as add routing starter');
+    expect(out).toContain('as add app-shell');
   });
 
   it('documents `generate` with its kinds, flags and examples', async () => {
@@ -164,6 +172,16 @@ describe('as (program)', () => {
     expect(out).toContain('https://tailwindcss.com');
     expect(out).toContain('Utility-first');
     expect(out).toMatch(/^ {2}css +CSS/m);
+  });
+
+  it('lists the application shell options with the link to their decision', async () => {
+    const fake = createFakeIo();
+    expect(await run(['list', 'appShell'], fake.io)).toBe(0);
+    const out = fake.out();
+    expect(out).toContain('Application shells (appShell)');
+    expect(out).toMatch(/^ {2}starter +Angular Starter App Shell/m);
+    expect(out).toContain('0008-app-shell.md');
+    expect(out).not.toMatch(/App Shell \(Recommended\)/);
   });
 
   it('prints environment information', async () => {

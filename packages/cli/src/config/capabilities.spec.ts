@@ -56,6 +56,25 @@ describe('capability registry', () => {
       components: [],
       icons: ['lucide'],
       packageManager: [],
+      appShell: [],
+    });
+  });
+
+  it('offers the application shell like any other option: none or the Angular Starter App Shell', () => {
+    expect(availableIds('appShell')).toEqual(['none', 'starter']);
+    const starter = CAPABILITIES.appShell.find((option) => option.id === 'starter');
+    expect(starter?.label).toBe('Angular Starter App Shell');
+    expect(starter?.docs).toBe(
+      'https://github.com/LiriRaid/as-starter/blob/main/docs/adr/0008-app-shell.md',
+    );
+    expect(starter?.default).toBe(true);
+    expect(starter?.recommended).toBeUndefined();
+    expect(starter?.requires).toEqual({
+      architecture: ['screaming'],
+      routing: ['starter'],
+      rendering: ['csr'],
+      tailwind: true,
+      icons: ['lucide'],
     });
   });
 
@@ -103,13 +122,27 @@ describe('recommendedOption', () => {
 });
 
 describe('defaultOption', () => {
-  const context = { architecture: 'screaming', style: 'css', tailwind: true, icons: 'lucide' };
+  const context = {
+    architecture: 'screaming',
+    routing: 'starter',
+    style: 'css',
+    tailwind: true,
+    icons: 'lucide',
+  };
 
   it('names the silent choice of --defaults for every category', () => {
     expect(defaultOption('architecture', {})?.id).toBe('screaming');
     expect(defaultOption('routing', context)?.id).toBe('starter');
     expect(defaultOption('components', context)?.id).toBe('recommended');
+    expect(defaultOption('appShell', context)?.id).toBe('starter');
     expect(defaultOption('style', {})?.id).toBe('tailwind');
+  });
+
+  it('leaves the application shell out of the default when the project cannot take it', () => {
+    expect(defaultOption('appShell', { ...context, routing: 'angular' })).toBeUndefined();
+    expect(defaultOption('appShell', { ...context, icons: 'none' })).toBeUndefined();
+    expect(defaultOption('appShell', { ...context, tailwind: false })).toBeUndefined();
+    expect(defaultOption('appShell', { ...context, rendering: 'ssr' })).toBeUndefined();
   });
 
   it('falls back to undefined when the default cannot be used', () => {
@@ -129,6 +162,19 @@ describe('unmetRequirements', () => {
       'the architecture: screaming',
     ]);
     expect(unmetRequirements(starter!, { architecture: 'screaming' })).toEqual([]);
+  });
+
+  it('names the routing the application shell reads its navigation from', () => {
+    const shell = CAPABILITIES.appShell.find((option) => option.id === 'starter');
+    expect(shell).toBeDefined();
+    expect(
+      unmetRequirements(shell!, {
+        architecture: 'screaming',
+        routing: 'angular',
+        tailwind: true,
+        icons: 'lucide',
+      }),
+    ).toEqual(['the routing: starter']);
   });
 
   it('names every missing requirement of a component collection', () => {

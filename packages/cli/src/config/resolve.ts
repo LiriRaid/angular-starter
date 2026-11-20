@@ -1,6 +1,5 @@
 import { UsageError } from '../errors.js';
 import {
-  APP_SHELL_AVAILABLE,
   CAPABILITIES,
   CATEGORIES,
   availableIds,
@@ -25,9 +24,10 @@ function pick<T extends string>(
 
 /**
  * The defaults for everything that was not given: Screaming, Angular Starter Routing, Tailwind CSS,
- * Client-Side Rendering, Lucide and the essential components. Each one is derived from what was
- * already chosen so a default never conflicts with a choice: with SCSS there is no Tailwind CSS and
- * no component collection, without the Screaming Architecture the routing is Angular's own.
+ * Client-Side Rendering, Lucide, the Angular Starter App Shell and the essential components. Each
+ * one is derived from what was already chosen so a default never conflicts with a choice: with
+ * SCSS there is no Tailwind CSS, no shell and no component collection, without the Screaming
+ * Architecture the routing is Angular's own and so there is no shell either.
  */
 function defaultsFor(given: Partial<StarterOptions>): StarterOptions {
   const architecture = pick(given.architecture, 'architecture', {}, 'angular-default');
@@ -35,14 +35,21 @@ function defaultsFor(given: Partial<StarterOptions>): StarterOptions {
   // An explicit stylesheet format means no Tailwind CSS unless it was asked for.
   const tailwind = given.tailwind ?? given.style === undefined;
   const icons = pick(given.icons, 'icons', {}, 'none');
-  const context = { architecture, style, tailwind, icons };
+  const routing = pick(
+    given.routing,
+    'routing',
+    { architecture, style, tailwind, icons },
+    'angular',
+  );
+  const rendering = pick(given.rendering, 'rendering', {}, 'csr');
+  const context = { architecture, routing, rendering, style, tailwind, icons };
   return {
     architecture,
-    routing: pick(given.routing, 'routing', context, 'angular'),
+    routing,
     style,
     tailwind,
-    rendering: pick(given.rendering, 'rendering', {}, 'csr'),
-    appShell: false,
+    rendering,
+    appShell: pick(given.appShell, 'appShell', context, 'none'),
     components: pick(given.components, 'components', context, 'none'),
     icons,
     packageManager: 'npm',
@@ -125,9 +132,6 @@ function availabilityProblems(options: StarterOptions): string[] {
         `${category}: "${value}" is not available yet. Available: ${availableIds(category).join(', ')}.`,
       );
     }
-  }
-  if (options.appShell && !APP_SHELL_AVAILABLE) {
-    problems.push('appShell: Angular Starter App Shell is not available yet.');
   }
   return problems;
 }

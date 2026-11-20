@@ -299,7 +299,7 @@ const NAVIGATION = `import type { NavigationGroup } from '@core/navigation/navig
 export const APP_NAVIGATION: readonly NavigationGroup[] = [
   {
     label: 'General',
-    items: [{ id: 'home', title: 'Home', icon: 'house', type: 'basic', link: '/home' }],
+    items: [{ id: 'home', title: 'Home', icon: 'Home', type: 'basic', link: '/home' }],
   },
   // Keep this comment.
 ];

@@ -24,6 +24,7 @@ export interface NewFlags {
   style?: string;
   tailwind?: boolean;
   rendering?: string;
+  appShell?: string;
   components?: string;
   icons?: string;
   packageManager?: string;
@@ -131,6 +132,7 @@ const OPTION_FLAGS = [
   'style',
   'tailwind',
   'rendering',
+  'appShell',
   'components',
   'icons',
   'packageManager',
@@ -167,6 +169,7 @@ function printSummary(io: CliIo, name: string, options: StarterOptions): void {
     ['Stylesheet', labelOf('style', options.style)],
     ['Tailwind CSS', toggle(options.tailwind)],
     ['Rendering', labelOf('rendering', options.rendering)],
+    ['App shell', labelOf('appShell', options.appShell)],
     ['Components', labelOf('components', options.components)],
     ['Icons', labelOf('icons', options.icons)],
     ['Package manager', options.packageManager],
@@ -203,11 +206,16 @@ async function runDryRun(context: GenerationContext): Promise<void> {
           `Add incremental hydration, event replay and view transitions (${labelOf('rendering', options.rendering)})`,
         ]
       : []),
+    ...(options.components === 'none' && options.appShell === 'none'
+      ? []
+      : ['Add the design base: tokens, theme, typography, animations, utilities and pipes']),
     ...(options.components === 'none'
       ? []
+      : [`Add the ${labelOf('components', options.components)} (as- components)`]),
+    ...(options.appShell === 'none'
+      ? []
       : [
-          'Add the design base: tokens, theme, typography, animations, utilities and pipes',
-          `Add the ${labelOf('components', options.components)} (as- components)`,
+          `Add the ${labelOf('appShell', options.appShell)} (layout, sidebar, header, breadcrumb and example pages)`,
         ]),
     ...(ICON_PACKAGES[options.icons]
       ? [

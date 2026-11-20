@@ -5,7 +5,13 @@ import { addDependencies } from '../edits/package-json.js';
 import { planEdit, writeEdits } from '../edits/planned.js';
 import { addComponentStyles } from '../edits/styles.js';
 import { pathExists } from '../fs.js';
-import { barrelLines, componentsOf, stylesOf, type ComponentSet } from './manifest.js';
+import {
+  barrelLines,
+  componentsOf,
+  componentsOfIds,
+  stylesOf,
+  type ComponentSet,
+} from './manifest.js';
 
 const SHARED = 'src/app/shared/components';
 const BARREL = `${SHARED}/index.ts`;
@@ -16,8 +22,12 @@ export interface ComponentsProject {
   targetDir: string;
   name: string;
   prefix: string;
-  set: ComponentSet;
+  /** A collection, or the ids of the components a feature of the starter needs. */
+  set: ComponentSet | readonly string[];
 }
+
+const definitionsOf = (set: ComponentSet | readonly string[]) =>
+  typeof set === 'string' ? componentsOf(set) : componentsOfIds(set);
 
 /**
  * The native `as-` components (ADR-0007): the collection's folders under `shared/components`, each
@@ -28,11 +38,11 @@ export interface ComponentsProject {
  */
 export const componentsProfile = {
   /** Project files (forward slashes) that must exist once the collection has been applied. */
-  requiredFilesFor: (set: ComponentSet): string[] =>
-    componentsOf(set).map(({ id }) => `${SHARED}/as-${id}/as-${id}.ts`),
+  requiredFilesFor: (set: ComponentSet | readonly string[]): string[] =>
+    definitionsOf(set).map(({ id }) => `${SHARED}/as-${id}/as-${id}.ts`),
 
   async apply({ targetDir, name, prefix, set }: ComponentsProject): Promise<void> {
-    const definitions = componentsOf(set);
+    const definitions = definitionsOf(set);
 
     // Plan every edit first: a project without the barrel or the design base stops the stage
     // before anything is written.

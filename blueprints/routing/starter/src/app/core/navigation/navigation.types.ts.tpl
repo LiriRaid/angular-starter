@@ -15,6 +15,8 @@ export interface NavigationItem {
   /** Items hidden from the sidebar still get a page title and breadcrumbs. */
   readonly hidden?: (item: NavigationItem) => boolean;
   readonly children?: readonly NavigationItem[];
+  /** Whether the sidebar shows the children open. The sidebar updates it as folders are opened and closed. */
+  unfolded?: boolean;
 }
 
 export interface NavigationGroup {

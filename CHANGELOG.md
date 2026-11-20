@@ -8,6 +8,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- `--defaults` and the wizard now include the Angular Starter App Shell when the project can take it
+  (Screaming Architecture, Angular Starter Routing, Tailwind CSS and Lucide Icons); `--app-shell none`
+  keeps the previous result. `NavigationItem` gets an optional, mutable `unfolded`, and the `Home`
+  entry of the starter tree uses the `Home` icon name that `as-icon` knows.
 - The design base and the `as-` components are now the structure of the reference application
   without its business (ADR-0007, which supersedes ADR-0005): `src/styles.css` imports the
   `src/styles/**/*-styles.css` files (theme, base elements, mixins, scrollbars, typography, one
@@ -23,6 +27,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Angular Starter App Shell (`--app-shell starter`, `as add app-shell`; ADR-0008 and plan 0006), first
+  layout mode of the reference application without its business: `features/app-shell` with the
+  `Main` and `Empty` layouts, the sidebar (brand, search, navigation tree, user menu, preferences
+  drawer), the header, the breadcrumb, `provideLayout`, `LayoutService` and their specs, the
+  `sidebar`, `breadcrumb` and `user-menu` stylesheets imported from `styles.css`, the components the
+  shell draws with, and the example pages `dashboard`, `users`, `reports` and `settings` in the
+  navigation tree. The routes are wrapped in the `Main` layout route and `as generate feature` adds
+  its route there. It is a new option of the wizard, `--help`, `as list` and `as add`.
 - Explicit wizard: every option shows its name, the official documentation of what it installs
   (`[ url ]`, aligned like `ng new`) and a description while highlighted. One stylesheet list
   (CSS, Tailwind CSS, SCSS, Sass, Less); `--style tailwind` is accepted. The registry holds the

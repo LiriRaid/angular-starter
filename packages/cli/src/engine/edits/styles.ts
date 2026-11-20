@@ -18,6 +18,7 @@ export const DESIGN_STYLE_IMPORTS: readonly string[] = [
 const TAILWIND_IMPORT = /^@import\s+(['"])tailwindcss\1\s*;?[ \t]*$/m;
 const ANIMATIONS_IMPORT = `@import '${DESIGN_STYLE_IMPORTS.at(-1)}';`;
 const COMPONENT_STYLES_FOLDER = './styles/components';
+const FEATURE_STYLES_FOLDER = './styles/features';
 
 /** The line ending the file already uses, so an edit never mixes them. */
 const eolOf = (text: string): string => (text.includes('\r\n') ? '\r\n' : '\n');
@@ -55,21 +56,43 @@ export function addDesignStyles(text: string): string {
 
 /**
  * Imports the stylesheets of components (`button-styles` is `styles/components/button-styles.css`)
- * that are not imported yet, before the shared animations as in the reference application.
+ * that are not imported yet, before those of the features and the shared animations as in the
+ * reference application.
  */
 export function addComponentStyles(text: string, names: readonly string[]): string {
+  return addStyleImports(text, COMPONENT_STYLES_FOLDER, names, (line) =>
+    line.trim().startsWith(`@import '${FEATURE_STYLES_FOLDER}/`),
+  );
+}
+
+/**
+ * Imports the stylesheets of features (`sidebar-styles` is `styles/features/sidebar-styles.css`) that
+ * are not imported yet, after the components and before the shared animations.
+ */
+export function addFeatureStyles(text: string, names: readonly string[]): string {
+  return addStyleImports(text, FEATURE_STYLES_FOLDER, names);
+}
+
+/** Inserts the missing imports before the first line `isAnchor` accepts, else before the animations. */
+function addStyleImports(
+  text: string,
+  folder: string,
+  names: readonly string[],
+  isAnchor: (line: string) => boolean = () => false,
+): string {
   const eol = eolOf(text);
   const lines = text.split(eol);
-  const anchor = lines.findIndex((line) => line.trim() === ANIMATIONS_IMPORT);
-  if (anchor < 0) {
+  const animations = lines.findIndex((line) => line.trim() === ANIMATIONS_IMPORT);
+  if (animations < 0) {
     throw new Error(
       'it does not import the design base yet; add the design before its components.',
     );
   }
   const missing = names
-    .map((name) => `@import '${COMPONENT_STYLES_FOLDER}/${name}.css';`)
+    .map((name) => `@import '${folder}/${name}.css';`)
     .filter((line) => !text.includes(line));
   if (missing.length === 0) return text;
-  lines.splice(anchor, 0, ...missing);
+  const first = lines.findIndex((line) => isAnchor(line));
+  lines.splice(first >= 0 ? first : animations, 0, ...missing);
   return lines.join(eol);
 }

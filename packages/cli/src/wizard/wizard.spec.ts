@@ -32,6 +32,7 @@ describe('runWizard', () => {
       'starter',
       'tailwind',
       'csr',
+      'starter',
       'recommended',
       'npm',
       true,
@@ -44,17 +45,19 @@ describe('runWizard', () => {
       'routing',
       'style',
       'rendering',
+      'appShell',
       'components',
       'packageManager',
       'git',
       'install',
     ]);
-    // Architecture, routing and components are the user's call: nothing is preselected there.
-    expect(asked.slice(0, 5).map((question) => question.default)).toEqual([
+    // Architecture, routing, the shell and components are the user's call: nothing is preselected.
+    expect(asked.slice(0, 6).map((question) => question.default)).toEqual([
       undefined,
       undefined,
       'tailwind',
       'csr',
+      undefined,
       undefined,
     ]);
     expect(answers).toEqual({
@@ -63,6 +66,7 @@ describe('runWizard', () => {
       style: 'css',
       tailwind: true,
       rendering: 'csr',
+      appShell: 'starter',
       components: 'recommended',
       icons: 'lucide',
       packageManager: 'npm',
@@ -201,12 +205,93 @@ describe('runWizard', () => {
     expect(plainCss.asked.map((question) => question.name)).toEqual(['icons']);
   });
 
+  it('asks for the application shell after the rendering and implies Lucide with it', async () => {
+    const { prompter, asked } = createFakePrompter(['starter', 'none']);
+    const answers = await runWizard(
+      {
+        ...SETTLED,
+        architecture: 'screaming',
+        routing: 'starter',
+        style: 'css',
+        tailwind: true,
+        rendering: 'csr',
+      },
+      prompter,
+      NO_ENV,
+      FULL,
+    );
+    expect(asked.map((question) => question.name)).toEqual(['appShell', 'components']);
+    expect(asked[0]?.choices).toEqual(['none', 'starter']);
+    expect(asked[0]?.names?.[1]).toMatch(
+      /^Angular Starter App Shell +\[ https:\/\/github\.com\/LiriRaid\/\S+0008-app-shell\.md +\]$/,
+    );
+    expect(answers).toEqual({ appShell: 'starter', components: 'none', icons: 'lucide' });
+  });
+
+  it('does not ask for the application shell when the project cannot take it', async () => {
+    const angular = createFakePrompter(['none']);
+    await runWizard(
+      {
+        ...SETTLED,
+        architecture: 'screaming',
+        routing: 'angular',
+        style: 'css',
+        tailwind: true,
+        rendering: 'csr',
+        icons: 'none',
+      },
+      angular.prompter,
+      NO_ENV,
+      FULL,
+    );
+    expect(angular.asked.map((question) => question.name)).not.toContain('appShell');
+
+    const noLucide = createFakePrompter([]);
+    await runWizard(
+      {
+        ...SETTLED,
+        architecture: 'screaming',
+        routing: 'starter',
+        style: 'css',
+        tailwind: true,
+        rendering: 'csr',
+        icons: 'none',
+      },
+      noLucide.prompter,
+      NO_ENV,
+      FULL,
+    );
+    expect(noLucide.asked.map((question) => question.name)).toEqual([]);
+  });
+
+  it('does not ask again for what a flag already decided', async () => {
+    const { prompter, asked } = createFakePrompter([]);
+    const answers = await runWizard(
+      {
+        ...SETTLED,
+        architecture: 'screaming',
+        routing: 'starter',
+        style: 'css',
+        tailwind: true,
+        rendering: 'csr',
+        appShell: 'starter',
+        components: 'recommended',
+      },
+      prompter,
+      NO_ENV,
+      FULL,
+    );
+    expect(asked).toEqual([]);
+    expect(answers).toEqual({ icons: 'lucide' });
+  });
+
   it('never offers options that cannot be generated', async () => {
     const { prompter, asked } = createFakePrompter([
       'screaming',
       'starter',
       'tailwind',
       'csr',
+      'starter',
       'recommended',
       'npm',
       true,

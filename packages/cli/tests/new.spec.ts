@@ -535,6 +535,86 @@ export const appConfig: ApplicationConfig = {
     expect(fake.out()).not.toContain('Starter SSR');
   });
 
+  it('adds the application shell after the components and before the icon library', async () => {
+    const fake = createFakeIo({ cwd });
+    const runner = createFakeRunner();
+    const code = await run(['new', 'my-app', '--defaults', '--no-install', '--no-git'], fake.io, {
+      run: runner.run,
+    });
+    expect(code, fake.err()).toBe(0);
+    const out = fake.out();
+    const order = [
+      'Adding native components',
+      'Adding the application shell',
+      'Adding icon library',
+    ].map((title) => out.indexOf(`✓ ${title}`));
+    expect(order.every((index) => index >= 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+
+    const target = join(cwd, 'my-app');
+    expect(
+      await readFile(join(target, 'src/app/features/app-shell/layout/main/main.ts'), 'utf8'),
+    ).toContain("selector: 'app-main'");
+    expect(await readFile(join(target, 'src/app/app.ts'), 'utf8')).toContain('provideLayout(');
+    const config = JSON.parse(await readFile(join(target, 'angular-starter.config.json'), 'utf8'));
+    expect(config.options.appShell).toBe('starter');
+  });
+
+  it('keeps the shell out with --app-shell none', async () => {
+    const fake = createFakeIo({ cwd });
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--app-shell', 'none', '--no-install', '--no-git'],
+      fake.io,
+      { run: createFakeRunner().run },
+    );
+    expect(code, fake.err()).toBe(0);
+    expect(fake.out()).not.toContain('application shell');
+    const target = join(cwd, 'my-app');
+    await expect(
+      readFile(join(target, 'src/app/features/app-shell/layout/main/main.ts'), 'utf8'),
+    ).rejects.toThrow();
+    expect(await readFile(join(target, 'src/app/app.ts'), 'utf8')).not.toContain('provideLayout');
+  });
+
+  it('brings the design base for the shell even without a component collection', async () => {
+    const fake = createFakeIo({ cwd });
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--components', 'none', '--no-install', '--no-git'],
+      fake.io,
+      { run: createFakeRunner().run },
+    );
+    expect(code, fake.err()).toBe(0);
+    const target = join(cwd, 'my-app');
+    expect(await readFile(join(target, 'src/styles.css'), 'utf8')).toContain(
+      "@import './styles/features/sidebar-styles.css';",
+    );
+    expect(
+      await readFile(join(target, 'src/app/shared/components/as-search/as-search.ts'), 'utf8'),
+    ).toContain('AsSearch');
+  });
+
+  it('rejects the shell without the starter routing before doing anything', async () => {
+    const fake = createFakeIo({ cwd });
+    const runner = createFakeRunner();
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--routing', 'angular', '--app-shell', 'starter'],
+      fake.io,
+      { run: runner.run },
+    );
+    expect(code).toBe(2);
+    expect(fake.err()).toContain('appShell: "starter" requires the routing: starter');
+    expect(runner.calls).toEqual([]);
+  });
+
+  it('mentions the application shell in the --dry-run plan and the summary', async () => {
+    const fake = createFakeIo({ cwd });
+    await run(['new', 'my-app', '--defaults', '--dry-run'], fake.io, {
+      run: createFakeRunner().run,
+    });
+    expect(fake.out()).toContain('Add the Angular Starter App Shell');
+    expect(fake.out()).toMatch(/^ {2}App shell +Angular Starter App Shell$/m);
+  });
+
   it('lists only the values that can be used in the help of `new`', async () => {
     const fake = createFakeIo();
     expect(await run(['new', '--help'], fake.io)).toBe(0);

@@ -79,7 +79,7 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
     .description('List available options with what each one is and its documentation')
     .argument(
       '[category]',
-      'architecture, routing, style, rendering, components, icons or packageManager',
+      'architecture, routing, style, rendering, components, icons, packageManager or appShell',
     )
     .addHelpText(
       'after',
@@ -169,6 +169,7 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     .option('--tailwind', 'Integrate Tailwind CSS (same as --style tailwind)')
     .option('--no-tailwind', 'Do not integrate Tailwind CSS')
     .option('--rendering <strategy>', `Rendering strategy (${valuesOf('rendering')})`)
+    .option('--app-shell <id>', `Application shell (${valuesOf('appShell')})`)
     .option('--components <set>', `Native UI components (${valuesOf('components')})`)
     .option('--icons <library>', `Icon library (${valuesOf('icons')})`)
     .option('--package-manager <name>', `Package manager (${valuesOf('packageManager')})`)
@@ -184,7 +185,7 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     .addHelpText(
       'after',
       '\nOnly Tailwind CSS, Client-Side Rendering and Lucide Icons are marked (Recommended) and preselected.\n' +
-        'The defaults also use the Screaming Architecture, Angular Starter Routing and the essential components.\n' +
+        'The defaults also use the Screaming Architecture, Angular Starter Routing, the Angular Starter App Shell and the essential components.\n' +
         'Run "as list" to see what each option is and where its documentation lives.\n' +
         examples([
           ['as new InventorySystem', 'Ask for each option'],
@@ -210,6 +211,10 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     ['icons', 'Icon library'],
     ['components', 'Native as- components, tokens and theme'],
     ['routing', 'Angular Starter Routing (needs the Screaming Architecture)'],
+    [
+      'app-shell',
+      'Angular Starter App Shell: sidebar, header and breadcrumb (needs the starter routing)',
+    ],
     ['rendering', 'Server-side rendering'],
   ];
   program
@@ -231,6 +236,7 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
         examples([
           ['as add icons lucide', 'Install Lucide Icons'],
           ['as add routing starter', 'Navigation tree, titles and breadcrumbs'],
+          ['as add app-shell', 'Floating sidebar, header and example pages'],
           ['as add rendering starter-ssr', 'Angular SSR with incremental hydration'],
           ['as add components all --dry-run', 'See the steps without changing anything'],
         ])

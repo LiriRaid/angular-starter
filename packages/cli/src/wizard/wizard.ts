@@ -1,5 +1,4 @@
 import {
-  APP_SHELL_AVAILABLE,
   CAPABILITIES,
   availableOptions,
   unmetRequirements,
@@ -20,6 +19,7 @@ const MESSAGES: Record<SelectKey, string> = {
   routing: 'Which routing system would you like to use?',
   style: 'Select a stylesheet format:',
   rendering: 'Select a rendering strategy:',
+  appShell: 'Which application shell would you like to use?',
   components: 'Which native UI components would you like to include?',
   icons: 'Select an icon library:',
   packageManager: 'Select a package manager:',
@@ -56,6 +56,8 @@ export async function runWizard(
       architecture: String(
         known.architecture ?? answers.architecture ?? DEFAULT_OPTIONS.architecture,
       ),
+      routing: String(known.routing ?? answers.routing ?? '') || undefined,
+      rendering: String(known.rendering ?? answers.rendering ?? '') || undefined,
       style: style === undefined ? undefined : String(style),
       // A stylesheet format that is not Tailwind CSS means there is no Tailwind CSS.
       tailwind: tailwind ?? (style === undefined ? undefined : false),
@@ -117,17 +119,16 @@ export async function runWizard(
   if (known.tailwind !== true) await ask('style');
   await ask('rendering');
 
-  if (APP_SHELL_AVAILABLE && known.appShell === undefined) {
-    answers.appShell = await prompter.confirm({
-      name: 'appShell',
-      message: 'Would you like to include the Angular Starter App Shell? (Recommended)',
-      default: true,
-    });
-  }
+  // The shell and the components draw with Lucide Icons, so choosing either one sets it.
+  const impliedIcons = (category: 'appShell' | 'components', id: string | undefined): void => {
+    const needed = find(category, id)?.requires?.icons?.[0];
+    if (needed && known.icons === undefined) answers.icons = needed;
+  };
+  const shell = await ask('appShell');
+  impliedIcons('appShell', shell ?? known.appShell);
 
   const components = await ask('components');
-  const needed = find('components', components ?? known.components)?.requires?.icons?.[0];
-  if (needed && known.icons === undefined) answers.icons = needed;
+  impliedIcons('components', components ?? known.components);
   await ask('icons');
   await ask('packageManager');
 

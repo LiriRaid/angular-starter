@@ -143,8 +143,13 @@ export type ComponentSet = 'recommended' | 'all';
 
 /** The components of a collection plus what they import, each once, imported ones first. */
 export function componentsOf(set: ComponentSet): ComponentDefinition[] {
-  const ids =
-    set === 'all' ? [...RECOMMENDED_COMPONENTS, ...EXTRA_COMPONENTS] : RECOMMENDED_COMPONENTS;
+  return componentsOfIds(
+    set === 'all' ? [...RECOMMENDED_COMPONENTS, ...EXTRA_COMPONENTS] : RECOMMENDED_COMPONENTS,
+  );
+}
+
+/** The components with these ids plus what they import, each once, imported ones first. */
+export function componentsOfIds(ids: readonly string[]): ComponentDefinition[] {
   const byId = new Map(COMPONENTS.map((definition) => [definition.id, definition]));
   const ordered: ComponentDefinition[] = [];
   // Components can import each other in both directions (input and select), so a component is

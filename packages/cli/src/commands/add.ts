@@ -6,6 +6,7 @@ import { runPipeline, type GenerationContext, type Stage } from '../engine/pipel
 import {
   addAngularSsr,
   addIconLibrary,
+  applyAppShell,
   applyComponents,
   applyDesign,
   applyRendering,
@@ -24,6 +25,7 @@ export const ADDABLE: Readonly<Record<string, Extract<CapabilityCategory, keyof 
     icons: 'icons',
     components: 'components',
     routing: 'routing',
+    'app-shell': 'appShell',
     rendering: 'rendering',
   };
 
@@ -32,6 +34,7 @@ const NOT_ADDABLE: Readonly<Record<string, readonly string[]>> = {
   icons: ['none'],
   components: ['none'],
   routing: ['angular'],
+  'app-shell': ['none'],
   rendering: ['csr'],
 };
 
@@ -83,8 +86,9 @@ export async function addCommand(
   }
 
   const label = CAPABILITIES[category].find((option) => option.id === choice);
-  // The components draw their icons with Lucide, so adding them adds it too.
-  const implied = category === 'components' ? label?.requires?.icons?.[0] : undefined;
+  // The components and the shell draw their icons with Lucide, so adding them adds it too.
+  const implied =
+    category === 'components' || category === 'appShell' ? label?.requires?.icons?.[0] : undefined;
   const options = resolveOptions({
     file: {
       ...project.options,
@@ -152,9 +156,18 @@ function stagesFor(
     case 'components':
       return [
         ...(before.icons === options.icons ? [] : [addIconLibrary]),
-        // The design base arrives with the first collection; a bigger one only adds components.
-        ...(current === 'none' ? [applyDesign] : []),
+        // The design base arrives with the first collection or the shell; a bigger collection only
+        // adds components.
+        ...(before.components === 'none' && before.appShell === 'none' ? [applyDesign] : []),
         applyComponents,
+        writeStarterConfig,
+        installDependencies,
+      ];
+    case 'appShell':
+      return [
+        ...(before.icons === options.icons ? [] : [addIconLibrary]),
+        ...(before.components === 'none' ? [applyDesign] : []),
+        applyAppShell,
         writeStarterConfig,
         installDependencies,
       ];
