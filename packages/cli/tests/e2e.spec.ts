@@ -432,6 +432,67 @@ ${result.stderr}`,
   );
 
   it(
+    'creates the default Angular structure as plain Angular: no Lucide, no shell, no layout',
+    async () => {
+      const project = await createInstalled('e2e-plain', '--architecture', 'angular-default');
+      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      expect(config.options).toMatchObject({
+        icons: 'none',
+        appShell: 'none',
+        layout: 'none',
+        uiSystem: 'none',
+        ssrPurpose: 'none',
+      });
+      expect(await read(project, 'package.json')).not.toContain('lucide');
+      expect(existsSync(join(project, 'src/app/features'))).toBe(false);
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'creates a project with the design preferences page and the UI System that builds and passes its tests',
+    async () => {
+      const project = await createInstalled('e2e-ui-system', '--ui-system', 'starter');
+      for (const file of [
+        'src/app/features/preference-design/preference-design.ts',
+        'src/app/features/preference-design/ui-system/ui-system.catalog.ts',
+        'src/app/core/design-preferences/design-preferences.service.ts',
+        'src/styles/features/design-preferences-styles.css',
+      ]) {
+        expect(existsSync(join(project, file)), file).toBe(true);
+      }
+      expect(await read(project, 'src/app/app.config.ts')).toContain('provideDesignPreferences()');
+      expect(await read(project, 'src/app/features/preference-design/tabs/ui-tab.html')).toContain(
+        '<app-ui-system />',
+      );
+      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      expect(config.options).toMatchObject({ uiSystem: 'starter', layout: 'floating-wide' });
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'adds the UI System to an existing project that builds and passes its tests',
+    async () => {
+      const project = await createInstalled('e2e-add-ui-system');
+      await asProject(project, 'add', 'ui-system');
+      expect(JSON.parse(await read(project, 'angular-starter.config.json')).options.uiSystem).toBe(
+        'starter',
+      );
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
     'installs the Lucide Icons package and still builds',
     async () => {
       const project = await createInstalled('e2e-lucide', '--icons', 'lucide');

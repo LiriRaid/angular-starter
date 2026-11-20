@@ -8,6 +8,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- The wizard of `as new` is a chained flow (ADR-0010 and plan 0008): architecture, routing, stylesheet,
+  rendering, the purpose of Starter SSR, shell, layout, presence, components, UI System, icons and
+  package manager, each answer deciding what comes next. With the Angular default structure it only
+  asks the stylesheet and the rendering (Client-Side Rendering or Default Angular SSR): no routing,
+  shell, components, icons or Starter SSR, and `--defaults --architecture angular-default` no longer
+  adds Lucide. The registry gets `offeredWith`, next to `requires`: it shapes the wizard and the
+  defaults without making an existing project invalid.
+- The "Preferencias" drawer of the user menu is now "Preferencias de Diseño", a page at
+  `/preference-design` (`features/preference-design`, with a navigation entry and breadcrumb). The
+  drawer component is removed and the presence edits anchor on the new button.
+- The component collections say what they bring: the essential collection has 16 components and
+  "All available components" 26.
+- `as add app-shell` and `as add rendering starter-ssr` also settle the layout and the purpose.
+
 - `--defaults` and the wizard now include the Angular Starter App Shell when the project can take it
   (Screaming Architecture, Angular Starter Routing, Tailwind CSS and Lucide Icons); `--app-shell none`
   keeps the previous result. `NavigationItem` gets an optional, mutable `unfolded`, and the `Home`
@@ -27,6 +41,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- Design preferences page (`/preference-design`) with the tabs Apariencia, Tema, UI and Otros of the
+  maintainer's demo: layout cards (only Floating wide is built; the other five say "En construcción"),
+  colour scheme, light or dark, and UI tokens (radius, button size, density, font size) and toggles
+  (breadcrumb, animations) that apply in real time through `core/design-preferences` and persist with
+  "Guardar cambios"; "Restablecer" goes back to the defaults. The variables are applied by
+  `src/styles/features/design-preferences-styles.css`.
+- Angular Starter UI System (`--ui-system starter`, `as add ui-system`), an option on top of the shell
+  and a component collection that is not part of `--defaults`: the UI tab lists the 16 essential
+  components with a live preview, its code, the tokens that change it, a search and a visibility
+  toggle.
+- Three options in the registry, `--help`, `as list`, `angular-starter.config.json` and `as add`:
+  `ssrPurpose` (`--ssr-purpose`: landing, ecommerce and backoffice; only backoffice is built),
+  `layout` (`--layout`: the six modes of the demo; only floating-wide is built) and `uiSystem`
+  (`--ui-system`). The layouts and the purposes under construction are listed disabled in the wizard.
+  A project made before them still works: `findProject` fills what is missing.
 - Angular Starter Presence (`--presence starter`, `as add presence`; ADR-0009 and plan 0007), an option of
   the App Shell that is not part of `--defaults`: `core/presence` with the `PresenceService` of the
   reference application without its authentication, HTTP client and vendor socket (status with a
