@@ -1,0 +1,23 @@
+/* Thin scrollbars that follow the theme. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--as-border) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--as-border);
+  border-radius: var(--as-radius-full);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--as-text-subtle);
+}

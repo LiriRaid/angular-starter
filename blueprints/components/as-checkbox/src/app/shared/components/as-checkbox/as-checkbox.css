@@ -1,0 +1,76 @@
+.as-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.as-checkbox--disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* The native input stays for the keyboard, the form and screen readers; the box is only its look. */
+.as-checkbox__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.as-checkbox__box {
+  position: relative;
+  flex: none;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 1px solid var(--as-border);
+  border-radius: var(--as-radius-sm);
+  background: var(--as-panel);
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.as-checkbox:hover .as-checkbox__box {
+  border-color: var(--as-primary);
+}
+
+.as-checkbox__input:focus-visible + .as-checkbox__box {
+  box-shadow: 0 0 0 3px var(--as-focus-ring);
+}
+
+.as-checkbox__input:checked + .as-checkbox__box,
+.as-checkbox__input:indeterminate + .as-checkbox__box {
+  border-color: var(--as-primary);
+  background: var(--as-primary);
+}
+
+.as-checkbox__input:checked + .as-checkbox__box::after {
+  content: '';
+  position: absolute;
+  top: 0.125rem;
+  left: 0.35rem;
+  width: 0.3rem;
+  height: 0.6rem;
+  border: solid var(--as-on-primary);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.as-checkbox__input:indeterminate + .as-checkbox__box::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0.25rem;
+  right: 0.25rem;
+  height: 2px;
+  background: var(--as-on-primary);
+  transform: translateY(-50%);
+}
+
+.as-checkbox__label {
+  color: var(--as-text);
+}

@@ -40,19 +40,97 @@ function parseSource(source: string): SourceFile {
 
 /** Imports `feature` from `@angular/router` and passes `feature()` to `provideRouter(...)`. */
 export function addRouterFeature(source: string, feature: string): string {
+  return addCallArgument(source, 'provideRouter', `${feature}()`, [
+    { module: ROUTER_MODULE, names: [feature] },
+  ]);
+}
+
+/**
+ * Passes `expression` (for example `withEventReplay()`) to the call `callName(...)` and adds the
+ * imports it needs. An argument that starts like the expression (same function name) is already
+ * there and is left alone.
+ */
+export function addCallArgument(
+  source: string,
+  callName: string,
+  expression: string,
+  imports: readonly ImportSpec[],
+): string {
   const file = parseSource(source);
   const call = file
     .getDescendantsOfKind(SyntaxKind.CallExpression)
-    .find((candidate) => candidate.getExpression().getText() === 'provideRouter');
-  if (!call) {
-    throw new Error('Could not find a provideRouter(...) call to add the router feature to.');
-  }
+    .find((candidate) => candidate.getExpression().getText() === callName);
+  if (!call) throw new Error(`Could not find a ${callName}(...) call to add ${expression} to.`);
 
-  if (!call.getArguments().some((argument) => argument.getText().startsWith(`${feature}(`))) {
-    call.addArgument(`${feature}()`);
+  const head = expression.slice(0, expression.indexOf('(') + 1);
+  if (!call.getArguments().some((argument) => argument.getText().startsWith(head))) {
+    call.addArgument(expression);
   }
+  for (const spec of imports) addNamedImports(file, spec);
+  return file.getFullText();
+}
 
-  addNamedImports(file, { module: ROUTER_MODULE, names: [feature] });
+/** The object passed to `@Component({ ... })` on `className`. */
+function componentMetadata(file: SourceFile, className: string): ObjectLiteralExpression {
+  const declaration = file.getClass(className);
+  if (!declaration) throw new Error(`Could not find the class "${className}".`);
+  const metadata = declaration
+    .getDecorator('Component')
+    ?.getArguments()[0]
+    ?.asKind(SyntaxKind.ObjectLiteralExpression);
+  if (!metadata) throw new Error(`The class "${className}" has no @Component({ ... }) metadata.`);
+  return metadata;
+}
+
+/** Adds `name` to the `imports` of the `@Component` of `className`, importing it from `module`. */
+export function addComponentImport(
+  source: string,
+  className: string,
+  name: string,
+  module: string,
+): string {
+  const file = parseSource(source);
+  const metadata = componentMetadata(file, className);
+
+  const array = metadata
+    .getProperty('imports')
+    ?.asKind(SyntaxKind.PropertyAssignment)
+    ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression);
+  if (!array) {
+    metadata.addPropertyAssignment({ name: 'imports', initializer: `[${name}]` });
+  } else if (!array.getElements().some((element) => element.getText() === name)) {
+    array.addElement(name);
+  }
+  addNamedImports(file, { module, names: [name] });
+  return file.getFullText();
+}
+
+/**
+ * Gives the component an inline `template` instead of template and style files, and makes it
+ * `OnPush`. The files themselves are for the caller to delete.
+ */
+export function inlineComponentTemplate(
+  source: string,
+  className: string,
+  template: string,
+): string {
+  const file = parseSource(source);
+  const metadata = componentMetadata(file, className);
+
+  for (const name of ['templateUrl', 'styleUrl', 'styleUrls', 'styles']) {
+    metadata.getProperty(name)?.remove();
+  }
+  const current = metadata.getProperty('template')?.asKind(SyntaxKind.PropertyAssignment);
+  if (current) current.setInitializer(quote(template));
+  else metadata.addPropertyAssignment({ name: 'template', initializer: quote(template) });
+
+  if (!metadata.getProperty('changeDetection')) {
+    metadata.addPropertyAssignment({
+      name: 'changeDetection',
+      initializer: 'ChangeDetectionStrategy.OnPush',
+    });
+    addNamedImports(file, { module: '@angular/core', names: ['ChangeDetectionStrategy'] });
+  }
   return file.getFullText();
 }
 
@@ -76,6 +154,42 @@ export function addProvider(
     array.addElement(expression, { useNewLines: true });
   }
   for (const spec of imports) addNamedImports(file, spec);
+  return file.getFullText();
+}
+
+export interface NavigationItemSpec {
+  id: string;
+  title: string;
+  link: string;
+  icon?: string;
+}
+
+/** Appends a page to the first group of the `APP_NAVIGATION` tree, unless its id is there. */
+export function addNavigationItem(source: string, spec: NavigationItemSpec): string {
+  const file = parseSource(source);
+  const tree = file
+    .getVariableDeclaration('APP_NAVIGATION')
+    ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression);
+  const group = tree?.getElements().find(Node.isObjectLiteralExpression);
+  const items = group
+    ?.getProperty('items')
+    ?.asKind(SyntaxKind.PropertyAssignment)
+    ?.getInitializerIfKind(SyntaxKind.ArrayLiteralExpression);
+  if (!items) {
+    throw new Error('Could not find the "APP_NAVIGATION" tree with a group that has "items".');
+  }
+
+  const declared = items
+    .getElements()
+    .filter(Node.isObjectLiteralExpression)
+    .some((element) => stringProperty(element, 'id') === spec.id);
+  if (!declared) {
+    const icon = spec.icon === undefined ? '' : ` icon: ${quote(spec.icon)},`;
+    items.addElement(
+      `{ id: ${quote(spec.id)}, title: ${quote(spec.title)},${icon} type: 'basic', link: ${quote(spec.link)} }`,
+      { useNewLines: true },
+    );
+  }
   return file.getFullText();
 }
 

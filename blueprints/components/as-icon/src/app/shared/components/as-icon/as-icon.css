@@ -1,0 +1,23 @@
+:host {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--as-icon-size, 16px);
+  height: var(--as-icon-size, 16px);
+  line-height: 1;
+}
+
+svg {
+  display: block;
+  color: inherit;
+}
+
+.as-icon__svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  -webkit-mask: var(--as-icon-url) center / contain no-repeat;
+  mask: var(--as-icon-url) center / contain no-repeat;
+}

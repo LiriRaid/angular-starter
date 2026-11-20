@@ -15,10 +15,13 @@ import {
 import { RuntimeError, UsageError } from '../errors.js';
 import { CLI_VERSION } from '../version.js';
 import { ARCHITECTURE_PROFILES } from './architectures/index.js';
+import { componentsProfile } from './components/components.js';
+import { designProfile } from './design/design.js';
 import { buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
 import { pathExists } from './fs.js';
 import type { GenerationContext, Stage } from './pipeline.js';
+import { RENDERING_PROFILES } from './rendering/index.js';
 import { ROUTING_PROFILES } from './routing/index.js';
 
 const PROBE_TIMEOUT_MS = 15_000;
@@ -107,6 +110,71 @@ export const applyRouting: Stage = {
   },
 };
 
+export const addAngularSsr: Stage = {
+  id: 'add-angular-ssr',
+  title: 'Adding Angular SSR',
+  pending: 'runs ng add @angular/ssr and installs its packages',
+  async run({ targetDir, deps, verbose }) {
+    try {
+      await deps.run(
+        'npx',
+        [
+          '--yes',
+          `@angular/cli@${ANGULAR_CLI_VERSION}`,
+          'add',
+          '@angular/ssr',
+          '--skip-confirmation',
+        ],
+        { cwd: targetDir, inherit: verbose, timeoutMs: INSTALL_TIMEOUT_MS },
+      );
+    } catch (error) {
+      throw new RuntimeError(`ng add @angular/ssr failed: ${describe(error)}`);
+    }
+  },
+};
+
+export const applyRendering: Stage = {
+  id: 'apply-rendering',
+  title: 'Applying Angular Starter SSR',
+  enabled: ({ options }) => RENDERING_PROFILES[options.rendering] !== undefined,
+  async run({ name, options, targetDir }) {
+    await RENDERING_PROFILES[options.rendering]?.apply({
+      targetDir,
+      name,
+      prefix: options.prefix,
+      architecture: options.architecture,
+    });
+  },
+};
+
+export const applyDesign: Stage = {
+  id: 'apply-design',
+  title: 'Adding the design base',
+  enabled: ({ options }) => options.components !== 'none',
+  async run({ name, options, targetDir }) {
+    await designProfile.apply({
+      targetDir,
+      name,
+      prefix: options.prefix,
+      tailwind: options.tailwind,
+    });
+  },
+};
+
+export const applyComponents: Stage = {
+  id: 'apply-components',
+  title: 'Adding native components',
+  enabled: ({ options }) => options.components !== 'none',
+  async run({ name, options, targetDir }) {
+    await componentsProfile.apply({
+      targetDir,
+      name,
+      prefix: options.prefix,
+      set: options.components === 'all' ? 'all' : 'recommended',
+    });
+  },
+};
+
 export const addIconLibrary: Stage = {
   id: 'add-icon-library',
   title: 'Adding icon library',
@@ -183,6 +251,11 @@ export const verifyProject: Stage = {
       PROJECT_CONFIG_FILE,
       ...(ARCHITECTURE_PROFILES[options.architecture]?.requiredFiles ?? []),
       ...(ROUTING_PROFILES[options.routing]?.requiredFiles ?? []),
+      ...(RENDERING_PROFILES[options.rendering]?.requiredFilesFor(options.architecture) ?? []),
+      ...(options.components === 'none' ? [] : designProfile.requiredFiles),
+      ...(options.components === 'none'
+        ? []
+        : componentsProfile.requiredFilesFor(options.components === 'all' ? 'all' : 'recommended')),
     ];
     const missing: string[] = [];
     for (const file of required) {
@@ -202,6 +275,9 @@ export const NEW_PROJECT_STAGES: readonly Stage[] = [
   createWorkspace,
   applyArchitecture,
   applyRouting,
+  applyRendering,
+  applyDesign,
+  applyComponents,
   addIconLibrary,
   writeStarterConfig,
   installDependencies,

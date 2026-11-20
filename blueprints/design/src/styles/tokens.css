@@ -1,0 +1,115 @@
+/*
+ * Design tokens. Two ramps (--as-primary-* and --as-surface-*) feed the semantic tokens that
+ * components read (--as-bg, --as-text, --as-border, ...); `.dark` on <html> redefines the semantic
+ * ones. ThemeService (core/theme) replaces the ramps at run time when the user picks other colors.
+ */
+:root {
+  color-scheme: light;
+
+  /* Primary (accent) ramp: Indigo. */
+  --as-primary-50: #eef2ff;
+  --as-primary-100: #e0e7ff;
+  --as-primary-200: #c7d2fe;
+  --as-primary-300: #a5b4fc;
+  --as-primary-400: #818cf8;
+  --as-primary-500: #6366f1;
+  --as-primary-600: #4f46e5;
+  --as-primary-700: #4338ca;
+  --as-primary-800: #3730a3;
+  --as-primary-900: #312e81;
+  --as-primary-950: #1e1b4b;
+
+  /* Surface (neutral) ramp: Neutral. */
+  --as-surface-0: #ffffff;
+  --as-surface-50: #fafafa;
+  --as-surface-100: #f5f5f5;
+  --as-surface-200: #e5e5e5;
+  --as-surface-300: #d4d4d4;
+  --as-surface-400: #a3a3a3;
+  --as-surface-500: #737373;
+  --as-surface-600: #525252;
+  --as-surface-700: #404040;
+  --as-surface-800: #262626;
+  --as-surface-900: #171717;
+  --as-surface-950: #0a0a0a;
+
+  /* Accent. */
+  --as-primary: var(--as-primary-500);
+  --as-primary-hover: var(--as-primary-600);
+  --as-primary-active: var(--as-primary-700);
+  --as-on-primary: #ffffff;
+  --as-primary-soft: color-mix(in srgb, var(--as-primary) 12%, transparent);
+
+  /* Surfaces and text. */
+  --as-bg: var(--as-surface-100);
+  --as-panel: var(--as-surface-0);
+  --as-panel-muted: var(--as-surface-50);
+  --as-border: var(--as-surface-300);
+  --as-text: var(--as-surface-900);
+  --as-text-muted: var(--as-surface-600);
+  --as-text-subtle: var(--as-surface-500);
+  --as-placeholder: var(--as-surface-400);
+  --as-disabled-bg: var(--as-surface-200);
+  --as-disabled-text: var(--as-surface-500);
+  --as-overlay: color-mix(in srgb, var(--as-surface-950) 50%, transparent);
+  --as-focus-ring: color-mix(in srgb, var(--as-primary) 55%, transparent);
+
+  /* Status colors. */
+  --as-success: #16a34a;
+  --as-warning: #d97706;
+  --as-danger: #dc2626;
+  --as-info: #0284c7;
+  --as-success-soft: color-mix(in srgb, var(--as-success) 12%, transparent);
+  --as-warning-soft: color-mix(in srgb, var(--as-warning) 14%, transparent);
+  --as-danger-soft: color-mix(in srgb, var(--as-danger) 12%, transparent);
+  --as-info-soft: color-mix(in srgb, var(--as-info) 12%, transparent);
+
+  /* Shape and depth. */
+  --as-radius-sm: 0.25rem;
+  --as-radius-md: 0.5rem;
+  --as-radius-lg: 0.75rem;
+  --as-radius-xl: 1rem;
+  --as-radius-full: 9999px;
+  --as-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --as-shadow-md: 0 8px 20px rgba(15, 23, 42, 0.08);
+  --as-shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.14);
+
+  /* Type. */
+  --as-font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --as-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  /* Layers. */
+  --as-z-dropdown: 1000;
+  --as-z-drawer: 1100;
+  --as-z-modal: 1200;
+  --as-z-toast: 1300;
+  --as-z-tooltip: 1400;
+}
+
+.dark {
+  color-scheme: dark;
+
+  --as-primary-soft: color-mix(in srgb, var(--as-primary) 18%, transparent);
+
+  --as-bg: var(--as-surface-950);
+  --as-panel: var(--as-surface-900);
+  --as-panel-muted: var(--as-surface-800);
+  --as-border: var(--as-surface-700);
+  --as-text: var(--as-surface-0);
+  --as-text-muted: var(--as-surface-300);
+  --as-text-subtle: var(--as-surface-400);
+  --as-placeholder: var(--as-surface-500);
+  --as-disabled-bg: var(--as-surface-800);
+  --as-disabled-text: var(--as-surface-500);
+  --as-overlay: color-mix(in srgb, var(--as-surface-950) 70%, transparent);
+
+  --as-success: #4ade80;
+  --as-warning: #fbbf24;
+  --as-danger: #f87171;
+  --as-info: #38bdf8;
+
+  --as-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --as-shadow-md: 0 8px 20px rgba(0, 0, 0, 0.35);
+  --as-shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.5);
+}

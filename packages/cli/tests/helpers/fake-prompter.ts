@@ -6,6 +6,9 @@ export interface AskedQuestion {
   message: string;
   default?: unknown;
   choices?: string[];
+  /** What the user reads for each choice, and the line shown while it is highlighted. */
+  names?: string[];
+  descriptions?: (string | undefined)[];
 }
 
 /** Answers are consumed in order; an `Error` answer is thrown, like Ctrl+C in a real prompt. */
@@ -41,6 +44,8 @@ export function createFakePrompter(answers: unknown[]): {
         message: question.message,
         default: question.default,
         choices: question.choices.map((choice) => choice.value),
+        names: question.choices.map((choice) => choice.name),
+        descriptions: question.choices.map((choice) => choice.description),
       }) as T,
     confirm: async (question) =>
       next({

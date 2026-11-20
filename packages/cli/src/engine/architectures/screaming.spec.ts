@@ -50,7 +50,7 @@ describe('Screaming Architecture profile', () => {
     await apply('acme');
     expect(await read('src/app/features/home/home.ts')).toContain("selector: 'acme-home'");
     expect(await read('src/app/features/home/home.ts')).toContain("signal('demo')");
-    expect(await read('src/app/features/home/home.spec.ts')).toContain('Hello, demo');
+    expect(await read('src/app/features/home/home.spec.ts')).toContain('demo');
   });
 
   it('leaves no unresolved placeholder in any generated file', async () => {
@@ -86,11 +86,16 @@ describe('Screaming Architecture profile', () => {
 
   it('turns the root component into a router outlet and drops the placeholder', async () => {
     await apply();
-    expect(await read('src/app/app.html')).toBe('<router-outlet />\n');
+    // The root is composed in app.ts, like a real application: no welcome page, no template file.
+    await expect(read('src/app/app.html')).rejects.toThrow();
+    await expect(read('src/app/app.css')).rejects.toThrow();
     expect(await read('src/app/app.spec.ts')).not.toContain('Hello');
     const app = await read('src/app/app.ts');
+    expect(app).toContain("template: '<router-outlet />'");
+    expect(app).not.toContain('templateUrl');
+    expect(app).not.toContain('styleUrl');
     expect(app).not.toContain('title');
-    expect(app).toContain("import { Component } from '@angular/core';");
+    expect(app).toContain('changeDetection: ChangeDetectionStrategy.OnPush');
   });
 
   it('writes nothing when a generated file does not have the expected shape', async () => {
@@ -98,6 +103,14 @@ describe('Screaming Architecture profile', () => {
     await expect(apply()).rejects.toThrow(/routes/);
     await expect(read('src/app/features/home/home.ts')).rejects.toThrow();
     expect(await read('src/app/app.html')).toContain('Hello, demo');
+    expect(await read('src/app/app.ts')).toContain("templateUrl: './app.html'");
+  });
+
+  it('shows a neutral home page, with no Angular welcome text', async () => {
+    await apply();
+    const html = await read('src/app/features/home/home.html');
+    expect(html).not.toMatch(/Angular|Hello|congratulations/i);
+    expect(html).toContain('projectName()');
   });
 
   it('refuses to overwrite a file of the project that is not an Angular placeholder', async () => {

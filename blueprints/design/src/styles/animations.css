@@ -1,0 +1,99 @@
+/* Keyframes and helper classes shared by the components. They calm down for people who ask for less motion. */
+@keyframes as-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes as-fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes as-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes as-slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes as-scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes as-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes as-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.as-animate-fade-in {
+  animation: as-fade-in 150ms ease-out both;
+}
+
+.as-animate-slide-up {
+  animation: as-slide-up 200ms ease-out both;
+}
+
+.as-animate-slide-down {
+  animation: as-slide-down 200ms ease-out both;
+}
+
+.as-animate-scale-in {
+  animation: as-scale-in 150ms ease-out both;
+}
+
+.as-animate-spin {
+  animation: as-spin 1s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .as-animate-fade-in,
+  .as-animate-slide-up,
+  .as-animate-slide-down,
+  .as-animate-scale-in {
+    animation: none;
+  }
+
+  .as-animate-spin {
+    animation-duration: 3s;
+  }
+}

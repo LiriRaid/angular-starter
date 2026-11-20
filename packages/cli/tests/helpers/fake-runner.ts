@@ -13,6 +13,8 @@ export interface FakeRunnerOptions {
   failOn?: (call: RecordedCall) => Error | undefined;
   /** Replaces (or, with null, removes) files of the workspace `ng new` writes. */
   files?: Readonly<Record<string, string | null>>;
+  /** Runs after a call is recorded, to imitate what the real tool does to the project. */
+  onRun?: (call: RecordedCall) => void | Promise<void>;
 }
 
 /**
@@ -30,6 +32,7 @@ export function createFakeRunner(options: FakeRunnerOptions = {}): {
 
     const failure = options.failOn?.(call);
     if (failure) throw failure;
+    await options.onRun?.(call);
 
     const newIndex = args.indexOf('new');
     if (command === 'npx' && newIndex >= 0 && runOptions?.cwd) {

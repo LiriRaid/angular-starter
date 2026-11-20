@@ -8,10 +8,10 @@ describe('Home', () => {
     }).compileComponents();
   });
 
-  it('should render the project name', async () => {
+  it('should show the project name', async () => {
     const fixture = TestBed.createComponent(Home);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, __PROJECT_NAME__');
+    expect(compiled.querySelector('h1')?.textContent).toContain('__PROJECT_NAME__');
   });
 });

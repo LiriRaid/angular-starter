@@ -26,7 +26,7 @@ export function buildNgCommand(name: string, options: StarterOptions): NgCommand
       '--skip-git',
       '--routing',
       `--style=${style}`,
-      options.rendering === 'ssr' ? '--ssr' : '--ssr=false',
+      options.rendering === 'csr' ? '--ssr=false' : '--ssr',
       '--zoneless',
       '--ai-config=none',
       `--package-manager=${options.packageManager}`,

@@ -109,9 +109,12 @@ describe('as new (non-interactive)', () => {
     expect(config.schemaVersion).toBe(1);
     expect(config.generator.angularCli).toBe(ANGULAR_CLI_VERSION);
     expect(config.options).toMatchObject({
-      architecture: 'angular-default',
+      architecture: 'screaming',
+      routing: 'starter',
       style: 'css',
       tailwind: true,
+      rendering: 'csr',
+      icons: 'lucide',
     });
   });
 
@@ -177,7 +180,17 @@ describe('as new (non-interactive)', () => {
     const fake = createFakeIo({ cwd });
     expect(
       await run(
-        ['new', 'my-app', '--defaults', '--architecture', 'screaming', '--no-install', '--no-git'],
+        [
+          'new',
+          'my-app',
+          '--defaults',
+          '--architecture',
+          'screaming',
+          '--routing',
+          'angular',
+          '--no-install',
+          '--no-git',
+        ],
         fake.io,
         { run: createFakeRunner().run },
       ),
@@ -189,9 +202,11 @@ describe('as new (non-interactive)', () => {
   it('rejects the starter routing without the Screaming architecture before doing anything', async () => {
     const fake = createFakeIo({ cwd });
     const runner = createFakeRunner();
-    const code = await run(['new', 'my-app', '--defaults', '--routing', 'starter'], fake.io, {
-      run: runner.run,
-    });
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--architecture', 'angular-default', '--routing', 'starter'],
+      fake.io,
+      { run: runner.run },
+    );
     expect(code).toBe(2);
     expect(fake.err()).toContain('requires the architecture: screaming');
     expect(runner.calls).toEqual([]);
@@ -219,9 +234,19 @@ describe('as new (non-interactive)', () => {
   it('does not apply any profile to the default Angular structure', async () => {
     const fake = createFakeIo({ cwd });
     expect(
-      await run(['new', 'my-app', '--defaults', '--no-install', '--no-git'], fake.io, {
-        run: createFakeRunner().run,
-      }),
+      await run(
+        [
+          'new',
+          'my-app',
+          '--defaults',
+          '--architecture',
+          'angular-default',
+          '--no-install',
+          '--no-git',
+        ],
+        fake.io,
+        { run: createFakeRunner().run },
+      ),
     ).toBe(0);
     expect(fake.out()).not.toContain('Applying');
     expect(await exists(join(cwd, 'my-app/src/app/features'))).toBe(false);
@@ -273,9 +298,11 @@ describe('as new (non-interactive)', () => {
   it('does not touch package.json when no icon library is chosen', async () => {
     const fake = createFakeIo({ cwd });
     expect(
-      await run(['new', 'my-app', '--defaults', '--no-install', '--no-git'], fake.io, {
-        run: createFakeRunner().run,
-      }),
+      await run(
+        ['new', 'my-app', '--defaults', '--icons', 'none', '--no-install', '--no-git'],
+        fake.io,
+        { run: createFakeRunner().run },
+      ),
     ).toBe(0);
     expect(fake.out()).not.toContain('Adding icon library');
     expect(await readFile(join(cwd, 'my-app', 'package.json'), 'utf8')).not.toContain('lucide');
@@ -418,6 +445,96 @@ describe('as new (non-interactive)', () => {
     expect(fake.out()).toContain('Add the Angular Starter Routing (navigation tree');
   });
 
+  it.each([
+    [['--style', 'tailwind'], '--style=tailwind'],
+    [['--tailwind'], '--style=tailwind'],
+    [['--style', 'css'], '--style=css'],
+    [['--style', 'css', '--tailwind'], '--style=tailwind'],
+    [['--style', 'scss'], '--style=scss'],
+  ])('passes %j to ng new as %s', async (flags, expected) => {
+    const fake = createFakeIo({ cwd });
+    const runner = createFakeRunner();
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--no-install', '--no-git', ...flags],
+      fake.io,
+      { run: runner.run },
+    );
+    expect(code).toBe(0);
+    expect(runner.calls.find((call) => call.args.includes('new'))?.args).toContain(expected);
+  });
+
+  it('rejects --style tailwind together with --no-tailwind', async () => {
+    const fake = createFakeIo({ cwd });
+    const runner = createFakeRunner();
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--style', 'tailwind', '--no-tailwind'],
+      fake.io,
+      { run: runner.run },
+    );
+    expect(code).toBe(2);
+    expect(fake.err()).toContain('--no-tailwind');
+    expect(runner.calls).toEqual([]);
+  });
+
+  it('shows the components and the icons in the summary', async () => {
+    const fake = createFakeIo({ cwd });
+    await run(['new', 'my-app', '--defaults', '--dry-run'], fake.io, {
+      run: createFakeRunner().run,
+    });
+    expect(fake.out()).toMatch(/^ {2}Components +Recommended component collection$/m);
+    expect(fake.out()).toMatch(/^ {2}Icons +Lucide Icons$/m);
+  });
+
+  it('applies the Starter SSR profile after the routing and before the icon library', async () => {
+    const fake = createFakeIo({ cwd });
+    const runner = createFakeRunner({
+      files: {
+        'src/app/app.config.ts': `import { ApplicationConfig } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideClientHydration } from '@angular/platform-browser';
+
+export const appConfig: ApplicationConfig = {
+  providers: [provideRouter([]), provideClientHydration()],
+};
+`,
+      },
+    });
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--rendering', 'starter-ssr', '--no-install', '--no-git'],
+      fake.io,
+      { run: runner.run },
+    );
+    expect(code, fake.err()).toBe(0);
+    const out = fake.out();
+    const order = [
+      'Adding Angular Starter routing',
+      'Applying Angular Starter SSR',
+      'Adding icon library',
+    ].map((title) => out.indexOf(`✓ ${title}`));
+    expect(order.every((index) => index >= 0)).toBe(true);
+    expect(order).toEqual([...order].sort((a, b) => a - b));
+    expect(runner.calls.find((call) => call.args.includes('new'))?.args).toContain('--ssr');
+    expect(await readFile(join(cwd, 'my-app/src/app/app.config.ts'), 'utf8')).toContain(
+      'withIncrementalHydration()',
+    );
+  });
+
+  it('mentions the Starter SSR in the --dry-run plan', async () => {
+    const fake = createFakeIo({ cwd });
+    await run(['new', 'my-app', '--defaults', '--rendering', 'starter-ssr', '--dry-run'], fake.io, {
+      run: createFakeRunner().run,
+    });
+    expect(fake.out()).toContain('Add incremental hydration, event replay and view transitions');
+  });
+
+  it('does not run the Starter SSR stage for the other rendering strategies', async () => {
+    const fake = createFakeIo({ cwd });
+    await run(['new', 'my-app', '--defaults', '--no-install', '--no-git'], fake.io, {
+      run: createFakeRunner().run,
+    });
+    expect(fake.out()).not.toContain('Starter SSR');
+  });
+
   it('lists only the values that can be used in the help of `new`', async () => {
     const fake = createFakeIo();
     expect(await run(['new', '--help'], fake.io)).toBe(0);
@@ -428,7 +545,7 @@ describe('as new (non-interactive)', () => {
     expect(out).toContain('--config');
     expect(out).toContain('screaming');
     expect(out).not.toContain('modular');
-    expect(out).not.toContain('starter-ssr');
+    expect(out).toContain('starter-ssr');
   });
 });
 
@@ -474,7 +591,6 @@ describe('as new (interactive)', () => {
       'my-app',
       'angular-default',
       'css',
-      true,
       'csr',
       'none',
       'npm',
@@ -493,7 +609,6 @@ describe('as new (interactive)', () => {
     const { prompter } = createFakePrompter([
       'angular-default',
       'css',
-      true,
       'csr',
       'none',
       'npm',

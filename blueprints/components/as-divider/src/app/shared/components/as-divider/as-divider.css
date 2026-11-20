@@ -1,0 +1,46 @@
+:host {
+  --as-divider-line: 1px solid var(--as-border);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  margin: 0.75rem 0;
+  color: var(--as-text-subtle);
+  font-size: 0.75rem;
+}
+
+:host(.as-divider--dashed) {
+  --as-divider-line: 1px dashed var(--as-border);
+}
+
+:host::before,
+:host::after {
+  content: '';
+  flex: 1;
+  border-top: var(--as-divider-line);
+}
+
+:host([data-align='start'])::before,
+:host([data-align='end'])::after {
+  flex: 0 0 1.5rem;
+}
+
+/* Without a label a single line is enough. */
+:host:not([data-align])::after {
+  display: none;
+}
+
+:host(.as-divider--vertical) {
+  display: inline-flex;
+  flex-direction: column;
+  align-self: stretch;
+  width: auto;
+  min-height: 1rem;
+  margin: 0 0.75rem;
+}
+
+:host(.as-divider--vertical)::before,
+:host(.as-divider--vertical)::after {
+  border-top: 0;
+  border-left: var(--as-divider-line);
+}

@@ -1,6 +1,9 @@
 import { Command, Help } from 'commander';
 import { availableIds, type CapabilityCategory } from './config/capabilities.js';
+import { addCommand, addableValues, ADDABLE, type AddFlags } from './commands/add.js';
+import { configCommand } from './commands/config.js';
 import { doctorCommand } from './commands/doctor.js';
+import { generateCommand, GENERATE_KINDS, type GenerateFlags } from './commands/generate.js';
 import { infoCommand } from './commands/info.js';
 import { listCommand } from './commands/list.js';
 import { newCommand, type NewFlags } from './commands/new.js';
@@ -10,21 +13,44 @@ import { println, type CliIo } from './io.js';
 import { formatRows } from './ui/format.js';
 import { CLI_VERSION } from './version.js';
 
-interface UnavailableCommand {
-  name: string;
-  alias?: string;
-  description: string;
-}
-
-const UNAVAILABLE_COMMANDS: readonly UnavailableCommand[] = [
-  { name: 'generate', alias: 'g', description: 'Generate project files' },
-  { name: 'add', description: 'Add supported capabilities' },
-  { name: 'config', description: 'Manage project configuration' },
+/** What the root help says about each command, grouped by what it is for. */
+const HELP_SECTIONS: readonly {
+  title: string;
+  commands: readonly (readonly [string, string])[];
+}[] = [
+  { title: 'Create a project', commands: [['new', 'new [name]']] },
+  {
+    title: 'Change an existing project (run it inside the project folder)',
+    commands: [
+      ['add', 'add <capability> [value]'],
+      ['generate', 'generate, g <kind> <name>'],
+    ],
+  },
+  {
+    title: 'Inspect',
+    commands: [
+      ['list', 'list [category]'],
+      ['info', 'info'],
+      ['config', 'config <list|get> [key]'],
+      ['doctor', 'doctor'],
+      ['version', 'version'],
+      ['help', 'help [command]'],
+    ],
+  },
+  { title: 'Planned', commands: [['update', 'update']] },
 ];
 
-const UNAVAILABLE_AFTER_LIST: readonly UnavailableCommand[] = [
-  { name: 'update', description: 'Update supported starter capabilities' },
+const ROOT_EXAMPLES: readonly (readonly [string, string])[] = [
+  ['as new InventorySystem', 'Create a project; choose each option in the wizard'],
+  ['as new Shop --defaults --no-git', 'The recommended set, no questions'],
+  ['as add icons lucide', 'Add Lucide Icons to a project you already have'],
+  ['as add routing starter', 'Add the navigation tree, titles and breadcrumbs'],
+  ['as generate feature billing', 'A feature with its routes, ready to build on'],
+  ['as list rendering', 'See what each rendering strategy is'],
 ];
+
+const ONLY_NEW =
+  'Only `as new` decides: architecture, stylesheet format, Tailwind CSS, package manager and selector prefix.';
 
 export function createProgram(io: CliIo, deps: ProgramDeps): Command {
   const program = new Command();
@@ -45,14 +71,22 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
     .exitOverride();
 
   registerNewCommand(program, io, deps);
-  registerUnavailable(program, UNAVAILABLE_COMMANDS);
+  registerAddCommand(program, io, deps);
+  registerGenerateCommand(program, io);
 
   program
     .command('list')
-    .description('List available options')
+    .description('List available options with what each one is and its documentation')
     .argument(
       '[category]',
       'architecture, routing, style, rendering, components, icons or packageManager',
+    )
+    .addHelpText(
+      'after',
+      examples([
+        ['as list', 'Every category'],
+        ['as list rendering', 'Only the rendering strategies'],
+      ]),
     )
     .action((category: string | undefined) => {
       listCommand(io, category);
@@ -66,13 +100,43 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
     });
 
   program
+    .command('config')
+    .description('Read the options recorded in the project')
+    .usage('<list|get> [key]')
+    .argument('[action]', 'list: every option · get <key>: one option')
+    .argument('[key]', 'Option to read')
+    // "as config set ..." gets its own explanation instead of a generic usage error.
+    .allowExcessArguments()
+    .addHelpText(
+      'after',
+      `\nThe project configuration (angular-starter.config.json) is read-only: ${ONLY_NEW}\n` +
+        examples([
+          ['as config list', 'Every option of the project'],
+          ['as config get architecture', 'One value, ready for a script'],
+        ]),
+    )
+    .action(async (action: string | undefined, key: string | undefined) => {
+      await configCommand(io, action, key);
+    });
+
+  program
     .command('doctor')
     .description('Diagnose your environment')
     .action(async () => {
       await doctorCommand(io, deps);
     });
 
-  registerUnavailable(program, UNAVAILABLE_AFTER_LIST);
+  program
+    .command('update')
+    .description('Update supported starter capabilities (not available yet)')
+    .allowUnknownOption()
+    .allowExcessArguments()
+    .argument('[args...]')
+    .action(() => {
+      throw new RuntimeError(
+        '"as update" is not available yet. It is planned for a future release.',
+      );
+    });
 
   program
     .command('version')
@@ -89,6 +153,11 @@ function valuesOf(category: CapabilityCategory): string {
   return availableIds(category).join(', ');
 }
 
+function examples(rows: readonly (readonly [string, string])[]): string {
+  const lines = formatRows(rows.map(([command, note]) => [command, note] as const));
+  return `\nExamples:\n${lines.join('\n')}\n`;
+}
+
 function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): void {
   program
     .command('new')
@@ -97,7 +166,7 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     .option('--architecture <id>', `Project architecture (${valuesOf('architecture')})`)
     .option('--routing <id>', `Routing system (${valuesOf('routing')})`)
     .option('--style <format>', `Stylesheet format (${valuesOf('style')})`)
-    .option('--tailwind', 'Integrate Tailwind CSS (requires the css format)')
+    .option('--tailwind', 'Integrate Tailwind CSS (same as --style tailwind)')
     .option('--no-tailwind', 'Do not integrate Tailwind CSS')
     .option('--rendering <strategy>', `Rendering strategy (${valuesOf('rendering')})`)
     .option('--components <set>', `Native UI components (${valuesOf('components')})`)
@@ -108,51 +177,138 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     .option('--no-git', 'Do not initialize a Git repository')
     .option('--install', 'Install dependencies (default)')
     .option('--no-install', 'Do not install dependencies')
-    .option('--defaults', 'Never prompt: use the default for every option that was not provided')
+    .option(
+      '--defaults',
+      'Never prompt: use the recommended choice for every option that was not provided',
+    )
     .option('--config <file>', 'Read options from a JSON file (flags override it)')
     .option('--dry-run', 'Show what would be done without creating anything')
     .option('--verbose', 'Show the output of the commands that are run')
+    .addHelpText(
+      'after',
+      '\nThe choices marked (Recommended) are preselected: Screaming Architecture, Angular Starter Routing,\n' +
+        'Tailwind CSS, Client-Side Rendering, Lucide Icons and the recommended component collection.\n' +
+        'Run "as list" to see what each option is and where its documentation lives.\n' +
+        examples([
+          ['as new InventorySystem', 'Ask for each option'],
+          ['as new Shop --defaults', 'The recommended set, no questions'],
+          ['as new Shop --style scss --rendering ssr', 'Pick some options, be asked the rest'],
+          [
+            'as new Shop --defaults --architecture angular-default --routing angular',
+            "Angular's own structure",
+          ],
+          [
+            'as new Shop --config starter.json --dry-run',
+            'Read options from a file, show the plan',
+          ],
+        ]),
+    )
     .action(async (name: string | undefined, flags: NewFlags) => {
       await newCommand(io, deps, name, flags);
     });
 }
 
-function registerUnavailable(program: Command, commands: readonly UnavailableCommand[]): void {
-  for (const { name, alias, description } of commands) {
-    const command = program
-      .command(name)
-      .description(`${description} (not available yet)`)
-      .allowUnknownOption()
-      .allowExcessArguments()
-      .argument('[args...]')
-      .action(() => {
-        throw new RuntimeError(
-          `"as ${name}" is not available yet. It is planned for a future release.`,
-        );
+function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): void {
+  const capabilities: readonly (readonly [string, string])[] = [
+    ['icons', 'Icon library'],
+    ['components', 'Native as- components, tokens and theme'],
+    ['routing', 'Angular Starter Routing (needs the Screaming Architecture)'],
+    ['rendering', 'Server-side rendering'],
+  ];
+  program
+    .command('add')
+    .description('Add a capability to an existing project')
+    .usage('<capability> [value]')
+    .argument('[capability]', Object.keys(ADDABLE).join(', '))
+    .argument('[value]', 'What to add; optional when the capability has one option')
+    .option('--no-install', 'Do not install dependencies')
+    .option('--dry-run', 'Show what would be done without changing anything')
+    .option('--verbose', 'Show the output of the commands that are run')
+    .addHelpText('after', () => {
+      const rows = capabilities.map(([name, text]) => {
+        const values = addableValues(name);
+        return [name, `${text}${values.length > 0 ? ` (${values.join(', ')})` : ''}`] as const;
       });
-    if (alias) command.alias(alias);
-  }
+      return (
+        `\nCapabilities:\n${formatRows(rows).join('\n')}\n\n${ONLY_NEW}\n` +
+        examples([
+          ['as add icons lucide', 'Install Lucide Icons'],
+          ['as add routing starter', 'Navigation tree, titles and breadcrumbs'],
+          ['as add rendering starter-ssr', 'Angular SSR with incremental hydration'],
+          ['as add components all --dry-run', 'See the steps without changing anything'],
+        ])
+      );
+    })
+    .action(async (capability: string | undefined, value: string | undefined, flags: AddFlags) => {
+      await addCommand(io, deps, capability, value, flags);
+    });
+}
+
+function registerGenerateCommand(program: Command, io: CliIo): void {
+  const kinds: readonly (readonly [string, string])[] = [
+    [
+      'feature',
+      'features/<name> with its component, lazy routes and spec; adds the route and the menu entry',
+    ],
+    [
+      'component',
+      'A standalone component inside a feature (--feature) or in shared/components (--shared)',
+    ],
+  ];
+  program
+    .command('generate')
+    .alias('g')
+    .description('Generate project files that follow the architecture')
+    .usage('<kind> <name> [options]')
+    .argument('[kind]', GENERATE_KINDS.join(', '))
+    .argument('[name]', 'Name in lowercase with hyphens, for example user-profiles')
+    .option('--feature <name>', 'Feature that receives the component')
+    .option('--shared', 'Create the component in shared/components')
+    .option('--dry-run', 'Show what would be created without writing anything')
+    .addHelpText(
+      'after',
+      `\nKinds:\n${formatRows(kinds).join('\n')}\n\nIt needs the Screaming Architecture and uses your selector prefix.\n` +
+        examples([
+          ['as generate feature billing', 'Create features/billing'],
+          ['as generate component invoice-card --feature billing', 'Inside the feature'],
+          [
+            'as generate component invoice-card --shared',
+            'Reusable, exported by @shared/components',
+          ],
+        ]),
+    )
+    .action(async (kind: string | undefined, name: string | undefined, flags: GenerateFlags) => {
+      await generateCommand(io, kind, name, flags);
+    });
 }
 
 function formatRootHelp(program: Command, helper: Help): string {
-  const commands = helper
-    .visibleCommands(program)
-    .map((command) => [command.name(), helper.subcommandDescription(command)] as const);
+  const descriptions = new Map(
+    helper
+      .visibleCommands(program)
+      .map((command) => [command.name(), helper.subcommandDescription(command)] as const),
+  );
   const options = helper
     .visibleOptions(program)
     .map((option) => [helper.optionTerm(option), helper.optionDescription(option)] as const);
+
+  const sections = HELP_SECTIONS.flatMap(({ title, commands }) => [
+    title,
+    ...formatRows(commands.map(([name, term]) => [term, descriptions.get(name) ?? ''] as const)),
+    '',
+  ]);
 
   return [
     'Angular Starter CLI',
     '',
     'Usage: as [command] [options]',
     '',
-    'Commands:',
-    ...formatRows(commands),
-    '',
+    ...sections,
     'Options:',
     ...formatRows(options),
+    ...examples(ROOT_EXAMPLES).trimEnd().split('\n'),
     '',
+    ONLY_NEW,
     'Run "as <command> --help" for details on a command.',
     '',
   ].join('\n');

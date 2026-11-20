@@ -2,11 +2,12 @@ import { join } from 'node:path';
 import { ANGULAR_CLI_VERSION, ICON_PACKAGES } from '../compat.js';
 import { CAPABILITIES, type CapabilityCategory } from '../config/capabilities.js';
 import { readConfigFile } from '../config/file.js';
-import { resolveOptions } from '../config/resolve.js';
+import { normalizeStyleChoice, resolveOptions } from '../config/resolve.js';
 import type { StarterOptions } from '../config/schema.js';
 import type { ProgramDeps } from '../deps.js';
 import { buildNgCommand } from '../engine/angular-cli.js';
 import { ARCHITECTURE_PROFILES } from '../engine/architectures/index.js';
+import { RENDERING_PROFILES } from '../engine/rendering/index.js';
 import { ROUTING_PROFILES } from '../engine/routing/index.js';
 import { runPipeline, type GenerationContext } from '../engine/pipeline.js';
 import { NEW_PROJECT_STAGES, validateEnvironment } from '../engine/stages.js';
@@ -140,8 +141,13 @@ const OPTION_FLAGS = [
 
 /** Only the flags that describe the project; control flags such as --dry-run stay out. */
 function optionsFromFlags(flags: NewFlags): Partial<StarterOptions> {
+  const { style, tailwind } = normalizeStyleChoice(flags.style, flags.tailwind);
+  const normalized: NewFlags = { ...flags, style, tailwind };
   return Object.fromEntries(
-    OPTION_FLAGS.filter((key) => flags[key] !== undefined).map((key) => [key, flags[key]]),
+    OPTION_FLAGS.filter((key) => normalized[key] !== undefined).map((key) => [
+      key,
+      normalized[key],
+    ]),
   ) as Partial<StarterOptions>;
 }
 
@@ -161,6 +167,8 @@ function printSummary(io: CliIo, name: string, options: StarterOptions): void {
     ['Stylesheet', labelOf('style', options.style)],
     ['Tailwind CSS', toggle(options.tailwind)],
     ['Rendering', labelOf('rendering', options.rendering)],
+    ['Components', labelOf('components', options.components)],
+    ['Icons', labelOf('icons', options.icons)],
     ['Package manager', options.packageManager],
     ['Selector prefix', options.prefix],
     ['Git', toggle(options.git)],
@@ -190,6 +198,17 @@ async function runDryRun(context: GenerationContext): Promise<void> {
           `Add the ${labelOf('routing', options.routing)} (navigation tree, page titles and breadcrumbs)`,
         ]
       : []),
+    ...(RENDERING_PROFILES[options.rendering]
+      ? [
+          `Add incremental hydration, event replay and view transitions (${labelOf('rendering', options.rendering)})`,
+        ]
+      : []),
+    ...(options.components === 'none'
+      ? []
+      : [
+          'Add the design base: tokens, theme, typography, animations, utilities and pipes',
+          `Add the ${labelOf('components', options.components)} (as- components)`,
+        ]),
     ...(ICON_PACKAGES[options.icons]
       ? [
           `Add the ${labelOf('icons', options.icons)} package (${ICON_PACKAGES[options.icons]?.name})`,

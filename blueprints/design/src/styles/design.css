@@ -1,0 +1,11 @@
+/*
+ * Design layer of the application: design tokens, base elements, typography, scrollbars and
+ * animations, as plain CSS that works with or without Tailwind CSS. It is registered in the
+ * `styles` of angular.json; change any of these files, they are yours.
+ */
+@import './tokens.css';
+@import './base.css';
+@import './typography.css';
+@import './forms.css';
+@import './scrollbar.css';
+@import './animations.css';

@@ -1,9 +1,14 @@
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { RuntimeError } from '../../errors.js';
 import { BLUEPRINTS_ROOT, copyBlueprint } from '../blueprint.js';
 import { addPathAliases } from '../edits/tsconfig.js';
-import { addRouterFeature, addRoutes, removeClassProperty } from '../edits/typescript.js';
+import {
+  addRouterFeature,
+  addRoutes,
+  inlineComponentTemplate,
+  removeClassProperty,
+} from '../edits/typescript.js';
 import type { RouteSpec } from '../edits/typescript.js';
 import type { ArchitectureProfile } from './profile.js';
 
@@ -21,13 +26,24 @@ const ROUTES: readonly RouteSpec[] = [
 /** Edits to files `ng new` generates, as functions from the file's text to its new text. */
 const EDITS: readonly (readonly [file: string, edit: (text: string) => string])[] = [
   ['tsconfig.json', (text) => addPathAliases(text, ALIASES)],
-  ['src/app/app.ts', (text) => removeClassProperty(text, 'App', 'title')],
+  [
+    'src/app/app.ts',
+    (text) =>
+      inlineComponentTemplate(
+        removeClassProperty(text, 'App', 'title'),
+        'App',
+        '<router-outlet />',
+      ),
+  ],
   ['src/app/app.config.ts', (text) => addRouterFeature(text, 'withComponentInputBinding')],
   ['src/app/app.routes.ts', (text) => addRoutes(text, ROUTES)],
 ];
 
-/** Angular's welcome page and its test; the home feature replaces them. */
-const PLACEHOLDERS = ['src/app/app.html', 'src/app/app.spec.ts'];
+/** Angular's test of the welcome page; the router outlet test replaces it. */
+const PLACEHOLDERS = ['src/app/app.spec.ts'];
+
+/** The welcome page and its style: the root component composes the application inline instead. */
+const REMOVED = ['src/app/app.html', 'src/app/app.css'];
 
 export const screamingProfile: ArchitectureProfile = {
   requiredFiles: [
@@ -57,5 +73,6 @@ export const screamingProfile: ArchitectureProfile = {
       overwrite: PLACEHOLDERS,
     });
     for (const [path, text] of edited) await writeFile(path, text);
+    for (const file of REMOVED) await rm(join(targetDir, file), { force: true });
   },
 };

@@ -1,0 +1,184 @@
+import { CAPABILITIES, availableIds, type CapabilityCategory } from '../config/capabilities.js';
+import { resolveOptions } from '../config/resolve.js';
+import type { StarterOptions } from '../config/schema.js';
+import type { ProgramDeps } from '../deps.js';
+import { runPipeline, type GenerationContext, type Stage } from '../engine/pipeline.js';
+import {
+  addAngularSsr,
+  addIconLibrary,
+  applyComponents,
+  applyDesign,
+  applyRendering,
+  applyRouting,
+  installDependencies,
+  writeStarterConfig,
+} from '../engine/stages.js';
+import { UsageError } from '../errors.js';
+import { println, type CliIo } from '../io.js';
+import { findProject } from '../project/find.js';
+import { createStyler } from '../ui/format.js';
+
+/** The capabilities `as add` can apply to an existing project, by the word the user types. */
+export const ADDABLE: Readonly<Record<string, Extract<CapabilityCategory, keyof StarterOptions>>> =
+  {
+    icons: 'icons',
+    components: 'components',
+    routing: 'routing',
+    rendering: 'rendering',
+  };
+
+/** Options that are "off" in a project and that adding a capability can turn on. */
+const NOT_ADDABLE: Readonly<Record<string, readonly string[]>> = {
+  icons: ['none'],
+  components: ['none'],
+  routing: ['angular'],
+  rendering: ['csr'],
+};
+
+export interface AddFlags {
+  install?: boolean;
+  dryRun?: boolean;
+  verbose?: boolean;
+}
+
+/** The values of a capability that can be added, from the registry. */
+export function addableValues(capability: string): string[] {
+  const category = ADDABLE[capability];
+  if (!category) return [];
+  return availableIds(category).filter((id) => !NOT_ADDABLE[capability]?.includes(id));
+}
+
+export async function addCommand(
+  io: CliIo,
+  deps: ProgramDeps,
+  capability: string | undefined,
+  value: string | undefined,
+  flags: AddFlags,
+): Promise<void> {
+  const category = capability === undefined ? undefined : ADDABLE[capability];
+  if (capability === undefined || category === undefined) {
+    throw new UsageError(
+      capability === undefined
+        ? 'Usage: as add <capability> [value]'
+        : `Unknown capability "${capability}".`,
+      `Choose one of: ${Object.keys(ADDABLE).join(', ')}. The architecture, the stylesheet format, Tailwind CSS, the package manager and the selector prefix are decided by "as new".`,
+    );
+  }
+
+  const project = await findProject(io.cwd);
+  const choice = chooseValue(capability, value);
+  const current = project.options[category];
+  if (current === choice) {
+    throw new UsageError(`"${choice}" is already in this project (${capability}).`);
+  }
+  if (capability === 'components' && current === 'all') {
+    throw new UsageError(
+      'This project already has all the components; a smaller collection cannot replace them.',
+    );
+  }
+  if (capability === 'rendering' && current === 'starter-ssr') {
+    throw new UsageError(
+      `This project already has the Angular Starter SSR; "${choice}" cannot replace it.`,
+    );
+  }
+
+  const label = CAPABILITIES[category].find((option) => option.id === choice);
+  // The components draw their icons with Lucide, so adding them adds it too.
+  const implied = category === 'components' ? label?.requires?.icons?.[0] : undefined;
+  const options = resolveOptions({
+    file: {
+      ...project.options,
+      ...(implied ? { icons: implied as StarterOptions['icons'] } : {}),
+      [category]: choice,
+      install: flags.install !== false,
+    },
+  });
+  const stages = stagesFor(category, current, options, project.options);
+  const style = createStyler(io.color);
+
+  if (flags.dryRun) {
+    println(io.stdout, style.bold('Dry run: nothing was changed. Planned steps:'));
+    stages
+      .filter((stage) => !stage.enabled || stage.enabled(contextFor(io, deps, project, options)))
+      .forEach((stage, index) => println(io.stdout, `  ${index + 1}. ${stage.title}`));
+    println(io.stdout, `  Adds: ${label?.label ?? choice}`);
+    return;
+  }
+
+  println(io.stdout);
+  await runPipeline(stages, contextFor(io, deps, project, options, flags.verbose));
+  println(io.stdout);
+  println(io.stdout, style.green(`${label?.label ?? choice} added.`));
+  if (label?.docs) println(io.stdout, `Documentation: ${label.docs}`);
+}
+
+function chooseValue(capability: string, value: string | undefined): string {
+  const values = addableValues(capability);
+  if (value !== undefined) {
+    if (NOT_ADDABLE[capability]?.includes(value)) {
+      throw new UsageError(
+        `"${value}" cannot be added: it is what a project has when the ${capability} capability is not in use.`,
+        values.length > 0 ? `Choose one of: ${values.join(', ')}.` : undefined,
+      );
+    }
+    return value;
+  }
+  if (values.length === 1 && values[0]) return values[0];
+  throw new UsageError(
+    `Usage: as add ${capability} <value>`,
+    values.length > 0 ? `Choose one of: ${values.join(', ')}.` : undefined,
+  );
+}
+
+/** The steps that bring a project from `current` to the new option, then record it. */
+function stagesFor(
+  category: Extract<CapabilityCategory, keyof StarterOptions>,
+  current: string,
+  options: StarterOptions,
+  before: StarterOptions,
+): Stage[] {
+  switch (category) {
+    case 'icons':
+      return [addIconLibrary, writeStarterConfig, installDependencies];
+    case 'routing':
+      return [applyRouting, writeStarterConfig];
+    case 'rendering':
+      // `ng add @angular/ssr` installs what it needs; the starter edits come on top of its result.
+      return [
+        ...(current === 'csr' ? [addAngularSsr] : []),
+        ...(options.rendering === 'starter-ssr' ? [applyRendering] : []),
+        writeStarterConfig,
+      ];
+    case 'components':
+      return [
+        ...(before.icons === options.icons ? [] : [addIconLibrary]),
+        // The design base arrives with the first collection; a bigger one only adds components.
+        ...(current === 'none' ? [applyDesign] : []),
+        applyComponents,
+        writeStarterConfig,
+        installDependencies,
+      ];
+    default:
+      return [writeStarterConfig];
+  }
+}
+
+function contextFor(
+  io: CliIo,
+  deps: ProgramDeps,
+  project: { root: string; name: string },
+  options: StarterOptions,
+  verbose = false,
+): GenerationContext {
+  return {
+    name: project.name,
+    options,
+    cwd: project.root,
+    targetDir: project.root,
+    io,
+    deps,
+    verbose,
+    warnings: [],
+    created: false,
+  };
+}

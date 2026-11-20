@@ -1,0 +1,8 @@
+:host {
+  display: block;
+}
+
+/* The browser draws its own clear button in search inputs; the component has one. */
+.as-field__input::-webkit-search-cancel-button {
+  display: none;
+}

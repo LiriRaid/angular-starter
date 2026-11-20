@@ -1,0 +1,84 @@
+.as-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--as-z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--as-overlay);
+}
+
+.as-modal__panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: calc(100vh - 2rem);
+  border: 1px solid var(--as-border);
+  border-radius: var(--as-radius-lg);
+  background: var(--as-panel);
+  color: var(--as-text);
+  box-shadow: var(--as-shadow-lg);
+}
+
+.as-modal__panel:focus {
+  outline: none;
+}
+
+.as-modal__panel--sm {
+  max-width: 24rem;
+}
+
+.as-modal__panel--md {
+  max-width: 32rem;
+}
+
+.as-modal__panel--lg {
+  max-width: 48rem;
+}
+
+.as-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--as-border);
+}
+
+.as-modal__title {
+  font-size: 1.0625rem;
+}
+
+.as-modal__close {
+  display: inline-flex;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: var(--as-radius-sm);
+  background: transparent;
+  color: var(--as-text-subtle);
+  cursor: pointer;
+}
+
+.as-modal__close:hover {
+  color: var(--as-text);
+}
+
+.as-modal__body {
+  flex: 1;
+  padding: 1.25rem;
+  overflow-y: auto;
+}
+
+/* The footer only takes space when the dialog has actions. */
+.as-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  border-top: 1px solid var(--as-border);
+}
+
+.as-modal__footer:empty {
+  display: none;
+}

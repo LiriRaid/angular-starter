@@ -1,0 +1,47 @@
+/*
+ * Connects the design tokens to Tailwind CSS: the `dark:` variant follows the `.dark` class that
+ * ThemeService puts on <html>, and the tokens become theme values, so `bg-primary-500`,
+ * `text-surface-700` or `bg-panel` use the same colors as the components.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme inline {
+  --color-primary-50: var(--as-primary-50);
+  --color-primary-100: var(--as-primary-100);
+  --color-primary-200: var(--as-primary-200);
+  --color-primary-300: var(--as-primary-300);
+  --color-primary-400: var(--as-primary-400);
+  --color-primary-500: var(--as-primary-500);
+  --color-primary-600: var(--as-primary-600);
+  --color-primary-700: var(--as-primary-700);
+  --color-primary-800: var(--as-primary-800);
+  --color-primary-900: var(--as-primary-900);
+  --color-primary-950: var(--as-primary-950);
+
+  --color-surface-0: var(--as-surface-0);
+  --color-surface-50: var(--as-surface-50);
+  --color-surface-100: var(--as-surface-100);
+  --color-surface-200: var(--as-surface-200);
+  --color-surface-300: var(--as-surface-300);
+  --color-surface-400: var(--as-surface-400);
+  --color-surface-500: var(--as-surface-500);
+  --color-surface-600: var(--as-surface-600);
+  --color-surface-700: var(--as-surface-700);
+  --color-surface-800: var(--as-surface-800);
+  --color-surface-900: var(--as-surface-900);
+  --color-surface-950: var(--as-surface-950);
+
+  --color-app-bg: var(--as-bg);
+  --color-panel: var(--as-panel);
+  --color-panel-muted: var(--as-panel-muted);
+  --color-line: var(--as-border);
+  --color-content: var(--as-text);
+  --color-content-muted: var(--as-text-muted);
+  --color-success: var(--as-success);
+  --color-warning: var(--as-warning);
+  --color-danger: var(--as-danger);
+  --color-info: var(--as-info);
+
+  --font-sans: var(--as-font-sans);
+  --font-mono: var(--as-font-mono);
+}
