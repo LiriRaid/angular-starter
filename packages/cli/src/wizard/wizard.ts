@@ -16,6 +16,7 @@ import {
 } from '../config/components.js';
 import { DEFAULT_OPTIONS } from '../config/resolve.js';
 import { COMPONENT_DESCRIPTIONS } from '../engine/components/descriptions.js';
+import { SHELL_COMPONENTS } from '../engine/app-shell/app-shell.js';
 import { COMPONENTS } from '../engine/components/manifest.js';
 import { PACKAGE_MANAGERS, type StarterOptions } from '../config/schema.js';
 import { formatChoices } from './choices.js';
@@ -39,13 +40,15 @@ const MESSAGES: Record<SelectKey, string> = {
 };
 
 /** What a component is, what it brings with it and the global stylesheet it adds. */
-function describeComponent(id: string): string {
+function describeComponent(id: string, shellBrings: boolean): string {
   const definition = COMPONENTS.find((component) => component.id === id);
   const brings = definition?.uses.length ? ` Also brings: ${definition.uses.join(', ')}.` : '';
   const styles = definition?.styles.length
     ? ` Adds: ${definition.styles.map((style) => `${style}.css`).join(', ')}.`
     : '';
-  return `${COMPONENT_DESCRIPTIONS[id] ?? id}${brings}${styles}`;
+  const shell =
+    shellBrings && SHELL_COMPONENTS.includes(id) ? ' The app shell brings it anyway.' : '';
+  return `${COMPONENT_DESCRIPTIONS[id] ?? id}${brings}${styles}${shell}`;
 }
 
 /** The package manager that launched the CLI (`pnpm dlx`, `npx`, ...), or npm. */
@@ -174,7 +177,7 @@ export async function runWizard(
       choices: ALL_COMPONENT_IDS.map((id) => ({
         value: id,
         name: `as-${id}`,
-        description: describeComponent(id),
+        description: describeComponent(id, context().appShell === 'starter'),
         checked: preset.includes(id),
       })),
     });

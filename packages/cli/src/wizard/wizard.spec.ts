@@ -787,6 +787,26 @@ describe('runWizard', () => {
       expect(answers).toMatchObject({ components: 'none', icons: 'lucide' });
     });
 
+    it('says which components the app shell brings anyway', async () => {
+      const { prompter, asked } = createFakePrompter(['recommended', [...ESSENTIAL_COMPONENT_IDS]]);
+      await runWizard(
+        {
+          ...KNOWN,
+          appShell: 'starter',
+          layout: 'floating-wide',
+          presence: 'none',
+          uiSystem: 'none',
+        },
+        prompter,
+        NO_ENV,
+        FULL,
+      );
+      const list = asked.find((question) => question.name === 'componentList');
+      const text = (id: string) => list?.descriptions?.[list.choices?.indexOf(id) ?? -1] ?? '';
+      expect(text('tabs')).toContain('The app shell brings it anyway.');
+      expect(text('textarea')).not.toContain('app shell');
+    });
+
     it('never offers the custom selection as an answer of its own', async () => {
       const { prompter, asked } = createFakePrompter(['none']);
       await runWizard(KNOWN, prompter, NO_ENV, FULL);
