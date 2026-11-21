@@ -148,6 +148,13 @@ as-toast {
   color: var(--app-toast-message-text);
   overflow-wrap: anywhere;
 }
+
+/* Contraste es el inverso del tema: texto claro sobre fondo oscuro en claro, y texto oscuro sobre fondo claro en oscuro.
+   El título y el mensaje toman el color del tipo (`--_toast-color`) en vez del de los avisos normales, que es claro en los dos temas. */
+.as-toast-item--contrast .as-toast-title,
+.as-toast-item--contrast .as-toast-message {
+  color: var(--_toast-color);
+}
 .as-toast-message strong {
   font-weight: 800;
 }

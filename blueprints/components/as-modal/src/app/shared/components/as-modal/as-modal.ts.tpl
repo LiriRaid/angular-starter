@@ -32,6 +32,8 @@ export class AsModal {
   readonly width = input<string>('34rem');
   readonly styleClass = input<string>('');
   readonly showFooter = input(false, { transform: booleanAttribute });
+  /** El contenido maneja su propio espaciado: el área del contenido no le pone relleno (y su barra de desplazamiento queda en el borde del modal). */
+  readonly flush = input(false, { transform: booleanAttribute });
 
   readonly closable = input(true, { transform: booleanAttribute });
   readonly dismissableMask = input(true, { transform: booleanAttribute });
@@ -58,6 +60,7 @@ export class AsModal {
   readonly hostClasses = computed(() => {
     const parts = ['as-modal'];
     if (this.variant() === 'preview') parts.push('as-modal--preview');
+    if (this.flush()) parts.push('as-modal--flush');
 
     const extra = this.styleClass().trim();
     if (extra) parts.push(extra);

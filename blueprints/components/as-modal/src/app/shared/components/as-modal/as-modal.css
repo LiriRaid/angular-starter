@@ -97,6 +97,11 @@ as-modal {
   padding: 1.25rem;
 }
 
+/* El contenido maneja su propio espaciado: el relleno va en su interior, no en el área que se desplaza. */
+.as-modal--flush .as-modal-content {
+  padding: 0;
+}
+
 .as-modal-footer {
   flex-shrink: 0;
   display: flex;
