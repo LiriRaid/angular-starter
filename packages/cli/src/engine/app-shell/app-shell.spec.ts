@@ -164,7 +164,7 @@ describe('App Shell profile', () => {
       expect(tree).toContain("link: '/preference-design'");
       expect(tree).toContain('Preferencias de Diseño');
       // Only the button of the user menu opens the page: the sidebar does not list it.
-      expect(tree).toContain("hidden: () => true");
+      expect(tree).toContain('hidden: () => true');
       const styles = await read('src/styles.css');
       expect(styles).toContain("@import './styles/features/design-preferences-styles.css';");
     });
