@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { UsageError } from '../errors.js';
 import { DEFAULT_OPTIONS, normalizeStyleChoice, resolveOptions } from './resolve.js';
+import { ALL_COMPONENT_IDS, ESSENTIAL_COMPONENT_IDS } from './components.js';
 import type { StarterOptions } from './schema.js';
 
 describe('resolveOptions', () => {
@@ -194,6 +195,61 @@ describe('resolveOptions', () => {
     expect(() => resolveOptions({ flags: { uiSystem: 'starter', components: 'none' } })).toThrow(
       /the components: recommended, all/,
     );
+  });
+
+  it('records a custom selection of components with its list', () => {
+    const options = resolveOptions({
+      flags: { components: 'custom', componentList: ['button', 'modal'] },
+    });
+    expect(options.components).toBe('custom');
+    expect(options.componentList).toEqual(['button', 'modal']);
+    expect(DEFAULT_OPTIONS).not.toHaveProperty('componentList');
+  });
+
+  it('turns a list that is exactly a collection into that collection', () => {
+    const essential = resolveOptions({
+      flags: { components: 'custom', componentList: [...ESSENTIAL_COMPONENT_IDS].reverse() },
+    });
+    expect(essential.components).toBe('recommended');
+    expect(essential).not.toHaveProperty('componentList');
+    expect(
+      resolveOptions({ flags: { components: 'custom', componentList: [...ALL_COMPONENT_IDS] } })
+        .components,
+    ).toBe('all');
+  });
+
+  it('needs the list for a custom selection, and only then', () => {
+    expect(() => resolveOptions({ flags: { components: 'custom' } })).toThrow(
+      /componentList: .*custom/,
+    );
+    expect(() => resolveOptions({ flags: { components: 'custom', componentList: [] } })).toThrow(
+      /componentList/,
+    );
+    expect(() =>
+      resolveOptions({ flags: { components: 'recommended', componentList: ['button'] } }),
+    ).toThrow(/componentList: .*only .*custom/);
+  });
+
+  it('names the components of the list that do not exist', () => {
+    expect(() =>
+      resolveOptions({ flags: { components: 'custom', componentList: ['button', 'carousel'] } }),
+    ).toThrow(/componentList: .*"carousel"/);
+  });
+
+  it('asks a custom selection for what the collections ask for', () => {
+    expect(() =>
+      resolveOptions({
+        flags: { components: 'custom', componentList: ['button'], style: 'scss' },
+      }),
+    ).toThrow(/components: "custom" requires/);
+  });
+
+  it('keeps the UI System for a whole collection', () => {
+    expect(() =>
+      resolveOptions({
+        flags: { components: 'custom', componentList: ['button'], uiSystem: 'starter' },
+      }),
+    ).toThrow(/uiSystem: "starter" requires the components: recommended, all/);
   });
 
   it('rejects unknown values and lists every issue', () => {

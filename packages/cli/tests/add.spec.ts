@@ -283,6 +283,65 @@ describe('as add', () => {
     });
   });
 
+  describe('components by id', () => {
+    it('adds the components named, with what they import, and records a custom selection', async () => {
+      const project = await createStarterProject(cwd, [
+        '--components',
+        'none',
+        '--app-shell',
+        'none',
+        '--icons',
+        'none',
+      ]);
+      const result = await add(project, ['components', 'modal,toggle']);
+      expect(result.code, result.err).toBe(0);
+      for (const id of ['modal', 'toggle', 'button', 'icon']) {
+        expect(
+          await exists(join(project, `src/app/shared/components/as-${id}/as-${id}.ts`)),
+          id,
+        ).toBe(true);
+      }
+      expect(await exists(join(project, 'src/app/shared/components/as-table/as-table.ts'))).toBe(
+        false,
+      );
+      const config = await readConfig(project);
+      expect(config.components).toBe('custom');
+      expect(config.componentList).toEqual(['modal', 'toggle']);
+    });
+
+    it('adds to what the project has and records the union', async () => {
+      const project = await createStarterProject(cwd, ['--components', 'recommended']);
+      const result = await add(project, ['components', 'table']);
+      expect(result.code, result.err).toBe(0);
+      const config = await readConfig(project);
+      expect(config.components).toBe('custom');
+      expect(config.componentList).toHaveLength(17);
+      expect(config.componentList).toContain('table');
+      expect(await exists(join(project, 'src/app/shared/components/as-table/as-table.ts'))).toBe(
+        true,
+      );
+    });
+
+    it('says so when every component named is already there', async () => {
+      const project = await createStarterProject(cwd, ['--components', 'recommended']);
+      const result = await add(project, ['components', 'button,modal']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('already');
+    });
+
+    it('refuses a name that is not a component', async () => {
+      const project = await createStarterProject(cwd, [
+        '--components',
+        'none',
+        '--app-shell',
+        'none',
+      ]);
+      const result = await add(project, ['components', 'carousel']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('"carousel"');
+    });
+  });
+
   describe('ui-system', () => {
     const TAB = 'src/app/features/preference-design/tabs/ui-tab.html';
 

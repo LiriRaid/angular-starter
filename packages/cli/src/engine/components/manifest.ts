@@ -1,3 +1,5 @@
+import { ESSENTIAL_COMPONENT_IDS, EXTRA_COMPONENT_IDS } from '../../config/components.js';
+
 /** One file of a component and what the `@shared/components` barrel exports from it. */
 export interface ComponentExport {
   /** Path below `shared/components`, without extension (`as-button/as-button`). */
@@ -106,38 +108,10 @@ export const COMPONENTS: readonly ComponentDefinition[] = [
 ];
 
 /** The `recommended` collection, in the order the documentation lists it. */
-export const RECOMMENDED_COMPONENTS: readonly string[] = [
-  'icon',
-  'button',
-  'input',
-  'textarea',
-  'checkbox',
-  'toggle',
-  'select',
-  'avatar',
-  'divider',
-  'skeleton',
-  'tooltip',
-  'modal',
-  'drawer',
-  'toast',
-  'tabs',
-  'popover',
-];
+export const RECOMMENDED_COMPONENTS: readonly string[] = ESSENTIAL_COMPONENT_IDS;
 
-/** What `all` adds to the recommended collection. */
-export const EXTRA_COMPONENTS: readonly string[] = [
-  'table',
-  'search',
-  'datepicker',
-  'section-nav',
-  'selectable-item',
-  'reorder-list',
-  'preview',
-  'media-preview',
-  'theme-color-picker',
-  'weekly-schedule',
-];
+/** What "all the components" adds to the essential collection. */
+export const EXTRA_COMPONENTS: readonly string[] = EXTRA_COMPONENT_IDS;
 
 export type ComponentSet = 'recommended' | 'all';
 

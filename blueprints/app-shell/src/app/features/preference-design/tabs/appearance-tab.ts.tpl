@@ -1,8 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-
-import { PRIMARY_COLORS } from '@core/theme/theme-palettes';
-import { ThemeService } from '@core/theme/theme.service';
-import { ColorSwatches, ModeSwitch } from './theme-controls';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 export interface LayoutMode {
   readonly id: string;
@@ -27,14 +23,10 @@ export const LAYOUT_MODES: readonly LayoutMode[] = [
 
 @Component({
   selector: '__PREFIX__-appearance-tab',
-  imports: [ColorSwatches, ModeSwitch],
   templateUrl: './appearance-tab.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppearanceTab {
-  readonly themeService = inject(ThemeService);
-
   readonly layoutModes = LAYOUT_MODES;
   readonly activeLayout = LAYOUT_MODES.find((mode) => mode.built)?.id ?? '';
-  readonly colors = PRIMARY_COLORS;
 }

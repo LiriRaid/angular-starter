@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 const prompts = vi.hoisted(() => ({
   input: vi.fn(),
   select: vi.fn(),
+  checkbox: vi.fn(),
   confirm: vi.fn(),
 }));
 vi.mock('@inquirer/prompts', () => prompts);
@@ -33,6 +34,28 @@ describe('createInquirerPrompter', () => {
     await createInquirerPrompter().input({ name: 'a', message: 'a' });
     const { validate } = prompts.input.mock.calls[0]?.[0] as { validate: (v: string) => unknown };
     expect(validate('anything')).toBe(true);
+  });
+
+  it('maps the choices of a checkbox with what starts ticked, and returns what was ticked', async () => {
+    prompts.checkbox.mockResolvedValue(['button']);
+    const answer = await createInquirerPrompter().checkbox({
+      name: 'componentList',
+      message: 'Which components?',
+      choices: [
+        { value: 'button', name: 'button', checked: true },
+        { value: 'modal', name: 'modal', description: 'Dialog' },
+      ],
+    });
+
+    expect(answer).toEqual(['button']);
+    expect(prompts.checkbox).toHaveBeenCalledWith({
+      message: 'Which components?',
+      choices: [
+        { value: 'button', name: 'button', description: undefined, checked: true },
+        { value: 'modal', name: 'modal', description: 'Dialog', checked: false },
+      ],
+      pageSize: 14,
+    });
   });
 
   it('maps choices and the default for select', async () => {

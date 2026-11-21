@@ -9,50 +9,65 @@
     'as-select-interaction-disabled': isInteractionDisabled(),
   }"
 >
-
   <!-- Contenido de una opción "rica" (avatar/ícono/color/chip/barra + etiqueta), según
        `optionAvatar`/`optionIcon`/`optionColor`/`optionShape` — un solo template compartido por
        el listado simple y el multiselect en vez de repetirlo. El peso (bold solo si está
        seleccionada) nunca se fija acá: lo hereda de la fila (`.as-select-option--selected`,
        ver select-styles.css), así ningún consumidor necesita declarar nada por su cuenta. -->
-  <ng-template #richOptionLabel let-option>
+  <ng-template #richOptionLabel let-option let-hideLabel="hideLabel">
     @if (hasAvatarOption()) {
       <as-avatar [label]="optionAvatarLabelOf(option)" [imageUrl]="optionAvatarOf(option) ?? null" [background]="optionAccent(option)" [shape]="optionAvatarShape()" [size]="22" textClass="text-caption-2-bold" [mode]="optionPresence() ? 'presence' : 'avatar'" [presenceStatus]="optionPresenceOf(option)" />
-      <span class="truncate">{{ labelForOption(option) }}</span>
+      @if (!hideLabel) {
+        <span class="truncate">{{ labelForOption(option) }}</span>
+      }
     } @else if (optionIconOf(option); as iconName) {
       @if (optionShape() === 'chip') {
         <span class="as-mselect-chip" [style.background]="'color-mix(in srgb, ' + optionColorOf(option) + ' 14%, transparent)'" [style.border]="'1px solid color-mix(in srgb, ' + optionColorOf(option) + ' 30%, transparent)'">
           <as-icon [name]="iconName" size="12" [color]="optionColorOf(option)" />
-          <span class="truncate" [style.color]="optionColorOf(option)">{{ labelForOption(option) }}</span>
+          @if (!hideLabel) {
+            <span class="truncate" [style.color]="optionColorOf(option)">{{ labelForOption(option) }}</span>
+          }
         </span>
       } @else if (optionShape() === 'box') {
         <span class="as-mselect-icon-box" [style.background]="'color-mix(in srgb, ' + optionColorOf(option) + ' 14%, transparent)'">
           <as-icon [name]="iconName" size="13" [color]="optionColorOf(option)" />
         </span>
-        <span class="truncate">{{ labelForOption(option) }}</span>
+        @if (!hideLabel) {
+          <span class="truncate">{{ labelForOption(option) }}</span>
+        }
       } @else {
-        <as-icon [name]="iconName" size="14" [color]="optionColorOf(option)" />
-        <span class="truncate">{{ labelForOption(option) }}</span>
+        <as-icon [name]="iconName" [size]="optionIconSize()" [color]="optionColorOf(option)" />
+        @if (!hideLabel) {
+          <span class="truncate">{{ labelForOption(option) }}</span>
+        }
       }
     } @else if (optionColorOf(option); as dotColor) {
       @if (optionShape() === 'chip') {
         <span class="as-mselect-chip" [style.background]="'color-mix(in srgb, ' + dotColor + ' 14%, transparent)'" [style.border]="'1px solid color-mix(in srgb, ' + dotColor + ' 30%, transparent)'">
           <span class="as-mselect-dot" [style.background]="dotColor"></span>
-          <span class="truncate" [style.color]="dotColor">{{ labelForOption(option) }}</span>
+          @if (!hideLabel) {
+            <span class="truncate" [style.color]="dotColor">{{ labelForOption(option) }}</span>
+          }
         </span>
       } @else if (optionShape() === 'bar') {
         <span class="as-mselect-bar" [style.background]="dotColor"></span>
-        <span class="truncate" [style.color]="dotColor">{{ labelForOption(option) }}</span>
+        @if (!hideLabel) {
+          <span class="truncate" [style.color]="dotColor">{{ labelForOption(option) }}</span>
+        }
       } @else {
         <span class="as-mselect-dot" [style.background]="dotColor"></span>
-        <span class="truncate" [style.color]="dotColor">{{ labelForOption(option) }}</span>
+        @if (!hideLabel) {
+          <span class="truncate" [style.color]="dotColor">{{ labelForOption(option) }}</span>
+        }
       }
     } @else {
-      <span class="truncate">{{ labelForOption(option) }}</span>
+      @if (!hideLabel) {
+        <span class="truncate">{{ labelForOption(option) }}</span>
+      }
     }
   </ng-template>
 
-  <fieldset class="relative w-full rounded-lg border-0 transition-all duration-180" style="padding: 0; margin: 0; min-inline-size: 0" [ngClass]="fieldsetClasses()" [style.box-shadow]="fieldsetBoxShadow()">
+  <fieldset class="relative w-full rounded-lg border-0 transition-all duration-180" style="padding: 0; margin: 0; min-inline-size: 0" [ngClass]="fieldsetClasses()" [style.box-shadow]="fieldsetBoxShadow()" [style.background]="fieldsetBackground()">
     @if (label() && variant() === 'on' && !isCompactMultiSelect() && !isCompactSingleSelect()) {
       <legend class="h-0 invisible overflow-hidden whitespace-nowrap block leading-none" style="padding: 0" [style.margin-left]="legendOffset()" [style.max-width]="legendMaxWidth()" [style.transition]="legendTransition()">
         <span class="px-2 text-caption-2-bold">{{ label() }}</span>
@@ -119,24 +134,7 @@
     } @else {
       <div #triggerRef class="as-select-field" [class.as-select-field--disabled]="isDisabled() || readonly()" [class.as-select-field--open]="isOpen()">
         @if (searchable()) {
-          <input
-            type="text"
-            class="as-select-field-label"
-            role="combobox"
-            aria-haspopup="listbox"
-            [attr.id]="resolvedInputId()"
-            [attr.aria-expanded]="isOpen()"
-            [attr.aria-controls]="resolvedInputId() + '-panel'"
-            [attr.aria-describedby]="describedBy()"
-            [value]="editableValue()"
-            [placeholder]="!label() || variant() === 'over' ? placeholder() : isFocused() && !hasValue() ? placeholder() : ' '"
-            [disabled]="isDisabled() || readonly()"
-            (input)="onSelectChange($any($event.target).value)"
-            (click)="onEditableTriggerPointer($event)"
-            (focus)="onEditableFocus()"
-            (blur)="onBlur()"
-            (keydown)="onTriggerKeydown($event)"
-          />
+          <input type="text" class="as-select-field-label" role="combobox" aria-haspopup="listbox" [attr.id]="resolvedInputId()" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="resolvedInputId() + '-panel'" [attr.aria-describedby]="describedBy()" [value]="editableValue()" [placeholder]="!label() || variant() === 'over' ? placeholder() : isFocused() && !hasValue() ? placeholder() : ' '" [disabled]="isDisabled() || readonly()" (input)="onSelectChange($any($event.target).value)" (click)="onEditableTriggerPointer($event)" (focus)="onEditableFocus()" (blur)="onBlur()" (keydown)="onTriggerKeydown($event)" />
         } @else {
           <!-- No searchable: nada de <input> — un <span> plano, igual que PrimeNG cuando
                `editable="false"` (ver primeng-select.mjs, rama `*ngIf="!editable"`). Un <input>
@@ -145,23 +143,10 @@
                la posición X contra el string COMPLETO (no el truncado) y hace scroll interno para
                mostrarlo — ahí se "rompía" el truncate. Un <span> nunca tiene caret, así que nunca
                puede pasarle eso. */ -->
-          <span
-            class="as-select-field-label"
-            role="combobox"
-            aria-haspopup="listbox"
-            tabindex="0"
-            [attr.id]="resolvedInputId()"
-            [attr.aria-expanded]="isOpen()"
-            [attr.aria-controls]="resolvedInputId() + '-panel'"
-            [attr.aria-describedby]="describedBy()"
-            (click)="togglePanel()"
-            (focus)="onEditableFocus()"
-            (blur)="onBlur()"
-            (keydown)="onTriggerKeydown($event)"
-          >
+          <span class="as-select-field-label" role="combobox" aria-haspopup="listbox" tabindex="0" [attr.id]="resolvedInputId()" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="resolvedInputId() + '-panel'" [attr.aria-describedby]="describedBy()" (click)="togglePanel()" (focus)="onEditableFocus()" (blur)="onBlur()" (keydown)="onTriggerKeydown($event)">
             @if (hasValue()) {
               @if (hasAvatarOption() || optionIcon() || optionColor()) {
-                <ng-container *ngTemplateOutlet="richOptionLabel; context: { $implicit: resolvedSelectedOption() }" />
+                <ng-container *ngTemplateOutlet="richOptionLabel; context: { $implicit: resolvedSelectedOption(), hideLabel: hideOptionLabel() }" />
               } @else {
                 <span class="truncate">{{ editableValue() }}</span>
               }
@@ -213,7 +198,7 @@
     </small>
   }
 
-  <div #panelRef popover [id]="resolvedInputId() + '-panel'" class="as-select-panel" [class.as-select-panel--multi]="isAnyMultiSelect()" (toggle)="onPanelToggle($event)">
+  <div #panelRef popover [id]="resolvedInputId() + '-panel'" class="as-select-panel" [ngClass]="panelStyleClass()" [class.as-select-panel--multi]="isAnyMultiSelect()" (toggle)="onPanelToggle($event)">
     <div class="as-select-list-container">
       @if (activeOptions().length === 0) {
         <div class="as-select-empty">Sin resultados</div>
@@ -221,15 +206,15 @@
         <div class="as-select-list as-select-list--multi" role="listbox" aria-multiselectable="true">
           @for (option of activeOptions(); track optionTrackValue(option); let index = $index) {
             <div class="as-select-option" [class.as-select-option--active]="activeIndex() === index" [class.as-select-option--selected]="isOptionSelected(option)" role="option" [attr.aria-selected]="isOptionSelected(option)" (mousedown)="$event.preventDefault()" (click)="selectOption(option)">
-            <div class="as-mselect-option-inner" [class.as-mselect-option-inner--all]="isSelectAllOption(option)">
-              <span class="as-mselect-cb" [class.as-mselect-cb--checked]="isOptionSelected(option)"></span>
+              <div class="as-mselect-option-inner" [class.as-mselect-option-inner--all]="isSelectAllOption(option)">
+                <span class="as-mselect-cb" [class.as-mselect-cb--checked]="isOptionSelected(option)"></span>
 
-              @if (isSelectAllOption(option)) {
-                <span class="truncate">{{ allVisibleSelected() ? 'Quitar todos' : 'Seleccionar todos' }}</span>
-              } @else {
-                <ng-container *ngTemplateOutlet="richOptionLabel; context: { $implicit: option }" />
-              }
-            </div>
+                @if (isSelectAllOption(option)) {
+                  <span class="truncate">{{ allVisibleSelected() ? 'Quitar todos' : 'Seleccionar todos' }}</span>
+                } @else {
+                  <ng-container *ngTemplateOutlet="richOptionLabel; context: { $implicit: option }" />
+                }
+              </div>
             </div>
           }
         </div>
@@ -237,7 +222,7 @@
         <div class="as-select-list" role="listbox">
           @for (option of activeOptions(); track optionTrackValue(option); let index = $index) {
             <div class="as-select-option" [class.as-select-option--active]="activeIndex() === index" [class.as-select-option--selected]="isOptionSelected(option)" role="option" [attr.aria-selected]="isOptionSelected(option)" (mousedown)="$event.preventDefault()" (click)="selectOption(option)">
-              <ng-container *ngTemplateOutlet="richOptionLabel; context: { $implicit: option }" />
+              <ng-container *ngTemplateOutlet="richOptionLabel; context: { $implicit: option, hideLabel: hideOptionLabel() }" />
             </div>
           }
         </div>

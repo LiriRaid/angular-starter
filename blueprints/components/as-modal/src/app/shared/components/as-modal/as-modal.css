@@ -154,3 +154,10 @@ as-modal {
 .as-btn.as-icon-overlay-btn:hover {
   background: rgba(0, 0, 0, 0.7);
 }
+
+.as-modal-title-dot {
+  height: 0.625rem;
+  width: 0.625rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+}

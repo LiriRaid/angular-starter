@@ -4,6 +4,12 @@ import {
   defaultOption,
   type CapabilityCategory,
 } from '../config/capabilities.js';
+import {
+  ALL_COMPONENT_IDS,
+  ESSENTIAL_COMPONENT_IDS,
+  componentIdsOf,
+  normalizeComponents,
+} from '../config/components.js';
 import { resolveOptions } from '../config/resolve.js';
 import type { StarterOptions } from '../config/schema.js';
 import type { ProgramDeps } from '../deps.js';
@@ -41,7 +47,7 @@ export const ADDABLE: Readonly<Record<string, Extract<CapabilityCategory, keyof 
 /** Options that are "off" in a project and that adding a capability can turn on. */
 const NOT_ADDABLE: Readonly<Record<string, readonly string[]>> = {
   icons: ['none'],
-  components: ['none'],
+  components: ['none', 'custom'],
   routing: ['angular'],
   'app-shell': ['none'],
   presence: ['none'],
@@ -80,15 +86,15 @@ export async function addCommand(
   }
 
   const project = await findProject(io.cwd);
-  const choice = chooseValue(capability, value);
   const current = project.options[category];
-  if (current === choice) {
+  // Components are added to what the project has: the union is what gets recorded (ADR-0011).
+  const addition =
+    capability === 'components' && value !== undefined
+      ? componentsAddition(project.options, value)
+      : undefined;
+  const choice = addition?.components ?? chooseValue(capability, value);
+  if (capability !== 'components' && current === choice) {
     throw new UsageError(`"${choice}" is already in this project (${capability}).`);
-  }
-  if (capability === 'components' && current === 'all') {
-    throw new UsageError(
-      'This project already has all the components; a smaller collection cannot replace them.',
-    );
   }
   if (capability === 'rendering' && current === 'starter-ssr') {
     throw new UsageError(
@@ -100,12 +106,15 @@ export async function addCommand(
   // The components and the shell draw their icons with Lucide, so adding them adds it too.
   const implied =
     category === 'components' || category === 'appShell' ? label?.requires?.icons?.[0] : undefined;
+  const recorded: Partial<StarterOptions> = { ...project.options };
+  delete recorded.componentList;
   const options = resolveOptions({
     file: {
-      ...project.options,
+      ...(capability === 'components' ? recorded : project.options),
       ...(implied ? { icons: implied as StarterOptions['icons'] } : {}),
       ...dependentChoices(category, choice),
       [category]: choice,
+      ...(addition?.componentList ? { componentList: addition.componentList } : {}),
       install: flags.install !== false,
     },
   });
@@ -139,6 +148,43 @@ function dependentChoices(category: CapabilityCategory, choice: string): Partial
     return ssrPurpose ? { ssrPurpose: ssrPurpose as StarterOptions['ssrPurpose'] } : {};
   }
   return {};
+}
+
+/**
+ * What `as add components <value>` leaves in a project: the components it has plus the ones asked
+ * for (a collection or a comma list of ids), recorded as the collection or custom selection that
+ * union equals. Asking for what the project already has stops with that said.
+ */
+function componentsAddition(
+  recorded: StarterOptions,
+  value: string,
+): ReturnType<typeof normalizeComponents> | undefined {
+  if (NOT_ADDABLE['components']?.includes(value)) return undefined;
+  const requested =
+    value === 'recommended'
+      ? ESSENTIAL_COMPONENT_IDS
+      : value === 'all'
+        ? ALL_COMPONENT_IDS
+        : value
+            .split(',')
+            .map((id) => id.trim())
+            .filter(Boolean);
+  const unknown = requested.find((entry) => !ALL_COMPONENT_IDS.includes(entry));
+  if (unknown !== undefined) {
+    throw new UsageError(
+      `"${unknown}" is not a component.`,
+      `Choose a collection (${addableValues('components').join(', ')}) or ids from: ${ALL_COMPONENT_IDS.join(', ')}.`,
+    );
+  }
+  const has = componentIdsOf(recorded);
+  if (requested.every((id) => has.includes(id))) {
+    throw new UsageError(
+      recorded.components === 'all'
+        ? 'This project already has all the components; a smaller collection cannot replace them.'
+        : `"${value}" is already in this project (components).`,
+    );
+  }
+  return normalizeComponents([...has, ...requested]);
 }
 
 function chooseValue(capability: string, value: string | undefined): string {

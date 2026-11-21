@@ -9,7 +9,15 @@ import {
   type Registry,
   type RequirementContext,
 } from '../config/capabilities.js';
+import {
+  ALL_COMPONENT_IDS,
+  ESSENTIAL_COMPONENT_IDS,
+  normalizeComponents,
+} from '../config/components.js';
 import { DEFAULT_OPTIONS } from '../config/resolve.js';
+import { COMPONENT_DESCRIPTIONS } from '../engine/components/descriptions.js';
+import { SHELL_COMPONENTS } from '../engine/app-shell/app-shell.js';
+import { COMPONENTS } from '../engine/components/manifest.js';
 import { PACKAGE_MANAGERS, type StarterOptions } from '../config/schema.js';
 import { formatChoices } from './choices.js';
 import type { Prompter } from './prompter.js';
@@ -30,6 +38,18 @@ const MESSAGES: Record<SelectKey, string> = {
   icons: 'Select an icon library:',
   packageManager: 'Select a package manager:',
 };
+
+/** What a component is, what it brings with it and the global stylesheet it adds. */
+function describeComponent(id: string, shellBrings: boolean): string {
+  const definition = COMPONENTS.find((component) => component.id === id);
+  const brings = definition?.uses.length ? ` Also brings: ${definition.uses.join(', ')}.` : '';
+  const styles = definition?.styles.length
+    ? ` Adds: ${definition.styles.map((style) => `${style}.css`).join(', ')}.`
+    : '';
+  const shell =
+    shellBrings && SHELL_COMPONENTS.includes(id) ? ' The app shell brings it anyway.' : '';
+  return `${COMPONENT_DESCRIPTIONS[id] ?? id}${brings}${styles}${shell}`;
+}
 
 /** The package manager that launched the CLI (`pnpm dlx`, `npx`, ...), or npm. */
 export function detectPackageManager(env: NodeJS.ProcessEnv): StarterOptions['packageManager'] {
@@ -95,7 +115,10 @@ export async function runWizard(
       return { options, planned: [] };
     }
     const now = context();
-    const offered = offeredOptions(key, now, registry);
+    // A custom selection comes from ticking the list that follows, never from this question.
+    const offered = offeredOptions(key, now, registry).filter(
+      (option) => !(key === 'components' && option.id === 'custom'),
+    );
     return {
       options:
         key === 'style' && known.tailwind === false
@@ -142,6 +165,28 @@ export async function runWizard(
     return answer;
   }
 
+  /**
+   * The list of every component with the chosen collection ticked (ADR-0011), like the last question
+   * of `ng new`. What ends ticked is recorded as the collection it equals, or as a custom selection.
+   */
+  async function askComponentList(collection: string): Promise<void> {
+    const preset = collection === 'all' ? ALL_COMPONENT_IDS : ESSENTIAL_COMPONENT_IDS;
+    const ticked = await prompter.checkbox({
+      name: 'componentList',
+      message: 'Which components do you want to generate?',
+      choices: ALL_COMPONENT_IDS.map((id) => ({
+        value: id,
+        name: `as-${id}`,
+        description: describeComponent(id, context().appShell === 'starter'),
+        checked: preset.includes(id),
+      })),
+    });
+    const choice = normalizeComponents(ticked);
+    answers.components = choice.components;
+    if (choice.componentList) answers.componentList = choice.componentList;
+    else delete answers.componentList;
+  }
+
   await ask('architecture');
   await ask('routing');
   // Tailwind CSS is part of the stylesheet list, and implies the CSS format.
@@ -159,8 +204,9 @@ export async function runWizard(
   await ask('layout');
   await ask('presence');
 
-  const components = await ask('components');
-  impliedIcons('components', components ?? known.components);
+  const collection = await ask('components');
+  if (collection !== undefined && collection !== 'none') await askComponentList(collection);
+  impliedIcons('components', answers.components ? String(answers.components) : known.components);
   await ask('uiSystem');
   await ask('icons');
   await ask('packageManager');

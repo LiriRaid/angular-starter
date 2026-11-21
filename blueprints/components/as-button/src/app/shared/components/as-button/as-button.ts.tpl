@@ -12,6 +12,7 @@ type ButtonVariant = 'outlined' | 'text' | 'dashed' | undefined;
 type ButtonType = 'button' | 'submit' | 'reset';
 type IconPosition = 'left' | 'right' | 'top' | 'bottom';
 type ButtonSize = 'xsmall' | 'small' | 'medium' | 'high' | 'large';
+export type ButtonRounded = 'default' | 'lg' | 'full';
 
 type ButtonClassParts = {
   button: string;
@@ -47,6 +48,8 @@ export class AsButton {
   readonly trailingIconExtraClass = input<string>('');
 
   readonly size = input<ButtonSize>('medium');
+  /** Radio del borde: `default` (el de siempre), `lg` (1rem) o `full` (píldora). */
+  readonly rounded = input<ButtonRounded>('default');
 
   readonly severity = input<ButtonSeverity | undefined>(undefined);
   readonly outlined = input(false, { transform: booleanAttribute });
@@ -108,7 +111,7 @@ export class AsButton {
   /** as-btn-{size} fija un height pensado para una sola línea (icono+label en fila) — no
    *  aplica cuando el ícono va apilado arriba/abajo, porque ahí el alto lo debe dar el
    *  contenido (2 líneas), no un valor fijo pensado para la variante horizontal. */
-  readonly buttonClass = computed(() => this.joinClasses(this.baseClasses(), this.classParts().button, this.isStackedIcon() ? '' : `as-btn-${this.size()}`, this.isIconOnly() ? 'as-btn-icon' : '', this.isStackedIcon() ? 'as-btn-icon-stacked' : ''));
+  readonly buttonClass = computed(() => this.joinClasses(this.baseClasses(), this.classParts().button, this.isStackedIcon() ? '' : `as-btn-${this.size()}`, this.isIconOnly() ? 'as-btn-icon' : '', this.isStackedIcon() ? 'as-btn-icon-stacked' : '', this.rounded() !== 'default' ? `as-btn-r-${this.rounded()}` : ''));
 
   readonly hostClass = computed(() => {
     const widthTokens = this.toClassList(this.styleClass()).filter((token) => this.isWidthClass(token));

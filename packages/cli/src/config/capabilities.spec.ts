@@ -170,6 +170,24 @@ describe('capability registry', () => {
     expect(all?.description).toMatch(/16/);
   });
 
+  it('has a custom selection next to the collections, asked for what they ask for', () => {
+    expect(CAPABILITIES.components.map((option) => option.id)).toEqual([
+      'none',
+      'recommended',
+      'all',
+      'custom',
+    ]);
+    const custom = CAPABILITIES.components.find((option) => option.id === 'custom');
+    expect(custom?.requires).toEqual({
+      architecture: ['screaming'],
+      tailwind: true,
+      icons: ['lucide'],
+    });
+    expect(custom?.docs).toContain('0011-components-picker');
+    expect(custom?.recommended).toBeUndefined();
+    expect(custom?.default).toBeUndefined();
+  });
+
   it('says that no shell means the default Angular screen', () => {
     const none = CAPABILITIES.appShell.find((option) => option.id === 'none');
     expect(none?.description).toMatch(/default Angular/i);
