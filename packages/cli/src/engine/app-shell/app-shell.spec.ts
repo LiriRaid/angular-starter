@@ -131,9 +131,6 @@ describe('App Shell profile', () => {
       for (const label of ['Apariencia', 'Tema', 'UI', 'Otros']) {
         expect(ts).toContain(`label: '${label}'`);
       }
-      expect(await read(`${PAGE}/tabs/appearance-tab.ts`)).toContain(
-        "from '@core/theme/theme.service'",
-      );
       expect(await read(`${PAGE}/tabs/appearance-tab.ts`)).toContain('Flotante (ancho)');
       expect(await read(`${PAGE}/tabs/appearance-tab.html`)).toContain('En construcción');
     });
@@ -172,6 +169,34 @@ describe('App Shell profile', () => {
       const layered = css.slice(css.indexOf('@layer legacy-overrides {'));
       expect(layered).toContain(':root .as-btn.as-btn-medium');
       expect(css.slice(0, css.indexOf('@layer legacy-overrides {'))).not.toContain('.as-btn');
+    });
+
+    it('keeps only the layout in Apariencia: colours and light or dark live in Tema (ADR-0011)', async () => {
+      await apply();
+      const appearance = await read(`${PAGE}/tabs/appearance-tab.html`);
+      expect(appearance).toContain('Diseño (Layout)');
+      expect(appearance).toContain('Sidebar transparente');
+      expect(appearance).not.toMatch(/Esquema de colores|color-swatches|mode-switch|Claro|Oscuro/);
+      expect(await read(`${PAGE}/tabs/appearance-tab.ts`)).not.toMatch(
+        /ThemeService|theme-controls/,
+      );
+
+      const theme = await read(`${PAGE}/tabs/theme-tab.html`);
+      expect(theme).toContain('Color principal');
+      expect(theme).toContain('Superficie');
+      expect(theme).toContain('mode-switch');
+      expect(await read(`${PAGE}/tabs/theme-tab.ts`)).toContain("from '@core/theme/theme.service'");
+    });
+
+    it('draws the swatches round, with the ring of the reference application and a check', async () => {
+      await apply();
+      const controls = await read(`${PAGE}/tabs/theme-controls.ts`);
+      expect(controls).toContain('rounded-full');
+      expect(controls).not.toContain('border-white');
+      expect(controls).toContain('CheckCircle');
+      // A ring of the panel colour, then one of the primary colour.
+      expect(controls).toContain('--app-panel-bg');
+      expect(controls).toContain('--as-primary-color');
     });
 
     it('leaves a marker in the UI tab where the UI System puts its catalog', async () => {

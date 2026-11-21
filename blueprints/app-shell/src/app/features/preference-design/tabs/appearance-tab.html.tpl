@@ -34,14 +34,4 @@
       <option>Compacto</option>
     </select>
   </section>
-
-  <section class="flex items-center justify-between gap-3 border-t border-(--app-border-color) pt-4">
-    <span class="text-caption-1-semibold text-(--app-text-color)">Esquema de colores</span>
-    <__PREFIX__-color-swatches [colors]="colors" [current]="themeService.primaryColorKey()" label="Esquema de colores" (chosen)="themeService.applyColor($event)" />
-  </section>
-
-  <section class="flex items-center justify-between gap-3 border-t border-(--app-border-color) pt-4">
-    <span class="text-caption-1-semibold text-(--app-text-color)">Tema</span>
-    <__PREFIX__-mode-switch label="Tema" />
-  </section>
 </div>
