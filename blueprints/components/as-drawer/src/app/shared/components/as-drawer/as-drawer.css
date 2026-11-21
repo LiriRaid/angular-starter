@@ -70,11 +70,6 @@
   min-width: 0;
 }
 
-/* Sin título proyectado el botón de cerrar sigue pegado a la derecha. */
-.as-drawer-header-content:empty {
-  flex: 1 1 auto;
-}
-
 .as-drawer--compact .as-drawer-header {
   padding: 1rem 0.75rem;
 }

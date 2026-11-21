@@ -29,7 +29,11 @@ interface DrawerInputs {
   readonly flush?: boolean;
 }
 
-const entryOf = (id: string): UiComponentEntry => UI_COMPONENTS.find((entry) => entry.id === id) as UiComponentEntry;
+const entryOf = (id: string): UiComponentEntry => {
+  const entry = UI_COMPONENTS.find((candidate) => candidate.id === id);
+  if (!entry) throw new Error(`The UI System catalog has no "${id}".`);
+  return entry;
+};
 
 /**
  * El UI System (ADR-0010, ADR-0012): el catálogo de los componentes `as-` instalados, cada uno con todas
