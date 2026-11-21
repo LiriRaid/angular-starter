@@ -145,4 +145,18 @@ describe('AsButton', () => {
 
     expect(component.isOutlined()).toBe(false);
   });
+
+  it('rounded añade la clase de radio y sin él no cambia el borde por defecto', () => {
+    fixture.detectChanges();
+    expect(component.buttonClass()).not.toContain('as-btn-r-');
+
+    fixture.componentRef.setInput('rounded', 'lg');
+    fixture.detectChanges();
+    expect(component.buttonClass()).toContain('as-btn-r-lg');
+
+    fixture.componentRef.setInput('rounded', 'full');
+    fixture.detectChanges();
+    expect(component.buttonClass()).toContain('as-btn-r-full');
+    expect(component.buttonClass()).not.toContain('as-btn-r-lg');
+  });
 });

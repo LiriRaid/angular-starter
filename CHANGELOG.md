@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- The UI System shows every variant of every essential component (ADR-0012 and plan 0010): the sizes,
+  severities and states of the button; the `in` / `on` / `over` modes and the types of the field; the
+  positions of the tooltip, the popover and the drawer; the states of the toggle and the checkbox; the
+  types and positions of the toast. A chip under each variant chooses it and the code block shows its
+  snippet; modal and drawer open over the whole page with switches for their options. The variants live
+  only in the catalog: the tokens of the UI tab keep changing every preview through CSS variables.
+- The `as-drawer` is mounted through the CDK overlay (it paints over the whole page, like the modal) and
+  gets `density`, `flush`, `closeIcon`, `closeLabel`, `styleClass` and a `[drawer-header]` slot; the
+  `as-select` gets `optionIconSize`, `hideOptionLabel`, `accentColor` and `panelStyleClass`; the
+  `as-modal` gets `titleDotColor`; the `as-button` gets `rounded`.
+
 ### Changed
 
 - After the components question the wizard lists every component with a checkbox, like the last

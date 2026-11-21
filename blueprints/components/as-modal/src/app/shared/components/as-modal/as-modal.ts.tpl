@@ -25,6 +25,8 @@ export class AsModal {
 
   readonly title = input<string>('');
   readonly titleIcon = input<string | null>(null);
+  /** Punto de color antes del título (en lugar del ícono), p. ej. el color de una etiqueta o estado. */
+  readonly titleDotColor = input<string | null>(null);
   /** Ancho por defecto pensado para el caso común (formulario con grid de opciones);
    * cada consumidor puede seguir pasando `width` para achicarlo o agrandarlo. */
   readonly width = input<string>('34rem');

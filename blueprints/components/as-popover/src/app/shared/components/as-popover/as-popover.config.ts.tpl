@@ -72,6 +72,7 @@ function getVerticalPanelLayout(params: PopoverPositionParams, config: PopoverPo
   return {
     top,
     left,
+    bottom: placement === 'top' ? params.viewportHeight - (top + params.panelHeight) : null,
     arrowPosition: placement === 'bottom' ? 'top' : 'bottom',
     arrowX: clamp(triggerCenterX - left + config.arrowOffsetX, config.arrowMinOffset, params.panelWidth - config.arrowMinOffset),
     arrowY: null,
@@ -86,6 +87,7 @@ function getHorizontalPanelLayout(params: PopoverPositionParams, config: Popover
   return {
     top,
     left,
+    bottom: null,
     arrowPosition: placement === 'left' ? 'right' : 'left',
     arrowX: null,
     arrowY: clamp(triggerCenterY - top, config.arrowMinOffset, params.panelHeight - config.arrowMinOffset),

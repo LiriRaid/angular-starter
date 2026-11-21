@@ -214,10 +214,10 @@ export class AsPopover {
 
   private applyPopoverPosition(panel: HTMLElement, styles: PopoverPanelLayout): void {
     panel.style.setProperty('position', 'fixed', 'important');
-    panel.style.setProperty('top', `${styles.top}px`, 'important');
+    panel.style.setProperty('top', styles.bottom === null ? `${styles.top}px` : 'auto', 'important');
     panel.style.setProperty('left', `${styles.left}px`, 'important');
     panel.style.setProperty('right', 'auto', 'important');
-    panel.style.setProperty('bottom', 'auto', 'important');
+    panel.style.setProperty('bottom', styles.bottom === null ? 'auto' : `${styles.bottom}px`, 'important');
     panel.style.setProperty('transform', 'none', 'important');
     panel.style.setProperty('margin-top', '0', 'important');
 

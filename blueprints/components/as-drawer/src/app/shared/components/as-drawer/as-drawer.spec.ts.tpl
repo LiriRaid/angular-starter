@@ -63,7 +63,8 @@ describe('AsDrawer', () => {
   selector: 'as-drawer-spec-host',
   imports: [AsDrawer],
   template: `
-    <as-drawer [visible]="true" position="right" [ariaLabel]="label()" [width]="width()">
+    <as-drawer [visible]="true" position="right" [ariaLabel]="label()" [width]="width()" [density]="density()" [flush]="flush()" [closeIcon]="closeIcon()" [closeLabel]="closeLabel()" styleClass="host-class">
+      <h2 drawer-header class="header-title">Título</h2>
       <p class="body">Contenido</p>
       @if (withFooter()) {
         <div drawer-footer class="footer-action">Guardar</div>
@@ -75,11 +76,16 @@ class DrawerHost {
   readonly label = signal<string | null>('Filtros avanzados');
   readonly width = signal<string | null>('30rem');
   readonly withFooter = signal(true);
+  readonly density = signal<'comfortable' | 'compact'>('comfortable');
+  readonly flush = signal(false);
+  readonly closeIcon = signal('X');
+  readonly closeLabel = signal('Cerrar');
 }
 
 describe('AsDrawer · template', () => {
   let fixture: ComponentFixture<DrawerHost>;
-  const dialog = () => fixture.nativeElement.querySelector('dialog') as HTMLDialogElement;
+  /** El panel se monta en el contenedor de overlays (hijo de <body>), no dentro del host. */
+  const dialog = () => document.querySelector('.cdk-overlay-container dialog') as HTMLDialogElement;
 
   beforeEach(async () => {
     // jsdom no implementa `<dialog>.show()`: el drawer lo llama en un rAF al abrirse.
@@ -114,7 +120,11 @@ describe('AsDrawer · template', () => {
   it('el contenido con [drawer-footer] va al pie, fuera del área con scroll', () => {
     const footer = dialog().querySelector('.as-drawer-footer');
     expect(footer?.querySelector('.footer-action')?.textContent).toContain('Guardar');
-    expect(dialog().querySelector('.as-drawer-content')?.contains(footer as Node)).toBe(false);
+    expect(
+      dialog()
+        .querySelector('.as-drawer-content')
+        ?.contains(footer as Node),
+    ).toBe(false);
   });
 
   it('sin contenido de pie, el pie queda vacío para que el CSS lo oculte (:empty)', () => {
@@ -124,5 +134,43 @@ describe('AsDrawer · template', () => {
     const footer = dialog().querySelector('.as-drawer-footer') as HTMLElement;
     expect(footer.childElementCount).toBe(0);
     expect(footer.textContent?.trim()).toBe('');
+  });
+
+  it('se monta sobre toda la página: en el contenedor de overlays y no dentro del host', () => {
+    expect(dialog()).toBeTruthy();
+    expect(fixture.nativeElement.contains(dialog())).toBe(false);
+    expect(document.querySelector('.cdk-overlay-container .as-drawer-backdrop')).toBeTruthy();
+  });
+
+  it('cabecera, contenido y pie van en ese orden, cada uno en su zona', () => {
+    const zones = Array.from(dialog().children).map((el) => el.className);
+    expect(zones).toEqual(['as-drawer-header', 'as-drawer-content', 'as-drawer-footer']);
+    expect(dialog().querySelector('.as-drawer-header .header-title')?.textContent).toContain('Título');
+    expect(dialog().querySelector('.as-drawer-content .body')?.textContent).toContain('Contenido');
+  });
+
+  it('el botón de cerrar va en la cabecera con el nombre accesible y el ícono pedidos', () => {
+    const button = dialog().querySelector('.as-drawer-header .as-drawer-close-button') as HTMLButtonElement;
+    expect(button.getAttribute('aria-label')).toBe('Cerrar');
+    expect(button.querySelector('svg.lucide-x')).toBeTruthy();
+
+    fixture.componentInstance.closeLabel.set('Volver');
+    fixture.componentInstance.closeIcon.set('ChevronRight');
+    fixture.detectChanges();
+    expect(button.getAttribute('aria-label')).toBe('Volver');
+    expect(button.querySelector('svg.lucide-chevron-right')).toBeTruthy();
+  });
+
+  it('density y flush se reflejan como clases del panel, junto con styleClass', () => {
+    expect(dialog().classList.contains('as-drawer--compact')).toBe(false);
+    expect(dialog().classList.contains('as-drawer--flush')).toBe(false);
+    expect(dialog().classList.contains('host-class')).toBe(true);
+
+    fixture.componentInstance.density.set('compact');
+    fixture.componentInstance.flush.set(true);
+    fixture.detectChanges();
+    expect(dialog().classList.contains('as-drawer--compact')).toBe(true);
+    expect(dialog().classList.contains('as-drawer--flush')).toBe(true);
+    expect(dialog().classList.contains('as-drawer-right')).toBe(true);
   });
 });

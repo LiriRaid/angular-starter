@@ -6,9 +6,11 @@
 
     @if (variant() === 'default') {
       <div class="as-modal-header" (mousedown)="onHeaderMouseDown($event)">
-        @if (title() || titleIcon()) {
+        @if (title() || titleIcon() || titleDotColor()) {
           <div class="as-modal-header-title flex min-w-0 items-center gap-2">
-            @if (titleIcon(); as icon) {
+            @if (titleDotColor(); as dotColor) {
+              <span class="as-modal-title-dot" [style.background]="dotColor"></span>
+            } @else if (titleIcon(); as icon) {
               <as-icon [name]="icon" size="20" />
             }
             <span class="truncate text-body-2-bold text-(--app-text-color)">{{ title() }}</span>
