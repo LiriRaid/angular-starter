@@ -15,12 +15,14 @@ import {
   normalizeComponents,
 } from '../config/components.js';
 import { DEFAULT_OPTIONS } from '../config/resolve.js';
+import { CancelledError } from '../errors.js';
 import { COMPONENT_DESCRIPTIONS } from '../engine/components/descriptions.js';
 import { SHELL_COMPONENTS } from '../engine/app-shell/app-shell.js';
 import { COMPONENTS } from '../engine/components/manifest.js';
 import { PACKAGE_MANAGERS, type StarterOptions } from '../config/schema.js';
 import { formatChoices } from './choices.js';
-import type { Prompter } from './prompter.js';
+import { History, Rewind } from './history.js';
+import { BackRequested, type Prompter } from './prompter.js';
 
 type SelectKey = Extract<keyof StarterOptions, CapabilityCategory>;
 
@@ -38,6 +40,27 @@ const MESSAGES: Record<SelectKey, string> = {
   icons: 'Select an icon library:',
   packageManager: 'Select a package manager:',
 };
+
+/** What each question is called in the list of answers to change. */
+const TITLES: Record<SelectKey | 'componentList' | 'git' | 'install', string> = {
+  architecture: 'Architecture',
+  routing: 'Routing',
+  style: 'Stylesheet',
+  rendering: 'Rendering',
+  ssrPurpose: 'Starter SSR purpose',
+  appShell: 'App shell',
+  layout: 'Layout',
+  presence: 'Presence',
+  components: 'Components',
+  componentList: 'Component list',
+  uiSystem: 'UI System',
+  icons: 'Icons',
+  packageManager: 'Package manager',
+  git: 'Git',
+  install: 'Install dependencies',
+};
+
+const yesNo = (value: boolean): string => (value ? 'Yes' : 'No');
 
 /** What a component is, what it brings with it and the global stylesheet it adds. */
 function describeComponent(id: string, shellBrings: boolean): string {
@@ -66,12 +89,103 @@ const UNDER_CONSTRUCTION = 'Under construction';
  * a question, except the layout and the purpose of the Starter SSR, which also list what is under
  * construction, disabled. A choice that implies another one (components need Lucide Icons) sets it
  * instead of asking. Returns the answers given, never the known values.
+ *
+ * Esc goes back to the question before (ADR-0013): the answers are kept in a history and the flow runs
+ * again from the start, replaying them, so what each answer decided is recomputed. With a `review`,
+ * the wizard also ends by asking to create the project, change an answer or cancel.
  */
 export async function runWizard(
   known: Partial<StarterOptions>,
   prompter: Prompter,
   env: NodeJS.ProcessEnv,
   registry: Registry = CAPABILITIES,
+  review?: WizardReview,
+): Promise<Partial<StarterOptions>> {
+  const history = new History();
+  for (;;) {
+    try {
+      history.begin();
+      const answers = await runFlow(known, prompter, env, registry, history);
+      if (review) await confirmAnswers(answers, prompter, history, review);
+      return answers;
+    } catch (error) {
+      if (!(error instanceof Rewind)) throw error;
+      history.rewind(error.to);
+    }
+  }
+}
+
+/** What the wizard needs from the command to end with a confirmation. */
+export interface WizardReview {
+  /** Shows what the answers add up to, each time before asking whether to create the project. */
+  show(answers: Partial<StarterOptions>): void;
+}
+
+/** The answer to a question, or `undefined` when the user pressed Esc to leave it. */
+async function unlessBack<T>(question: Promise<T>): Promise<T | undefined> {
+  try {
+    return await question;
+  } catch (error) {
+    if (error instanceof BackRequested) return undefined;
+    throw error;
+  }
+}
+
+/** The last question: create, change an answer (which one is asked next) or cancel. */
+async function confirmAnswers(
+  answers: Partial<StarterOptions>,
+  prompter: Prompter,
+  history: History,
+  review: WizardReview,
+): Promise<void> {
+  const last = history.length - 1;
+  for (;;) {
+    review.show(answers);
+    const verdict = await unlessBack(
+      prompter.select({
+        name: 'confirm',
+        message: 'Create project with this configuration?',
+        default: 'create',
+        canGoBack: last >= 0,
+        choices: [
+          { value: 'create', name: 'Create the project' },
+          // With nothing asked there is nothing to change: everything came from flags.
+          ...(last >= 0 ? [{ value: 'change', name: 'Change an answer' }] : []),
+          { value: 'cancel', name: 'Cancel' },
+        ],
+      }),
+    );
+    // Esc on the confirmation goes back to the last question.
+    if (verdict === undefined) throw new Rewind(last);
+    if (verdict === 'create') return;
+    if (verdict === 'cancel') throw new CancelledError();
+
+    const name = await unlessBack(
+      prompter.select({
+        name: 'changeAnswer',
+        message: 'Which answer would you like to change?',
+        canGoBack: true,
+        choices: history.answered.map((entry) => ({
+          value: entry.name,
+          name: `${entry.title}: ${entry.summary}`,
+        })),
+      }),
+    );
+    // Esc on the list returns to the confirmation.
+    if (name === undefined) continue;
+    const index = history.indexOf(name);
+    if (index < 0) throw new Error(`"${name}" is not an answered question`);
+    throw new Rewind(index);
+  }
+}
+
+/** One pass of the flow: every question of the wizard, in order, asked only when it still matters. */
+async function runFlow(
+  known: Partial<StarterOptions>,
+  prompter: Prompter,
+  env: NodeJS.ProcessEnv,
+  registry: Registry,
+  history: History,
 ): Promise<Partial<StarterOptions>> {
   const answers: Partial<Record<keyof StarterOptions, unknown>> = {};
   const find = (
@@ -143,17 +257,25 @@ export async function runWizard(
     const detected = key === 'packageManager' ? detectPackageManager(env) : undefined;
     // Only a category with one best answer starts on it; elsewhere the user chooses from the top.
     const preselected = options.find((option) => option.recommended)?.id ?? detected;
-    const answer = await prompter.select({
+    const choices = formatChoices(listed, (option) =>
+      detected !== undefined && option.id === detected ? 'Default' : undefined,
+    ).map((choice) =>
+      planned.some((option) => option.id === choice.value)
+        ? { ...choice, disabled: UNDER_CONSTRUCTION }
+        : choice,
+    );
+    const answer = await history.turn<string>({
       name: key,
-      message: MESSAGES[key],
-      default: preselected,
-      choices: formatChoices(listed, (option) =>
-        detected !== undefined && option.id === detected ? 'Default' : undefined,
-      ).map((choice) =>
-        planned.some((option) => option.id === choice.value)
-          ? { ...choice, disabled: UNDER_CONSTRUCTION }
-          : choice,
-      ),
+      title: TITLES[key],
+      summarize: (value) => find(key, value)?.label ?? value,
+      ask: (previous, canGoBack) =>
+        prompter.select({
+          name: key,
+          message: MESSAGES[key],
+          default: previous ?? preselected,
+          choices,
+          canGoBack,
+        }),
     });
     if (key === 'style') {
       // "Tailwind CSS" is the CSS format with Tailwind enabled.
@@ -171,15 +293,22 @@ export async function runWizard(
    */
   async function askComponentList(collection: string): Promise<void> {
     const preset = collection === 'all' ? ALL_COMPONENT_IDS : ESSENTIAL_COMPONENT_IDS;
-    const ticked = await prompter.checkbox({
+    const ticked = await history.turn<string[]>({
       name: 'componentList',
-      message: 'Which components do you want to generate?',
-      choices: ALL_COMPONENT_IDS.map((id) => ({
-        value: id,
-        name: `as-${id}`,
-        description: describeComponent(id, context().appShell === 'starter'),
-        checked: preset.includes(id),
-      })),
+      title: TITLES.componentList,
+      summarize: (ids) => `${ids.length} of ${ALL_COMPONENT_IDS.length}`,
+      ask: (previous, canGoBack) =>
+        prompter.checkbox({
+          name: 'componentList',
+          message: 'Which components do you want to generate?',
+          canGoBack,
+          choices: ALL_COMPONENT_IDS.map((id) => ({
+            value: id,
+            name: `as-${id}`,
+            description: describeComponent(id, context().appShell === 'starter'),
+            checked: (previous ?? preset).includes(id),
+          })),
+        }),
     });
     const choice = normalizeComponents(ticked);
     answers.components = choice.components;
@@ -211,19 +340,27 @@ export async function runWizard(
   await ask('icons');
   await ask('packageManager');
 
-  if (known.git === undefined) {
-    answers.git = await prompter.confirm({
-      name: 'git',
-      message: 'Initialize a Git repository?',
-      default: DEFAULT_OPTIONS.git,
+  const yesNoQuestion = async (
+    key: 'git' | 'install',
+    message: string,
+    fallback: boolean,
+  ): Promise<boolean> =>
+    history.turn<boolean>({
+      name: key,
+      title: TITLES[key],
+      summarize: yesNo,
+      ask: (previous, canGoBack) =>
+        prompter.confirm({ name: key, message, default: previous ?? fallback, canGoBack }),
     });
+  if (known.git === undefined) {
+    answers.git = await yesNoQuestion('git', 'Initialize a Git repository?', DEFAULT_OPTIONS.git);
   }
   if (known.install === undefined) {
-    answers.install = await prompter.confirm({
-      name: 'install',
-      message: 'Install dependencies now?',
-      default: DEFAULT_OPTIONS.install,
-    });
+    answers.install = await yesNoQuestion(
+      'install',
+      'Install dependencies now?',
+      DEFAULT_OPTIONS.install,
+    );
   }
 
   return answers as Partial<StarterOptions>;

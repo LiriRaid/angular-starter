@@ -21,6 +21,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- The wizard can go back (ADR-0013 and plan 0011): Esc returns to the previous question in every kind of
+  prompt (lists, the components checklist, text and yes/no), shown as `esc back` in the help line, with the
+  previous answer selected, and what the changed answer decides is asked again (the answers are kept in a
+  history and the flow replays). The first question has nothing before it. The final confirmation is now
+  _Create the project_, _Change an answer_ (it lists the answers and jumps to the one chosen) or _Cancel_.
+  Flags and `--config` values are never asked, so never revisited.
 - After the components question the wizard lists every component with a checkbox, like the last
   question of `ng new` (ADR-0011 and plan 0009): the essential collection starts with its 16 ticked and
   "all" with the 26; each line says what the component is, what it brings with it and the stylesheet it

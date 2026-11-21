@@ -865,6 +865,7 @@ export const appConfig: ApplicationConfig = {
     expect(out).toContain('--package-manager');
     expect(out).toContain('--dry-run');
     expect(out).toContain('--config');
+    expect(out).toContain('press Esc to go back');
     expect(out).toContain('screaming');
     expect(out).not.toContain('modular');
     expect(out).toContain('starter-ssr');
@@ -884,7 +885,7 @@ describe('as new (interactive)', () => {
       'pnpm',
       false,
       false,
-      true,
+      'create',
     ]);
     const code = await run(['new', 'my-app'], fake.io, { run: runner.run, prompter });
 
@@ -916,7 +917,7 @@ describe('as new (interactive)', () => {
       'npm',
       false,
       false,
-      true,
+      'create',
     ]);
     expect(await run(['new'], fake.io, { run: runner.run, prompter })).toBe(0);
     expect(asked[0]?.name).toBe('projectName');
@@ -933,11 +934,39 @@ describe('as new (interactive)', () => {
       'npm',
       true,
       true,
-      false,
+      'cancel',
     ]);
     expect(await run(['new', 'my-app'], fake.io, { run: runner.run, prompter })).toBe(130);
     expect(runner.calls.some((call) => call.args.includes('new'))).toBe(false);
     expect(await exists(join(cwd, 'my-app'))).toBe(false);
+  });
+
+  it('lets the user change an answer from the final confirmation before creating anything', async () => {
+    const fake = createFakeIo({ cwd, interactive: true });
+    const runner = createFakeRunner();
+    const { prompter, asked } = createFakePrompter([
+      'angular-default',
+      'scss',
+      'csr',
+      'npm',
+      false,
+      false,
+      'change',
+      'style',
+      'css',
+      'csr',
+      'npm',
+      false,
+      false,
+      'create',
+    ]);
+    expect(await run(['new', 'my-app'], fake.io, { run: runner.run, prompter })).toBe(0);
+    expect(asked.map((question) => question.name)).toContain('changeAnswer');
+    const args = runner.calls.find((call) => call.args.includes('new'))?.args ?? [];
+    expect(args).toContain('--style=css');
+    expect(args).not.toContain('--style=scss');
+    // The summary is printed again with what was changed.
+    expect(fake.out().match(/Project configuration/g)).toHaveLength(2);
   });
 
   it('exits with 130 when the user presses Ctrl+C in a prompt', async () => {
