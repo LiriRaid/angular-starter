@@ -48,25 +48,34 @@ describe('getPopoverPanelLayout', () => {
   it('placement bottom: centra el panel debajo del trigger con la flecha apuntando arriba', () => {
     const layout = getPopoverPanelLayout({ ...baseParams, placement: 'bottom' }, CONFIG);
 
-    expect(layout).toEqual({ top: 348, left: 400, arrowPosition: 'top', arrowX: 100, arrowY: null });
+    expect(layout).toEqual({ top: 348, left: 400, bottom: null, arrowPosition: 'top', arrowX: 100, arrowY: null });
   });
 
   it('placement top: centra el panel arriba del trigger con la flecha apuntando abajo', () => {
     const layout = getPopoverPanelLayout({ ...baseParams, placement: 'top' }, CONFIG);
 
-    expect(layout).toEqual({ top: 192, left: 400, arrowPosition: 'bottom', arrowX: 100, arrowY: null });
+    expect(layout).toEqual({ top: 192, left: 400, bottom: 508, arrowPosition: 'bottom', arrowX: 100, arrowY: null });
+  });
+
+  it('placement top: el panel se ancla por su borde de abajo, pegado al botón aunque luego cambie de alto', () => {
+    const tall = getPopoverPanelLayout({ ...baseParams, panelHeight: 100, placement: 'top' }, CONFIG);
+    const taller = getPopoverPanelLayout({ ...baseParams, panelHeight: 160, placement: 'top' }, CONFIG);
+
+    // Lo que queda entre el borde de abajo del panel y el de la ventana es el mismo: crece hacia arriba.
+    expect(tall.bottom).toBe(508);
+    expect(taller.bottom).toBe(508);
   });
 
   it('placement left: ubica el panel a la izquierda con la flecha apuntando a la derecha', () => {
     const layout = getPopoverPanelLayout({ ...baseParams, placement: 'left' }, CONFIG);
 
-    expect(layout).toEqual({ top: 270, left: 192, arrowPosition: 'right', arrowX: null, arrowY: 50 });
+    expect(layout).toEqual({ top: 270, left: 192, bottom: null, arrowPosition: 'right', arrowX: null, arrowY: 50 });
   });
 
   it('placement right: ubica el panel a la derecha con la flecha apuntando a la izquierda', () => {
     const layout = getPopoverPanelLayout({ ...baseParams, placement: 'right' }, CONFIG);
 
-    expect(layout).toEqual({ top: 270, left: 608, arrowPosition: 'left', arrowX: null, arrowY: 50 });
+    expect(layout).toEqual({ top: 270, left: 608, bottom: null, arrowPosition: 'left', arrowX: null, arrowY: 50 });
   });
 
   it('clampea top y left contra los bordes del viewport cuando el panel no entra', () => {
