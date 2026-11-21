@@ -16,6 +16,7 @@ interface ModalInputs {
   readonly dismissableMask?: boolean;
   readonly titleIcon?: string;
   readonly titleDotColor?: string;
+  readonly flush?: boolean;
 }
 
 /** Lo que recibe el panel de la vista previa. */
@@ -27,6 +28,8 @@ interface DrawerInputs {
   readonly closeOnEscape?: boolean;
   readonly density?: 'comfortable' | 'compact';
   readonly flush?: boolean;
+  readonly closeIcon?: string;
+  readonly closeLabel?: string;
 }
 
 const entryOf = (id: string): UiComponentEntry => {
@@ -43,7 +46,7 @@ const entryOf = (id: string): UiComponentEntry => {
  */
 @Component({
   selector: '__PREFIX__-ui-system',
-  imports: [NgComponentOutlet, ReactiveFormsModule, AsButton, AsCheckbox, AsDivider, AsDrawer, AsModal, AsPopover, AsTabs, AsToggle, AsTooltip],
+  imports: [NgComponentOutlet, ReactiveFormsModule, AsButton, AsCheckbox, AsDrawer, AsInput, AsModal, AsTabs, AsToggle, AsTooltip],
   templateUrl: './ui-system.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -53,7 +56,7 @@ export class UiSystem {
   readonly components = UI_COMPONENTS;
   readonly groupsOf = groupsOf;
   /** El componente que pinta, tal cual, las variantes de cada tarjeta (el resto tiene su propia plantilla). */
-  readonly outlets: Readonly<Record<string, Type<unknown>>> = { icon: AsIcon, button: AsButton, input: AsInput, textarea: AsTextarea, select: AsSelect, toggle: AsToggle, avatar: AsAvatar, skeleton: AsSkeleton };
+  readonly outlets: Readonly<Record<string, Type<unknown>>> = { icon: AsIcon, button: AsButton, input: AsInput, textarea: AsTextarea, select: AsSelect, toggle: AsToggle, avatar: AsAvatar, skeleton: AsSkeleton, divider: AsDivider, popover: AsPopover };
 
   /** Lo que se escribe en el buscador. */
   readonly query = signal('');
@@ -63,6 +66,12 @@ export class UiSystem {
   private readonly chosen = signal<Readonly<Record<string, string>>>({});
   /** El estado de los interruptores de modal y panel, por `componente/opción`. */
   private readonly switches = signal<Readonly<Record<string, boolean>>>({});
+  /** Los componentes cuyo código de todas las variantes está desplegado. */
+  private readonly codeOpen = signal<ReadonlySet<string>>(new Set());
+  /** La pestaña activa de las variantes que no comparten estado, por variante. */
+  private readonly ownActive = signal<Readonly<Record<string, string>>>({});
+  /** Las contraseñas que se están viendo, por variante. */
+  private readonly shownPasswords = signal<ReadonlySet<string>>(new Set());
 
   readonly filtered = computed(() => {
     const text = this.query().trim().toLowerCase();
@@ -79,15 +88,36 @@ export class UiSystem {
     { id: 'three', label: 'Tres' },
   ];
   readonly iconTabs: readonly AsTab[] = [
-    { id: 'one', label: 'Inicio', icon: 'Home' },
-    { id: 'two', label: 'Buscar', icon: 'Search' },
-    { id: 'three', icon: 'Settings' },
+    { id: 'one', label: 'Uno', icon: 'Home' },
+    { id: 'two', label: 'Dos', icon: 'Search' },
+    { id: 'three', label: 'Tres', icon: 'Settings' },
   ];
   readonly countTabs: readonly AsTab[] = [
     { id: 'one', label: 'Todos', count: 12 },
     { id: 'two', label: 'Pendientes', count: 3, countTone: 'danger' },
     { id: 'three', label: 'Cerrados' },
   ];
+  readonly manyIconTabs: readonly AsTab[] = [
+    { id: 'one', label: 'Uno', icon: 'Home' },
+    { id: 'two', label: 'Dos', icon: 'Search' },
+    { id: 'three', label: 'Tres', icon: 'Users' },
+    { id: 'four', label: 'Cuatro', icon: 'MessageCircle' },
+    { id: 'five', label: 'Cinco', icon: 'Bell' },
+    { id: 'six', label: 'Seis', icon: 'Folder' },
+    { id: 'seven', label: 'Siete', icon: 'FileText' },
+    { id: 'eight', label: 'Ocho', icon: 'Settings' },
+  ];
+  readonly manyCountTabs: readonly AsTab[] = [
+    { id: 'one', label: 'Todos', count: 128 },
+    { id: 'two', label: 'Pendientes', count: 12, countTone: 'danger' },
+    { id: 'three', label: 'En curso', count: 24 },
+    { id: 'four', label: 'Resueltos', count: 80 },
+    { id: 'five', label: 'Archivados', count: 6 },
+    { id: 'six', label: 'Borradores', count: 3 },
+    { id: 'seven', label: 'Eliminados', count: 1 },
+    { id: 'eight', label: 'Spam', count: 9 },
+  ];
+  /** La pestaña activa de los estilos y los tamaños: una sola para todos los ejemplos de esos grupos. */
   readonly activeTab = signal('one');
   readonly actionItems = ACTIONS;
   /** Un control por casilla de la vista previa: su estado sale de la variante. */
@@ -102,6 +132,10 @@ export class UiSystem {
   readonly modalInputs = computed(() => inputsOf(this.propsOf(entryOf('modal'))) as ModalInputs);
   readonly drawerInputs = computed(() => inputsOf(this.propsOf(entryOf('drawer'))) as DrawerInputs);
   readonly drawerFooter = computed(() => this.isOptionOn(entryOf('drawer'), { id: 'footer', label: '' }));
+  readonly drawerLong = computed(() => this.isOptionOn(entryOf('drawer'), { id: 'long', label: '' }));
+  readonly modalLong = computed(() => this.isOptionOn(entryOf('modal'), { id: 'long', label: '' }));
+  /** Un texto largo para ver la barra de desplazamiento en el borde del modal y del panel. */
+  readonly longText = Array.from({ length: 24 }, (_, index) => `Línea ${index + 1} de un contenido largo que se desplaza.`);
 
   isShown(id: string): boolean {
     return !this.hidden().has(id);
@@ -138,6 +172,60 @@ export class UiSystem {
     this.switches.update((current) => ({ ...current, [`${entry.id}/${option.id}`]: on }));
   }
 
+  isCodeOpen(id: string): boolean {
+    return this.codeOpen().has(id);
+  }
+
+  toggleCode(id: string): void {
+    this.codeOpen.update((current) => {
+      const next = new Set(current);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
+  }
+
+  /** La pestaña activa de una variante: la compartida en los grupos que la comparten, la suya en el resto. */
+  activeOf(entry: UiComponentEntry, item: UiVariant): string {
+    return entry.sharedGroups?.includes(item.group) ? this.activeTab() : (this.ownActive()[item.id] ?? 'one');
+  }
+
+  setActive(entry: UiComponentEntry, item: UiVariant, id: string): void {
+    if (entry.sharedGroups?.includes(item.group)) this.activeTab.set(id);
+    else this.ownActive.update((current) => ({ ...current, [item.id]: id }));
+  }
+
+  isPasswordShown(item: UiVariant): boolean {
+    return this.shownPasswords().has(item.id);
+  }
+
+  togglePassword(item: UiVariant): void {
+    this.shownPasswords.update((current) => {
+      const next = new Set(current);
+      if (!next.delete(item.id)) next.add(item.id);
+      return next;
+    });
+  }
+
+  /** Lo que se proyecta dentro del componente de una variante (el texto de un popover o de un separador), una sola vez por variante. */
+  private readonly projected = new Map<string, Node[][]>();
+
+  contentOf(entry: UiComponentEntry, item: UiVariant): Node[][] {
+    const key = `${entry.id}/${item.id}`;
+    let nodes = this.projected.get(key);
+    if (!nodes) {
+      if (entry.id === 'popover') {
+        const text = document.createElement('p');
+        text.className = 'w-48 p-3 text-caption-1-regular text-(--app-text-color)';
+        text.textContent = item.text ?? '';
+        nodes = [[], item.text ? [text] : []];
+      } else {
+        nodes = [item.text ? [document.createTextNode(item.text)] : []];
+      }
+      this.projected.set(key, nodes);
+    }
+    return nodes;
+  }
+
   /** Las propiedades de lo que se muestra: las de la variante elegida y las de los interruptores que cambiaron. */
   private propsOf(entry: UiComponentEntry, item: UiVariant = this.selectedOf(entry)): UiProps {
     const extra: Record<string, string | number | boolean> = {};
@@ -147,7 +235,7 @@ export class UiSystem {
       if (on === (option.startsOn ?? false)) continue;
       extra[option.prop] = (on ? option.on : option.off) ?? on;
     }
-    return { ...item.props, ...extra };
+    return { ...entry.baseProps, ...item.props, ...extra };
   }
 
   /** Las zonas activas: los interruptores que están encendidos. */
@@ -205,11 +293,19 @@ export class UiSystem {
     }
   }
 
-  /** Las pestañas de la variante: las de siempre, con iconos o con contador. */
+  /** Las pestañas de la variante: las de siempre, con iconos, con contador, o muchas para que no quepan. */
   tabsOf(item: UiVariant): readonly AsTab[] {
-    const binding = item.props['[tabs]'];
-    if (binding === 'iconTabs') return this.iconTabs;
-    if (binding === 'countTabs') return this.countTabs;
-    return this.tabs;
+    switch (item.props['[tabs]']) {
+      case 'iconTabs':
+        return this.iconTabs;
+      case 'countTabs':
+        return this.countTabs;
+      case 'manyIconTabs':
+        return this.manyIconTabs;
+      case 'manyCountTabs':
+        return this.manyCountTabs;
+      default:
+        return this.tabs;
+    }
   }
 }

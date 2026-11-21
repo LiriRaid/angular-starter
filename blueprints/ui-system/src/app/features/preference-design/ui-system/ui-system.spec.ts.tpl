@@ -1,4 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { reflectComponentType, type Type } from '@angular/core';
+import { AsAvatar, AsButton, AsCheckbox, AsDivider, AsDrawer, AsIcon, AsInput, AsModal, AsPopover, AsSelect, AsSkeleton, AsTabs, AsTextarea, AsToggle } from '@shared/components';
 import { AlertService } from '@shared/services';
 import { UI_COMPONENTS, type UiComponentEntry } from './ui-system.catalog';
 import { UiSystem } from './ui-system';
@@ -19,6 +21,8 @@ describe('UiSystem', () => {
     HTMLDialogElement.prototype.close ??= function (this: HTMLDialogElement) {
       this.removeAttribute('open');
     };
+    // jsdom tampoco implementa `Element.scrollTo`, que las pestañas usan para traer la elegida a la vista.
+    HTMLElement.prototype.scrollTo ??= function () {};
   });
 
   const render = async () => {
@@ -54,14 +58,37 @@ describe('UiSystem', () => {
     expect(Array.from(cards).map((card) => card.getAttribute('data-component'))).toEqual(['modal']);
   });
 
-  it('hides and shows the preview of a component', async () => {
+  it('collapses the preview of a component with the accordion animation and expands it again', async () => {
     const { fixture, component, card } = await render();
+    const collapse = () => card('button').querySelector('[data-preview]') as HTMLElement;
+    expect(collapse().classList.contains('as-collapse-grid')).toBe(true);
+    expect(collapse().classList.contains('is-collapsed')).toBe(false);
+
     component.setShown('button', false);
     await fixture.whenStable();
-    expect(card('button').querySelector('.border-dashed')).toBeNull();
+    expect(collapse().classList.contains('is-collapsed')).toBe(true);
+    expect(collapse().hasAttribute('inert')).toBe(true);
+
     component.setShown('button', true);
     await fixture.whenStable();
-    expect(card('button').querySelector('.border-dashed')).not.toBeNull();
+    expect(collapse().classList.contains('is-collapsed')).toBe(false);
+  });
+
+  it('expands and collapses the code of all the variants with the same animation', async () => {
+    const { fixture, card } = await render();
+    const toggle = card('button').querySelector('[data-all-code-toggle]') as HTMLButtonElement;
+    const collapse = () => card('button').querySelector('[data-all-code]') as HTMLElement;
+    expect(collapse().classList.contains('is-collapsed')).toBe(true);
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+
+    toggle.click();
+    await fixture.whenStable();
+    expect(collapse().classList.contains('is-collapsed')).toBe(false);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+
+    toggle.click();
+    await fixture.whenStable();
+    expect(collapse().classList.contains('is-collapsed')).toBe(true);
   });
 
   describe('variants', () => {
@@ -104,17 +131,17 @@ describe('UiSystem', () => {
     });
 
     it('covers the options of the rest of the components', () => {
-      expect(idsOf('select')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over', 'multiple', 'clearable', 'icon-only']));
+      expect(idsOf('select')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over', 'multiple-on', 'clearable-on', 'icon-only']));
       expect(idsOf('textarea')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over']));
-      expect(idsOf('tabs')).toEqual(expect.arrayContaining(['default', 'pills', 'compact']));
+      expect(idsOf('tabs')).toEqual(expect.arrayContaining(['default', 'pills', 'compact', 'default-icons', 'pills-icons', 'compact-icons', 'fit-icons', 'fit-counts', 'overflow-icons', 'overflow-counts']));
       expect(idsOf('avatar')).toEqual(expect.arrayContaining(['shape-circle', 'shape-rounded']));
       expect(idsOf('divider')).toEqual(expect.arrayContaining(['horizontal-solid', 'horizontal-dashed', 'horizontal-dotted', 'vertical-solid']));
       expect(idsOf('skeleton')).toEqual(expect.arrayContaining(['layout-line', 'layout-stat', 'layout-row', 'layout-circles']));
-      expect(idsOf('tooltip')).toEqual(['top', 'bottom', 'left', 'right']);
+      expect(idsOf('tooltip')).toEqual(['host-top', 'host-bottom', 'host-left', 'host-right', 'text-top', 'text-bottom', 'text-left', 'text-right']);
       expect(idsOf('popover')).toEqual(expect.arrayContaining(['top', 'bottom', 'left', 'right', 'actions']));
       expect(idsOf('toggle')).toEqual(expect.arrayContaining(['off', 'on', 'disabled-off', 'disabled-on']));
       expect(idsOf('checkbox')).toEqual(expect.arrayContaining(['unchecked', 'checked', 'indeterminate', 'disabled']));
-      expect(idsOf('toast')).toEqual(expect.arrayContaining(['success', 'info', 'warning', 'error', 'secondary', 'contrast', 'loading']));
+      expect(idsOf('toast')).toEqual(expect.arrayContaining(['success', 'info', 'warning', 'error', 'secondary', 'contrast', 'loading', 'position-top-center']));
     });
 
     it('renders a preview for every variant of every component', async () => {
@@ -123,6 +150,96 @@ describe('UiSystem', () => {
         for (const variant of entry.variants) {
           expect(card(entry.id).querySelector(`[data-variant="${variant.id}"]`), `${entry.id}/${variant.id}`).not.toBeNull();
         }
+      }
+    });
+  });
+
+  describe('the properties of the components', () => {
+    const CLASSES: Record<string, Type<unknown>> = { icon: AsIcon, button: AsButton, input: AsInput, textarea: AsTextarea, checkbox: AsCheckbox, toggle: AsToggle, select: AsSelect, avatar: AsAvatar, divider: AsDivider, skeleton: AsSkeleton, modal: AsModal, drawer: AsDrawer, tabs: AsTabs, popover: AsPopover };
+
+    it('shows every input of every component, or says why it does not', () => {
+      for (const [id, type] of Object.entries(CLASSES)) {
+        const entry = entryOf(id);
+        const shown = new Set<string>();
+        const note = (props: Record<string, unknown>) => Object.keys(props).forEach((name) => shown.add(name.replace(/^[[(]+|[\])]+$/g, '')));
+        for (const variant of entry.variants) note(variant.props);
+        note(entry.baseProps ?? {});
+        for (const option of entry.options ?? []) if (option.prop) shown.add(option.prop);
+        const missing = (reflectComponentType(type)?.inputs ?? []).map((input) => input.propName).filter((name) => !shown.has(name) && !(entry.notShown ?? []).includes(name));
+        expect(missing, id).toEqual([]);
+      }
+    });
+  });
+
+  describe('the modes of the field', () => {
+    it('shows required in each mode, with its own name', async () => {
+      const { card } = await render();
+      for (const mode of ['on', 'in', 'over']) {
+        const figure = card('input').querySelector(`[data-variant="required-${mode}"]`) as HTMLElement;
+        expect(figure, mode).not.toBeNull();
+        expect(figure.querySelector('[data-chip]')?.textContent).toContain(`required variant="${mode}"`);
+      }
+    });
+
+    it('lets the password be shown and hidden with the eye', async () => {
+      const { fixture, card } = await render();
+      const figure = () => card('input').querySelector('[data-variant="type-password"]') as HTMLElement;
+      expect(figure().querySelector('input')?.getAttribute('type')).toBe('password');
+      expect(figure().querySelector('svg.lucide-eye')).not.toBeNull();
+
+      (figure().querySelector('svg.lucide-eye')?.closest('as-icon') as HTMLElement).click();
+      await fixture.whenStable();
+      expect(figure().querySelector('input')?.getAttribute('type')).toBe('text');
+      expect(figure().querySelector('svg.lucide-eye-off')).not.toBeNull();
+    });
+
+    it('gives every mode the options that apply to it', () => {
+      for (const mode of ['on', 'in', 'over']) {
+        expect(idsOf('input')).toEqual(expect.arrayContaining([`required-${mode}`, `readonly-${mode}`, `icon-left-${mode}`, `icon-right-${mode}`]));
+        expect(idsOf('textarea')).toEqual(expect.arrayContaining([`required-${mode}`, `readonly-${mode}`, `icon-${mode}`]));
+        expect(idsOf('select')).toEqual(expect.arrayContaining([`required-${mode}`, `clearable-${mode}`, `multiple-${mode}`]));
+      }
+    });
+  });
+
+  describe('tabs', () => {
+    it('share the chosen tab across the styles and the sizes, and keep the contents apart', async () => {
+      const { fixture, card } = await render();
+      const active = (id: string) => card('tabs').querySelector(`[data-variant="${id}"] .as-tab--active`)?.textContent?.trim();
+      const second = (id: string) => card('tabs').querySelectorAll(`[data-variant="${id}"] .as-tab`)[1] as HTMLElement;
+
+      second('pills').click();
+      await fixture.whenStable();
+      for (const id of ['default', 'pills', 'default-icons', 'compact', 'pills-compact', 'compact-icons']) {
+        expect(active(id), id).toContain('Dos');
+      }
+      expect(active('overflow-icons')).not.toContain('Dos');
+
+      second('overflow-icons').click();
+      await fixture.whenStable();
+      expect(active('overflow-icons')).toContain('Dos');
+      expect(active('fit-icons')).not.toContain('Dos');
+    });
+  });
+
+  describe('the tooltip', () => {
+    it('is shown on the whole button and on its text, in each position', async () => {
+      const { card } = await render();
+      for (const position of ['top', 'bottom', 'left', 'right']) {
+        const host = card('tooltip').querySelector(`[data-variant="host-${position}"]`) as HTMLElement;
+        const text = card('tooltip').querySelector(`[data-variant="text-${position}"]`) as HTMLElement;
+        expect(host.querySelector('as-button')?.hasAttribute('astooltip'), position).toBe(true);
+        expect(text.querySelector('as-button span[astooltip]'), position).not.toBeNull();
+        expect(host.querySelector('[data-chip]')?.textContent).toContain('host');
+        expect(text.querySelector('[data-chip]')?.textContent).toContain('texto');
+      }
+    });
+  });
+
+  describe('the skeleton', () => {
+    it('gives every variant a box of its own, so one does not overlap the next', () => {
+      for (const variant of entryOf('skeleton').variants) {
+        expect(variant.boxClass, variant.id).toBeTruthy();
       }
     });
   });
@@ -199,6 +316,9 @@ describe('UiSystem', () => {
       expect(panel.querySelector('.as-drawer-header [drawer-header]')).not.toBeNull();
       expect(panel.querySelector('.as-drawer-footer [drawer-footer]')).not.toBeNull();
       expect(panel.querySelector('.as-drawer-close-button')).not.toBeNull();
+      expect(panel.classList.contains('as-drawer--flush')).toBe(true);
+      expect(component.codeOf(drawer)).toContain('flush');
+      expect(component.codeOf(drawer)).toContain('class="p-5"');
     });
 
     it('applies the options to the drawer and to its code', async () => {
@@ -228,6 +348,9 @@ describe('UiSystem', () => {
       expect(panel.querySelector('.as-modal-header-title')?.textContent).toContain('Título');
       expect(panel.querySelector('.as-modal-footer')).not.toBeNull();
       expect(component.codeOf(modal)).toContain('showFooter');
+      expect(panel.classList.contains('as-modal--flush')).toBe(true);
+      expect(component.codeOf(modal)).toContain('flush');
+      expect(component.codeOf(modal)).toContain('class="p-5"');
     });
   });
 
