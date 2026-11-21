@@ -222,6 +222,13 @@ describe('components profile', () => {
     expect(barrel).toContain("from './as-button/as-button';");
   });
 
+  it('brings the flags sprite that the phone country picker of the input draws', async () => {
+    await apply('recommended');
+    const sprite = await read('public/assets/flags-sprite.svg');
+    expect(sprite).toContain('<symbol id="fi-us"');
+    expect(await read(`${SHARED}/as-input/as-input.html`)).toContain('assets/flags-sprite.svg#fi-');
+  });
+
   it('imports the stylesheet of each generated component, and only those', async () => {
     await apply('recommended');
     const styles = await read('src/styles.css');
