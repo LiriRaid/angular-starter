@@ -137,7 +137,7 @@ describe('UiSystem', () => {
       expect(idsOf('avatar')).toEqual(expect.arrayContaining(['shape-circle', 'shape-rounded']));
       expect(idsOf('divider')).toEqual(expect.arrayContaining(['horizontal-solid', 'horizontal-dashed', 'horizontal-dotted', 'vertical-solid']));
       expect(idsOf('skeleton')).toEqual(expect.arrayContaining(['layout-line', 'layout-stat', 'layout-row', 'layout-circles']));
-      expect(idsOf('tooltip')).toEqual(['host-top', 'host-bottom', 'host-left', 'host-right', 'text-top', 'text-bottom', 'text-left', 'text-right']);
+      expect(idsOf('tooltip')).toEqual(['host-top', 'host-bottom', 'host-left', 'host-right', 'text-top', 'text-bottom', 'text-left', 'text-right', 'host-delay']);
       expect(idsOf('popover')).toEqual(expect.arrayContaining(['top', 'bottom', 'left', 'right', 'actions']));
       expect(idsOf('toggle')).toEqual(expect.arrayContaining(['off', 'on', 'disabled-off', 'disabled-on']));
       expect(idsOf('checkbox')).toEqual(expect.arrayContaining(['unchecked', 'checked', 'indeterminate', 'disabled']));

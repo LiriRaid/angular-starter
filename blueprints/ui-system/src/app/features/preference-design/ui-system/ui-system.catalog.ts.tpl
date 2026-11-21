@@ -423,13 +423,15 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
     description: 'Un texto flotante que aparece al pasar el cursor por cualquier elemento: sobre todo el botón (host) o solo sobre su texto.',
     affects: ['Radio de bordes', 'Tamaño de fuente'],
     code: `<as-button label="Ayuda" asTooltip="Texto de ayuda" tooltipPosition="top" />`,
-    variants: (['host', 'text'] as const).flatMap((anchor) =>
+    variants: [...(['host', 'text'] as const).flatMap((anchor) =>
       (['top', 'bottom', 'left', 'right'] as const).map((position) =>
         anchor === 'host'
-          ? named(`host-${position}`, `host · ${position}`, 'En todo el botón (host)', { label: 'Ayuda', variant: 'outlined', asTooltip: 'Texto de ayuda', tooltipPosition: position, ...(position === 'top' ? { showDelay: 300 } : {}) })
+          ? named(`host-${position}`, `host · ${position}`, 'En todo el botón (host)', { label: 'Ayuda', variant: 'outlined', asTooltip: 'Texto de ayuda', tooltipPosition: position })
           : named(`text-${position}`, `texto · ${position}`, 'Solo en el texto del botón', { variant: 'outlined', tooltipPosition: position }, { text: 'Ayuda', code: `<as-button variant="outlined">\n  <span asTooltip="Texto de ayuda" tooltipPosition="${position}">Ayuda</span>\n</as-button>` }),
       ),
     ),
+      named('host-delay', 'showDelay 300', 'Con retraso', { label: 'Ayuda', variant: 'outlined', asTooltip: 'Texto de ayuda', tooltipPosition: 'top', showDelay: 300 }),
+    ],
   },
   {
     id: 'modal',

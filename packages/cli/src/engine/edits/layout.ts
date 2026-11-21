@@ -131,6 +131,7 @@ function entryText(entry: NavigationEntrySpec, level: number): string {
     `${indentation(level + 1)}title: ${quote(entry.title)},`,
     ...(entry.icon === undefined ? [] : [`${indentation(level + 1)}icon: ${quote(entry.icon)},`]),
     `${indentation(level + 1)}type: 'collapsable',`,
+    ...(entry.hidden ? [`${indentation(level + 1)}hidden: () => true,`] : []),
     `${indentation(level + 1)}children: [`,
     children,
     `${indentation(level + 1)}],`,

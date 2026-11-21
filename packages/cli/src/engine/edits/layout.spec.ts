@@ -166,6 +166,23 @@ describe('addNavigationGroups', () => {
     expect(result.split('hidden:')).toHaveLength(2);
   });
 
+  it('hides an item with children too', () => {
+    const result = addNavigationGroups(TREE, [
+      {
+        label: 'System',
+        items: [
+          {
+            id: 'tools',
+            title: 'Tools',
+            hidden: true,
+            children: [{ id: 'tool', title: 'Tool', link: '/tool' }],
+          },
+        ],
+      },
+    ]);
+    expect(result).toMatch(/type: 'collapsable',\s+hidden: \(\) => true,/);
+  });
+
   it('marks an item with children as collapsable, without a link', () => {
     const result = addNavigationGroups(TREE, GROUPS);
     expect(result).toMatch(/id: 'settings'[\s\S]*type: 'collapsable'[\s\S]*children: \[/);
