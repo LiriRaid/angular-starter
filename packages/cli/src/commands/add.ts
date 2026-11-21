@@ -169,9 +169,10 @@ function componentsAddition(
             .split(',')
             .map((id) => id.trim())
             .filter(Boolean);
-  for (const id of requested.filter((entry) => !ALL_COMPONENT_IDS.includes(entry))) {
+  const unknown = requested.find((entry) => !ALL_COMPONENT_IDS.includes(entry));
+  if (unknown !== undefined) {
     throw new UsageError(
-      `"${id}" is not a component.`,
+      `"${unknown}" is not a component.`,
       `Choose a collection (${addableValues('components').join(', ')}) or ids from: ${ALL_COMPONENT_IDS.join(', ')}.`,
     );
   }

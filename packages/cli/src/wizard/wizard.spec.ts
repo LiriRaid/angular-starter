@@ -776,6 +776,17 @@ describe('runWizard', () => {
       expect(flag.asked).toEqual([]);
     });
 
+    it('asks for the icon library again when every component is unticked', async () => {
+      const { prompter, asked } = createFakePrompter(['recommended', [], 'lucide']);
+      const answers = await runWizard({ ...KNOWN, icons: undefined }, prompter, NO_ENV, FULL);
+      expect(asked.map((question) => question.name)).toEqual([
+        'components',
+        'componentList',
+        'icons',
+      ]);
+      expect(answers).toMatchObject({ components: 'none', icons: 'lucide' });
+    });
+
     it('never offers the custom selection as an answer of its own', async () => {
       const { prompter, asked } = createFakePrompter(['none']);
       await runWizard(KNOWN, prompter, NO_ENV, FULL);
