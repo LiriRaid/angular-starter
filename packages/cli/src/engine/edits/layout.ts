@@ -77,6 +77,8 @@ export interface NavigationEntrySpec {
   title: string;
   link?: string;
   icon?: string;
+  /** Kept out of the sidebar; the page still has its title and breadcrumb. */
+  hidden?: boolean;
   children?: readonly NavigationEntrySpec[];
 }
 
@@ -119,7 +121,8 @@ function entryText(entry: NavigationEntrySpec, level: number): string {
   const icon = entry.icon === undefined ? '' : ` icon: ${quote(entry.icon)},`;
   const base = `id: ${quote(entry.id)}, title: ${quote(entry.title)},${icon}`;
   if (!entry.children?.length) {
-    return `${indentation(level)}{ ${base} type: 'basic', link: ${quote(entry.link ?? '')} },`;
+    const hidden = entry.hidden ? ', hidden: () => true' : '';
+    return `${indentation(level)}{ ${base} type: 'basic', link: ${quote(entry.link ?? '')}${hidden} },`;
   }
   const children = entry.children.map((child) => entryText(child, level + 2)).join('\n');
   return [

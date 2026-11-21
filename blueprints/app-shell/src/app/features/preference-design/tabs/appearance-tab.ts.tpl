@@ -1,4 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+
+import { AsSelect } from '@shared/components';
 
 export interface LayoutMode {
   readonly id: string;
@@ -23,10 +26,17 @@ export const LAYOUT_MODES: readonly LayoutMode[] = [
 
 @Component({
   selector: '__PREFIX__-appearance-tab',
+  imports: [ReactiveFormsModule, AsSelect],
   templateUrl: './appearance-tab.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppearanceTab {
   readonly layoutModes = LAYOUT_MODES;
   readonly activeLayout = LAYOUT_MODES.find((mode) => mode.built)?.id ?? '';
+  /** El ancho del sidebar transparente: aún en construcción, por eso el campo está deshabilitado. */
+  readonly transparentWidths = [
+    { label: 'Ancho', value: 'wide' },
+    { label: 'Compacto', value: 'compact' },
+  ];
+  readonly transparentWidth = new FormControl({ value: 'wide', disabled: true });
 }
