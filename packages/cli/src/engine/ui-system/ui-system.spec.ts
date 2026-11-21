@@ -44,7 +44,9 @@ describe('UI System profile (ADR-0010)', () => {
       'ui-system.ts',
       'ui-system.html',
       'ui-system.catalog.ts',
+      'ui-system.code.ts',
       'ui-system.spec.ts',
+      'ui-system.code.spec.ts',
     ]) {
       await expect(read(`${SYSTEM}/${file}`), file).resolves.toBeTypeOf('string');
     }
@@ -59,6 +61,18 @@ describe('UI System profile (ADR-0010)', () => {
     }
     expect(catalog).toContain('affects:');
     expect(catalog).toContain('code:');
+  });
+
+  it('gives every essential component its variants, each with its own code (ADR-0012)', async () => {
+    await apply();
+    const catalog = await read(`${SYSTEM}/ui-system.catalog.ts`);
+    expect(catalog).toContain('variants:');
+    for (const variant of ['xsmall', 'mode-over', 'type-tags', 'icon-only', 'preview']) {
+      expect(catalog, variant).toContain(variant);
+    }
+    // The variants are for the catalog only: they never touch the design preferences service.
+    expect(catalog).not.toContain('DesignPreferences');
+    expect(await read(`${SYSTEM}/ui-system.ts`)).not.toContain('DesignPreferences');
   });
 
   it('puts the catalog in the UI tab, in place of its marker', async () => {
@@ -138,6 +152,7 @@ describe('UI System profile (ADR-0010)', () => {
         `${SYSTEM}/ui-system.ts`,
         `${SYSTEM}/ui-system.html`,
         `${SYSTEM}/ui-system.catalog.ts`,
+        `${SYSTEM}/ui-system.code.ts`,
       ]),
     );
   });
