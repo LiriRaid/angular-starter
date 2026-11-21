@@ -6,6 +6,11 @@ export interface Choice<T extends string> {
   disabled?: string;
 }
 
+export interface CheckboxChoice<T extends string> extends Choice<T> {
+  /** Ticked when the question opens. */
+  checked?: boolean;
+}
+
 export interface InputQuestion {
   /** Stable identifier of the question, used by tests and logs; never shown to the user. */
   name: string;
@@ -22,6 +27,12 @@ export interface SelectQuestion<T extends string> {
   default?: T;
 }
 
+export interface CheckboxQuestion<T extends string> {
+  name: string;
+  message: string;
+  choices: readonly CheckboxChoice<T>[];
+}
+
 export interface ConfirmQuestion {
   name: string;
   message: string;
@@ -32,6 +43,8 @@ export interface ConfirmQuestion {
 export interface Prompter {
   input(question: InputQuestion): Promise<string>;
   select<T extends string>(question: SelectQuestion<T>): Promise<T>;
+  /** Several answers at once: what ends ticked, in the order of the choices. */
+  checkbox<T extends string>(question: CheckboxQuestion<T>): Promise<T[]>;
   confirm(question: ConfirmQuestion): Promise<boolean>;
 }
 
@@ -58,6 +71,19 @@ export function createInquirerPrompter(): Prompter {
           description: choice.description,
           disabled: choice.disabled,
         })),
+      });
+    },
+    async checkbox<T extends string>(question: CheckboxQuestion<T>) {
+      const { checkbox } = await import('@inquirer/prompts');
+      return checkbox<T>({
+        message: question.message,
+        choices: question.choices.map((choice) => ({
+          value: choice.value,
+          name: choice.name,
+          description: choice.description,
+          checked: choice.checked ?? false,
+        })),
+        pageSize: 14,
       });
     },
     async confirm(question) {

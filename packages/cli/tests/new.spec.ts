@@ -781,6 +781,59 @@ export const appConfig: ApplicationConfig = {
     expect(fake.err()).toContain('uiSystem: "starter" requires the components: recommended, all');
   });
 
+  it('generates only the components of --components with their ids, plus what they import', async () => {
+    const fake = createFakeIo({ cwd });
+    const code = await run(
+      [
+        'new',
+        'my-app',
+        '--defaults',
+        '--app-shell',
+        'none',
+        '--components',
+        'modal,toggle',
+        '--no-install',
+        '--no-git',
+      ],
+      fake.io,
+      { run: createFakeRunner().run },
+    );
+    expect(code, fake.err()).toBe(0);
+    const target = join(cwd, 'my-app');
+    for (const id of ['modal', 'toggle', 'button', 'icon']) {
+      expect(await exists(join(target, `src/app/shared/components/as-${id}/as-${id}.ts`)), id).toBe(
+        true,
+      );
+    }
+    expect(await exists(join(target, 'src/app/shared/components/as-table/as-table.ts'))).toBe(
+      false,
+    );
+    const config = JSON.parse(await readFile(join(target, 'angular-starter.config.json'), 'utf8'));
+    expect(config.options).toMatchObject({
+      components: 'custom',
+      componentList: ['modal', 'toggle'],
+    });
+    expect(fake.out()).toMatch(/^ {2}Components +Custom selection \(2: modal, toggle\)$/m);
+  });
+
+  it('refuses a custom selection without ids and ids that are not components', async () => {
+    const without = createFakeIo({ cwd });
+    expect(
+      await run(['new', 'a-app', '--defaults', '--components', 'custom'], without.io, {
+        run: createFakeRunner().run,
+      }),
+    ).toBe(2);
+    expect(without.err()).toContain('componentList');
+
+    const unknown = createFakeIo({ cwd });
+    expect(
+      await run(['new', 'b-app', '--defaults', '--components', 'button,carousel'], unknown.io, {
+        run: createFakeRunner().run,
+      }),
+    ).toBe(2);
+    expect(unknown.err()).toContain('"carousel"');
+  });
+
   it('refuses a layout mode that is under construction before doing anything', async () => {
     const fake = createFakeIo({ cwd });
     const runner = createFakeRunner();

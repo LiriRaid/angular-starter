@@ -15,6 +15,7 @@ import {
 import { RuntimeError, UsageError } from '../errors.js';
 import { CLI_VERSION } from '../version.js';
 import { ARCHITECTURE_PROFILES } from './architectures/index.js';
+import { componentSetOf } from '../config/components.js';
 import { componentsProfile } from './components/components.js';
 import { designProfile } from './design/design.js';
 import { appShellProfile } from './app-shell/app-shell.js';
@@ -168,7 +169,7 @@ export const applyComponents: Stage = {
       targetDir,
       name,
       prefix: options.prefix,
-      set: options.components === 'all' ? 'all' : 'recommended',
+      set: componentSetOf(options),
     });
   },
 };
@@ -285,7 +286,7 @@ export const verifyProject: Stage = {
       ...(options.uiSystem === 'starter' ? uiSystemProfile.requiredFiles : []),
       ...(options.components === 'none'
         ? []
-        : componentsProfile.requiredFilesFor(options.components === 'all' ? 'all' : 'recommended')),
+        : componentsProfile.requiredFilesFor(componentSetOf(options))),
     ];
     const missing: string[] = [];
     for (const file of required) {

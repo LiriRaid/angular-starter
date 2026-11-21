@@ -173,7 +173,10 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     .option('--app-shell <id>', `Application shell (${valuesOf('appShell')})`)
     .option('--layout <id>', `Layout of the app shell (${valuesOf('layout')})`)
     .option('--presence <id>', `Real-time presence (${valuesOf('presence')})`)
-    .option('--components <set>', `Native UI components (${valuesOf('components')})`)
+    .option(
+      '--components <set>',
+      `Native UI components (${valuesOf('components')}); or ids, like button,modal`,
+    )
     .option('--ui-system <id>', `UI System of the design preferences (${valuesOf('uiSystem')})`)
     .option('--icons <library>', `Icon library (${valuesOf('icons')})`)
     .option('--package-manager <name>', `Package manager (${valuesOf('packageManager')})`)
@@ -213,7 +216,10 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
 function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): void {
   const capabilities: readonly (readonly [string, string])[] = [
     ['icons', 'Icon library'],
-    ['components', 'Native as- components, tokens and theme'],
+    [
+      'components',
+      'Native as- components, tokens and theme; a collection or ids like button,modal',
+    ],
     ['routing', 'Angular Starter Routing (needs the Screaming Architecture)'],
     [
       'app-shell',

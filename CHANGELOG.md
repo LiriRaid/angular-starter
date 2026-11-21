@@ -8,6 +8,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- After the components question the wizard lists every component with a checkbox, like the last
+  question of `ng new` (ADR-0011 and plan 0009): the essential collection starts with its 16 ticked and
+  "all" with the 26; each line says what the component is, what it brings with it and the stylesheet it
+  adds. What ends ticked is recorded as `recommended` or `all` when it equals one of them, otherwise
+  as `components: custom` with the ids in `componentList`. `--components` also takes ids
+  (`--components button,modal,toast`) and `as add components` adds components by id to what the
+  project has. The UI System still needs a whole collection.
+- The Apariencia tab of the design preferences keeps only the layout; the colour scheme and light or
+  dark mode are in Tema. The colour swatches are round, with the ring and the check of the reference
+  application.
+
 - The wizard of `as new` is a chained flow (ADR-0010 and plan 0008): architecture, routing, stylesheet,
   rendering, the purpose of Starter SSR, shell, layout, presence, components, UI System, icons and
   package manager, each answer deciding what comes next. With the Angular default structure it only

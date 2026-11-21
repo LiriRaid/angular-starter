@@ -31,7 +31,7 @@ The generated code belongs entirely to the developer. AS Starter is not a runtim
 | App shell       | Angular Starter App Shell                | None (the default Angular look)                                                                                |
 | Layout          | **Floating (wide)** (recommended)        | Wide sidebar, compact sidebar, floating compact, transparent (joined, floating): under construction            |
 | Presence        | None (opt in with `--presence starter`)  | Angular Starter Presence (needs the app shell)                                                                 |
-| Components      | Essential collection (16 `as-`)          | All available (26), none                                                                                       |
+| Components      | Essential collection (16 `as-`)          | All available (26), none; then a checklist of the 26 to tick or untick (`--components button,modal`)           |
 | UI System       | None (opt in with `--ui-system starter`) | Angular Starter UI System: the components catalog in the design preferences (needs the shell and a collection) |
 | Icons           | **Lucide Icons** (recommended)           | None                                                                                                           |
 

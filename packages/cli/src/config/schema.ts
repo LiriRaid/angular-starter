@@ -16,7 +16,7 @@ export const STYLES = ['css', 'scss', 'sass', 'less'] as const;
 export const RENDERING = ['csr', 'ssr', 'starter-ssr'] as const;
 /** What the Starter SSR is for; `none` for every other rendering (ADR-0010). */
 export const SSR_PURPOSES = ['none', 'landing', 'ecommerce', 'backoffice'] as const;
-export const COMPONENTS = ['none', 'recommended', 'all'] as const;
+export const COMPONENTS = ['none', 'recommended', 'all', 'custom'] as const;
 export const ICONS = [
   'none',
   'lucide',
@@ -64,6 +64,8 @@ export const optionsSchema = z.strictObject({
   layout: z.enum(LAYOUTS),
   presence: z.enum(PRESENCES),
   components: z.enum(COMPONENTS),
+  /** The ids of a `custom` selection of components (ADR-0011); absent for every other choice. */
+  componentList: z.array(z.string()).optional(),
   uiSystem: z.enum(UI_SYSTEMS),
   icons: z.enum(ICONS),
   packageManager: z.enum(PACKAGE_MANAGERS),

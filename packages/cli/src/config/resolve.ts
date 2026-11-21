@@ -9,6 +9,7 @@ import {
   type CapabilityCategory,
   type RequirementContext,
 } from './capabilities.js';
+import { ALL_COMPONENT_IDS, normalizeComponents } from './components.js';
 import { formatIssues } from './issues.js';
 import { optionsSchema, type StarterOptions } from './schema.js';
 
@@ -85,14 +86,18 @@ export function resolveOptions(layers: OptionLayers = {}): StarterOptions {
     ...withoutUndefined(layers.file),
     ...withoutUndefined(layers.flags),
   });
-  const candidate = { ...defaultsFor(merged), ...merged };
+  const candidate = withNormalizedComponents({ ...defaultsFor(merged), ...merged });
 
   const parsed = optionsSchema.safeParse(candidate);
   if (!parsed.success) {
     throw new UsageError(`Invalid options:\n${formatIssues(parsed.error)}`);
   }
 
-  const problems = [...compatibilityProblems(parsed.data), ...availabilityProblems(parsed.data)];
+  const problems = [
+    ...componentListProblems(parsed.data),
+    ...compatibilityProblems(parsed.data),
+    ...availabilityProblems(parsed.data),
+  ];
   if (problems.length > 0) {
     throw new UsageError(
       `Invalid options:\n${problems.map((problem) => `  - ${problem}`).join('\n')}`,
@@ -112,6 +117,42 @@ function withoutUndefined<T extends object>(value: T | undefined): Partial<T> {
   return Object.fromEntries(
     Object.entries(value).filter(([, entry]) => entry !== undefined),
   ) as Partial<T>;
+}
+
+/**
+ * A custom selection whose list is exactly a collection is that collection (ADR-0011): the list is
+ * dropped. A list that is not valid is left for `componentListProblems` to name.
+ */
+function withNormalizedComponents(options: StarterOptions): StarterOptions {
+  const { componentList, ...rest } = options;
+  if (options.components !== 'custom' || !isIdList(componentList)) return options;
+  const choice = normalizeComponents(componentList);
+  return choice.componentList ? { ...rest, ...choice } : { ...rest, components: choice.components };
+}
+
+const isIdList = (value: unknown): value is string[] =>
+  Array.isArray(value) && value.length > 0 && value.every((id) => ALL_COMPONENT_IDS.includes(id));
+
+function componentListProblems(options: StarterOptions): string[] {
+  const { components, componentList } = options;
+  if (components !== 'custom') {
+    return componentList === undefined
+      ? []
+      : [
+          'componentList: only a custom selection of components has a list; use "components": "custom".',
+        ];
+  }
+  if (!componentList || componentList.length === 0) {
+    return [
+      'componentList: a custom selection of components needs the ids to generate, for example --components button,modal.',
+    ];
+  }
+  return componentList
+    .filter((id) => !ALL_COMPONENT_IDS.includes(id))
+    .map(
+      (id) =>
+        `componentList: "${id}" is not a component. Available: ${ALL_COMPONENT_IDS.join(', ')}.`,
+    );
 }
 
 function compatibilityProblems(options: StarterOptions): string[] {

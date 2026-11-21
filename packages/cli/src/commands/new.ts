@@ -2,6 +2,8 @@ import { join } from 'node:path';
 import { ANGULAR_CLI_VERSION, ICON_PACKAGES } from '../compat.js';
 import { CAPABILITIES, type CapabilityCategory } from '../config/capabilities.js';
 import { readConfigFile } from '../config/file.js';
+import { COMPONENTS as COMPONENT_CHOICES } from '../config/schema.js';
+import { componentIdsOf } from '../config/components.js';
 import { normalizeStyleChoice, resolveOptions } from '../config/resolve.js';
 import type { StarterOptions } from '../config/schema.js';
 import type { ProgramDeps } from '../deps.js';
@@ -153,12 +155,33 @@ const OPTION_FLAGS = [
 function optionsFromFlags(flags: NewFlags): Partial<StarterOptions> {
   const { style, tailwind } = normalizeStyleChoice(flags.style, flags.tailwind);
   const normalized: NewFlags = { ...flags, style, tailwind };
-  return Object.fromEntries(
+  const options = Object.fromEntries(
     OPTION_FLAGS.filter((key) => normalized[key] !== undefined).map((key) => [
       key,
       normalized[key],
     ]),
   ) as Partial<StarterOptions>;
+  return { ...options, ...componentsFromFlag(flags.components) };
+}
+
+/** `--components` is a collection (or `custom`), or the ids of the components to generate (ADR-0011). */
+function componentsFromFlag(value: string | undefined): Partial<StarterOptions> {
+  if (value === undefined || (COMPONENT_CHOICES as readonly string[]).includes(value)) return {};
+  return {
+    components: 'custom',
+    componentList: value
+      .split(',')
+      .map((id) => id.trim())
+      .filter(Boolean),
+  };
+}
+
+/** The collection's name, or "Custom selection (2: modal, toggle)". */
+function componentsLabel(options: StarterOptions): string {
+  const label = labelOf('components', options.components);
+  if (options.components !== 'custom') return label;
+  const ids = componentIdsOf(options);
+  return `${label} (${ids.length}: ${ids.join(', ')})`;
 }
 
 function labelOf(category: CapabilityCategory, id: string): string {
@@ -183,7 +206,7 @@ function printSummary(io: CliIo, name: string, options: StarterOptions): void {
     ['App shell', labelOf('appShell', options.appShell)],
     ['Layout', labelOf('layout', options.layout)],
     ['Presence', labelOf('presence', options.presence)],
-    ['Components', labelOf('components', options.components)],
+    ['Components', componentsLabel(options)],
     ['UI System', labelOf('uiSystem', options.uiSystem)],
     ['Icons', labelOf('icons', options.icons)],
     ['Package manager', options.packageManager],
@@ -225,7 +248,7 @@ async function runDryRun(context: GenerationContext): Promise<void> {
       : ['Add the design base: tokens, theme, typography, animations, utilities and pipes']),
     ...(options.components === 'none'
       ? []
-      : [`Add the ${labelOf('components', options.components)} (as- components)`]),
+      : [`Add the ${componentsLabel(options)} (as- components)`]),
     ...(options.appShell === 'none'
       ? []
       : [

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { createFakePrompter } from '../../tests/helpers/fake-prompter.js';
 import { CAPABILITIES, type CapabilityOption, type Registry } from '../config/capabilities.js';
+import {
+  ALL_COMPONENT_IDS,
+  ESSENTIAL_COMPONENT_IDS,
+  EXTRA_COMPONENT_IDS,
+} from '../config/components.js';
 import { detectPackageManager, runWizard } from './wizard.js';
 
 const NO_ENV = {};
@@ -43,6 +48,7 @@ describe('runWizard', () => {
       'floating-wide',
       'none',
       'recommended',
+      [...ESSENTIAL_COMPONENT_IDS],
       'none',
       'npm',
       true,
@@ -59,6 +65,7 @@ describe('runWizard', () => {
       'layout',
       'presence',
       'components',
+      'componentList',
       'uiSystem',
       'packageManager',
       'git',
@@ -66,13 +73,14 @@ describe('runWizard', () => {
     ]);
     // The architecture, the routing, the shell, presence, the components and the UI System are the
     // user's call: nothing is preselected. The layout starts on the one that exists.
-    expect(asked.slice(0, 9).map((question) => question.default)).toEqual([
+    expect(asked.slice(0, 10).map((question) => question.default)).toEqual([
       undefined,
       undefined,
       'tailwind',
       'csr',
       undefined,
       'floating-wide',
+      undefined,
       undefined,
       undefined,
       undefined,
@@ -394,6 +402,7 @@ describe('runWizard', () => {
       'floating-wide',
       'none',
       'recommended',
+      [...ESSENTIAL_COMPONENT_IDS],
       'none',
       'npm',
       true,
@@ -692,6 +701,86 @@ describe('runWizard', () => {
       FULL,
     );
     expect(withoutCollection.asked).toEqual([]);
+  });
+
+  describe('the components picker (ADR-0011)', () => {
+    const KNOWN = {
+      ...SETTLED,
+      architecture: 'screaming',
+      routing: 'starter',
+      style: 'css',
+      tailwind: true,
+      rendering: 'csr',
+      appShell: 'none',
+      icons: 'lucide',
+    } as const;
+
+    it('lists every component after the collection, with the essential ones ticked', async () => {
+      const { prompter, asked } = createFakePrompter(['recommended', [...ESSENTIAL_COMPONENT_IDS]]);
+      const answers = await runWizard(KNOWN, prompter, NO_ENV, FULL);
+      expect(asked.map((question) => question.name)).toEqual(['components', 'componentList']);
+      const list = asked[1];
+      expect(list?.kind).toBe('checkbox');
+      expect(list?.message).toBe('Which components do you want to generate?');
+      expect(list?.choices).toEqual([...ALL_COMPONENT_IDS]);
+      expect(list?.checked).toEqual([...ESSENTIAL_COMPONENT_IDS]);
+      expect(answers).toEqual({ components: 'recommended' });
+    });
+
+    it('starts with all of them ticked when all the components were chosen', async () => {
+      const { prompter, asked } = createFakePrompter(['all', [...ALL_COMPONENT_IDS]]);
+      const answers = await runWizard(KNOWN, prompter, NO_ENV, FULL);
+      expect(asked[1]?.checked).toEqual([...ALL_COMPONENT_IDS]);
+      expect(answers).toEqual({ components: 'all' });
+    });
+
+    it('records a custom selection when the ticks change', async () => {
+      const picked = [...EXTRA_COMPONENT_IDS.slice(0, 2), 'button', 'icon'];
+      const { prompter } = createFakePrompter(['recommended', picked]);
+      const answers = await runWizard(KNOWN, prompter, NO_ENV, FULL);
+      expect(answers).toEqual({ components: 'custom', componentList: picked });
+    });
+
+    it('records none when everything is unticked', async () => {
+      const { prompter } = createFakePrompter(['all', []]);
+      const answers = await runWizard(KNOWN, prompter, NO_ENV, FULL);
+      expect(answers).toEqual({ components: 'none' });
+    });
+
+    it('says what each component brings: its description, what it imports and its stylesheet', async () => {
+      const { prompter, asked } = createFakePrompter(['recommended', [...ESSENTIAL_COMPONENT_IDS]]);
+      await runWizard(KNOWN, prompter, NO_ENV, FULL);
+      const list = asked[1];
+      const names = list?.names ?? [];
+      const descriptions = list?.descriptions ?? [];
+      const button = list?.choices?.indexOf('button') ?? -1;
+      expect(names[button]).toContain('as-button');
+      expect(descriptions[button]).toMatch(/Button with severities/);
+      expect(descriptions[button]).toContain('button-styles.css');
+      expect(descriptions[button]).toMatch(/brings: icon/i);
+      expect(descriptions[list?.choices?.indexOf('toggle') ?? -1]).not.toMatch(/brings/i);
+    });
+
+    it('does not ask for the list without components, or when a flag decided them', async () => {
+      const none = createFakePrompter(['none']);
+      await runWizard(KNOWN, none.prompter, NO_ENV, FULL);
+      expect(none.asked.map((question) => question.name)).toEqual(['components']);
+
+      const flag = createFakePrompter([]);
+      await runWizard(
+        { ...KNOWN, components: 'custom', componentList: ['button'] },
+        flag.prompter,
+        NO_ENV,
+        FULL,
+      );
+      expect(flag.asked).toEqual([]);
+    });
+
+    it('never offers the custom selection as an answer of its own', async () => {
+      const { prompter, asked } = createFakePrompter(['none']);
+      await runWizard(KNOWN, prompter, NO_ENV, FULL);
+      expect(asked[0]?.choices).toEqual(['none', 'recommended', 'all']);
+    });
   });
 
   it('uses the registry of the CLI by default', async () => {
