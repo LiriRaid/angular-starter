@@ -91,3 +91,64 @@ describe('AsSelect', () => {
     expect(component.shouldFloat()).toBe(true);
   });
 });
+
+describe('AsSelect · opciones con ícono (template)', () => {
+  const ICON_OPTIONS = [
+    { label: 'Casa', value: 'home', icon: 'Home', color: '#3b82f6' },
+    { label: 'Trabajo', value: 'work', icon: 'User', color: '#10b981' },
+  ];
+  let fixture: ComponentFixture<AsSelect>;
+
+  const setup = (inputs: Record<string, unknown> = {}) => {
+    fixture = TestBed.createComponent(AsSelect);
+    const defaults = { options: ICON_OPTIONS, optionLabel: 'label', optionValue: 'value', optionIcon: 'icon', optionColor: 'color', searchable: false, ...inputs };
+    for (const [name, value] of Object.entries(defaults)) fixture.componentRef.setInput(name, value);
+    fixture.detectChanges();
+  };
+  const el = () => fixture.nativeElement as HTMLElement;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [AsSelect] }).compileComponents();
+  });
+
+  it('el ícono plano de cada opción mide 14 por defecto y respeta optionIconSize', () => {
+    setup();
+    expect(el().querySelector('.as-select-option svg')?.getAttribute('width')).toBe('14');
+
+    fixture.componentRef.setInput('optionIconSize', 20);
+    fixture.detectChanges();
+    expect(el().querySelector('.as-select-option svg')?.getAttribute('width')).toBe('20');
+  });
+
+  it('hideOptionLabel quita el texto de las filas y del campo cerrado, no el ícono', () => {
+    setup();
+    expect(el().querySelector('.as-select-option .truncate')?.textContent).toContain('Casa');
+
+    fixture.componentRef.setInput('hideOptionLabel', true);
+    fixture.componentInstance.writeValue('work');
+    fixture.detectChanges();
+
+    expect(el().querySelector('.as-select-option .truncate')).toBeNull();
+    expect(el().querySelector('.as-select-field-label .truncate')).toBeNull();
+    expect(el().querySelector('.as-select-field-label svg')).toBeTruthy();
+  });
+
+  it('accentColor tiñe el fondo del campo y sin él no pone estilo propio', () => {
+    setup();
+    const fieldset = () => el().querySelector('fieldset') as HTMLElement;
+    expect(fieldset().style.background).toBe('');
+
+    fixture.componentRef.setInput('accentColor', '#ff0000');
+    fixture.detectChanges();
+    expect(fieldset().style.background).toContain('color-mix');
+    expect(fieldset().style.background).toContain('#ff0000');
+  });
+
+  it('panelStyleClass se suma a la clase del panel desplegable', () => {
+    setup({ panelStyleClass: 'mi-panel otra' });
+    const panel = el().querySelector('.as-select-panel') as HTMLElement;
+    expect(panel.classList.contains('mi-panel')).toBe(true);
+    expect(panel.classList.contains('otra')).toBe(true);
+    expect(panel.classList.contains('as-select-panel')).toBe(true);
+  });
+});

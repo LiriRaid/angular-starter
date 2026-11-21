@@ -45,6 +45,14 @@ export class AsSelect implements ControlValueAccessor {
   /** Cómo dibujar el color/ícono de cada opción: `'chip'` = píldora con fondo tintado, `'bar'` =
    *  barrita vertical, `'box'` = ícono en caja tintada, `'dot'` (default) = punto simple. */
   readonly optionShape = input<'dot' | 'chip' | 'bar' | 'box'>('dot');
+  /** Tamaño del ícono de cada opción cuando no hay `optionShape` de caja/chip (rama plana). */
+  readonly optionIconSize = input<string | number>(14);
+  /** Oculta el texto de la etiqueta en las filas de la lista y en el campo cerrado (select no buscable), para selects "solo ícono". */
+  readonly hideOptionLabel = input<boolean>(false);
+  /** Tiñe el fondo del CAMPO con una mezcla suave de este color; sin definir, el fondo de siempre. */
+  readonly accentColor = input<string | undefined>(undefined);
+  /** Clase(s) extra del panel desplegable, para escopar estilos propios sin tocar `.as-select-panel`, compartida por todos los selects. */
+  readonly panelStyleClass = input<string>('');
 
   readonly options = input<unknown[]>([]);
   readonly optionLabel = input<string | undefined>(undefined);
@@ -149,6 +157,13 @@ export class AsSelect implements ControlValueAccessor {
   readonly legendTransition = this.presentation.legendTransition;
   readonly fieldsetBoxShadow = this.presentation.fieldsetBoxShadow;
   readonly fieldsetClasses = this.presentation.fieldsetClasses;
+  /** Fondo propio del campo cuando hay `accentColor` y el campo está habilitado; `null` deja el de las clases. */
+  readonly fieldsetBackground = computed(() => {
+    const accent = this.accentColor();
+    if (!accent || this.isDisabled() || this.readonly() || this.isInteractionDisabled()) return null;
+
+    return `color-mix(in srgb, ${accent} 14%, var(--app-control-surface-bg))`;
+  });
   readonly labelBackground = this.presentation.labelBackground;
   readonly labelColor = this.presentation.labelColor;
   readonly labelClass = this.presentation.labelClass;

@@ -59,8 +59,37 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.75rem;
   flex-shrink: 0;
-  padding: 1.25rem;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--app-border-color);
+}
+
+.as-drawer-header-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Sin título proyectado el botón de cerrar sigue pegado a la derecha. */
+.as-drawer-header-content:empty {
+  flex: 1 1 auto;
+}
+
+.as-drawer--compact .as-drawer-header {
+  padding: 1rem 0.75rem;
+}
+
+.as-drawer--compact .as-drawer-content {
+  padding: 1rem;
+}
+
+.as-drawer--compact .as-drawer-footer {
+  padding: 0.75rem;
+}
+
+/* El contenido maneja su propio espaciado: el cuerpo no le pone padding. */
+.as-drawer--flush .as-drawer-content {
+  padding: 0;
 }
 
 .as-drawer-close-button {
