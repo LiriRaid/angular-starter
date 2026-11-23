@@ -23,15 +23,22 @@ describe('Home', () => {
 
   it('shows a card for each entry of the list', () => {
     expect(compiled.querySelectorAll('article').length).toBe(WELCOME_CARDS.length);
-    expect(WELCOME_CARDS.map((card) => card.id)).toContain('angular-docs');
+    expect(WELCOME_CARDS.map((card) => card.id)).toContain('starter-docs');
   });
 
   it('opens the pages of the application with the router and the others in a new tab', () => {
     const internal = compiled.querySelector('[data-card="examples"] a');
     expect(internal?.getAttribute('href')).toBe('/dashboard');
-    const external = compiled.querySelector('[data-card="angular-docs"] a');
+    const external = compiled.querySelector('footer a[aria-label="GitHub"]');
     expect(external?.getAttribute('target')).toBe('_blank');
     expect(external?.getAttribute('rel')).toContain('noopener');
+  });
+
+  it('sends the documentation and the tutorials to the pages of AS Starter, not to Angular', () => {
+    expect(compiled.querySelector('[data-card="starter-docs"] a')?.getAttribute('href')).toBe('/docs');
+    expect(compiled.querySelector('[data-card="starter-tutorials"] a')?.getAttribute('href')).toBe('/docs/tutorials');
+    const hrefs = Array.from(compiled.querySelectorAll('a')).map((link) => link.getAttribute('href') ?? '');
+    expect(hrefs.some((href) => href.includes('angular.dev'))).toBe(false);
   });
 
   it('links to AS Starter and to its GitHub repository', () => {
