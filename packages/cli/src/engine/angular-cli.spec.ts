@@ -76,12 +76,15 @@ describe('buildNgAddSsrCommand', () => {
     await Promise.all(projects.splice(0).map((dir) => rm(dir, { recursive: true, force: true })));
   });
 
-  async function projectDir(withLocalCli: boolean): Promise<string> {
+  async function projectDir(withLocalCli: boolean, withManifest = true): Promise<string> {
     const dir = await mkdtemp(join(tmpdir(), 'as-ng-add-'));
     projects.push(dir);
     if (withLocalCli) {
       await mkdir(join(dir, 'node_modules', '@angular', 'cli', 'bin'), { recursive: true });
       await writeFile(join(dir, 'node_modules', '@angular', 'cli', 'bin', 'ng.js'), '');
+      if (withManifest) {
+        await writeFile(join(dir, 'node_modules', '@angular', 'cli', 'package.json'), '{}');
+      }
     }
     return dir;
   }
@@ -111,5 +114,10 @@ describe('buildNgAddSsrCommand', () => {
         '--skip-confirmation',
       ],
     });
+  });
+
+  it('falls back to npx when the installed CLI is incomplete (an interrupted install left ng.js without its package.json)', async () => {
+    const dir = await projectDir(true, false);
+    expect((await buildNgAddSsrCommand(dir)).command).toBe('npx');
   });
 });

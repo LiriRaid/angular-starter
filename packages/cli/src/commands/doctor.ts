@@ -35,7 +35,11 @@ export async function doctorCommand(io: CliIo, deps: ProgramDeps): Promise<void>
   if (npx?.version) {
     ok(`npx ${npx.version}`);
   } else {
-    fail('npx was not found. It ships with npm and is needed to run the Angular CLI.');
+    fail(
+      npx?.refusal
+        ? `npx could not run: ${npx.refusal}`
+        : 'npx was not found. It ships with npm and is needed to run the Angular CLI.',
+    );
     failed = true;
   }
 
@@ -47,6 +51,7 @@ export async function doctorCommand(io: CliIo, deps: ProgramDeps): Promise<void>
   });
 
   if (git?.version) ok(git.version);
+  else if (git?.refusal) warn(`git could not run: ${git.refusal}`);
   else warn('git not found: projects can only be created without a Git repository');
 
   try {

@@ -46,8 +46,10 @@ export function buildNgCommand(name: string, options: StarterOptions): NgCommand
  */
 export async function buildNgAddSsrCommand(targetDir: string): Promise<NgCommand> {
   const addArgs = ['add', '@angular/ssr', '--skip-confirmation'];
-  const localCli = join(targetDir, 'node_modules', '@angular', 'cli', 'bin', 'ng.js');
-  if (await pathExists(localCli)) {
+  const cliFolder = join(targetDir, 'node_modules', '@angular', 'cli');
+  const localCli = join(cliFolder, 'bin', 'ng.js');
+  // Both files: an interrupted install can leave the first without the second.
+  if ((await pathExists(localCli)) && (await pathExists(join(cliFolder, 'package.json')))) {
     return { command: process.execPath, args: [localCli, ...addArgs] };
   }
   return { command: 'npx', args: ['--yes', `@angular/cli@${ANGULAR_CLI_VERSION}`, ...addArgs] };
