@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -220,6 +220,20 @@ describe('components profile', () => {
       expect(barrel, name).toContain(name);
     }
     expect(barrel).toContain("from './as-button/as-button';");
+  });
+
+  it('brings the flags sprite that the phone country picker of the input draws', async () => {
+    await apply('recommended');
+    const sprite = await read('public/assets/flags-sprite.svg');
+    expect(sprite).toContain('<symbol id="fi-us"');
+    expect(await read(`${SHARED}/as-input/as-input.html`)).toContain('assets/flags-sprite.svg#fi-');
+  });
+
+  it('replaces a flags sprite that is already in the project instead of failing', async () => {
+    await mkdir(join(project, 'public/assets'), { recursive: true });
+    await writeFile(join(project, 'public/assets/flags-sprite.svg'), '<svg>old</svg>');
+    await apply('recommended');
+    expect(await read('public/assets/flags-sprite.svg')).toContain('<symbol id="fi-us"');
   });
 
   it('imports the stylesheet of each generated component, and only those', async () => {

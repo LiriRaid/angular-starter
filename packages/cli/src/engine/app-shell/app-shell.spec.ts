@@ -133,6 +133,10 @@ describe('App Shell profile', () => {
       }
       expect(await read(`${PAGE}/tabs/appearance-tab.ts`)).toContain('Flotante (ancho)');
       expect(await read(`${PAGE}/tabs/appearance-tab.html`)).toContain('En construcción');
+      // The width of the transparent sidebar is the project's own select, not a native one.
+      const appearance = await read(`${PAGE}/tabs/appearance-tab.html`);
+      expect(appearance).toContain('<as-select');
+      expect(appearance).not.toContain('<select');
     });
 
     it('applies the preferences at start and in real time, persisting what is saved', async () => {
@@ -159,6 +163,8 @@ describe('App Shell profile', () => {
       const tree = await read(`${SHELL}/navigation/navigation.data.ts`);
       expect(tree).toContain("link: '/preference-design'");
       expect(tree).toContain('Preferencias de Diseño');
+      // Only the button of the user menu opens the page: the sidebar does not list it.
+      expect(tree).toContain('hidden: () => true');
       const styles = await read('src/styles.css');
       expect(styles).toContain("@import './styles/features/design-preferences-styles.css';");
     });

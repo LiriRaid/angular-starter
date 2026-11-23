@@ -28,10 +28,9 @@
   </section>
 
   <section class="flex items-center justify-between gap-3 border-t border-(--app-border-color) pt-4">
-    <label for="transparent-sidebar-width" class="text-caption-1-semibold text-(--app-text-color)">Sidebar transparente</label>
-    <select id="transparent-sidebar-width" class="rounded-lg border border-(--app-border-color) bg-(--app-panel-bg) px-2 py-1.5 text-caption-1-medium text-(--app-text-subtle)" disabled>
-      <option>Ancho</option>
-      <option>Compacto</option>
-    </select>
+    <span class="text-caption-1-semibold text-(--app-text-color)">Sidebar transparente</span>
+    <div class="w-44">
+      <as-select label="Ancho" [options]="transparentWidths" optionLabel="label" optionValue="value" [searchable]="false" [formControl]="transparentWidth" />
+    </div>
   </section>
 </div>

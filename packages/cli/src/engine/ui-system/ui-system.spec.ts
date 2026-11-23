@@ -67,7 +67,14 @@ describe('UI System profile (ADR-0010)', () => {
     await apply();
     const catalog = await read(`${SYSTEM}/ui-system.catalog.ts`);
     expect(catalog).toContain('variants:');
-    for (const variant of ['xsmall', 'mode-over', 'type-tags', 'icon-only', 'preview']) {
+    for (const variant of [
+      'xsmall',
+      'type-tags',
+      'icon-only',
+      'preview',
+      'phone-country',
+      'sharedGroups',
+    ]) {
       expect(catalog, variant).toContain(variant);
     }
     // The variants are for the catalog only: they never touch the design preferences service.
