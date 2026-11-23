@@ -8,6 +8,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- `as --version`, `as list` and every help start in about 0.5 s instead of 2.1 s: `ts-morph` and
+  `execa` load when `new`, `add` or `generate` need them (ADR-0018).
 - `as new` installs with `npm install --no-audit --no-fund --prefer-offline` or `pnpm install
 --prefer-offline` (yarn stays plain), so the install reaches for the local cache first
   (ADR-0016 and plan 0014).

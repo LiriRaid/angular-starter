@@ -1,5 +1,3 @@
-import { execa } from 'execa';
-
 export interface CommandResult {
   stdout: string;
   stderr: string;
@@ -34,6 +32,8 @@ export function refusalOf(error: unknown): string | undefined {
 
 /** Runs a program on any operating system (`.cmd` shims on Windows included). */
 export const runCommand: CommandRunner = async (command, args, options = {}) => {
+  // Loaded on the first command it runs: execa takes hundreds of milliseconds the help does not need.
+  const { execa } = await import('execa');
   const result = await execa(command, [...args], {
     cwd: options.cwd,
     timeout: options.timeoutMs,
