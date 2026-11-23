@@ -203,22 +203,27 @@ describe('UiSystem', () => {
   });
 
   describe('tabs', () => {
-    it('share the chosen tab across the styles and the sizes, and keep the contents apart', async () => {
+    it('keep each example independent: choosing a tab in one does not change the others', async () => {
       const { fixture, card } = await render();
       const active = (id: string) => card('tabs').querySelector(`[data-variant="${id}"] .as-tab--active`)?.textContent?.trim();
       const second = (id: string) => card('tabs').querySelectorAll(`[data-variant="${id}"] .as-tab`)[1] as HTMLElement;
 
       second('pills').click();
       await fixture.whenStable();
-      for (const id of ['default', 'pills', 'default-icons', 'compact', 'pills-compact', 'compact-icons']) {
-        expect(active(id), id).toContain('Dos');
+      expect(active('pills')).toContain('Dos');
+      for (const id of ['default', 'default-icons', 'compact', 'pills-compact', 'compact-icons', 'overflow-icons', 'fit-icons']) {
+        expect(active(id), id).not.toContain('Dos');
       }
-      expect(active('overflow-icons')).not.toContain('Dos');
 
-      second('overflow-icons').click();
+      second('compact').click();
       await fixture.whenStable();
-      expect(active('overflow-icons')).toContain('Dos');
-      expect(active('fit-icons')).not.toContain('Dos');
+      expect(active('compact')).toContain('Dos');
+      expect(active('default')).not.toContain('Dos');
+      expect(active('pills')).toContain('Dos');
+    });
+
+    it('has no state shared between variants', () => {
+      expect('sharedGroups' in entryOf('tabs')).toBe(false);
     });
   });
 
@@ -232,6 +237,35 @@ describe('UiSystem', () => {
         expect(text.querySelector('as-button span[astooltip]'), position).not.toBeNull();
         expect(host.querySelector('[data-chip]')?.textContent).toContain('host');
         expect(text.querySelector('[data-chip]')?.textContent).toContain('texto');
+      }
+    });
+  });
+
+  describe('the chips', () => {
+    it('paint the variant names and the tokens with the dark surface of the fields, in both themes', async () => {
+      const { root } = await render();
+      const chips = Array.from(root.querySelectorAll('[data-chip], [data-token]'));
+      expect(chips.length).toBeGreaterThan(100);
+      for (const chip of chips) {
+        expect(chip.className).toContain('bg-(--app-control-surface-bg)');
+        expect(chip.className).not.toContain('badge-soft-bg');
+      }
+    });
+
+    it('mark the chosen variant with the primary colour, not with a lighter background', async () => {
+      const { card } = await render();
+      const chosen = card('button').querySelector('[data-chip][aria-pressed="true"]') as HTMLElement;
+      expect(chosen.className).toContain('text-(--app-badge-soft-text)');
+      expect(chosen.className).toContain('border-(--app-badge-soft-text)');
+    });
+  });
+
+  describe('the readonly select', () => {
+    it('shows a chosen value in each mode, so the readonly look can be judged', async () => {
+      const { card } = await render();
+      for (const mode of ['on', 'in', 'over']) {
+        const field = card('select').querySelector(`[data-variant="readonly-${mode}"] input`) as HTMLInputElement;
+        expect(field.value, mode).toBe('Pro');
       }
     });
   });
@@ -351,6 +385,28 @@ describe('UiSystem', () => {
       expect(panel.classList.contains('as-modal--flush')).toBe(true);
       expect(component.codeOf(modal)).toContain('flush');
       expect(component.codeOf(modal)).toContain('class="p-5"');
+    });
+    it('lets the modal be fixed with the draggable switch, and writes it in the code', async () => {
+      const { fixture, component } = await render();
+      const modal = entryOf('modal');
+      const press = (header: HTMLElement) => header.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 10, clientY: 10 }));
+
+      component.openOverlay(modal, modal.variants[0]);
+      await fixture.whenStable();
+      expect(component.codeOf(modal)).not.toContain('draggable');
+      press(overlay().querySelector('.as-modal-header') as HTMLElement);
+      expect((overlay().querySelector('.as-modal') as HTMLElement).style.position).toBe('fixed');
+      document.dispatchEvent(new MouseEvent('mouseup'));
+
+      component.modalOpen.set(false);
+      await new Promise((resolve) => setTimeout(resolve, 400));
+      component.setOption(modal, modal.options!.find((option) => option.id === 'draggable')!, false);
+      component.openOverlay(modal, modal.variants[0]);
+      await fixture.whenStable();
+
+      expect(component.codeOf(modal)).toContain('[draggable]="false"');
+      press(overlay().querySelector('.as-modal-header') as HTMLElement);
+      expect((overlay().querySelector('.as-modal') as HTMLElement).style.position).toBe('');
     });
   });
 

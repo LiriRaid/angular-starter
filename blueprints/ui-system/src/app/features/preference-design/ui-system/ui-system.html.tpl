@@ -22,7 +22,7 @@
       <p class="flex flex-wrap items-center gap-1.5 text-caption-2-regular text-(--app-text-subtle)">
         <span>Cambia con:</span>
         @for (token of entry.affects; track token) {
-          <span class="rounded-full bg-(--app-badge-soft-bg) px-2 py-0.5 text-caption-2-semibold text-(--app-badge-soft-text)">{{ token }}</span>
+          <span data-token class="rounded-full border border-(--app-border-color) bg-(--app-control-surface-bg) px-2 py-0.5 text-caption-2-semibold text-(--app-badge-soft-text)">{{ token }}</span>
         } @empty {
           <span>ningún token</span>
         }
@@ -56,8 +56,15 @@
                               <as-button [label]="$any(item.inputs['label'])" variant="outlined" asTooltip="Texto de ayuda" [tooltipPosition]="$any(item.inputs['tooltipPosition'])" [showDelay]="$any(item.inputs['showDelay'] ?? 0)" />
                             }
                           }
+                          @case ('select') {
+                            @if (readonlySelects[item.id]; as control) {
+                              <as-select [formControl]="control" [label]="$any(item.inputs['label'])" [variant]="$any(item.inputs['variant'])" [options]="$any(item.inputs['options'])" optionLabel="label" optionValue="value" [readonlyInput]="true" />
+                            } @else {
+                              <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: item.inputs" />
+                            }
+                          }
                           @case ('tabs') {
-                            <as-tabs [tabs]="tabsOf(item)" [active]="activeOf(entry, item)" (activeChange)="setActive(entry, item, $event)" [variant]="$any(item.inputs['variant'] ?? 'default')" [size]="$any(item.inputs['size'] ?? 'default')" ariaLabel="Pestañas de ejemplo" />
+                            <as-tabs [tabs]="tabsOf(item)" [active]="activeOf(item)" (activeChange)="setActive(item, $event)" [variant]="$any(item.inputs['variant'] ?? 'default')" [size]="$any(item.inputs['size'] ?? 'default')" ariaLabel="Pestañas de ejemplo" />
                           }
                           @case ('modal') {
                             <as-button label="Abrir" variant="outlined" size="small" (onClick)="openOverlay(entry, item)" />
@@ -73,7 +80,7 @@
                           }
                         }
                       </div>
-                      <button type="button" data-chip class="rounded-full border px-2 py-0.5 text-caption-2-semibold transition-colors" [class]="isSelected(entry, item) ? 'border-transparent bg-(--app-badge-soft-bg) text-(--app-badge-soft-text)' : 'border-(--app-border-color) text-(--app-text-subtle) hover:text-(--app-text-color)'" [attr.aria-pressed]="isSelected(entry, item)" (click)="choose(entry, item)">{{ item.label }}</button>
+                      <button type="button" data-chip class="rounded-full border bg-(--app-control-surface-bg) px-2 py-0.5 text-caption-2-semibold transition-colors" [class]="isSelected(entry, item) ? 'border-(--app-badge-soft-text) text-(--app-badge-soft-text)' : 'border-(--app-border-color) text-(--app-text-subtle) hover:text-(--app-text-color)'" [attr.aria-pressed]="isSelected(entry, item)" (click)="choose(entry, item)">{{ item.label }}</button>
                     </figure>
                   }
                 </div>
@@ -93,7 +100,7 @@
 
             @switch (entry.id) {
               @case ('modal') {
-                <as-modal [visible]="modalOpen()" (visibleChange)="modalOpen.set($event)" title="Título" [flush]="modalInputs().flush ?? false" [titleIcon]="modalInputs().titleIcon ?? null" [titleDotColor]="modalInputs().titleDotColor ?? null" [width]="modalInputs().width ?? '34rem'" [variant]="modalInputs().variant ?? 'default'" [showFooter]="modalInputs().showFooter ?? false" [closable]="modalInputs().closable ?? true" [dismissableMask]="modalInputs().dismissableMask ?? true">
+                <as-modal [visible]="modalOpen()" (visibleChange)="modalOpen.set($event)" title="Título" [flush]="modalInputs().flush ?? false" [titleIcon]="modalInputs().titleIcon ?? null" [titleDotColor]="modalInputs().titleDotColor ?? null" [width]="modalInputs().width ?? '34rem'" [variant]="modalInputs().variant ?? 'default'" [showFooter]="modalInputs().showFooter ?? false" [closable]="modalInputs().closable ?? true" [dismissableMask]="modalInputs().dismissableMask ?? true" [draggable]="modalInputs().draggable ?? true">
                   <div class="flex flex-col gap-2 p-5 text-caption-1-regular text-(--app-text-color)">
                     <p>El contenido del diálogo.</p>
                     @if (modalLong()) {

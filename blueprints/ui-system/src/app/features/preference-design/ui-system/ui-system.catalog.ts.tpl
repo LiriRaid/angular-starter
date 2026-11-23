@@ -54,8 +54,6 @@ export interface UiComponentEntry {
   /** Propiedades que llevan todas las variantes en el código (el `[(visible)]` de un modal). */
   readonly baseProps?: UiProps;
   readonly options?: readonly UiOption[];
-  /** Los grupos cuyas variantes comparten un solo estado (la pestaña activa de las pestañas). */
-  readonly sharedGroups?: readonly string[];
   /** Las entradas del componente que el catálogo no muestra a propósito (plantillas, clases, nombres accesibles). */
   readonly notShown?: readonly string[];
   /** `ts` cuando el código no es una etiqueta. */
@@ -329,7 +327,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
             named(`plain-${mode}`, `searchable apagado variant="${mode}"`, group, { ...base, searchable: false }),
             named(`icon-${mode}`, `icono a la izquierda variant="${mode}"`, group, { ...base, lucideIcon: 'Search' }),
             named(`icon-right-${mode}`, `icono a la derecha variant="${mode}"`, group, { ...base, lucideIcon: 'Search', iconPosition: 'right' }),
-            named(`readonly-${mode}`, `readonlyInput variant="${mode}"`, group, { ...base, readonlyInput: true }),
+            // El valor lo lleva el control (`[formControl]`), como en un formulario real: sin él un selector de solo lectura se vería vacío.
+            named(`readonly-${mode}`, `readonlyInput variant="${mode}"`, group, { ...base, readonlyInput: true, '[formControl]': 'plan' }),
           ];
         }),
         named('placeholder', 'placeholder', 'Otras propiedades', { placeholder: 'Elige un plan', ...plans }),
@@ -454,6 +453,7 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       { id: 'long', label: 'Contenido largo' },
       { id: 'closable', label: 'Botón de cerrar', prop: 'closable', on: true, off: false, startsOn: true },
       { id: 'dismissableMask', label: 'Cierra al hacer clic fuera', prop: 'dismissableMask', on: true, off: false, startsOn: true },
+      { id: 'draggable', label: 'Se puede mover', prop: 'draggable', on: true, off: false, startsOn: true },
       { id: 'icon', label: 'Icono en el título', prop: 'titleIcon', on: 'User' },
       { id: 'dot', label: 'Punto de color en el título', prop: 'titleDotColor', on: '#10b981' },
     ],
@@ -516,8 +516,7 @@ this.alerts.showSuccess('Guardado', 'Los cambios se guardaron.');`,
     // El nombre accesible y la clase del texto de cada pestaña.
     notShown: ['ariaLabel', 'tabLabelClass'],
     code: `<as-tabs [tabs]="tabs" [(active)]="active" ariaLabel="Secciones" />`,
-    // La pestaña activa es una sola en estos grupos: al elegir "Dos" en uno, queda "Dos" en todos. Las de "Contenido" son independientes.
-    sharedGroups: ['Estilos', 'Tamaños'],
+    // Cada ejemplo lleva su propia pestaña activa (ver `ownActive` en `ui-system.ts`): elegir una no cambia las demás.
     variants: [
       named('default', 'variant="default"', 'Estilos', { variant: 'default', '[tabs]': 'tabs', '[(active)]': 'active' }, { boxClass: 'w-72' }),
       named('pills', 'variant="pills"', 'Estilos', { variant: 'pills', '[tabs]': 'tabs', '[(active)]': 'active' }, { boxClass: 'w-72' }),
