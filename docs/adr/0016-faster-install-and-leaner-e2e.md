@@ -32,10 +32,10 @@ so the creation of a project has to be as light as it can be.
    - the plain Angular structure.
      The combinations that are no longer installed are covered by the unit specs of the engine (the
      profiles, the stages and the `add` command run with a fake runner).
-3. **The projects install with pnpm, except one.** Its content-addressable store links the files, so every install
-   after the first is a matter of links; `ng` runs with `pnpm exec`. The project that runs `as add rendering starter-ssr` stays on npm,
-   because `ng add @angular/ssr` fails with pnpm (see the follow-up); npm is also covered by the unit specs
-   of the install arguments.
+3. **The projects install with pnpm.** Its content-addressable store links the files, so every install
+   after the first is a matter of links; `ng` runs with `pnpm exec`. The project that runs
+   `as add rendering starter-ssr` stayed on npm until the bug in the last consequence was fixed; it uses pnpm
+   too now. npm is covered by the unit specs of the install arguments.
 
 ## Alternatives considered
 
@@ -53,8 +53,13 @@ so the creation of a project has to be as light as it can be.
   install for the users of the CLI.
 - Negative: a bug in a combination that is no longer installed is found by the unit specs, not by a real
   build; the options that matter to the build (SSR, the components, the shell) keep their project.
-- Follow-up: `as add rendering ssr|starter-ssr` in a pnpm project fails with "a merge conflicted on path
-  /src/server.ts" from `ng add @angular/ssr` (it works with npm and is not caused by this change); it
-  needs its own fix.
+- Resolved: `as add rendering ssr|starter-ssr` in a pnpm project failed with "a merge conflicted on path
+  /src/server.ts". Cause: `ng add` installs packages, and pnpm rewrites `node_modules/.bin/ng.cmd` (934 to
+  1014 bytes: the folder of the CLI in `.pnpm` gains `@types+node` once `@angular/ssr` is installed) while
+  that shim is still running. `cmd.exe` reads a batch file by offset as it executes it, so it resumed in the
+  new file and ran `ng add @angular/ssr` a second time, which found the files of the first run (the second
+  run, started by the same parent process, exited with code 1). npm does not rewrite its shim. Fix: the
+  stage runs the project's own `node_modules/@angular/cli/bin/ng.js` with node (`buildNgAddSsrCommand`) and
+  falls back to `npx` only when the project has no dependencies installed.
 - Follow-up: when the components package exists, install it from a local registry in the suite instead
   of copying blueprints; measure the real `as new` before and after on a clean machine.

@@ -21,9 +21,10 @@ import { designProfile } from './design/design.js';
 import { appShellProfile } from './app-shell/app-shell.js';
 import { presenceProfile } from './presence/presence.js';
 import { uiSystemProfile } from './ui-system/ui-system.js';
-import { buildNgCommand } from './angular-cli.js';
+import { buildNgAddSsrCommand, buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
 import { pathExists } from './fs.js';
+import { refusalOf } from './process.js';
 import type { GenerationContext, Stage } from './pipeline.js';
 import { RENDERING_PROFILES } from './rendering/index.js';
 import { ROUTING_PROFILES } from './routing/index.js';
@@ -120,17 +121,12 @@ export const addAngularSsr: Stage = {
   pending: 'runs ng add @angular/ssr and installs its packages',
   async run({ targetDir, deps, verbose }) {
     try {
-      await deps.run(
-        'npx',
-        [
-          '--yes',
-          `@angular/cli@${ANGULAR_CLI_VERSION}`,
-          'add',
-          '@angular/ssr',
-          '--skip-confirmation',
-        ],
-        { cwd: targetDir, inherit: verbose, timeoutMs: INSTALL_TIMEOUT_MS },
-      );
+      const { command, args } = await buildNgAddSsrCommand(targetDir);
+      await deps.run(command, args, {
+        cwd: targetDir,
+        inherit: verbose,
+        timeoutMs: INSTALL_TIMEOUT_MS,
+      });
     } catch (error) {
       throw new RuntimeError(`ng add @angular/ssr failed: ${describe(error)}`);
     }
@@ -338,8 +334,12 @@ async function requireTool(
 ): Promise<void> {
   try {
     await deps.run(tool, ['--version'], { timeoutMs: PROBE_TIMEOUT_MS });
-  } catch {
-    throw new UsageError(message);
+  } catch (error) {
+    const refusal = refusalOf(error);
+    throw new UsageError(
+      refusal ? `"${tool}" could not run: ${refusal}` : message,
+      refusal ? 'Fix that, or choose another tool with --package-manager.' : undefined,
+    );
   }
 }
 
