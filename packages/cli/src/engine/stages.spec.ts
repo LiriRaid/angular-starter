@@ -7,6 +7,7 @@ import {
   applyComponents,
   applyDesign,
   applyPresence,
+  installArgsOf,
 } from './stages.js';
 
 const contextWith = (
@@ -57,5 +58,24 @@ describe('new project stages', () => {
       'verify-project',
     ];
     expect(ids.filter((id) => order.includes(id))).toEqual(order);
+  });
+});
+
+describe('installArgsOf', () => {
+  it('installs from the local cache first and skips the audit and funding calls of npm', () => {
+    expect(installArgsOf('npm')).toEqual([
+      'install',
+      '--no-audit',
+      '--no-fund',
+      '--prefer-offline',
+    ]);
+  });
+
+  it('prefers the offline store with pnpm and never freezes the lockfile (the CLI has just changed package.json, and CI turns the freeze on)', () => {
+    expect(installArgsOf('pnpm')).toEqual(['install', '--prefer-offline', '--no-frozen-lockfile']);
+  });
+
+  it('keeps yarn plain: its modern versions reject the flag', () => {
+    expect(installArgsOf('yarn')).toEqual(['install']);
   });
 });

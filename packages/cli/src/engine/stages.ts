@@ -228,6 +228,18 @@ export const writeStarterConfig: Stage = {
   },
 };
 
+/**
+ * The arguments of the install. npm and pnpm reach for their local cache before the network, and npm
+ * skips the audit and funding requests it would otherwise make after every install (ADR-0016). pnpm never
+ * freezes its lockfile: the CLI has just changed `package.json`, and a CI environment turns the freeze on
+ * by default. Yarn stays plain: its modern versions reject `--prefer-offline`.
+ */
+export function installArgsOf(packageManager: string): string[] {
+  if (packageManager === 'npm') return ['install', '--no-audit', '--no-fund', '--prefer-offline'];
+  if (packageManager === 'pnpm') return ['install', '--prefer-offline', '--no-frozen-lockfile'];
+  return ['install'];
+}
+
 export const installDependencies: Stage = {
   id: 'install-dependencies',
   title: 'Installing dependencies',
@@ -235,7 +247,7 @@ export const installDependencies: Stage = {
   enabled: ({ options }) => options.install,
   async run({ options, targetDir, deps, verbose }) {
     try {
-      await deps.run(options.packageManager, ['install'], {
+      await deps.run(options.packageManager, installArgsOf(options.packageManager), {
         cwd: targetDir,
         inherit: verbose,
         timeoutMs: INSTALL_TIMEOUT_MS,
