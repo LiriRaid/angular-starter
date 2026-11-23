@@ -294,7 +294,7 @@
   --app-toggleswitch-disabled-checked-bg: color-mix(in srgb, var(--as-primary-color) 55%, #000000);
   --app-toggle-track-bg: var(--as-surface-700);
   --app-toggle-track-hover-bg: var(--as-surface-600);
-  --app-toggle-track-disabled-bg: var(--as-surface-800);
+  --app-toggle-track-disabled-bg: var(--as-surface-700);
 
   --app-chip-bg: color-mix(in srgb, var(--as-surface-0) 8%, transparent);
   --app-chip-border: color-mix(in srgb, var(--app-border-color) 68%, rgba(255, 255, 255, 0.12));

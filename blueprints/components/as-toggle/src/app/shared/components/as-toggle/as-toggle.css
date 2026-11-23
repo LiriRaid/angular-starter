@@ -43,8 +43,13 @@ as-toggle {
 
 .as-toggle:disabled {
   cursor: default;
-  opacity: 0.6;
   background: var(--app-toggle-track-disabled-bg);
+  /* El borde mantiene visible la pista apagada y bloqueada sobre cualquier fondo, también en oscuro. */
+  border-color: var(--app-border-color);
+}
+
+.as-toggle:disabled .as-toggle-handle {
+  opacity: 0.6;
 }
 
 /* Un toggle encendido pero bloqueado no se atenúa — mantiene un tinte del primario

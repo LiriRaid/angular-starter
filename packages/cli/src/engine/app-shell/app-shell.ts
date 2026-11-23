@@ -224,6 +224,8 @@ async function planEdits(targetDir: string): Promise<PlannedEdit[]> {
                 title: 'Preferencias de Diseño',
                 icon: 'SlidersHorizontal',
                 link: `/${PREFERENCE_DESIGN_FEATURE}`,
+                // Only the button of the user menu opens the page; it keeps its title and breadcrumb.
+                hidden: true,
               },
             ],
           },

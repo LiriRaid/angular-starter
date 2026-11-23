@@ -48,14 +48,17 @@ describe('createInquirerPrompter', () => {
     });
 
     expect(answer).toEqual(['button']);
-    expect(prompts.checkbox).toHaveBeenCalledWith({
-      message: 'Which components?',
-      choices: [
-        { value: 'button', name: 'button', description: undefined, checked: true },
-        { value: 'modal', name: 'modal', description: 'Dialog', checked: false },
-      ],
-      pageSize: 14,
-    });
+    expect(prompts.checkbox).toHaveBeenCalledWith(
+      {
+        message: 'Which components?',
+        choices: [
+          { value: 'button', name: 'button', description: undefined, checked: true },
+          { value: 'modal', name: 'modal', description: 'Dialog', checked: false },
+        ],
+        pageSize: 14,
+      },
+      {},
+    );
   });
 
   it('maps choices and the default for select', async () => {
@@ -71,14 +74,17 @@ describe('createInquirerPrompter', () => {
     });
 
     expect(answer).toBe('scss');
-    expect(prompts.select).toHaveBeenCalledWith({
-      message: 'Select a stylesheet format:',
-      default: 'css',
-      choices: [
-        { value: 'css', name: 'CSS', description: undefined },
-        { value: 'scss', name: 'SCSS', description: 'Sass' },
-      ],
-    });
+    expect(prompts.select).toHaveBeenCalledWith(
+      {
+        message: 'Select a stylesheet format:',
+        default: 'css',
+        choices: [
+          { value: 'css', name: 'CSS', description: undefined },
+          { value: 'scss', name: 'SCSS', description: 'Sass' },
+        ],
+      },
+      {},
+    );
   });
 
   it('forwards confirm questions', async () => {
@@ -86,6 +92,6 @@ describe('createInquirerPrompter', () => {
     expect(
       await createInquirerPrompter().confirm({ name: 'c', message: 'Sure?', default: true }),
     ).toBe(false);
-    expect(prompts.confirm).toHaveBeenCalledWith({ message: 'Sure?', default: true });
+    expect(prompts.confirm).toHaveBeenCalledWith({ message: 'Sure?', default: true }, {});
   });
 });

@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- The design preferences page is reached only from the user menu: its navigation entry is `hidden`
+  (it keeps its title and breadcrumb), and the sidebar width of Apariencia is an `as-select`
+  (ADR-0014 and plan 0012).
+- The UI System catalog (ADR-0014): the previews of every component are apart (no overlaps), show
+  every property in each mode (`required variant="on"`, `in`, `over`), the tooltip on the host and on
+  the text, tabs with a shared active tab in Estilos and Tamaños, icons and counters, the password with
+  its eye, the modal and the drawer with `flush` and a padded inner content, and every input of each
+  component or the reason it is not shown. The cards and the code of all the variants collapse with the
+  accordion animation.
+- `as-modal` gets `flush`; the disabled toggle is visible in dark mode and the `contrast` toast has the
+  inverse text of the theme, both with theme tokens.
+- The `as-input` blueprint brings the country flags sprite (flag-icons, MIT) to
+  `public/assets/flags-sprite.svg`.
+
 ### Added
 
 - The UI System shows every variant of every essential component (ADR-0012 and plan 0010): the sizes,
@@ -21,6 +37,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- The wizard can go back (ADR-0013 and plan 0011): Esc returns to the previous question in every kind of
+  prompt (lists, the components checklist, text and yes/no), shown as `esc back` in the help line, with the
+  previous answer selected, and what the changed answer decides is asked again (the answers are kept in a
+  history and the flow replays). The first question has nothing before it. The final confirmation is now
+  _Create the project_, _Change an answer_ (it lists the answers and jumps to the one chosen) or _Cancel_.
+  Flags and `--config` values are never asked, so never revisited.
 - After the components question the wizard lists every component with a checkbox, like the last
   question of `ng new` (ADR-0011 and plan 0009): the essential collection starts with its 16 ticked and
   "all" with the 26; each line says what the component is, what it brings with it and the stylesheet it

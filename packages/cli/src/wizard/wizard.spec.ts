@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createFakePrompter } from '../../tests/helpers/fake-prompter.js';
-import { CAPABILITIES, type CapabilityOption, type Registry } from '../config/capabilities.js';
+import { FULL } from '../../tests/helpers/full-registry.js';
 import {
   ALL_COMPONENT_IDS,
   ESSENTIAL_COMPONENT_IDS,
@@ -9,32 +9,6 @@ import {
 import { detectPackageManager, runWizard } from './wizard.js';
 
 const NO_ENV = {};
-const PLANNED = new Set([
-  'modular',
-  'hexagonal',
-  'clean',
-  'feature-sliced',
-  'heroicons',
-  'phosphor',
-  'tabler',
-  'bootstrap-icons',
-  'landing',
-  'ecommerce',
-  'wide-joined',
-  'compact-joined',
-  'floating-compact',
-  'transparent-joined',
-  'transparent-floating',
-]);
-
-/** Every option the project plans to generate today and in the near future, whatever `available` says. */
-const FULL: Registry = Object.fromEntries(
-  Object.entries(CAPABILITIES).map(([category, options]) => [
-    category,
-    options.map((option: CapabilityOption) => ({ ...option, available: !PLANNED.has(option.id) })),
-  ]),
-) as unknown as Registry;
-
 const SETTLED = { packageManager: 'npm', git: true, install: true } as const;
 
 describe('runWizard', () => {

@@ -153,6 +153,36 @@ describe('addNavigationGroups', () => {
     );
   });
 
+  it('hides an item from the sidebar when it asks for it, keeping its title and breadcrumb', () => {
+    const result = addNavigationGroups(TREE, [
+      {
+        label: 'System',
+        items: [{ id: 'prefs', title: 'Prefs', icon: 'Settings', link: '/prefs', hidden: true }],
+      },
+    ]);
+    expect(result).toContain(
+      "{ id: 'prefs', title: 'Prefs', icon: 'Settings', type: 'basic', link: '/prefs', hidden: () => true }",
+    );
+    expect(result.split('hidden:')).toHaveLength(2);
+  });
+
+  it('hides an item with children too', () => {
+    const result = addNavigationGroups(TREE, [
+      {
+        label: 'System',
+        items: [
+          {
+            id: 'tools',
+            title: 'Tools',
+            hidden: true,
+            children: [{ id: 'tool', title: 'Tool', link: '/tool' }],
+          },
+        ],
+      },
+    ]);
+    expect(result).toMatch(/type: 'collapsable',\s+hidden: \(\) => true,/);
+  });
+
   it('marks an item with children as collapsable, without a link', () => {
     const result = addNavigationGroups(TREE, GROUPS);
     expect(result).toMatch(/id: 'settings'[\s\S]*type: 'collapsable'[\s\S]*children: \[/);

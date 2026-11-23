@@ -64,6 +64,8 @@ export const componentsProfile = {
         source: join(BLUEPRINTS_ROOT, 'components', `as-${id}`),
         target: targetDir,
         variables: { PROJECT_NAME: name, PREFIX: prefix },
+        // The flags sprite is an asset the project may already serve: it is replaced, not a collision.
+        overwrite: ['public/assets/flags-sprite.svg'],
       });
     }
     await writeEdits(planned);
