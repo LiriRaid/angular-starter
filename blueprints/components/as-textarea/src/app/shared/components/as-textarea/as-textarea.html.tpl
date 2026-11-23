@@ -13,13 +13,14 @@
           <span class="px-2 text-caption-2-bold">{{ label() }}</span>
         </legend>
 
-        <textarea #textareaEl [id]="resolvedInputId()" [rows]="rows()" [disabled]="isDisabled()" [value]="displayValue()" [readOnly]="readonlyInput()" (input)="onInput($event)" (focus)="onFocus()" (blur)="onBlur()" (keyup)="keyup.emit($event)" [attr.autocomplete]="autocomplete() || null" [attr.placeholder]="placeholderAttr()" [attr.aria-invalid]="hasErrors() ? 'true' : null" [attr.aria-describedby]="describedBy()" [attr.data-resize-tick]="resizeTick()" class="as-textarea-field peer"></textarea>
+        <textarea #textareaEl [id]="resolvedInputId()" [rows]="rows()" [disabled]="isDisabled()" [value]="displayValue()" [readOnly]="readonlyInput()" (input)="onInput($event)" (focus)="onFocus()" (blur)="onBlur()" (keyup)="keyup.emit($event)" [attr.autocomplete]="autocomplete() || null" [attr.placeholder]="placeholderAttr()" [attr.aria-invalid]="hasErrors() ? 'true' : null" [attr.aria-describedby]="describedBy()" [attr.data-resize-tick]="resizeTick()" class="as-textarea-field peer" [ngStyle]="fieldStyles()"></textarea>
 
         @if (hasIcon() && lucideIcon()) {
           <as-icon
             [name]="lucideIcon()"
             [size]="iconSize()"
-            class="absolute top-3 transition-colors duration-150"
+            class="absolute transition-colors duration-150"
+            [style.top]="iconTop()"
             [ngClass]="{
               'left-2.75': iconPosition() === 'left',
               'right-3': iconPosition() === 'right',
@@ -29,7 +30,7 @@
           ></as-icon>
         }
 
-        <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-180 rounded-tl-md rounded-tr-md rounded-bl-none rounded-br-none" [class.transition-none]="!transitionReady()" [ngClass]="resolvedLabelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
+        <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-180 rounded-md" [class.transition-none]="!transitionReady()" [ngClass]="resolvedLabelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
           {{ label() }}
           @if (required()) {
             <span class="text-(--app-error-color)">*</span>
@@ -38,13 +39,14 @@
       </fieldset>
     } @else {
       <div class="as-textarea-grip relative w-full rounded-lg text-caption-1-medium transition-all duration-180" [ngClass]="fieldsetClasses()" [style.box-shadow]="fieldsetBoxShadow()">
-        <textarea #textareaEl [id]="resolvedInputId()" [rows]="rows()" [disabled]="isDisabled()" [value]="displayValue()" [readOnly]="readonlyInput()" (input)="onInput($event)" (focus)="onFocus()" (blur)="onBlur()" (keyup)="keyup.emit($event)" [attr.autocomplete]="autocomplete() || null" [attr.placeholder]="placeholderAttr()" [attr.aria-invalid]="hasErrors() ? 'true' : null" [attr.aria-describedby]="describedBy()" [attr.data-resize-tick]="resizeTick()" class="as-textarea-field peer"></textarea>
+        <textarea #textareaEl [id]="resolvedInputId()" [rows]="rows()" [disabled]="isDisabled()" [value]="displayValue()" [readOnly]="readonlyInput()" (input)="onInput($event)" (focus)="onFocus()" (blur)="onBlur()" (keyup)="keyup.emit($event)" [attr.autocomplete]="autocomplete() || null" [attr.placeholder]="placeholderAttr()" [attr.aria-invalid]="hasErrors() ? 'true' : null" [attr.aria-describedby]="describedBy()" [attr.data-resize-tick]="resizeTick()" class="as-textarea-field peer" [ngStyle]="fieldStyles()"></textarea>
 
         @if (hasIcon() && lucideIcon()) {
           <as-icon
             [name]="lucideIcon()"
             [size]="iconSize()"
-            class="absolute top-3 transition-colors duration-150"
+            class="absolute transition-colors duration-150"
+            [style.top]="iconTop()"
             [ngClass]="{
               'left-2.75': iconPosition() === 'left',
               'right-3': iconPosition() === 'right',
@@ -56,7 +58,7 @@
       </div>
 
       @if (label()) {
-        <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-150 rounded-tl-md rounded-tr-md" [class.transition-none]="!transitionReady()" [ngClass]="resolvedLabelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
+        <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-150 rounded-md" [class.transition-none]="!transitionReady()" [ngClass]="resolvedLabelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
           {{ label() }}
           @if (required()) {
             <span class="text-(--app-error-color)">*</span>

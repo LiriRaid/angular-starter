@@ -83,6 +83,20 @@ export function resolveInputFieldStyles(type: AsInputType, hasLeftIcon: boolean,
   };
 }
 
+/**
+ * Relleno del `<textarea>` interno de `as-textarea`: en `in` el label vive dentro, arriba, y el texto
+ * empieza debajo (24px, como el input); un icono a la izquierda o a la derecha reserva su lado para que el
+ * texto no pase por debajo.
+ */
+export function resolveTextareaFieldStyles(variant: AsVariant, hasLabel: boolean, hasLeftIcon: boolean, hasRightIcon: boolean): Record<string, string> {
+  return {
+    'padding-top': variant === 'in' && hasLabel ? '1.5rem' : '0.625rem',
+    'padding-bottom': '0.625rem',
+    'padding-left': hasLeftIcon ? '2.5rem' : '1rem',
+    'padding-right': hasRightIcon ? '2.5rem' : '1rem',
+  };
+}
+
 export function resolveControlBackground(disabled: boolean, readonly: boolean): string {
   return disabled || readonly ? 'var(--app-control-disabled-bg)' : 'var(--app-control-surface-bg)';
 }
@@ -123,7 +137,8 @@ export function resolveLabelColor(hasErrors: boolean, disabled: boolean, focused
  */
 export function resolveLabelPositionClass(variant: string, shouldFloat: boolean, hasLeftAffordance: boolean, defaultFloatOffsetClass: string): Record<string, boolean> {
   const classes: Record<string, boolean> = {
-    [hasLeftAffordance ? 'left-8' : variant === 'on' ? 'left-3' : 'left-2']: true,
+    // `over` vive afuera, arriba del campo: no hay icono debajo que esquivar, así que no se corre.
+    [hasLeftAffordance && variant !== 'over' ? 'left-8' : variant === 'on' ? 'left-3' : 'left-2']: true,
   };
 
   if (variant === 'in') {
