@@ -15,6 +15,7 @@ interface ModalInputs {
   readonly showFooter?: boolean;
   readonly closable?: boolean;
   readonly dismissableMask?: boolean;
+  readonly draggable?: boolean;
   readonly titleIcon?: string;
   readonly titleDotColor?: string;
   readonly flush?: boolean;
@@ -47,7 +48,7 @@ const entryOf = (id: string): UiComponentEntry => {
  */
 @Component({
   selector: '__PREFIX__-ui-system',
-  imports: [NgComponentOutlet, ReactiveFormsModule, AsButton, AsCheckbox, AsDrawer, AsInput, AsModal, AsTabs, AsToggle, AsTooltip],
+  imports: [NgComponentOutlet, ReactiveFormsModule, AsButton, AsCheckbox, AsDrawer, AsInput, AsModal, AsSelect, AsTabs, AsToggle, AsTooltip],
   templateUrl: './ui-system.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -69,7 +70,7 @@ export class UiSystem {
   private readonly switches = signal<Readonly<Record<string, boolean>>>({});
   /** Los componentes cuyo código de todas las variantes está desplegado. */
   private readonly codeOpen = signal<ReadonlySet<string>>(new Set());
-  /** La pestaña activa de las variantes que no comparten estado, por variante. */
+  /** La pestaña activa de cada ejemplo, por variante: ninguno comparte estado con otro. */
   private readonly ownActive = signal<Readonly<Record<string, string>>>({});
   /** Las contraseñas que se están viendo, por variante. */
   private readonly shownPasswords = signal<ReadonlySet<string>>(new Set());
@@ -118,9 +119,13 @@ export class UiSystem {
     { id: 'seven', label: 'Eliminados', count: 1 },
     { id: 'eight', label: 'Spam', count: 9 },
   ];
-  /** La pestaña activa de los estilos y los tamaños: una sola para todos los ejemplos de esos grupos. */
-  readonly activeTab = signal('one');
   readonly actionItems = ACTIONS;
+  /** Un control por selector de solo lectura de la vista previa, con un valor elegido para que se vea cómo luce. */
+  readonly readonlySelects: Readonly<Record<string, FormControl<unknown>>> = Object.fromEntries(
+    entryOf('select')
+      .variants.filter((item) => item.props['readonlyInput'] === true)
+      .map((item) => [item.id, new FormControl<unknown>('pro')]),
+  );
   /** Un control por casilla de la vista previa: su estado sale de la variante. */
   readonly checkboxes: Readonly<Record<string, FormControl<boolean | null>>> = Object.fromEntries(
     entryOf('checkbox').variants.map((item) => [item.id, new FormControl({ value: item.props['checked'] === true, disabled: item.props['disabled'] === true })]),
@@ -185,14 +190,13 @@ export class UiSystem {
     });
   }
 
-  /** La pestaña activa de una variante: la compartida en los grupos que la comparten, la suya en el resto. */
-  activeOf(entry: UiComponentEntry, item: UiVariant): string {
-    return entry.sharedGroups?.includes(item.group) ? this.activeTab() : (this.ownActive()[item.id] ?? 'one');
+  /** La pestaña activa de un ejemplo: la suya, que empieza en la primera. */
+  activeOf(item: UiVariant): string {
+    return this.ownActive()[item.id] ?? 'one';
   }
 
-  setActive(entry: UiComponentEntry, item: UiVariant, id: string): void {
-    if (entry.sharedGroups?.includes(item.group)) this.activeTab.set(id);
-    else this.ownActive.update((current) => ({ ...current, [item.id]: id }));
+  setActive(item: UiVariant, id: string): void {
+    this.ownActive.update((current) => ({ ...current, [item.id]: id }));
   }
 
   isPasswordShown(item: UiVariant): boolean {

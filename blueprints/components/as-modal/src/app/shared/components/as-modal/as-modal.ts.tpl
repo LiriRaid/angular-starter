@@ -35,6 +35,9 @@ export class AsModal {
   /** El contenido maneja su propio espaciado: el área del contenido no le pone relleno (y su barra de desplazamiento queda en el borde del modal). */
   readonly flush = input(false, { transform: booleanAttribute });
 
+  /** Con `false` el panel no se mueve al arrastrar su encabezado: se queda centrado (el cierre y el resize no cambian). */
+  readonly draggable = input(true, { transform: booleanAttribute });
+
   readonly closable = input(true, { transform: booleanAttribute });
   readonly dismissableMask = input(true, { transform: booleanAttribute });
 
@@ -60,6 +63,7 @@ export class AsModal {
   readonly hostClasses = computed(() => {
     const parts = ['as-modal'];
     if (this.variant() === 'preview') parts.push('as-modal--preview');
+    if (!this.draggable()) parts.push('as-modal--fixed');
     if (this.flush()) parts.push('as-modal--flush');
 
     const extra = this.styleClass().trim();
@@ -140,6 +144,8 @@ export class AsModal {
   }
 
   onHeaderMouseDown(event: MouseEvent): void {
+    if (!this.draggable()) return;
+
     const target = event.target as HTMLElement;
     // Cualquier botón de acción del header (cerrar, "Ver UI", "Editar/Ver Perfil", etc.) no debe
     // iniciar un arrastre — si no, el simple click ya fija `position: fixed` + left/top en píxeles

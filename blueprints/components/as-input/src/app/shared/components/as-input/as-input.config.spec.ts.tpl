@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { addPrecise, resolveInputFieldStyles, resolveInputType, sanitizeDecimalInput, stepNumberValue } from './as-input.config';
+import { addPrecise, resolveInputFieldStyles, resolveInputLabelClass, resolveInputType, resolveTextareaFieldStyles, sanitizeDecimalInput, stepNumberValue } from './as-input.config';
 
 describe('resolveInputType', () => {
   it('number se dibuja como texto: el <input type="number"> nativo borra estados intermedios como "1." y salta el cursor', () => {
@@ -79,5 +79,32 @@ describe('resolveInputFieldStyles', () => {
   it('deja sitio a los botones de incremento a la derecha solo cuando hay stepper', () => {
     expect(resolveInputFieldStyles('number', false, false, false, 'on')['padding-right']).toBe('1rem');
     expect(resolveInputFieldStyles('number', false, false, false, 'on', true)['padding-right']).toBe('2.25rem');
+  });
+});
+
+describe('resolveTextareaFieldStyles', () => {
+  it('en `in` con label deja bajo el label el mismo sitio que el input (24px); sin label o en `on`/`over` no', () => {
+    expect(resolveTextareaFieldStyles('in', true, false, false)['padding-top']).toBe('1.5rem');
+    expect(resolveTextareaFieldStyles('in', false, false, false)['padding-top']).toBe('0.625rem');
+    expect(resolveTextareaFieldStyles('on', true, false, false)['padding-top']).toBe('0.625rem');
+    expect(resolveTextareaFieldStyles('over', true, false, false)['padding-top']).toBe('0.625rem');
+  });
+
+  it('un icono a la izquierda o a la derecha reserva su lado; sin icono el relleno es el de siempre', () => {
+    expect(resolveTextareaFieldStyles('on', false, true, false)).toMatchObject({ 'padding-left': '2.5rem', 'padding-right': '1rem' });
+    expect(resolveTextareaFieldStyles('on', false, false, true)).toMatchObject({ 'padding-left': '1rem', 'padding-right': '2.5rem' });
+  });
+});
+
+describe('resolveInputLabelClass · icono a la izquierda', () => {
+  it('en `on` e `in` el label se corre para no tapar el icono', () => {
+    expect(resolveInputLabelClass('on', true, true)['left-8']).toBe(true);
+    expect(resolveInputLabelClass('in', true, true)['left-8']).toBe(true);
+  });
+
+  it('en `over` el label vive arriba del campo, fuera del icono: no se corre', () => {
+    const classes = resolveInputLabelClass('over', false, true);
+    expect(classes['left-8']).toBeUndefined();
+    expect(classes['left-2']).toBe(true);
   });
 });

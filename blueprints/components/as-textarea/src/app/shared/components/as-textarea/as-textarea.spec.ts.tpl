@@ -43,3 +43,64 @@ describe('AsTextarea · label en reposo', () => {
     expect(label().classList.contains('top-3')).toBe(false);
   });
 });
+
+describe('AsTextarea · espacio del label y de los iconos', () => {
+  let fixture: ComponentFixture<AsTextarea>;
+  const field = (): HTMLTextAreaElement => fixture.nativeElement.querySelector('textarea');
+  const label = (): HTMLLabelElement => fixture.nativeElement.querySelector('label');
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({ imports: [AsTextarea] }).compileComponents();
+    fixture = TestBed.createComponent(AsTextarea);
+    fixture.componentRef.setInput('label', 'Comentario');
+  });
+
+  it('en `in` el texto empieza bajo el label, también con readonlyInput y un valor', () => {
+    fixture.componentRef.setInput('variant', 'in');
+    fixture.componentRef.setInput('readonlyInput', true);
+    fixture.componentRef.setInput('value', 'Solo lectura');
+    fixture.detectChanges();
+
+    expect(field().style.paddingTop).toBe('1.5rem');
+  });
+
+  it('en `on` y `over` el texto conserva su relleno de siempre', () => {
+    for (const variant of ['on', 'over'] as const) {
+      fixture.componentRef.setInput('variant', variant);
+      fixture.detectChanges();
+      expect(field().style.paddingTop).toBe('0.625rem');
+    }
+  });
+
+  it('un icono a la izquierda empuja el texto y uno a la derecha le deja su lado', () => {
+    fixture.componentRef.setInput('lucideIcon', 'Search');
+    fixture.detectChanges();
+    expect(field().style.paddingLeft).toBe('2.5rem');
+
+    fixture.componentRef.setInput('iconPosition', 'right');
+    fixture.detectChanges();
+    expect(field().style.paddingLeft).toBe('1rem');
+    expect(field().style.paddingRight).toBe('2.5rem');
+  });
+
+  it('el icono se alinea con la primera línea: bajo el label en `in`, arriba en el resto', () => {
+    fixture.componentRef.setInput('lucideIcon', 'Search');
+    fixture.componentRef.setInput('variant', 'in');
+    fixture.detectChanges();
+    const icon = (): HTMLElement => fixture.nativeElement.querySelector('as-icon');
+    expect(icon().style.top).toBe('1.625rem');
+
+    fixture.componentRef.setInput('variant', 'on');
+    fixture.detectChanges();
+    expect(icon().style.top).toBe('0.75rem');
+  });
+
+  it('el fondo del label se redondea arriba y abajo, como el de los demás campos', () => {
+    for (const variant of ['on', 'in', 'over'] as const) {
+      fixture.componentRef.setInput('variant', variant);
+      fixture.detectChanges();
+      expect(label().classList.contains('rounded-md')).toBe(true);
+      expect(label().classList.contains('rounded-bl-none')).toBe(false);
+    }
+  });
+});

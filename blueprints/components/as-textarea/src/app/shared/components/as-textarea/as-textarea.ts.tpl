@@ -1,17 +1,17 @@
-import { NgClass } from '@angular/common';
+import { NgClass, NgStyle } from '@angular/common';
 import { afterNextRender, ChangeDetectionStrategy, Component, ElementRef, computed, DestroyRef, effect, forwardRef, inject, Injector, input, output, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR, NgControl, ReactiveFormsModule } from '@angular/forms';
 
 import { AsIcon } from '../as-icon/as-icon';
 import { LucideIconName } from '@core/common/icons/lucide-icons';
-import { createInputPresentation } from '../as-input/as-input.config';
+import { createInputPresentation, resolveTextareaFieldStyles } from '../as-input/as-input.config';
 import type { AsIconPosition, AsVariant } from '../as-input/as-input.entity';
 
 @Component({
   selector: 'as-textarea',
   standalone: true,
-  imports: [NgClass, FormsModule, ReactiveFormsModule, AsIcon],
+  imports: [NgClass, NgStyle, FormsModule, ReactiveFormsModule, AsIcon],
   templateUrl: './as-textarea.html',
   styleUrl: './as-textarea.css',
   providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => AsTextarea), multi: true }],
@@ -153,6 +153,12 @@ export class AsTextarea implements ControlValueAccessor {
   readonly labelBackground = this.presentation.labelBackground;
   readonly labelColor = this.presentation.labelColor;
   readonly labelClass = this.presentation.labelClass;
+
+  /** Relleno del texto: bajo el label en `in` y fuera del icono, a su lado. */
+  readonly fieldStyles = computed(() => resolveTextareaFieldStyles(this.variant(), !!this.label(), this.hasLeftIcon(), this.hasIcon() && this.iconPosition() === 'right'));
+
+  /** El icono se alinea con la primera línea del texto: en `in` esa línea queda bajo el label. */
+  readonly iconTop = computed(() => (this.variant() === 'in' && !!this.label() ? '1.625rem' : '0.75rem'));
 
   /** Con varias filas el label en reposo no se centra en el alto del campo (quedaría flotando a mitad de un cuadro de 4 líneas): se ancla junto a la primera línea. Flotando o en `over` no cambia nada. */
   readonly resolvedLabelClass = computed(() => {
