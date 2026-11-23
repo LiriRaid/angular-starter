@@ -67,6 +67,21 @@ describe('anchorRectOf', () => {
     host.remove();
   });
 
+  it('un hijo oculto (sin caja) no arrastra el ancla hacia la esquina de la página', () => {
+    const host = document.createElement('span');
+    const hidden = document.createElement('span');
+    host.appendChild(hidden);
+    document.body.appendChild(host);
+    vi.spyOn(host, 'getBoundingClientRect').mockReturnValue(rect(100, 118, 40, 120));
+    vi.spyOn(hidden, 'getBoundingClientRect').mockReturnValue(rect(0, 0, 0, 0));
+
+    const anchor = anchorRectOf(host);
+
+    expect(anchor.top).toBe(100);
+    expect(anchor.left).toBe(40);
+    host.remove();
+  });
+
   it('un host que no es en línea conserva su propia caja', () => {
     const host = document.createElement('div');
     const inner = document.createElement('button');
