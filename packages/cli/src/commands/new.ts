@@ -13,7 +13,7 @@ import { RENDERING_PROFILES } from '../engine/rendering/index.js';
 import { ROUTING_PROFILES } from '../engine/routing/index.js';
 import { runPipeline, type GenerationContext } from '../engine/pipeline.js';
 import { NEW_PROJECT_STAGES, validateEnvironment } from '../engine/stages.js';
-import { CancelledError, CliError, UsageError } from '../errors.js';
+import { CliError, UsageError } from '../errors.js';
 import { println, type CliIo } from '../io.js';
 import { formatRows, createStyler } from '../ui/format.js';
 import { validateProjectName } from '../validation/project-name.js';
@@ -62,21 +62,18 @@ export async function newCommand(
 
   // Validate what was already given before asking anything else.
   resolveOptions({ file, flags: flagOptions });
+  const optionsWith = (answers: Partial<StarterOptions>): StarterOptions =>
+    resolveOptions({ file, flags: { ...flagOptions, ...answers } });
+
+  // The wizard ends by asking to create the project, change an answer or cancel (ADR-0013), so it
+  // prints the summary itself, each time it asks.
   const answers = interactive
-    ? await runWizard({ ...file, ...flagOptions }, deps.prompter, io.env)
+    ? await runWizard({ ...file, ...flagOptions }, deps.prompter, io.env, undefined, {
+        show: (given) => printSummary(io, name, optionsWith(given)),
+      })
     : {};
-  const options = resolveOptions({ file, flags: { ...flagOptions, ...answers } });
-
-  printSummary(io, name, options);
-
-  if (interactive) {
-    const confirmed = await deps.prompter.confirm({
-      name: 'confirm',
-      message: 'Create project with this configuration?',
-      default: true,
-    });
-    if (!confirmed) throw new CancelledError();
-  }
+  const options = optionsWith(answers);
+  if (!interactive) printSummary(io, name, options);
 
   const context: GenerationContext = {
     name,

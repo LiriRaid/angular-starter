@@ -193,6 +193,7 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
       'after',
       '\nOnly Tailwind CSS, Client-Side Rendering and Lucide Icons are marked (Recommended) and preselected.\n' +
         'The defaults also use the Screaming Architecture, Angular Starter Routing, the Angular Starter App Shell and the essential components.\n' +
+        'In the wizard, press Esc to go back to the previous question; the last one can change any answer.\n' +
         'Run "as list" to see what each option is and where its documentation lives.\n' +
         examples([
           ['as new InventorySystem', 'Ask for each option'],
