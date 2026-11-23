@@ -1,5 +1,7 @@
+import { join } from 'node:path';
 import { ANGULAR_CLI_VERSION } from '../compat.js';
 import type { StarterOptions } from '../config/schema.js';
+import { pathExists } from './fs.js';
 
 export interface NgCommand {
   command: string;
@@ -33,4 +35,20 @@ export function buildNgCommand(name: string, options: StarterOptions): NgCommand
       `--prefix=${options.prefix}`,
     ],
   };
+}
+
+/**
+ * The official `ng add @angular/ssr` for a project that exists already. When the project has its own
+ * Angular CLI installed it runs that file with node, never the `node_modules/.bin/ng` shim: `ng add`
+ * installs packages, pnpm rewrites the shim while it runs, and on Windows cmd.exe reads a batch file
+ * as it executes it, so it resumes in the rewritten file and runs the whole command a second time
+ * ("A merge conflicted on path /src/server.ts"). Without the CLI installed it downloads the tested one.
+ */
+export async function buildNgAddSsrCommand(targetDir: string): Promise<NgCommand> {
+  const addArgs = ['add', '@angular/ssr', '--skip-confirmation'];
+  const localCli = join(targetDir, 'node_modules', '@angular', 'cli', 'bin', 'ng.js');
+  if (await pathExists(localCli)) {
+    return { command: process.execPath, args: [localCli, ...addArgs] };
+  }
+  return { command: 'npx', args: ['--yes', `@angular/cli@${ANGULAR_CLI_VERSION}`, ...addArgs] };
 }
