@@ -26,6 +26,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Fixed
 
+- `as add rendering ssr|starter-ssr` works in a pnpm project on Windows: `ng add @angular/ssr` now runs
+  from the project's own Angular CLI with node. Through the `.bin` shim, pnpm rewrote it while `cmd.exe`
+  was reading it, and the command ran twice and stopped with "A merge conflicted on path /src/server.ts"
+  (ADR-0016 and ADR-0017).
+- `as new` and `as doctor` say why a package manager that is installed refuses to run (corepack does it
+  for yarn inside a folder whose `package.json` names another manager) instead of calling it not found.
 - The UI System chips (variant names and tokens) use the dark field surface in dark mode; the chosen
   chip is marked by colour. The tabs of every example are independent again (`sharedGroups` is gone).
 - `as-textarea`: in `in` the text starts under the label, a left or right icon reserves its side and
