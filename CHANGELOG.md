@@ -6,6 +6,30 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- The welcome page brings the documentation of AS Starter (`features/docs`, ADR-0015 and plan 0013): a
+  side menu and pages for getting started, the design base, the native components and the app shell, and
+  a tutorials page with numbered steps, at `/docs` and `/docs/<page>`, with a Documentation item in the
+  navigation tree. The cards "AS Starter documentation" and "Learn with tutorials" open them instead of
+  angular.dev.
+- `as-modal` gets `draggable` (default `true`): with `false` the header does not move the panel. The
+  UI System has a "Se puede mover" switch for it.
+
+### Fixed
+
+- The UI System chips (variant names and tokens) use the dark field surface in dark mode; the chosen
+  chip is marked by colour. The tabs of every example are independent again (`sharedGroups` is gone).
+- `as-textarea`: in `in` the text starts under the label, a left or right icon reserves its side and
+  lines up with the first line.
+- `as-input` with `isTagInput` in `in` and `over`: the label follows the variant (no dark box) and the
+  box has the height of a plain input, so rows of fields line up.
+- The label background of `as-input` and `as-textarea` rounds on every corner; the `over` label no
+  longer moves for a left icon.
+- The tooltip on a component host (`as-button`) anchors `top` and `bottom` to the whole button, as
+  `left` and `right` already did.
+- The readonly `as-select` of the catalog shows a chosen value in each mode.
+
 ### Changed
 
 - The design preferences page is reached only from the user menu: its navigation entry is `hidden`
@@ -13,7 +37,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   (ADR-0014 and plan 0012).
 - The UI System catalog (ADR-0014): the previews of every component are apart (no overlaps), show
   every property in each mode (`required variant="on"`, `in`, `over`), the tooltip on the host and on
-  the text, tabs with a shared active tab in Estilos and Tamaños, icons and counters, the password with
+  the text, tabs (their active tab is independent again since ADR-0015), icons and counters, the password with
   its eye, the modal and the drawer with `flush` and a padded inner content, and every input of each
   component or the reason it is not shown. The cards and the code of all the variants collapse with the
   accordion animation.

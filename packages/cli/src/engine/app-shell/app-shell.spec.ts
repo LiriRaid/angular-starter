@@ -425,7 +425,7 @@ describe('App Shell profile', () => {
       await apply();
       const data = await read(`${HOME}/home.data.ts`);
       const tree = await read(`${SHELL}/navigation/navigation.data.ts`);
-      const routes = [...data.matchAll(/route: '([^']+)'/g)].map((match) => match[1]);
+      const routes = [...data.matchAll(/route: '([^']+)'/g)].map((match) => match[1] ?? '');
       expect(routes).toContain('/dashboard');
       for (const route of routes) {
         const page = `/${route.split('/')[1]}`;
@@ -449,11 +449,24 @@ describe('App Shell profile', () => {
 
       it('brings the documentation of AS Starter with its pages, its tutorials and its README', async () => {
         await apply('Inventory System');
-        for (const file of ['docs.ts', 'docs.html', 'docs.data.ts', 'docs.routes.ts', 'docs.spec.ts', 'README.md']) {
+        for (const file of [
+          'docs.ts',
+          'docs.html',
+          'docs.data.ts',
+          'docs.routes.ts',
+          'docs.spec.ts',
+          'README.md',
+        ]) {
           await expect(read(`${DOCS}/${file}`), file).resolves.toBeTypeOf('string');
         }
         const data = await read(`${DOCS}/docs.data.ts`);
-        for (const page of ['getting-started', 'design-base', 'components', 'app-shell', 'tutorials']) {
+        for (const page of [
+          'getting-started',
+          'design-base',
+          'components',
+          'app-shell',
+          'tutorials',
+        ]) {
           expect(data, page).toContain(`id: '${page}'`);
         }
         expect(data).toContain('as-starter');
@@ -471,7 +484,14 @@ describe('App Shell profile', () => {
 
       it('leaves no unresolved placeholder in it', async () => {
         await apply();
-        for (const file of ['docs.ts', 'docs.html', 'docs.data.ts', 'docs.routes.ts', 'docs.spec.ts', 'README.md']) {
+        for (const file of [
+          'docs.ts',
+          'docs.html',
+          'docs.data.ts',
+          'docs.routes.ts',
+          'docs.spec.ts',
+          'README.md',
+        ]) {
           expect(await read(`${DOCS}/${file}`), file).not.toMatch(/__[A-Z_]+__/);
         }
       });

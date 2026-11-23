@@ -73,10 +73,12 @@ describe('UI System profile (ADR-0010)', () => {
       'icon-only',
       'preview',
       'phone-country',
-      'sharedGroups',
+      'draggable',
     ]) {
       expect(catalog, variant).toContain(variant);
     }
+    // Every tabs example keeps its own active tab (ADR-0015).
+    expect(catalog).not.toContain('sharedGroups');
     // The variants are for the catalog only: they never touch the design preferences service.
     expect(catalog).not.toContain('DesignPreferences');
     expect(await read(`${SYSTEM}/ui-system.ts`)).not.toContain('DesignPreferences');
