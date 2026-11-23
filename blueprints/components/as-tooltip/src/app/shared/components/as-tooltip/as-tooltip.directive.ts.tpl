@@ -25,6 +25,8 @@ export function anchorRectOf(host: HTMLElement): DOMRect {
   let { top, bottom, left, right } = rect;
   for (const child of Array.from(host.children)) {
     const childRect = child.getBoundingClientRect();
+    // A child with no box (display: none) reports all zeros: it is not part of what is seen.
+    if (childRect.width === 0 && childRect.height === 0) continue;
     top = Math.min(top, childRect.top);
     bottom = Math.max(bottom, childRect.bottom);
     left = Math.min(left, childRect.left);
