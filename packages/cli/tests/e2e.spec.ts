@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { mkdtemp, readFile, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -9,12 +9,17 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 /**
  * Runs the compiled CLI against the real Angular CLI (needs network and a prior `pnpm build`).
  * Opt in with AS_E2E=1.
+ *
+ * Every project that is installed costs minutes, so there are few of them and each covers a family
+ * of the options (ADR-0016); the other combinations are covered by the unit specs of the engine.
+ * The projects install with pnpm: its store makes every install after the first a matter of links.
  */
 const enabled = process.env['AS_E2E'] === '1';
 const bin = fileURLToPath(new URL('../dist/bin.js', import.meta.url));
 const TIMEOUT_MS = 5 * 60_000;
 const INSTALL_TIMEOUT_MS = 15 * 60_000;
 const CLEANUP_TIMEOUT_MS = 10 * 60_000;
+const CHILD_ENV = { CI: '1' };
 
 describe.skipIf(!enabled)('as new (end to end, real Angular CLI)', () => {
   let cwd: string;
@@ -33,7 +38,7 @@ describe.skipIf(!enabled)('as new (end to end, real Angular CLI)', () => {
     const result = await execa(
       'node',
       [bin, 'new', name, '--defaults', '--no-install', '--no-git', ...flags],
-      { cwd, reject: false, env: { CI: '1' }, extendEnv: true },
+      { cwd, reject: false, env: CHILD_ENV, extendEnv: true },
     );
     expect(result.exitCode, `${result.stdout}\n${result.stderr}`).toBe(0);
     return join(cwd, name);
@@ -43,14 +48,20 @@ describe.skipIf(!enabled)('as new (end to end, real Angular CLI)', () => {
   async function createInstalled(name: string, ...flags: string[]) {
     const result = await execa(
       'node',
-      [bin, 'new', name, '--defaults', '--no-git', '--package-manager', 'npm', ...flags],
-      { cwd, reject: false, env: { CI: '1' }, extendEnv: true },
+      [bin, 'new', name, '--defaults', '--no-git', '--package-manager', 'pnpm', ...flags],
+      { cwd, reject: false, env: CHILD_ENV, extendEnv: true },
     );
     expect(
       result.exitCode,
       `${result.stdout}
 ${result.stderr}`,
     ).toBe(0);
+    // CI mode makes pnpm freeze the lockfile, and `ng add` installs on its own after a command changed
+    // package.json: the project says so for itself, in the file where pnpm reads its settings.
+    const workspace = join(cwd, name, 'pnpm-workspace.yaml');
+    if (existsSync(workspace)) {
+      await writeFile(workspace, `${await readFile(workspace, 'utf8')}\nfrozenLockfile: false\n`);
+    }
     return join(cwd, name);
   }
 
@@ -59,7 +70,7 @@ ${result.stderr}`,
     const result = await execa('node', [bin, ...args], {
       cwd: project,
       reject: false,
-      env: { CI: '1' },
+      env: CHILD_ENV,
       extendEnv: true,
     });
     expect(
@@ -71,12 +82,13 @@ ${result.stderr}`,
   }
 
   async function ng(project: string, ...args: string[]) {
-    const result = await execa('npx', ['--no-install', 'ng', ...args], {
-      cwd: project,
-      reject: false,
-      env: { CI: '1' },
-      extendEnv: true,
-    });
+    // Each project runs the Angular CLI through its own package manager (pnpm refuses to run in an npm one).
+    const npm = existsSync(join(project, 'package-lock.json'));
+    const result = await execa(
+      npm ? 'npx' : 'pnpm',
+      npm ? ['--no-install', 'ng', ...args] : ['exec', 'ng', ...args],
+      { cwd: project, reject: false, env: CHILD_ENV, extendEnv: true },
+    );
     expect(
       result.exitCode,
       `ng ${args.join(' ')}
@@ -124,102 +136,38 @@ ${result.stderr}`,
     TIMEOUT_MS,
   );
 
-  it.each([
-    ['csr', 'e2e-screaming'],
-    ['ssr', 'e2e-screaming-ssr'],
-  ])(
-    'creates a Screaming Architecture project (%s) that builds and passes its tests',
-    async (rendering, name) => {
+  it(
+    'creates a Screaming project with the Angular Starter routing and the default Angular SSR that builds',
+    async () => {
       const project = await createInstalled(
-        name,
+        'e2e-routing-ssr',
         '--architecture',
         'screaming',
+        '--routing',
+        'starter',
         '--rendering',
-        rendering,
+        'ssr',
         '--app-shell',
         'none',
       );
 
       for (const file of [
         'src/app/core/README.md',
-        'src/app/features/home/home.routes.ts',
-        'src/app/shared/components/index.ts',
+        'src/app/core/navigation/breadcrumb.service.ts',
+        'src/app/core/navigation/navigation-title.strategy.ts',
+        'src/app/features/app-shell/navigation/navigation.data.ts',
+        'src/main.server.ts',
       ]) {
         expect(existsSync(join(project, file)), file).toBe(true);
       }
       expect(await read(project, 'tsconfig.json')).toContain('"@features/*"');
-      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
-      expect(config.options.architecture).toBe('screaming');
-
-      await ng(project, 'build');
-      await ng(project, 'test', '--watch=false');
-    },
-    INSTALL_TIMEOUT_MS,
-  );
-
-  it.each([
-    ['csr', 'e2e-routing'],
-    ['ssr', 'e2e-routing-ssr'],
-  ])(
-    'creates a Screaming project with the Angular Starter routing (%s) that builds and passes its tests',
-    async (rendering, name) => {
-      const project = await createInstalled(
-        name,
-        '--architecture',
-        'screaming',
-        '--routing',
-        'starter',
-        '--rendering',
-        rendering,
-        '--app-shell',
-        'none',
-      );
-
-      for (const file of [
-        'src/app/core/navigation/breadcrumb.service.ts',
-        'src/app/core/navigation/navigation-title.strategy.ts',
-        'src/app/core/navigation/navigation.providers.ts',
-        'src/app/features/app-shell/navigation/navigation.data.ts',
-      ]) {
-        expect(existsSync(join(project, file)), file).toBe(true);
-      }
       expect(await read(project, 'src/app/app.config.ts')).toContain(
-        `provideNavigation(APP_NAVIGATION, { appName: '${name}' })`,
+        `provideNavigation(APP_NAVIGATION, { appName: 'e2e-routing-ssr' })`,
       );
       const config = JSON.parse(await read(project, 'angular-starter.config.json'));
       expect(config.options).toMatchObject({ architecture: 'screaming', routing: 'starter' });
 
       await ng(project, 'build');
-      await ng(project, 'test', '--watch=false');
-    },
-    INSTALL_TIMEOUT_MS,
-  );
-
-  it(
-    'creates a Starter SSR project with incremental hydration that builds and passes its tests',
-    async () => {
-      const project = await createInstalled(
-        'e2e-starter-ssr',
-        '--architecture',
-        'screaming',
-        '--routing',
-        'starter',
-        '--rendering',
-        'starter-ssr',
-        '--icons',
-        'none',
-        '--components',
-        'none',
-      );
-      const config = await read(project, 'src/app/app.config.ts');
-      expect(config).toContain('withIncrementalHydration()');
-      expect(await read(project, 'src/app/features/home/home.html')).toContain(
-        '@defer (hydrate on viewport)',
-      );
-      expect(existsSync(join(project, 'src', 'main.server.ts'))).toBe(true);
-
-      await ng(project, 'build');
-      await ng(project, 'test', '--watch=false');
     },
     INSTALL_TIMEOUT_MS,
   );
@@ -227,8 +175,11 @@ ${result.stderr}`,
   it(
     'adds routing, icons, SSR and components to an existing project and generates a feature that build and test',
     async () => {
+      // npm on purpose: `ng add @angular/ssr` leaves "a merge conflicted on path /src/server.ts" with pnpm.
       const project = await createInstalled(
         'e2e-add',
+        '--package-manager',
+        'npm',
         '--architecture',
         'screaming',
         '--routing',
@@ -297,6 +248,11 @@ ${result.stderr}`,
       expect(styles).toContain('@layer base, components, legacy-overrides, utilities;');
       expect(await read(project, 'angular.json')).not.toContain('theme-styles');
       expect(await read(project, 'angular.json')).toContain('src/test-setup.ts');
+      // The Lucide package is a dependency and is installed.
+      expect(
+        JSON.parse(await read(project, 'package.json')).dependencies['@lucide/angular'],
+      ).toMatch(/^\^1\./);
+      expect(existsSync(join(project, 'node_modules', '@lucide', 'angular'))).toBe(true);
 
       // The App Shell: layout, sidebar, header and breadcrumb, the example pages and their routes.
       for (const file of [
@@ -322,7 +278,7 @@ ${result.stderr}`,
   );
 
   it(
-    'creates a project with every component and the Starter SSR that builds and passes its tests',
+    'creates a project with every component and the Starter SSR with incremental hydration that builds and passes its tests',
     async () => {
       const project = await createInstalled(
         'e2e-all-components',
@@ -341,9 +297,14 @@ ${result.stderr}`,
         'src/app/shared/components/as-theme-color-picker/as-theme-color-picker.ts',
         'src/app/shared/components/as-weekly-schedule/as-weekly-schedule.ts',
         'src/app/features/home/home-details/home-details.ts',
+        'src/main.server.ts',
       ]) {
         expect(existsSync(join(project, file)), file).toBe(true);
       }
+      expect(await read(project, 'src/app/app.config.ts')).toContain('withIncrementalHydration()');
+      expect(await read(project, 'src/app/features/home/home.html')).toContain(
+        '@defer (hydrate on viewport)',
+      );
 
       await ng(project, 'build');
       await ng(project, 'test', '--watch=false');
@@ -352,7 +313,7 @@ ${result.stderr}`,
   );
 
   it(
-    'adds the App Shell to an existing project and generates a feature inside it that build and test',
+    'adds the App Shell, the components, presence and the UI System to an existing project that builds and passes its tests',
     async () => {
       const project = await createInstalled(
         'e2e-add-shell',
@@ -366,18 +327,25 @@ ${result.stderr}`,
       await asProject(project, 'add', 'app-shell');
       await asProject(project, 'generate', 'feature', 'billing');
       await asProject(project, 'add', 'components', 'all');
+      await asProject(project, 'add', 'presence');
+      await asProject(project, 'add', 'ui-system');
 
       const config = JSON.parse(await read(project, 'angular-starter.config.json'));
       expect(config.options).toMatchObject({
         appShell: 'starter',
         icons: 'lucide',
         components: 'all',
+        presence: 'starter',
+        uiSystem: 'starter',
       });
       const routes = await read(project, 'src/app/app.routes.ts');
       expect(routes.indexOf("path: 'billing'")).toBeGreaterThan(routes.indexOf('children: ['));
       expect(existsSync(join(project, 'src/app/shared/components/as-table/as-table.ts'))).toBe(
         true,
       );
+      expect(
+        await read(project, 'src/app/features/app-shell/layout/sidebar/user-menu/user-menu.html'),
+      ).toContain('um-status-trigger');
 
       await ng(project, 'build');
       await ng(project, 'test', '--watch=false');
@@ -386,9 +354,15 @@ ${result.stderr}`,
   );
 
   it(
-    'creates a project with presence and the welcome home that builds and passes its tests',
+    'creates a project with presence, the welcome home with its documentation and the UI System that builds and passes its tests',
     async () => {
-      const project = await createInstalled('e2e-presence', '--presence', 'starter');
+      const project = await createInstalled(
+        'e2e-presence-ui-system',
+        '--presence',
+        'starter',
+        '--ui-system',
+        'starter',
+      );
       for (const file of [
         'src/app/core/presence/presence.service.ts',
         'src/app/core/presence/web-socket-presence.transport.ts',
@@ -398,32 +372,30 @@ ${result.stderr}`,
         'src/app/core/theme/README.md',
         'src/app/shared/components/README.md',
         'src/styles/README.md',
+        'src/app/features/docs/docs.ts',
+        'src/app/features/preference-design/preference-design.ts',
+        'src/app/features/preference-design/ui-system/ui-system.catalog.ts',
+        'src/app/core/design-preferences/design-preferences.service.ts',
+        'src/styles/features/design-preferences-styles.css',
       ]) {
         expect(existsSync(join(project, file)), file).toBe(true);
       }
-      expect(await read(project, 'src/app/app.config.ts')).toContain('providePresence()');
+      const appConfig = await read(project, 'src/app/app.config.ts');
+      expect(appConfig).toContain('providePresence()');
+      expect(appConfig).toContain('provideDesignPreferences()');
       expect(await read(project, 'src/app/features/home/home.html')).toContain(
         '@for (card of cards',
       );
       expect(await read(project, 'src/app/features/home/home.data.ts')).toContain("id: 'presence'");
-
-      await ng(project, 'build');
-      await ng(project, 'test', '--watch=false');
-    },
-    INSTALL_TIMEOUT_MS,
-  );
-
-  it(
-    'adds presence to an existing project that builds and passes its tests',
-    async () => {
-      const project = await createInstalled('e2e-add-presence');
-      await asProject(project, 'add', 'presence');
-      expect(JSON.parse(await read(project, 'angular-starter.config.json')).options.presence).toBe(
-        'starter',
+      expect(await read(project, 'src/app/features/preference-design/tabs/ui-tab.html')).toContain(
+        '<app-ui-system />',
       );
-      expect(
-        await read(project, 'src/app/features/app-shell/layout/sidebar/user-menu/user-menu.html'),
-      ).toContain('um-status-trigger');
+      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      expect(config.options).toMatchObject({
+        presence: 'starter',
+        uiSystem: 'starter',
+        layout: 'floating-wide',
+      });
 
       await ng(project, 'build');
       await ng(project, 'test', '--watch=false');
@@ -448,59 +420,6 @@ ${result.stderr}`,
 
       await ng(project, 'build');
       await ng(project, 'test', '--watch=false');
-    },
-    INSTALL_TIMEOUT_MS,
-  );
-
-  it(
-    'creates a project with the design preferences page and the UI System that builds and passes its tests',
-    async () => {
-      const project = await createInstalled('e2e-ui-system', '--ui-system', 'starter');
-      for (const file of [
-        'src/app/features/preference-design/preference-design.ts',
-        'src/app/features/preference-design/ui-system/ui-system.catalog.ts',
-        'src/app/core/design-preferences/design-preferences.service.ts',
-        'src/styles/features/design-preferences-styles.css',
-      ]) {
-        expect(existsSync(join(project, file)), file).toBe(true);
-      }
-      expect(await read(project, 'src/app/app.config.ts')).toContain('provideDesignPreferences()');
-      expect(await read(project, 'src/app/features/preference-design/tabs/ui-tab.html')).toContain(
-        '<app-ui-system />',
-      );
-      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
-      expect(config.options).toMatchObject({ uiSystem: 'starter', layout: 'floating-wide' });
-
-      await ng(project, 'build');
-      await ng(project, 'test', '--watch=false');
-    },
-    INSTALL_TIMEOUT_MS,
-  );
-
-  it(
-    'adds the UI System to an existing project that builds and passes its tests',
-    async () => {
-      const project = await createInstalled('e2e-add-ui-system');
-      await asProject(project, 'add', 'ui-system');
-      expect(JSON.parse(await read(project, 'angular-starter.config.json')).options.uiSystem).toBe(
-        'starter',
-      );
-
-      await ng(project, 'build');
-      await ng(project, 'test', '--watch=false');
-    },
-    INSTALL_TIMEOUT_MS,
-  );
-
-  it(
-    'installs the Lucide Icons package and still builds',
-    async () => {
-      const project = await createInstalled('e2e-lucide', '--icons', 'lucide');
-      expect(
-        JSON.parse(await read(project, 'package.json')).dependencies['@lucide/angular'],
-      ).toMatch(/^\^1\./);
-      expect(existsSync(join(project, 'node_modules', '@lucide', 'angular'))).toBe(true);
-      await ng(project, 'build');
     },
     INSTALL_TIMEOUT_MS,
   );
