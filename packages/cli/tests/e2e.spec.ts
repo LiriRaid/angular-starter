@@ -175,11 +175,8 @@ ${result.stderr}`,
   it(
     'adds routing, icons, SSR and components to an existing project and generates a feature that build and test',
     async () => {
-      // npm on purpose: `ng add @angular/ssr` leaves "a merge conflicted on path /src/server.ts" with pnpm.
       const project = await createInstalled(
         'e2e-add',
-        '--package-manager',
-        'npm',
         '--architecture',
         'screaming',
         '--routing',
