@@ -1,3 +1,5 @@
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { DEFAULT_OPTIONS } from '../config/resolve.js';
 import type { GenerationContext } from './pipeline.js';
@@ -8,6 +10,7 @@ import {
   applyDesign,
   applyPresence,
   installArgsOf,
+  validateEnvironment,
 } from './stages.js';
 
 const contextWith = (
@@ -77,5 +80,44 @@ describe('installArgsOf', () => {
 
   it('keeps yarn plain: its modern versions reject the flag', () => {
     expect(installArgsOf('yarn')).toEqual(['install']);
+  });
+});
+
+describe('validateEnvironment', () => {
+  function contextWhere(
+    run: (command: string) => Promise<{ stdout: string; stderr: string }>,
+  ): GenerationContext {
+    return {
+      name: 'as-no-such-project',
+      cwd: tmpdir(),
+      targetDir: join(tmpdir(), 'as-no-such-project'),
+      options: { ...DEFAULT_OPTIONS, packageManager: 'yarn', install: true, git: false },
+      deps: { run, nodeVersion: '24.15.0' },
+    } as unknown as GenerationContext;
+  }
+
+  it('says a package manager is missing when it cannot be started', async () => {
+    const context = contextWhere(async (command) => {
+      if (command === 'yarn') throw new Error('spawn yarn ENOENT');
+      return { stdout: '1.0.0', stderr: '' };
+    });
+    await expect(validateEnvironment.run(context)).rejects.toThrow(
+      'The package manager "yarn" was not found',
+    );
+  });
+
+  it('shows what a package manager says when it is installed but refuses to run (corepack inside a folder that names another manager)', async () => {
+    const context = contextWhere(async (command) => {
+      if (command === 'yarn') {
+        throw Object.assign(new Error('Command failed'), {
+          stderr:
+            'This project is configured to use pnpm because package.json has a "packageManager" field\nmore',
+        });
+      }
+      return { stdout: '1.0.0', stderr: '' };
+    });
+    await expect(validateEnvironment.run(context)).rejects.toThrow(
+      /"yarn" could not run: This project is configured to use pnpm/,
+    );
   });
 });

@@ -44,6 +44,21 @@ describe('as doctor', () => {
     expect(fake.out()).toMatch(/yarn.*not found/);
   });
 
+  it('says why a package manager that is installed refuses to run, instead of calling it missing', async () => {
+    const fake = createFakeIo();
+    const refusal = Object.assign(new Error('Command failed with exit code 1: yarn --version'), {
+      stderr:
+        'This project is configured to use pnpm because package.json has a "packageManager" field',
+    });
+    const code = await run(['doctor'], fake.io, {
+      run: runnerFor({ ...HEALTHY, 'yarn --version': refusal }),
+      nodeVersion: '24.15.0',
+    });
+    expect(code).toBe(0);
+    expect(fake.out()).toMatch(/yarn could not run: This project is configured to use pnpm/);
+    expect(fake.out()).not.toMatch(/yarn.*not found/);
+  });
+
   it('warns when a newer Angular CLI is available', async () => {
     const fake = createFakeIo();
     const answers = { ...HEALTHY, 'npm view @angular/cli dist-tags.latest': '23.0.0' };
