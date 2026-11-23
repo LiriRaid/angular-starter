@@ -76,7 +76,11 @@ describe('as add', () => {
       const manifest = JSON.parse(await readFile(join(project, 'package.json'), 'utf8'));
       expect(manifest.dependencies).toHaveProperty(['@lucide/angular']);
       expect((await readConfig(project)).icons).toBe('lucide');
-      expect(result.calls).toContainEqual({ command: 'npm', args: ['install'], cwd: project });
+      expect(result.calls).toContainEqual({
+        command: 'npm',
+        args: ['install', '--no-audit', '--no-fund', '--prefer-offline'],
+        cwd: project,
+      });
     });
 
     it('does not install with --no-install', async () => {
@@ -155,7 +159,11 @@ describe('as add', () => {
       const options = await readConfig(project);
       expect(options).toMatchObject({ appShell: 'starter', components: 'none', icons: 'lucide' });
       expect(await readFile(join(project, 'src/app/app.ts'), 'utf8')).toContain('provideLayout(');
-      expect(result.calls).toContainEqual({ command: 'npm', args: ['install'], cwd: project });
+      expect(result.calls).toContainEqual({
+        command: 'npm',
+        args: ['install', '--no-audit', '--no-fund', '--prefer-offline'],
+        cwd: project,
+      });
     });
 
     it('needs the starter routing', async () => {
@@ -485,7 +493,11 @@ describe('as add', () => {
       );
       const options = await readConfig(project);
       expect(options).toMatchObject({ components: 'recommended', icons: 'lucide' });
-      expect(result.calls).toContainEqual({ command: 'npm', args: ['install'], cwd: project });
+      expect(result.calls).toContainEqual({
+        command: 'npm',
+        args: ['install', '--no-audit', '--no-fund', '--prefer-offline'],
+        cwd: project,
+      });
     });
 
     it('needs Tailwind CSS, the stylesheet the design is written in', async () => {

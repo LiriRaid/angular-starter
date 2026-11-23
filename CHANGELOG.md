@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- `as new` installs with `npm install --no-audit --no-fund --prefer-offline` or `pnpm install
+--prefer-offline` (yarn stays plain), so the install reaches for the local cache first
+  (ADR-0016 and plan 0014).
+- The end-to-end suite installs seven projects instead of fifteen, each covering a family of options
+  and keeping the assertions of the ones it replaces, and installs them with pnpm.
+
 ### Added
 
 - The welcome page brings the documentation of AS Starter (`features/docs`, ADR-0015 and plan 0013): a
