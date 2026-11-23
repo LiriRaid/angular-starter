@@ -47,7 +47,7 @@ export class AsSelect implements ControlValueAccessor {
   readonly optionShape = input<'dot' | 'chip' | 'bar' | 'box'>('dot');
   /** Tamaño del ícono de cada opción cuando no hay `optionShape` de caja/chip (rama plana). */
   readonly optionIconSize = input<string | number>(14);
-  /** Oculta el texto de la etiqueta en las filas de la lista y en el campo cerrado (select no buscable), para selects "solo ícono". */
+  /** Oculta el texto de la etiqueta en las filas de la lista y en el campo cerrado (solo en un select no buscable: con búsqueda el campo es un `<input>` de texto y sigue mostrando la etiqueta), para selects "solo ícono". */
   readonly hideOptionLabel = input<boolean>(false);
   /** Tiñe el fondo del CAMPO con una mezcla suave de este color; sin definir, el fondo de siempre. */
   readonly accentColor = input<string | undefined>(undefined);

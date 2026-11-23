@@ -1,9 +1,10 @@
 import { NgComponentOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, type Type, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, type Signal, type Type, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { AsAvatar, AsButton, AsCheckbox, AsDivider, AsDrawer, AsIcon, AsInput, AsModal, AsPopover, AsSelect, AsSkeleton, AsTabs, AsTextarea, AsToggle, AsTooltip, type AsTab } from '@shared/components';
 import { AlertService } from '@shared/services';
+import type { ToastPosition } from '@shared/components/as-toast/as-toast.types';
 import { ACTIONS, UI_COMPONENTS, codeOfVariant, groupsOf, type UiComponentEntry, type UiOption, type UiVariant } from './ui-system.catalog';
 import { inputsOf, type UiProps } from './ui-system.code';
 
@@ -125,8 +126,8 @@ export class UiSystem {
     entryOf('checkbox').variants.map((item) => [item.id, new FormControl({ value: item.props['checked'] === true, disabled: item.props['disabled'] === true })]),
   );
 
-  /** El código de todas las variantes de cada componente; solo cambia con los interruptores. */
-  readonly allCode = computed(() => Object.fromEntries(UI_COMPONENTS.map((entry) => [entry.id, this.allCodeOf(entry)])));
+  /** El código de todas las variantes de cada componente, uno por tarjeta: solo cambia con los interruptores de esa tarjeta. */
+  readonly allCode: Readonly<Record<string, Signal<string>>> = Object.fromEntries(UI_COMPONENTS.map((entry) => [entry.id, computed(() => this.allCodeOf(entry))]));
 
   /** Lo que recibe el modal abierto y el panel abierto. */
   readonly modalInputs = computed(() => inputsOf(this.propsOf(entryOf('modal'))) as ModalInputs);
@@ -266,30 +267,31 @@ export class UiSystem {
 
   showToast(item: UiVariant): void {
     this.choose(entryOf('toast'), item);
-    const position = item.props['position'] as 'top-left' | 'top-right' | 'bottom-left' | 'bottom-center' | 'bottom-right' | 'center' | undefined;
+    const position = item.props['position'] as ToastPosition | undefined;
     const title = String(item.props['title']);
     const message = String(item.props['message']);
+    const alerts = this.alertService;
     switch (item.props['method']) {
       case 'showInfo':
-        this.alertService.showInfo(title, message, undefined, undefined, position);
+        alerts.showInfo(title, message, undefined, undefined, position);
         break;
       case 'showWarning':
-        this.alertService.showWarning(title, message);
+        alerts.showWarning(title, message, undefined, undefined, false, position);
         break;
       case 'showError':
-        this.alertService.showError(title, message);
+        alerts.showError(title, message, undefined, undefined, position);
         break;
       case 'showSecondary':
-        this.alertService.showSecondary(title, message);
+        alerts.showSecondary(title, message, undefined, undefined, position);
         break;
       case 'showContrast':
-        this.alertService.showContrast(title, message);
+        alerts.showContrast(title, message, undefined, undefined, position);
         break;
       case 'showLoading':
-        this.alertService.showLoading(title, message);
+        alerts.showLoading(title, message, undefined, undefined, position);
         break;
       default:
-        this.alertService.showSuccess(title, message);
+        alerts.showSuccess(title, message, undefined, undefined, position);
     }
   }
 

@@ -354,6 +354,28 @@ describe('UiSystem', () => {
     });
   });
 
+  describe('overlay sizes', () => {
+    it('gives the modal the width and the shape of the chosen variant', async () => {
+      const { fixture, component } = await render();
+      const modal = entryOf('modal');
+      component.openOverlay(modal, modal.variants.find((variant) => variant.id === 'width-48')!);
+      await fixture.whenStable();
+      expect((overlay().querySelector('.as-modal') as HTMLElement).style.width).toBe('48rem');
+
+      component.openOverlay(modal, modal.variants.find((variant) => variant.id === 'preview')!);
+      await fixture.whenStable();
+      expect(overlay().querySelector('.as-modal')?.classList.contains('as-modal--preview')).toBe(true);
+    });
+
+    it('gives the drawer the width of the chosen variant', async () => {
+      const { fixture, component } = await render();
+      const drawer = entryOf('drawer');
+      component.openOverlay(drawer, drawer.variants.find((variant) => variant.id === 'width-45')!);
+      await fixture.whenStable();
+      expect((overlay().querySelector('dialog.as-drawer') as HTMLElement).style.getPropertyValue('--as-drawer-width')).toBe('45rem');
+    });
+  });
+
   describe('toast', () => {
     it('shows a toast of the chosen type through the alert service', async () => {
       const { component } = await render();
@@ -368,6 +390,19 @@ describe('UiSystem', () => {
       expect(success).toHaveBeenCalledOnce();
       expect(warning).toHaveBeenCalledOnce();
       expect(error).toHaveBeenCalledOnce();
+    });
+
+    it('passes the position of the variant to the alert service for every type', async () => {
+      const { component } = await render();
+      const alerts = TestBed.inject(AlertService);
+      const warning = vi.spyOn(alerts, 'showWarning');
+      const error = vi.spyOn(alerts, 'showError');
+      const toast = entryOf('toast');
+      const withPosition = (method: string) => ({ ...toast.variants[0], props: { method, title: 'T', message: 'M', position: 'bottom-right' } });
+      component.showToast(withPosition('showWarning'));
+      component.showToast(withPosition('showError'));
+      expect(warning).toHaveBeenCalledWith('T', 'M', undefined, undefined, false, 'bottom-right');
+      expect(error).toHaveBeenCalledWith('T', 'M', undefined, undefined, 'bottom-right');
     });
   });
 });

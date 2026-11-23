@@ -145,7 +145,7 @@
               <div>
                 <pre class="overflow-x-auto rounded-lg bg-(--app-panel-muted-bg) p-3 text-caption-2-regular text-(--app-text-color)"><code>{{ entry.code }}
 
-{{ allCode()[entry.id] }}</code></pre>
+{{ allCode[entry.id]() }}</code></pre>
               </div>
             </div>
           </div>
