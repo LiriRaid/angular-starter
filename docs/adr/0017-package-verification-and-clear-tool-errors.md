@@ -25,9 +25,9 @@ found".
    the resolved consequence of ADR-0016). It falls back to `npx` only when the project has no
    dependencies installed.
 3. **A tool that is installed but refuses to run says so.** `refusalOf(error)` returns the first line
-   the tool printed to stderr when it started and failed. `as new` stops with `"yarn" could not run:
-<that line>` and `as doctor` warns with the same text; a tool that cannot be started at all is still
-   "not found". The case that surfaced it: corepack refuses to run yarn inside a folder whose
+   the tool printed to stderr when it started and failed. `as new` stops with "yarn could not run"
+   followed by that line, and `as doctor` warns with the same text; a tool that cannot be started at all
+   is still "not found". The case that surfaced it: corepack refuses to run yarn inside a folder whose
    `package.json` names pnpm in `packageManager`.
 
 ## Alternatives considered
