@@ -124,3 +124,34 @@ describe('a project that was not made by as new', () => {
     expect(fake.err()).toContain('as init');
   });
 });
+
+describe('as init --force on a project that has a configuration', () => {
+  it('keeps what as new recorded and detection can only assume: layout, SSR purpose, git, install', async () => {
+    await mkdir(join(root, 'src/app/features/app-shell/layout/main'), { recursive: true });
+    await writeFile(join(root, 'src/app/features/app-shell/layout/main/main.ts'), '');
+    await writeFile(
+      join(root, CONFIG),
+      JSON.stringify({
+        schemaVersion: 1,
+        options: { layout: 'compact-joined', ssrPurpose: 'landing', git: false, install: false },
+      }),
+    );
+    const { code } = await init(root, '--force');
+    expect(code).toBe(0);
+    const options = JSON.parse(await readFile(join(root, CONFIG), 'utf8')).options;
+    expect(options).toMatchObject({
+      appShell: 'starter',
+      layout: 'compact-joined',
+      git: false,
+      install: false,
+    });
+  });
+
+  it('does not fail on a package.json that is not valid JSON', async () => {
+    await writeFile(join(root, 'package.json'), '{ "name": "shop", }');
+    const { code, err } = await init(root);
+    expect(code, err).toBe(0);
+    const config = JSON.parse(await readFile(join(root, CONFIG), 'utf8'));
+    expect(config.generator.angularCli).toBe(ANGULAR_CLI_VERSION);
+  });
+});

@@ -203,7 +203,10 @@ async function planPlainComponent(
 
 /** A folder below src/app: relative, without `..` and without a leading slash. */
 function plainPathOf(path: string): string {
-  const segments = path.replaceAll('\\', '/').split('/').filter(Boolean);
+  const segments = path
+    .replaceAll('\\', '/')
+    .split('/')
+    .filter((segment) => segment !== '' && segment !== '.');
   if (
     path.startsWith('/') ||
     /^[a-zA-Z]:/.test(path) ||

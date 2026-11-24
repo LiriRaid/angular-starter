@@ -683,3 +683,48 @@ describe('as add', () => {
     expect(result.calls).toEqual([]);
   });
 });
+
+describe('as add components when tsconfig.json extends another file', () => {
+  const PLAIN = [
+    '--architecture',
+    'angular-default',
+    '--routing',
+    'angular',
+    '--components',
+    'none',
+    '--app-shell',
+    'none',
+    '--icons',
+    'none',
+  ];
+
+  async function extending(extendsValue: string, basePaths: Record<string, string[]>) {
+    const project = await createStarterProject(cwd, PLAIN);
+    await writeFile(
+      join(project, 'tsconfig.base.json'),
+      JSON.stringify({ compilerOptions: { paths: basePaths } }),
+    );
+    const tsconfig = await readFile(join(project, 'tsconfig.json'), 'utf8');
+    await writeFile(
+      join(project, 'tsconfig.json'),
+      tsconfig.replace('{', `{ "extends": "${extendsValue}",`),
+    );
+    return project;
+  }
+
+  it('keeps the aliases it inherits: paths in the child replace the ones of the base', async () => {
+    const project = await extending('./tsconfig.base.json', { '@app/*': ['./src/app/*'] });
+    const result = await add(project, ['components', 'button']);
+    expect(result.code, result.err).toBe(0);
+    const text = await readFile(join(project, 'tsconfig.json'), 'utf8');
+    for (const alias of ['@app/*', '@shared/*', '@core/*']) expect(text).toContain(`"${alias}"`);
+  });
+
+  it('stops and names the file when the base is outside the project folder', async () => {
+    const project = await extending('../tsconfig.shared.json', {});
+    const result = await add(project, ['components', 'button']);
+    expect(result.code).toBe(2);
+    expect(result.err).toContain('extends');
+    expect(await exists(join(project, 'src/app/shared'))).toBe(false);
+  });
+});

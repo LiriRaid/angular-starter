@@ -23,6 +23,7 @@ import { presenceProfile } from './presence/presence.js';
 import { uiSystemProfile } from './ui-system/ui-system.js';
 import { buildNgAddSsrCommand, buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
+import { EditShapeError } from './edits/planned.js';
 import { pathExists } from './fs.js';
 import { applySharedFoundation } from './shared-foundation.js';
 import { refusalOf } from './process.js';
@@ -119,7 +120,7 @@ export const applyArchitectureToProject: Stage = {
     try {
       await applyArchitecture.run(context);
     } catch (error) {
-      if (!(error instanceof RuntimeError)) throw error;
+      if (!(error instanceof EditShapeError)) throw error;
       throw new UsageError(
         `${error.message}`,
         'The architecture is applied only to a project that is still what "ng new" generates; this one has changes in that file, so nothing was written.',

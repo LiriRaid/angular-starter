@@ -302,3 +302,20 @@ describe('as generate component in a project that is not Screaming', () => {
     expect(result.err).toContain('--feature');
   });
 });
+
+describe('as generate component --path with dot segments', () => {
+  it('drops them, so the same folder has one spelling', async () => {
+    const plain = await mkdtemp(join(tmpdir(), 'as-generate-dot-'));
+    try {
+      const folder = await createStarterProject(plain, ['--architecture', 'angular-default']);
+      const result = await generate(
+        ['component', 'invoice-card', '--path', './billing/.', '--dry-run'],
+        folder,
+      );
+      expect(result.code, result.err).toBe(0);
+      expect(result.out).toContain('src/app/billing/invoice-card/invoice-card.ts');
+    } finally {
+      await rm(plain, { recursive: true, force: true });
+    }
+  });
+});

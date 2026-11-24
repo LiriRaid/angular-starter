@@ -1,11 +1,15 @@
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import { RuntimeError, UsageError } from '../errors.js';
+import { EditShapeError } from './edits/planned.js';
 import { DEFAULT_OPTIONS } from '../config/resolve.js';
 import type { GenerationContext } from './pipeline.js';
 import {
   NEW_PROJECT_STAGES,
   applyAppShell,
+  applyArchitecture,
+  applyArchitectureToProject,
   applyComponents,
   applyDesign,
   applyPresence,
@@ -119,5 +123,28 @@ describe('validateEnvironment', () => {
     await expect(validateEnvironment.run(context)).rejects.toThrow(
       /"yarn" could not run: This project is configured to use pnpm/,
     );
+  });
+});
+
+describe('applyArchitectureToProject', () => {
+  it('turns a file with an unexpected shape into a usage error that names it', async () => {
+    const run = vi
+      .spyOn(applyArchitecture, 'run')
+      .mockRejectedValue(new EditShapeError('src/app/app.ts', 'no class App'));
+    await expect(applyArchitectureToProject.run({} as GenerationContext)).rejects.toBeInstanceOf(
+      UsageError,
+    );
+    run.mockRestore();
+  });
+
+  it('lets any other failure through as it is', async () => {
+    const run = vi.spyOn(applyArchitecture, 'run').mockRejectedValue(new RuntimeError('disk full'));
+    await expect(applyArchitectureToProject.run({} as GenerationContext)).rejects.toThrow(
+      'disk full',
+    );
+    await expect(
+      applyArchitectureToProject.run({} as GenerationContext),
+    ).rejects.not.toBeInstanceOf(UsageError);
+    run.mockRestore();
   });
 });

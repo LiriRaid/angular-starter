@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { ANGULAR_CLI_VERSION } from '../compat.js';
+import type { StarterOptions } from '../config/schema.js';
 import {
   PROJECT_CONFIG_FILE,
   createProjectConfig,
@@ -38,7 +39,9 @@ export async function initCommand(io: CliIo, flags: InitFlags): Promise<void> {
     );
   }
 
-  const { options, notes } = await detectProject(root);
+  const detected = await detectProject(root);
+  const options = flags.force ? await keepRecorded(file, detected.options) : detected.options;
+  const notes = detected.notes;
   const style = createStyler(io.color);
   println(
     io.stdout,
@@ -56,12 +59,7 @@ export async function initCommand(io: CliIo, flags: InitFlags): Promise<void> {
   for (const note of notes) println(io.stdout, style.dim(`  Note: ${note}`));
 
   if (flags.dryRun) return;
-  const manifest = JSON.parse(
-    await readFile(join(root, 'package.json'), 'utf8').catch(() => '{}'),
-  ) as {
-    devDependencies?: Record<string, string>;
-    dependencies?: Record<string, string>;
-  };
+  const manifest = await readManifest(root);
   const installed = (
     manifest.devDependencies?.['@angular/cli'] ??
     manifest.dependencies?.['@angular/cli'] ??
@@ -78,4 +76,42 @@ export async function initCommand(io: CliIo, flags: InitFlags): Promise<void> {
     io.stdout,
     'Now "as add", "as generate" and "as config" work in this project. See "as list".',
   );
+}
+
+/** The package.json as an object; one that is not valid JSON is treated as having nothing in it. */
+async function readManifest(root: string): Promise<{
+  devDependencies?: Record<string, string>;
+  dependencies?: Record<string, string>;
+}> {
+  try {
+    return JSON.parse(await readFile(join(root, 'package.json'), 'utf8')) as object;
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * What detection can only assume (the layout of the shell, the purpose of the Starter SSR) and what is
+ * not in the project's files (Git, install) stay as `as new` recorded them when there is a file.
+ */
+async function keepRecorded(file: string, detected: StarterOptions): Promise<StarterOptions> {
+  let recorded: Partial<StarterOptions> = {};
+  try {
+    recorded =
+      (JSON.parse(await readFile(file, 'utf8')) as { options?: Partial<StarterOptions> }).options ??
+      {};
+  } catch {
+    return detected;
+  }
+  return {
+    ...detected,
+    layout:
+      detected.appShell === 'starter' ? (recorded.layout ?? detected.layout) : detected.layout,
+    ssrPurpose:
+      detected.rendering === 'starter-ssr'
+        ? (recorded.ssrPurpose ?? detected.ssrPurpose)
+        : detected.ssrPurpose,
+    git: recorded.git ?? detected.git,
+    install: recorded.install ?? detected.install,
+  };
 }
