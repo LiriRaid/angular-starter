@@ -23,7 +23,6 @@ import { presenceProfile } from './presence/presence.js';
 import { uiSystemProfile } from './ui-system/ui-system.js';
 import { buildNgAddSsrCommand, buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
-import { EditShapeError } from './edits/planned.js';
 import { pathExists } from './fs.js';
 import { applySharedFoundation } from './shared-foundation.js';
 import { refusalOf } from './process.js';
@@ -109,23 +108,30 @@ export const applyArchitecture: Stage = {
 };
 
 /**
- * The architecture of `sa add` (ADR-0019): the same profile as `sa new`, but a file of the project that
- * does not have the shape `ng new` leaves stops it before anything is written, said as a usage error
- * that names the file.
+ * The architecture of `sa add` (ADR-0022): the structure added to what the project has. It creates what
+ * is missing, adapts the files of the Angular skeleton that are still as `ng new` leaves them and leaves
+ * every other file alone; what it did and what the developer should review is said after the steps.
  */
 export const applyArchitectureToProject: Stage = {
   id: 'apply-architecture',
   title: 'Applying architecture profile',
-  async run(context) {
-    try {
-      await applyArchitecture.run(context);
-    } catch (error) {
-      if (!(error instanceof EditShapeError)) throw error;
-      throw new UsageError(
-        `${error.message}`,
-        'The architecture is applied only to a project that is still what "ng new" generates; this one has changes in that file, so nothing was written.',
+  async run({ name, options, targetDir, warnings, notes }) {
+    const report = await ARCHITECTURE_PROFILES[options.architecture]?.adopt({
+      targetDir,
+      name,
+      prefix: options.prefix,
+    });
+    if (!report) return;
+    if (report.adapted.length > 0) notes?.push(`Adapted: ${report.adapted.join(', ')}.`);
+    if (report.removed.length > 0) {
+      notes?.push(
+        `Removed (Angular's welcome page, no longer used): ${report.removed.join(', ')}.`,
       );
     }
+    for (const { file, reason } of report.review) warnings.push(`Review ${file}: ${reason}`);
+    notes?.push(
+      'Next: "sa generate feature <name>" creates a feature; "sa add routing starter" and "sa add app-shell" add the navigation and the shell.',
+    );
   },
 };
 

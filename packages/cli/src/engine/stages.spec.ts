@@ -1,14 +1,13 @@
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
-import { RuntimeError, UsageError } from '../errors.js';
-import { EditShapeError } from './edits/planned.js';
+import { RuntimeError } from '../errors.js';
+import { screamingProfile } from './architectures/screaming.js';
 import { DEFAULT_OPTIONS } from '../config/resolve.js';
 import type { GenerationContext } from './pipeline.js';
 import {
   NEW_PROJECT_STAGES,
   applyAppShell,
-  applyArchitecture,
   applyArchitectureToProject,
   applyComponents,
   applyDesign,
@@ -127,24 +126,35 @@ describe('validateEnvironment', () => {
 });
 
 describe('applyArchitectureToProject', () => {
-  it('turns a file with an unexpected shape into a usage error that names it', async () => {
-    const run = vi
-      .spyOn(applyArchitecture, 'run')
-      .mockRejectedValue(new EditShapeError('src/app/app.ts', 'no class App'));
-    await expect(applyArchitectureToProject.run({} as GenerationContext)).rejects.toBeInstanceOf(
-      UsageError,
-    );
-    run.mockRestore();
+  const contextOf = (): GenerationContext =>
+    ({
+      name: 'demo',
+      targetDir: tmpdir(),
+      options: { ...DEFAULT_OPTIONS, architecture: 'screaming' },
+      warnings: [],
+      notes: [],
+    }) as unknown as GenerationContext;
+
+  it('tells what the profile adapted and removed, what to review and what to do next', async () => {
+    const adopt = vi.spyOn(screamingProfile, 'adopt').mockResolvedValue({
+      adapted: ['src/app/app.ts'],
+      removed: ['src/app/app.html'],
+      review: [{ file: 'src/app/app.css', reason: 'it is no longer used' }],
+    });
+    const context = contextOf();
+    await applyArchitectureToProject.run(context);
+    expect(context.notes?.join('\n')).toContain('Adapted: src/app/app.ts.');
+    expect(context.notes?.join('\n')).toContain('Removed');
+    expect(context.notes?.join('\n')).toContain('sa generate feature');
+    expect(context.warnings).toEqual(['Review src/app/app.css: it is no longer used']);
+    adopt.mockRestore();
   });
 
-  it('lets any other failure through as it is', async () => {
-    const run = vi.spyOn(applyArchitecture, 'run').mockRejectedValue(new RuntimeError('disk full'));
-    await expect(applyArchitectureToProject.run({} as GenerationContext)).rejects.toThrow(
-      'disk full',
-    );
-    await expect(
-      applyArchitectureToProject.run({} as GenerationContext),
-    ).rejects.not.toBeInstanceOf(UsageError);
-    run.mockRestore();
+  it('lets a failure of the profile through as it is', async () => {
+    const adopt = vi
+      .spyOn(screamingProfile, 'adopt')
+      .mockRejectedValue(new RuntimeError('disk full'));
+    await expect(applyArchitectureToProject.run(contextOf())).rejects.toThrow('disk full');
+    adopt.mockRestore();
   });
 });

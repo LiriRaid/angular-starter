@@ -1,4 +1,3 @@
-import { join } from 'node:path';
 import { CAPABILITIES, defaultOption, type CapabilityCategory } from '../config/capabilities.js';
 import {
   ALL_COMPONENT_IDS,
@@ -26,7 +25,6 @@ import {
   writeStarterConfig,
 } from '../engine/stages.js';
 import { UsageError } from '../errors.js';
-import { pathExists } from '../engine/fs.js';
 import { println, type CliIo } from '../io.js';
 import { describeComponent } from '../wizard/wizard.js';
 import { findProject } from '../project/find.js';
@@ -78,8 +76,6 @@ export async function addCommand(
     );
   }
 
-  if (category === 'architecture') await requireNoArchitectureFolders(project.root);
-
   const label = CAPABILITIES[category].find((option) => option.id === choice);
   // The components and the shell draw their icons with Lucide, so adding them adds it too.
   const implied =
@@ -118,12 +114,28 @@ export async function addCommand(
   }
 
   println(io.stdout);
-  await runPipeline(stages, contextFor(io, deps, project, options, flags.verbose));
+  const context = contextFor(io, deps, project, options, flags.verbose);
+  await runPipeline(stages, context);
   println(io.stdout);
   println(io.stdout, style.green(`${label?.label ?? choice} added.`));
   if (label?.docs) println(io.stdout, `Documentation: ${label.docs}`);
+  for (const note of context.notes ?? []) println(io.stdout, note);
+  for (const warning of context.warnings) println(io.stdout, `${style.yellow('!')} ${warning}`);
   if (category === 'icons' && project.options.components === 'none') {
     println(io.stdout, 'To draw an icon, add the sa-icon component: sa add components icon.');
+  }
+  // The structure alone is the architecture; the routing and the shell are asked, not assumed.
+  if (category === 'architecture' && io.interactive && project.options.appShell === 'none') {
+    const more = await deps.prompter.confirm({
+      name: 'routing-and-shell',
+      message: 'Add the Starter Angular routing and the app shell now?',
+      default: false,
+    });
+    if (more) {
+      println(io.stdout);
+      await addCommand(io, deps, 'routing', 'starter', { ...flags, install: false });
+      await addCommand(io, deps, 'app-shell', undefined, flags);
+    }
   }
 }
 
@@ -172,18 +184,6 @@ function componentsAddition(
     );
   }
   return normalizeComponents([...has, ...requested]);
-}
-
-/** The folders of the architecture belong to the developer when they exist: nothing is written over them. */
-async function requireNoArchitectureFolders(root: string): Promise<void> {
-  for (const folder of ['src/app/core', 'src/app/features', 'src/app/shared']) {
-    if (await pathExists(join(root, folder))) {
-      throw new UsageError(
-        `${folder} already exists, and the architecture would write into it.`,
-        'The architecture is applied to a project that still is what "ng new" generates; nothing was changed.',
-      );
-    }
-  }
 }
 
 function chooseValue(capability: string, value: string | undefined): string {
@@ -325,6 +325,7 @@ function contextFor(
     deps,
     verbose,
     warnings: [],
+    notes: [],
     created: false,
   };
 }

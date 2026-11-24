@@ -23,14 +23,18 @@ const normalize = (target: string): string => target.replace(/^\.\//, '').replac
  * has is kept when it points where the components expect it, and stops the stage when it does not; a
  * barrel that exists is left as it is. Nothing the developer has is moved or replaced.
  */
-export async function applySharedFoundation(targetDir: string): Promise<void> {
+export async function applySharedFoundation(
+  targetDir: string,
+  aliases: Readonly<Record<string, string[]>> = ALIASES,
+  needsThem = 'the components',
+): Promise<string[]> {
   const own = await readTsconfig(targetDir, TSCONFIG);
   const inherited = await inheritedPaths(targetDir, own);
   const ownPaths = pathsOf(own);
   const paths: Record<string, unknown> = { ...inherited, ...ownPaths };
 
   const missing: Record<string, string[]> = {};
-  for (const [alias, targets] of Object.entries(ALIASES)) {
+  for (const [alias, targets] of Object.entries(aliases)) {
     const current = paths[alias];
     if (current === undefined) {
       missing[alias] = targets;
@@ -41,8 +45,8 @@ export async function applySharedFoundation(targetDir: string): Promise<void> {
       )
     ) {
       throw new UsageError(
-        `The alias "${alias}" in ${TSCONFIG} points to ${JSON.stringify(current)}; the components need it to point to ${targets[0]}.`,
-        'Change it, or choose another place for the components by editing their imports after adding them.',
+        `The alias "${alias}" in ${TSCONFIG} points to ${JSON.stringify(current)}; ${needsThem} need it to point to ${targets[0]}.`,
+        `Change it, or choose another place for ${needsThem} by editing their imports after adding them.`,
       );
     }
   }
@@ -64,6 +68,7 @@ export async function applySharedFoundation(targetDir: string): Promise<void> {
     await mkdir(dirname(join(targetDir, BARREL)), { recursive: true });
     await writeFile(join(targetDir, BARREL), 'export {};\n');
   }
+  return Object.keys(missing);
 }
 
 type Tsconfig = { extends?: unknown; compilerOptions?: { paths?: Record<string, unknown> } };
