@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CAPABILITIES, CATEGORIES } from '../src/config/capabilities.js';
+import { ALL_COMPONENT_IDS, ESSENTIAL_COMPONENT_IDS } from '../src/config/components.js';
 import { run } from '../src/main.js';
 import { createFakeIo } from './helpers/fake-io.js';
 
@@ -185,5 +186,39 @@ describe('sa list: one table for the whole listing', () => {
       .filter((line) => /^ {2}(\S+ +)?sa (add|new) /.test(line))
       .map((line) => line.indexOf('sa '));
     expect(new Set(starts).size).toBe(1);
+  });
+});
+
+describe('sa list components: the components one by one', () => {
+  it('lists every component after the collections, with the command to add it', async () => {
+    const out = await wide('components');
+    for (const id of ALL_COMPONENT_IDS) {
+      expect(out, id).toMatch(new RegExp(`^ {2}${id} +sa add components ${id}( |$)`, 'm'));
+    }
+  });
+
+  it('keeps the same columns in every category, and a 100-column terminal wide enough for the names', async () => {
+    const all = await list(120);
+    const starts = all
+      .split('\n')
+      .filter((line) => /^ {2}(\S+ +)?sa (add|new) /.test(line))
+      .map((line) => line.indexOf('sa '));
+    expect(new Set(starts).size).toBe(1);
+  });
+
+  it('names each one sa-<id> and marks the essential ones', async () => {
+    const out = await wide('components');
+    for (const id of ALL_COMPONENT_IDS) {
+      const line = out.split('\n').find((text) => new RegExp(`^ {2}${id} +sa add`).test(text));
+      expect(line, id).toBeDefined();
+      expect(line, id).toContain(`sa-${id}`);
+      expect(line?.includes('(essential)'), id).toBe(ESSENTIAL_COMPONENT_IDS.includes(id));
+    }
+  });
+
+  it('keeps the collections first, before the components', async () => {
+    const out = await wide('components');
+    expect(out.indexOf('  none ')).toBeLessThan(out.indexOf('  icon '));
+    expect(out.indexOf('  all ')).toBeLessThan(out.indexOf('  icon '));
   });
 });

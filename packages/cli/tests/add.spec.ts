@@ -3,8 +3,14 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ANGULAR_CLI_VERSION } from '../src/compat.js';
+import {
+  ALL_COMPONENT_IDS,
+  ESSENTIAL_COMPONENT_IDS,
+  EXTRA_COMPONENT_IDS,
+} from '../src/config/components.js';
 import { run } from '../src/main.js';
 import { createFakeIo } from './helpers/fake-io.js';
+import { createFakePrompter } from './helpers/fake-prompter.js';
 import { createFakeRunner, type FakeRunnerOptions } from './helpers/fake-runner.js';
 import { SSR_APP_CONFIG, createStarterProject } from './helpers/starter-project.js';
 
@@ -778,5 +784,99 @@ describe('sa add: what it says about Lucide Icons', () => {
     expect(result.err).toContain('icon');
     expect(result.err).toContain('button');
     expect(result.err).toContain('datepicker');
+  });
+});
+
+describe('sa add with no value, in a terminal', () => {
+  const NO_ICONS = ['--components', 'none', '--icons', 'none'];
+
+  async function ask(project: string, args: string[], answers: unknown[]) {
+    const fake = createFakeIo({ cwd: project, interactive: true });
+    const runner = createFakeRunner();
+    const { prompter, asked } = createFakePrompter(answers);
+    const code = await run(['add', ...args], fake.io, { run: runner.run, prompter });
+    return { code, out: fake.out(), err: fake.err(), asked };
+  }
+
+  it('shows a checklist of every component with the essential ones ticked', async () => {
+    const project = await createStarterProject(cwd, NO_ICONS);
+    const result = await ask(project, ['components'], [ESSENTIAL_COMPONENT_IDS]);
+    expect(result.code, result.err).toBe(0);
+    const [question] = result.asked;
+    expect(question?.kind).toBe('checkbox');
+    expect(question?.choices).toEqual([...ALL_COMPONENT_IDS]);
+    expect(question?.names?.[0]).toBe('sa-icon');
+    expect(question?.checked).toEqual([...ESSENTIAL_COMPONENT_IDS]);
+    expect(question?.descriptions?.every((text) => (text ?? '').length > 10)).toBe(true);
+  });
+
+  it('adds what was ticked and records it as the collection it equals', async () => {
+    const project = await createStarterProject(cwd, NO_ICONS);
+    const result = await ask(project, ['components'], [ESSENTIAL_COMPONENT_IDS]);
+    expect(result.code, result.err).toBe(0);
+    expect(result.out).toContain('Lucide Icons will be installed too');
+    expect((await readConfig(project)).components).toBe('recommended');
+    expect(await exists(join(project, 'src/app/shared/components/sa-button/sa-button.ts'))).toBe(
+      true,
+    );
+  });
+
+  it('records a different selection as a custom one', async () => {
+    const project = await createStarterProject(cwd, NO_ICONS);
+    const result = await ask(project, ['components'], [['icon', 'button']]);
+    expect(result.code, result.err).toBe(0);
+    expect(await readConfig(project)).toMatchObject({ components: 'custom', icons: 'lucide' });
+  });
+
+  it('offers only the components the project does not have yet', async () => {
+    const project = await createStarterProject(cwd);
+    const result = await ask(project, ['components'], [['table']]);
+    expect(result.code, result.err).toBe(0);
+    const [question] = result.asked;
+    expect(question?.choices).toEqual([...EXTRA_COMPONENT_IDS]);
+    expect(question?.checked).toEqual([]);
+    expect(await exists(join(project, 'src/app/shared/components/sa-table/sa-table.ts'))).toBe(
+      true,
+    );
+  });
+
+  it('stops when nothing is ticked', async () => {
+    const project = await createStarterProject(cwd, NO_ICONS);
+    const result = await ask(project, ['components'], [[]]);
+    expect(result.code).toBe(2);
+    expect(result.err).toContain('No component was ticked');
+  });
+
+  it('says so when the project already has every component', async () => {
+    const project = await createStarterProject(cwd, ['--components', 'all']);
+    const result = await ask(project, ['components'], []);
+    expect(result.code).toBe(2);
+    expect(result.err).toContain('already has every component');
+    expect(result.asked).toEqual([]);
+  });
+
+  it('shows a selector for the rendering and adds what is chosen', async () => {
+    const project = await createStarterProject(cwd, ['--app-shell', 'none']);
+    const result = await ask(project, ['rendering'], ['ssr']);
+    expect(result.code, result.err).toBe(0);
+    const [question] = result.asked;
+    expect(question?.kind).toBe('select');
+    expect(question?.choices).toEqual(['ssr', 'starter-ssr']);
+    expect(question?.descriptions?.every((text) => (text ?? '').length > 10)).toBe(true);
+    expect((await readConfig(project)).rendering).toBe('ssr');
+  });
+
+  it('asks nothing when the value is given', async () => {
+    const project = await createStarterProject(cwd, NO_ICONS);
+    const result = await ask(project, ['components', 'icon'], []);
+    expect(result.code, result.err).toBe(0);
+    expect(result.asked).toEqual([]);
+  });
+
+  it('asks nothing for a capability that has a single option', async () => {
+    const project = await createStarterProject(cwd, ['--icons', 'none']);
+    const result = await ask(project, ['icons'], []);
+    expect(result.code, result.err).toBe(0);
+    expect(result.asked).toEqual([]);
   });
 });

@@ -1,4 +1,6 @@
 import { CAPABILITIES, CATEGORIES, type CapabilityCategory } from '../config/capabilities.js';
+import { ALL_COMPONENT_IDS, ESSENTIAL_COMPONENT_IDS } from '../config/components.js';
+import { COMPONENT_DESCRIPTIONS } from '../engine/components/descriptions.js';
 import { UsageError } from '../errors.js';
 import { ADDABLE, addableValues } from './addable.js';
 import { println, type CliIo } from '../io.js';
@@ -58,7 +60,21 @@ interface Row {
   docs?: string;
 }
 
+/** The components one by one, below the collections: what `sa add components <id>` takes. */
+function componentRows(): Row[] {
+  return ALL_COMPONENT_IDS.map((id) => ({
+    id,
+    commands: [`sa add components ${id}`],
+    name: `sa-${id}${ESSENTIAL_COMPONENT_IDS.includes(id) ? ' (essential)' : ''}`,
+    description: COMPONENT_DESCRIPTIONS[id] ?? id,
+  }));
+}
+
 function rowsOf(name: CapabilityCategory): Row[] {
+  return [...optionRows(name), ...(name === 'components' ? componentRows() : [])];
+}
+
+function optionRows(name: CapabilityCategory): Row[] {
   const word = ADD_WORD.get(name);
   return CAPABILITIES[name].map((option) => {
     const badge = option.available ? (option.recommended ? ' (Recommended)' : '') : ' (planned)';

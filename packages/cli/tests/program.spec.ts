@@ -104,7 +104,7 @@ describe('sa (program)', () => {
     expect(out).not.toContain('Examples:');
     expect(out).not.toContain('Only `sa new` decides');
     const lines = out.trim().split('\n');
-    expect(lines.length).toBeLessThanOrEqual(24);
+    expect(lines.length).toBeLessThanOrEqual(40);
     for (const line of lines) expect(line.length, line).toBeLessThanOrEqual(120);
   });
 
@@ -135,6 +135,38 @@ describe('sa (program)', () => {
     const plain = createFakeIo();
     await run(['--help'], plain.io);
     expect(plain.out()).not.toContain('\u001b[');
+  });
+
+  it('lists, in the root help, each category that sa list can show', async () => {
+    const fake = createFakeIo();
+    await run(['--help'], fake.io);
+    const out = fake.out();
+    expect(out).toMatch(/^Lists:$/m);
+    for (const category of [
+      'architecture',
+      'routing',
+      'style',
+      'rendering',
+      'ssr-purpose',
+      'app-shell',
+      'layout',
+      'presence',
+      'components',
+      'ui-system',
+      'icons',
+      'package-manager',
+    ]) {
+      expect(out, category).toMatch(new RegExp(`^ {2}sa list ${category} +[A-Z]`, 'm'));
+    }
+  });
+
+  it('points add and generate to the lists and to each other', async () => {
+    const add = createFakeIo();
+    await run(['add', '--help'], add.io);
+    expect(add.out()).toContain('sa list components');
+    const generate = createFakeIo();
+    await run(['generate', '--help'], generate.io);
+    expect(generate.out()).toContain('sa add components');
   });
 
   it('leaves the examples to the help of each command', async () => {
