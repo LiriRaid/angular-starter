@@ -18,6 +18,7 @@ import {
   applyPresence,
   applyRendering,
   applyRouting,
+  applySharedFolders,
   applyUiSystem,
   installDependencies,
   writeStarterConfig,
@@ -194,6 +195,7 @@ function stagesFor(
       ];
     case 'components':
       return [
+        applySharedFolders,
         ...(before.icons === options.icons ? [] : [addIconLibrary]),
         // The design base arrives with the first collection or the shell; a bigger collection only
         // adds components.

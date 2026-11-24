@@ -291,6 +291,87 @@ describe('as add', () => {
     });
   });
 
+  describe('components in a project that has no architecture', () => {
+    const PLAIN = [
+      '--architecture',
+      'angular-default',
+      '--routing',
+      'angular',
+      '--components',
+      'none',
+      '--app-shell',
+      'none',
+      '--icons',
+      'none',
+    ];
+
+    it('creates shared and core, adds the aliases, and leaves what the project has', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      expect(await exists(join(project, 'src/app/shared'))).toBe(false);
+      const result = await add(project, ['components', 'button']);
+      expect(result.code, result.err).toBe(0);
+      expect(await exists(join(project, 'src/app/shared/components/as-button/as-button.ts'))).toBe(
+        true,
+      );
+      expect(await exists(join(project, 'src/app/core/theme/theme.service.ts'))).toBe(true);
+      expect(await readFile(join(project, 'src/app/shared/components/index.ts'), 'utf8')).toContain(
+        "as-button/as-button'",
+      );
+      const tsconfig = await readFile(join(project, 'tsconfig.json'), 'utf8');
+      expect(tsconfig).toContain('"@shared/*"');
+      expect(tsconfig).toContain('"@core/*"');
+      expect(await exists(join(project, 'src/app/features'))).toBe(false);
+      const config = await readConfig(project);
+      expect(config).toMatchObject({ architecture: 'angular-default', components: 'custom' });
+    });
+
+    it('uses the shared folder the project already has, and adds to its barrel', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      await mkdir(join(project, 'src/app/shared/components'), { recursive: true });
+      await writeFile(
+        join(project, 'src/app/shared/components/index.ts'),
+        "export { Mine } from './mine/mine';\n",
+      );
+      const result = await add(project, ['components', 'button']);
+      expect(result.code, result.err).toBe(0);
+      const barrel = await readFile(join(project, 'src/app/shared/components/index.ts'), 'utf8');
+      expect(barrel).toContain("export { Mine } from './mine/mine';");
+      expect(barrel).toContain("as-button/as-button'");
+    });
+
+    it('keeps the aliases the project already has', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      const tsconfig = await readFile(join(project, 'tsconfig.json'), 'utf8');
+      await writeFile(
+        join(project, 'tsconfig.json'),
+        tsconfig.replace(
+          '"module": "preserve"',
+          '"module": "preserve", "paths": { "@shared/*": ["./src/app/shared/*"] }',
+        ),
+      );
+      const result = await add(project, ['components', 'button']);
+      expect(result.code, result.err).toBe(0);
+      const text = await readFile(join(project, 'tsconfig.json'), 'utf8');
+      expect(text.match(/"@shared\/\*"/g)).toHaveLength(1);
+    });
+
+    it('stops before writing when @shared points somewhere else', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      const tsconfig = await readFile(join(project, 'tsconfig.json'), 'utf8');
+      await writeFile(
+        join(project, 'tsconfig.json'),
+        tsconfig.replace(
+          '"module": "preserve"',
+          '"module": "preserve", "paths": { "@shared/*": ["./src/lib/*"] }',
+        ),
+      );
+      const result = await add(project, ['components', 'button']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('@shared');
+      expect(await exists(join(project, 'src/app/shared'))).toBe(false);
+    });
+  });
+
   describe('components by id', () => {
     it('adds the components named, with what they import, and records a custom selection', async () => {
       const project = await createStarterProject(cwd, [
@@ -507,11 +588,14 @@ describe('as add', () => {
       expect(result.err).toContain('requires Tailwind CSS');
     });
 
-    it('needs the Screaming architecture', async () => {
+    it('does not need an architecture: it is added to a project that has none', async () => {
       const project = await createStarterProject(cwd, ['--architecture', 'angular-default']);
       const result = await add(project, ['components', 'recommended']);
-      expect(result.code).toBe(2);
-      expect(result.err).toContain('requires the architecture: screaming');
+      expect(result.code, result.err).toBe(0);
+      expect(await readConfig(project)).toMatchObject({
+        architecture: 'angular-default',
+        components: 'recommended',
+      });
     });
 
     it('refuses what the project already has', async () => {

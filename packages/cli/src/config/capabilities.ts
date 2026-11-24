@@ -379,7 +379,8 @@ export const CAPABILITIES: Registry = {
       docs: `${STARTER_DOCS}/0007-omni-structure-design-and-components.md`,
       available: true,
       default: true,
-      requires: { architecture: ['screaming'], tailwind: true, icons: ['lucide'] },
+      requires: { tailwind: true, icons: ['lucide'] },
+      offeredWith: { architecture: ['screaming'] },
     },
     {
       id: 'all',
@@ -388,7 +389,8 @@ export const CAPABILITIES: Registry = {
         'All 26 as- components: the 16 of the essential collection plus ten more (table, search, datepicker, section-nav, selectable-item, reorder-list, preview, media-preview, theme-color-picker and weekly-schedule), with the design base. Needs Tailwind CSS.',
       docs: `${STARTER_DOCS}/0007-omni-structure-design-and-components.md`,
       available: true,
-      requires: { architecture: ['screaming'], tailwind: true, icons: ['lucide'] },
+      requires: { tailwind: true, icons: ['lucide'] },
+      offeredWith: { architecture: ['screaming'] },
     },
     {
       id: 'custom',
@@ -397,7 +399,8 @@ export const CAPABILITIES: Registry = {
         'The components you tick one by one (--components button,modal,toast): each one comes with the components it imports. Needs Tailwind CSS.',
       docs: STARTER_COMPONENTS_DOCS,
       available: true,
-      requires: { architecture: ['screaming'], tailwind: true, icons: ['lucide'] },
+      requires: { tailwind: true, icons: ['lucide'] },
+      offeredWith: { architecture: ['screaming'] },
     },
   ],
   uiSystem: [

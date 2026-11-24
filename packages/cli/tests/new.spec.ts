@@ -674,6 +674,36 @@ export const appConfig: ApplicationConfig = {
     expect(await readFile(join(cwd, 'plain/src/index.html'), 'utf8')).not.toContain('Inter');
   });
 
+  it('gives the components to a project without an architecture when they are asked for by flag', async () => {
+    const fake = createFakeIo({ cwd });
+    const code = await run(
+      [
+        'new',
+        'plain',
+        '--defaults',
+        '--architecture',
+        'angular-default',
+        '--routing',
+        'angular',
+        '--app-shell',
+        'none',
+        '--icons',
+        'lucide',
+        '--components',
+        'recommended',
+        '--no-install',
+        '--no-git',
+      ],
+      fake.io,
+      { run: createFakeRunner().run },
+    );
+    expect(code, fake.err()).toBe(0);
+    expect(await exists(join(cwd, 'plain/src/app/shared/components/as-button/as-button.ts'))).toBe(
+      true,
+    );
+    expect(await readFile(join(cwd, 'plain/tsconfig.json'), 'utf8')).toContain('"@shared/*"');
+  });
+
   it('rejects the shell without the starter routing before doing anything', async () => {
     const fake = createFakeIo({ cwd });
     const runner = createFakeRunner();
@@ -794,6 +824,8 @@ export const appConfig: ApplicationConfig = {
         '--defaults',
         '--app-shell',
         'none',
+        '--icons',
+        'lucide',
         '--components',
         'modal,toggle',
         '--no-install',

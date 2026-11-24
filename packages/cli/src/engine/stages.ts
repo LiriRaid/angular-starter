@@ -24,6 +24,7 @@ import { uiSystemProfile } from './ui-system/ui-system.js';
 import { buildNgAddSsrCommand, buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
 import { pathExists } from './fs.js';
+import { applySharedFoundation } from './shared-foundation.js';
 import { refusalOf } from './process.js';
 import type { GenerationContext, Stage } from './pipeline.js';
 import { RENDERING_PROFILES } from './rendering/index.js';
@@ -144,6 +145,17 @@ export const applyRendering: Stage = {
       prefix: options.prefix,
       architecture: options.architecture,
     });
+  },
+};
+
+export const applySharedFolders: Stage = {
+  id: 'apply-shared-folders',
+  title: 'Preparing shared and core for the components',
+  // A project with an architecture of the starter has them already.
+  enabled: ({ options }) =>
+    ARCHITECTURE_PROFILES[options.architecture] === undefined && options.components !== 'none',
+  async run({ targetDir }) {
+    await applySharedFoundation(targetDir);
   },
 };
 
@@ -315,6 +327,7 @@ export const NEW_PROJECT_STAGES: readonly Stage[] = [
   applyArchitecture,
   applyRouting,
   applyRendering,
+  applySharedFolders,
   applyDesign,
   applyComponents,
   applyAppShell,
