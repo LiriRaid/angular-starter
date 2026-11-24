@@ -61,6 +61,11 @@ const FEATURE_ROUTES: readonly RouteSpec[] = [
   },
 ];
 
+const DOCS_ROUTE: RouteSpec = {
+  path: 'docs',
+  lazy: { file: '@features/docs/docs.routes', exportName: 'DOCS_ROUTES' },
+};
+
 const LAYOUT = { file: '@features/app-shell/layout/main/main', exportName: 'Main' };
 
 export interface AppShellProject {
@@ -139,14 +144,20 @@ async function isPristine(targetDir: string, file: string, prefix: string): Prom
   return new RegExp(`^${pattern}$`).test(current.replaceAll('\r\n', '\n'));
 }
 
+/** The documentation of AS Starter that the welcome page links to (ADR-0015). */
+const DOCS_FEATURE = 'docs';
+
 /**
  * Replaces the neutral home of the architecture with the welcome page (ADR-0009), only while the
  * four files of `home` are still the ones the architecture wrote: a home the developer changed, or
- * that Starter SSR added its deferred section to, is theirs and stays as it is.
+ * that Starter SSR added its deferred section to, is theirs and stays as it is. The welcome page
+ * comes with the documentation of AS Starter its cards open (`features/docs`, its route and its
+ * item in the navigation tree); a documentation feature the developer already has is theirs too.
  */
 async function applyWelcomeHome({ targetDir, name, prefix }: AppShellProject): Promise<void> {
   // A home.data.ts already there is the developer's: the copy would refuse it after the edits.
   if (await pathExists(join(targetDir, HOME_FOLDER, 'home.data.ts'))) return;
+  if (await pathExists(join(targetDir, 'src/app/features', DOCS_FEATURE))) return;
   for (const file of HOME_FILES) {
     if (!(await isPristine(targetDir, file, prefix))) return;
   }
@@ -156,6 +167,17 @@ async function applyWelcomeHome({ targetDir, name, prefix }: AppShellProject): P
     variables: { PROJECT_NAME: name, PREFIX: prefix },
     overwrite: HOME_FILES.map((file) => `${HOME_FOLDER}/${file}`),
   });
+  await writeEdits([
+    await planEdit(targetDir, APP_ROUTES, (text) => addRoutes(text, [DOCS_ROUTE])),
+    await planEdit(targetDir, TREE, (text) =>
+      addNavigationItem(text, {
+        id: DOCS_FEATURE,
+        title: 'Documentation',
+        link: `/${DOCS_FEATURE}`,
+        icon: 'FileText',
+      }),
+    ),
+  ]);
 }
 
 async function planEdits(targetDir: string): Promise<PlannedEdit[]> {

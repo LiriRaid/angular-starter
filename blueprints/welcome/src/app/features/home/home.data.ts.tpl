@@ -20,21 +20,21 @@ export interface WelcomeLink {
 /** The website of AS Starter; until it exists, the repository is its home. */
 export const AS_STARTER_URL = 'https://github.com/LiriRaid/as-starter';
 
-/** What to explore: the framework, and what this project brings. Edit it, or delete the page. */
+/** What to explore: the documentation of AS Starter, and what this project brings. Edit it, or delete the page. */
 export const WELCOME_CARDS: readonly WelcomeCard[] = [
   {
-    id: 'angular-docs',
-    title: 'Angular documentation',
-    description: 'Guides, tutorials and the API reference of the framework.',
+    id: 'starter-docs',
+    title: 'AS Starter documentation',
+    description: 'Guides for this project: the structure, the design base, the components and the app shell.',
     icon: 'FileText',
-    href: 'https://angular.dev',
+    route: '/docs',
   },
   {
-    id: 'angular-tutorials',
+    id: 'starter-tutorials',
     title: 'Learn with tutorials',
-    description: 'Build a small application step by step, in the browser.',
+    description: 'Add a page, use a component and change the theme, step by step, in this project.',
     icon: 'Lightbulb',
-    href: 'https://angular.dev/tutorials',
+    route: '/docs/tutorials',
   },
   {
     id: 'design',

@@ -21,9 +21,10 @@ import { designProfile } from './design/design.js';
 import { appShellProfile } from './app-shell/app-shell.js';
 import { presenceProfile } from './presence/presence.js';
 import { uiSystemProfile } from './ui-system/ui-system.js';
-import { buildNgCommand } from './angular-cli.js';
+import { buildNgAddSsrCommand, buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
 import { pathExists } from './fs.js';
+import { refusalOf } from './process.js';
 import type { GenerationContext, Stage } from './pipeline.js';
 import { RENDERING_PROFILES } from './rendering/index.js';
 import { ROUTING_PROFILES } from './routing/index.js';
@@ -120,17 +121,12 @@ export const addAngularSsr: Stage = {
   pending: 'runs ng add @angular/ssr and installs its packages',
   async run({ targetDir, deps, verbose }) {
     try {
-      await deps.run(
-        'npx',
-        [
-          '--yes',
-          `@angular/cli@${ANGULAR_CLI_VERSION}`,
-          'add',
-          '@angular/ssr',
-          '--skip-confirmation',
-        ],
-        { cwd: targetDir, inherit: verbose, timeoutMs: INSTALL_TIMEOUT_MS },
-      );
+      const { command, args } = await buildNgAddSsrCommand(targetDir);
+      await deps.run(command, args, {
+        cwd: targetDir,
+        inherit: verbose,
+        timeoutMs: INSTALL_TIMEOUT_MS,
+      });
     } catch (error) {
       throw new RuntimeError(`ng add @angular/ssr failed: ${describe(error)}`);
     }
@@ -228,6 +224,18 @@ export const writeStarterConfig: Stage = {
   },
 };
 
+/**
+ * The arguments of the install. npm and pnpm reach for their local cache before the network, and npm
+ * skips the audit and funding requests it would otherwise make after every install (ADR-0016). pnpm never
+ * freezes its lockfile: the CLI has just changed `package.json`, and a CI environment turns the freeze on
+ * by default. Yarn stays plain: its modern versions reject `--prefer-offline`.
+ */
+export function installArgsOf(packageManager: string): string[] {
+  if (packageManager === 'npm') return ['install', '--no-audit', '--no-fund', '--prefer-offline'];
+  if (packageManager === 'pnpm') return ['install', '--prefer-offline', '--no-frozen-lockfile'];
+  return ['install'];
+}
+
 export const installDependencies: Stage = {
   id: 'install-dependencies',
   title: 'Installing dependencies',
@@ -235,7 +243,7 @@ export const installDependencies: Stage = {
   enabled: ({ options }) => options.install,
   async run({ options, targetDir, deps, verbose }) {
     try {
-      await deps.run(options.packageManager, ['install'], {
+      await deps.run(options.packageManager, installArgsOf(options.packageManager), {
         cwd: targetDir,
         inherit: verbose,
         timeoutMs: INSTALL_TIMEOUT_MS,
@@ -326,8 +334,12 @@ async function requireTool(
 ): Promise<void> {
   try {
     await deps.run(tool, ['--version'], { timeoutMs: PROBE_TIMEOUT_MS });
-  } catch {
-    throw new UsageError(message);
+  } catch (error) {
+    const refusal = refusalOf(error);
+    throw new UsageError(
+      refusal ? `"${tool}" could not run: ${refusal}` : message,
+      refusal ? 'Fix that, or choose another tool with --package-manager.' : undefined,
+    );
   }
 }
 

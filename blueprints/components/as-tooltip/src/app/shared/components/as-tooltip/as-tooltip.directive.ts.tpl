@@ -12,6 +12,29 @@ const FALLBACK_ORDER: Record<AsTooltipPosition, AsTooltipPosition[]> = {
   right: ['right', 'left', 'top', 'bottom'],
 };
 
+/**
+ * La caja a la que se ancla el tooltip. Un host `display: inline` (un componente como `as-button`, un
+ * elemento personalizado) solo reporta la caja de su línea de texto aunque lo que pinta dentro sea más alto
+ * (el botón con su relleno): por eso `top` y `bottom` quedaban sobre el texto mientras `left` y `right`, que
+ * solo miran el ancho, caían bien fuera del botón. Se ancla a la unión del host con lo que pinta dentro.
+ */
+export function anchorRectOf(host: HTMLElement): DOMRect {
+  const rect = host.getBoundingClientRect();
+  if (host.children.length === 0 || getComputedStyle(host).display !== 'inline') return rect;
+
+  let { top, bottom, left, right } = rect;
+  for (const child of Array.from(host.children)) {
+    const childRect = child.getBoundingClientRect();
+    // A child with no box (display: none) reports all zeros: it is not part of what is seen.
+    if (childRect.width === 0 && childRect.height === 0) continue;
+    top = Math.min(top, childRect.top);
+    bottom = Math.max(bottom, childRect.bottom);
+    left = Math.min(left, childRect.left);
+    right = Math.max(right, childRect.right);
+  }
+  return new DOMRect(left, top, right - left, bottom - top);
+}
+
 @Directive({
   selector: '[asTooltip]',
   standalone: true,
@@ -105,7 +128,7 @@ export class AsTooltip {
     if (!panel) return;
 
     panel.className = ['as-tooltip', `as-tooltip--${position}`, this.tooltipStyleClass()].filter(Boolean).join(' ');
-    const hostRect = this.host.nativeElement.getBoundingClientRect();
+    const hostRect = anchorRectOf(this.host.nativeElement);
     const panelRect = panel.getBoundingClientRect();
     let top = 0;
     let left = 0;

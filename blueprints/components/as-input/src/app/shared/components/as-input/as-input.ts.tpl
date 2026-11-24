@@ -237,6 +237,8 @@ export class AsInput implements ControlValueAccessor {
   readonly labelBackground = this.presentation.labelBackground;
   readonly labelColor = this.presentation.labelColor;
   readonly labelClass = this.presentation.labelClass;
+  /** En `in` el label vive dentro, arriba, y las etiquetas empiezan debajo: 21px + el borde y el relleno de abajo dan los 54px de un input en `in`. */
+  readonly tagsPaddingTop = computed(() => (this.variant() === 'in' && !!this.label() ? '1.3125rem' : null));
 
   writeValue(value: unknown): void {
     this.formBound.set(true);

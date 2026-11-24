@@ -8,12 +8,52 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- `as --version`, `as list` and every help start in about 0.5 s instead of 2.1 s: `ts-morph` and
+  `execa` load when `new`, `add` or `generate` need them (ADR-0018).
+- `as new` installs with `npm install --no-audit --no-fund --prefer-offline` or `pnpm install
+--prefer-offline` (yarn stays plain), so the install reaches for the local cache first
+  (ADR-0016 and plan 0014).
+- The end-to-end suite installs seven projects instead of fifteen, each covering a family of options
+  and keeping the assertions of the ones it replaces, and installs them with pnpm.
+
+### Added
+
+- The welcome page brings the documentation of AS Starter (`features/docs`, ADR-0015 and plan 0013): a
+  side menu and pages for getting started, the design base, the native components and the app shell, and
+  a tutorials page with numbered steps, at `/docs` and `/docs/<page>`, with a Documentation item in the
+  navigation tree. The cards "AS Starter documentation" and "Learn with tutorials" open them instead of
+  angular.dev.
+- `as-modal` gets `draggable` (default `true`): with `false` the header does not move the panel. The
+  UI System has a "Se puede mover" switch for it.
+
+### Fixed
+
+- `as add rendering ssr|starter-ssr` works in a pnpm project on Windows: `ng add @angular/ssr` now runs
+  from the project's own Angular CLI with node. Through the `.bin` shim, pnpm rewrote it while `cmd.exe`
+  was reading it, and the command ran twice and stopped with "A merge conflicted on path /src/server.ts"
+  (ADR-0016 and ADR-0017).
+- `as new` and `as doctor` say why a package manager that is installed refuses to run (corepack does it
+  for yarn inside a folder whose `package.json` names another manager) instead of calling it not found.
+- The UI System chips (variant names and tokens) use the dark field surface in dark mode; the chosen
+  chip is marked by colour. The tabs of every example are independent again (`sharedGroups` is gone).
+- `as-textarea`: in `in` the text starts under the label, a left or right icon reserves its side and
+  lines up with the first line.
+- `as-input` with `isTagInput` in `in` and `over`: the label follows the variant (no dark box) and the
+  box has the height of a plain input, so rows of fields line up.
+- The label background of `as-input` and `as-textarea` rounds on every corner; the `over` label no
+  longer moves for a left icon.
+- The tooltip on a component host (`as-button`) anchors `top` and `bottom` to the whole button, as
+  `left` and `right` already did.
+- The readonly `as-select` of the catalog shows a chosen value in each mode.
+
+### Changed
+
 - The design preferences page is reached only from the user menu: its navigation entry is `hidden`
   (it keeps its title and breadcrumb), and the sidebar width of Apariencia is an `as-select`
   (ADR-0014 and plan 0012).
 - The UI System catalog (ADR-0014): the previews of every component are apart (no overlaps), show
   every property in each mode (`required variant="on"`, `in`, `over`), the tooltip on the host and on
-  the text, tabs with a shared active tab in Estilos and Tamaños, icons and counters, the password with
+  the text, tabs (their active tab is independent again since ADR-0015), icons and counters, the password with
   its eye, the modal and the drawer with `flush` and a padded inner content, and every input of each
   component or the reason it is not shown. The cards and the code of all the variants collapse with the
   accordion animation.

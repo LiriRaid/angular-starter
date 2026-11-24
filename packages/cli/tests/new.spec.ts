@@ -98,7 +98,11 @@ describe('as new (non-interactive)', () => {
       'new',
       'my-app',
     ]);
-    expect(runner.calls).toContainEqual({ command: 'npm', args: ['install'], cwd: target });
+    expect(runner.calls).toContainEqual({
+      command: 'npm',
+      args: ['install', '--no-audit', '--no-fund', '--prefer-offline'],
+      cwd: target,
+    });
     expect(runner.calls).toContainEqual({ command: 'git', args: ['init'], cwd: target });
     expect(runner.calls).toContainEqual({ command: 'git', args: ['add', '-A'], cwd: target });
     expect(runner.calls.some((call) => call.command === 'git' && call.args[0] === 'commit')).toBe(

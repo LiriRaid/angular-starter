@@ -82,7 +82,7 @@
           </div>
 
           @if (variant() === 'over' && label()) {
-            <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-150 rounded-tl-md rounded-tr-md rounded-bl-none rounded-br-none" [class.transition-none]="!transitionReady()" [ngClass]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
+            <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-150 rounded-md" [class.transition-none]="!transitionReady()" [ngClass]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
               {{ label() }}
               @if (required()) {
                 <span class="text-(--app-error-color)">*</span>
@@ -151,7 +151,7 @@
             ></as-icon>
           }
 
-          <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-180 rounded-tl-md rounded-tr-md rounded-bl-none rounded-br-none" [class.transition-none]="!transitionReady()" [ngClass]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
+          <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-180 rounded-md" [class.transition-none]="!transitionReady()" [ngClass]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
             {{ label() }}
             @if (required()) {
               <span class="text-(--app-error-color)">*</span>
@@ -196,7 +196,7 @@
           }
 
           @if (label()) {
-            <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-150 rounded-tl-md rounded-tr-md rounded-bl-none rounded-br-none" [class.transition-none]="!transitionReady()" [ngClass]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
+            <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-150 rounded-md" [class.transition-none]="!transitionReady()" [ngClass]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
               {{ label() }}
               @if (required()) {
                 <span class="text-(--app-error-color)">*</span>
@@ -215,7 +215,7 @@
           <span class="px-2 text-caption-2-bold">{{ label() }}</span>
         </legend>
 
-        <div class="relative z-20 flex flex-wrap items-center gap-2 px-3 py-2.5" [class.has-content]="tags().length > 0">
+        <div class="relative z-20 flex flex-wrap items-center gap-2 px-3 py-2" [class.has-content]="tags().length > 0">
           @for (tag of tags(); track $index; let i = $index) {
             <span class="tag border flex items-center gap-2 flex-none bg-(--app-chip-bg) border-(--app-chip-border) text-(--app-chip-text)">
               <p class="text-caption-2-bold truncate">{{ tag }}</p>
@@ -237,7 +237,7 @@
           }
         </div>
 
-        <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-180 rounded-tl-md rounded-tr-md rounded-bl-none rounded-br-none" [class.transition-none]="!transitionReady()" [ngClass]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
+        <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-180 rounded-md" [class.transition-none]="!transitionReady()" [ngClass]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
           {{ label() }}
           @if (required()) {
             <span class="text-(--app-error-color)">*</span>
@@ -246,7 +246,8 @@
       </fieldset>
     } @else {
       <div
-        class="peer w-full py-2 border rounded-lg px-3 transition-all duration-150 focus-within:outline-none"
+        class="as-input-tags peer w-full py-[7px] border rounded-lg px-3 transition-all duration-150 focus-within:outline-none"
+        [style.padding-top]="tagsPaddingTop()"
         [ngClass]="{
           'bg-(--app-control-surface-bg) text-(--app-control-surface-text) border-(--app-control-surface-border)': !isDisabled() && !readonly() && !hasErrors(),
           'focus-within:ring-2 focus-within:ring-(--app-control-focus-ring) focus-within:border-transparent': !hasErrors(),
@@ -278,18 +279,7 @@
         </div>
 
         @if (label()) {
-          <label
-            [attr.for]="resolvedInputId()"
-            class="absolute left-3 z-10 px-2 py-px select-none pointer-events-none transition-all duration-150 rounded-tl-md rounded-tr-md rounded-bl-none rounded-br-none bg-(--app-panel-bg)"
-            [class.transition-none]="!transitionReady()"
-            [ngClass]="{
-              'top-1/2 -translate-y-1/2 text-caption-1-medium': !hasValue() && !readonly() && !hasErrors() && !isFocused(),
-              '-top-3 translate-y-0 text-caption-1-medium': hasValue() || readonly() || hasErrors() || isFocused(),
-              'text-(--app-error-color)': hasErrors(),
-              'text-(--app-control-disabled-text)': (isDisabled() || readonly()) && !hasErrors(),
-              'text-(--app-text-subtle)': !isDisabled() && !readonly() && !hasErrors(),
-            }"
-          >
+          <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-150 rounded-md" [class.transition-none]="!transitionReady()" [ngClass]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
             {{ label() }}
             @if (required()) {
               <span class="text-(--app-error-color)">*</span>

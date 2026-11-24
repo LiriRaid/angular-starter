@@ -1,5 +1,3 @@
-import { execa } from 'execa';
-
 export interface CommandResult {
   stdout: string;
   stderr: string;
@@ -18,8 +16,24 @@ export type CommandRunner = (
   options?: RunOptions,
 ) => Promise<CommandResult>;
 
+/**
+ * The first line a program printed to stderr when it started and then failed, or undefined when it
+ * could not be started at all (a program that is not installed prints nothing). It tells "yarn is not
+ * installed" from "yarn is installed and refuses to run" (corepack does so inside a folder whose
+ * package.json names another package manager).
+ */
+export function refusalOf(error: unknown): string | undefined {
+  if (error && typeof error === 'object' && 'stderr' in error) {
+    const stderr = String((error as { stderr?: unknown }).stderr ?? '').trim();
+    return stderr.split('\n')[0]?.trim() || undefined;
+  }
+  return undefined;
+}
+
 /** Runs a program on any operating system (`.cmd` shims on Windows included). */
 export const runCommand: CommandRunner = async (command, args, options = {}) => {
+  // Loaded on the first command it runs: execa takes hundreds of milliseconds the help does not need.
+  const { execa } = await import('execa');
   const result = await execa(command, [...args], {
     cwd: options.cwd,
     timeout: options.timeoutMs,

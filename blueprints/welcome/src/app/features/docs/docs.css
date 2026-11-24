@@ -1,0 +1,27 @@
+:host {
+  display: block;
+}
+
+.docs-link {
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.docs-link:hover {
+  background: var(--app-action-hover-bg);
+}
+
+.docs-link--active,
+.docs-link--active:hover {
+  background: var(--app-badge-soft-bg);
+  color: var(--app-badge-soft-text);
+}
+
+.docs-code {
+  background: var(--app-panel-muted-bg);
+}
+
+code {
+  font-family: ui-monospace, monospace;
+}

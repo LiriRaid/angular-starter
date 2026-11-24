@@ -1,12 +1,14 @@
 import { Command, Help } from 'commander';
 import { availableIds, type CapabilityCategory } from './config/capabilities.js';
-import { addCommand, addableValues, ADDABLE, type AddFlags } from './commands/add.js';
+import { ADDABLE, addableValues } from './commands/addable.js';
+import type { AddFlags } from './commands/add.js';
 import { configCommand } from './commands/config.js';
 import { doctorCommand } from './commands/doctor.js';
-import { generateCommand, GENERATE_KINDS, type GenerateFlags } from './commands/generate.js';
+import { GENERATE_KINDS } from './commands/generate-kinds.js';
+import type { GenerateFlags } from './commands/generate.js';
 import { infoCommand } from './commands/info.js';
 import { listCommand } from './commands/list.js';
-import { newCommand, type NewFlags } from './commands/new.js';
+import type { NewFlags } from './commands/new.js';
 import type { ProgramDeps } from './deps.js';
 import { RuntimeError } from './errors.js';
 import { println, type CliIo } from './io.js';
@@ -210,6 +212,8 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
         ]),
     )
     .action(async (name: string | undefined, flags: NewFlags) => {
+      // The commands that change files load the engine and ts-morph only when they run.
+      const { newCommand } = await import('./commands/new.js');
       await newCommand(io, deps, name, flags);
     });
 }
@@ -264,6 +268,7 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
       );
     })
     .action(async (capability: string | undefined, value: string | undefined, flags: AddFlags) => {
+      const { addCommand } = await import('./commands/add.js');
       await addCommand(io, deps, capability, value, flags);
     });
 }
@@ -302,6 +307,7 @@ function registerGenerateCommand(program: Command, io: CliIo): void {
         ]),
     )
     .action(async (kind: string | undefined, name: string | undefined, flags: GenerateFlags) => {
+      const { generateCommand } = await import('./commands/generate.js');
       await generateCommand(io, kind, name, flags);
     });
 }

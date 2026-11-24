@@ -7,8 +7,9 @@ import { RuntimeError, UsageError } from '../errors.js';
 import { println, type CliIo } from '../io.js';
 import { findProject, type StarterProject } from '../project/find.js';
 import { createStyler } from '../ui/format.js';
+import { GENERATE_KINDS } from './generate-kinds.js';
 
-export const GENERATE_KINDS = ['feature', 'component'] as const;
+export { GENERATE_KINDS };
 
 export interface GenerateFlags {
   feature?: string;

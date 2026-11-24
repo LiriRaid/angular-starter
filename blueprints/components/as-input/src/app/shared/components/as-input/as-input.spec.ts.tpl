@@ -225,4 +225,39 @@ describe('AsInput', () => {
 
     expect(iconClickSpy).toHaveBeenCalledTimes(1);
   });
+
+  describe('isTagInput con label', () => {
+    const label = (): HTMLLabelElement => fixture.nativeElement.querySelector('label');
+
+    beforeEach(() => {
+      fixture.componentRef.setInput('isTagInput', true);
+      fixture.componentRef.setInput('label', 'Etiquetas');
+    });
+
+    it('en `over` el label vive arriba del campo, no dentro, y no pinta una caja oscura propia', () => {
+      fixture.componentRef.setInput('variant', 'over');
+      fixture.detectChanges();
+
+      expect(label().classList.contains('-top-4.5')).toBe(true);
+      expect(label().classList.contains('top-1/2')).toBe(false);
+      expect(label().classList.contains('bg-(--app-panel-bg)')).toBe(false);
+      expect(label().style.backgroundColor).toBe('transparent');
+    });
+
+    it('en `in` el label queda dentro, arriba, y el campo le deja sitio como el input', () => {
+      fixture.componentRef.setInput('variant', 'in');
+      fixture.detectChanges();
+      const box: HTMLElement = fixture.nativeElement.querySelector('.as-input-tags');
+
+      expect(label().classList.contains('bg-(--app-panel-bg)')).toBe(false);
+      expect(box.style.paddingTop).toBe('1.3125rem');
+    });
+
+    it('el fondo del label se redondea arriba y abajo en todos los campos de texto', () => {
+      fixture.componentRef.setInput('variant', 'over');
+      fixture.detectChanges();
+      expect(label().classList.contains('rounded-md')).toBe(true);
+      expect(label().classList.contains('rounded-bl-none')).toBe(false);
+    });
+  });
 });

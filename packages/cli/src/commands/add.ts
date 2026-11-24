@@ -1,9 +1,4 @@
-import {
-  CAPABILITIES,
-  availableIds,
-  defaultOption,
-  type CapabilityCategory,
-} from '../config/capabilities.js';
+import { CAPABILITIES, defaultOption, type CapabilityCategory } from '../config/capabilities.js';
 import {
   ALL_COMPONENT_IDS,
   ESSENTIAL_COMPONENT_IDS,
@@ -30,42 +25,15 @@ import {
 import { UsageError } from '../errors.js';
 import { println, type CliIo } from '../io.js';
 import { findProject } from '../project/find.js';
+import { ADDABLE, NOT_ADDABLE, addableValues } from './addable.js';
 import { createStyler } from '../ui/format.js';
 
-/** The capabilities `as add` can apply to an existing project, by the word the user types. */
-export const ADDABLE: Readonly<Record<string, Extract<CapabilityCategory, keyof StarterOptions>>> =
-  {
-    icons: 'icons',
-    components: 'components',
-    routing: 'routing',
-    'app-shell': 'appShell',
-    presence: 'presence',
-    'ui-system': 'uiSystem',
-    rendering: 'rendering',
-  };
-
-/** Options that are "off" in a project and that adding a capability can turn on. */
-const NOT_ADDABLE: Readonly<Record<string, readonly string[]>> = {
-  icons: ['none'],
-  components: ['none', 'custom'],
-  routing: ['angular'],
-  'app-shell': ['none'],
-  presence: ['none'],
-  'ui-system': ['none'],
-  rendering: ['csr'],
-};
+export { ADDABLE, addableValues };
 
 export interface AddFlags {
   install?: boolean;
   dryRun?: boolean;
   verbose?: boolean;
-}
-
-/** The values of a capability that can be added, from the registry. */
-export function addableValues(capability: string): string[] {
-  const category = ADDABLE[capability];
-  if (!category) return [];
-  return availableIds(category).filter((id) => !NOT_ADDABLE[capability]?.includes(id));
 }
 
 export async function addCommand(

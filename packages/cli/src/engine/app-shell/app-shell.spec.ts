@@ -416,7 +416,6 @@ describe('App Shell profile', () => {
       expect(ts).toContain("signal('Inventory System')");
       const data = await read(`${HOME}/home.data.ts`);
       expect(data).toContain('WELCOME_CARDS');
-      expect(data).toContain('https://angular.dev');
       expect(data).toContain('https://github.com/LiriRaid/as-starter');
       expect(data).not.toMatch(/twitter|linkedin|facebook|instagram/i);
       expect(await read(`${HOME}/home.spec.ts`)).toContain('Inventory System');
@@ -426,10 +425,84 @@ describe('App Shell profile', () => {
       await apply();
       const data = await read(`${HOME}/home.data.ts`);
       const tree = await read(`${SHELL}/navigation/navigation.data.ts`);
-      const routes = [...data.matchAll(/route: '([^']+)'/g)].map((match) => match[1]);
+      const routes = [...data.matchAll(/route: '([^']+)'/g)].map((match) => match[1] ?? '');
       expect(routes).toContain('/dashboard');
-      for (const route of routes) expect(tree, route).toContain(`link: '${route}'`);
+      for (const route of routes) {
+        const page = `/${route.split('/')[1]}`;
+        expect(tree, route).toContain(`link: '${page}'`);
+      }
       expect(data).not.toContain('/presence');
+    });
+
+    it('sends the documentation and tutorials cards to the pages of AS Starter, not to Angular', async () => {
+      await apply();
+      const data = await read(`${HOME}/home.data.ts`);
+      expect(data).not.toContain('angular.dev');
+      expect(data).toContain("id: 'starter-docs'");
+      expect(data).toContain("route: '/docs'");
+      expect(data).toContain("id: 'starter-tutorials'");
+      expect(data).toContain("route: '/docs/tutorials'");
+    });
+
+    describe('documentation', () => {
+      const DOCS = 'src/app/features/docs';
+
+      it('brings the documentation of AS Starter with its pages, its tutorials and its README', async () => {
+        await apply('Inventory System');
+        for (const file of [
+          'docs.ts',
+          'docs.html',
+          'docs.data.ts',
+          'docs.routes.ts',
+          'docs.spec.ts',
+          'README.md',
+        ]) {
+          await expect(read(`${DOCS}/${file}`), file).resolves.toBeTypeOf('string');
+        }
+        const data = await read(`${DOCS}/docs.data.ts`);
+        for (const page of [
+          'getting-started',
+          'design-base',
+          'components',
+          'app-shell',
+          'tutorials',
+        ]) {
+          expect(data, page).toContain(`id: '${page}'`);
+        }
+        expect(data).toContain('as-starter');
+        expect(data).not.toContain('angular.dev');
+        expect(await read(`${DOCS}/docs.ts`)).toContain("selector: 'app-docs'");
+      });
+
+      it('loads it lazily from the routes and lists it in the navigation tree', async () => {
+        await apply();
+        const routes = await read('src/app/app.routes.ts');
+        expect(routes).toContain("path: 'docs'");
+        expect(routes).toContain('@features/docs/docs.routes');
+        expect(await read(`${SHELL}/navigation/navigation.data.ts`)).toContain("link: '/docs'");
+      });
+
+      it('leaves no unresolved placeholder in it', async () => {
+        await apply();
+        for (const file of [
+          'docs.ts',
+          'docs.html',
+          'docs.data.ts',
+          'docs.routes.ts',
+          'docs.spec.ts',
+          'README.md',
+        ]) {
+          expect(await read(`${DOCS}/${file}`), file).not.toMatch(/__[A-Z_]+__/);
+        }
+      });
+
+      it('is not written over a documentation feature the developer already has', async () => {
+        await mkdir(join(project, DOCS), { recursive: true });
+        await writeFile(join(project, DOCS, 'docs.ts'), '// mine\n');
+        await apply();
+        expect(await read(`${DOCS}/docs.ts`)).toBe('// mine\n');
+        await expect(read(`${HOME}/home.data.ts`)).rejects.toThrow();
+      });
     });
 
     it('keeps the routes of the home as the architecture wrote them', async () => {
@@ -448,6 +521,7 @@ describe('App Shell profile', () => {
       await apply();
       expect(await read(`${HOME}/${file}`)).toBe(text);
       await expect(read(`${HOME}/home.data.ts`)).rejects.toThrow();
+      await expect(read('src/app/features/docs/docs.ts')).rejects.toThrow();
       for (const other of ['home.ts', 'home.html', 'home.css', 'home.spec.ts']) {
         if (other !== file) expect(await read(`${HOME}/${other}`)).not.toContain('WELCOME');
       }

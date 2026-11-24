@@ -6,6 +6,7 @@ import {
 } from '../compat.js';
 import type { ProgramDeps } from '../deps.js';
 import { RuntimeError } from '../errors.js';
+import { refusalOf } from '../engine/process.js';
 import { println, type CliIo } from '../io.js';
 import { createStyler } from '../ui/format.js';
 
@@ -31,20 +32,26 @@ export async function doctorCommand(io: CliIo, deps: ProgramDeps): Promise<void>
     ['npx', 'git', ...PACKAGE_MANAGERS].map((tool) => probe(deps, tool)),
   );
 
-  if (npx) {
-    ok(`npx ${npx}`);
+  if (npx?.version) {
+    ok(`npx ${npx.version}`);
   } else {
-    fail('npx was not found. It ships with npm and is needed to run the Angular CLI.');
+    fail(
+      npx?.refusal
+        ? `npx could not run: ${npx.refusal}`
+        : 'npx was not found. It ships with npm and is needed to run the Angular CLI.',
+    );
     failed = true;
   }
 
   PACKAGE_MANAGERS.forEach((manager, index) => {
-    const version = managers[index];
-    if (version) ok(`${manager} ${version}`);
+    const found = managers[index];
+    if (found?.version) ok(`${manager} ${found.version}`);
+    else if (found?.refusal) warn(`${manager} could not run: ${found.refusal}`);
     else warn(`${manager} not found (optional)`);
   });
 
-  if (git) ok(git);
+  if (git?.version) ok(git.version);
+  else if (git?.refusal) warn(`git could not run: ${git.refusal}`);
   else warn('git not found: projects can only be created without a Git repository');
 
   try {
@@ -66,11 +73,17 @@ export async function doctorCommand(io: CliIo, deps: ProgramDeps): Promise<void>
   if (failed) throw new RuntimeError('Some checks failed.');
 }
 
-async function probe(deps: ProgramDeps, command: string): Promise<string | undefined> {
+interface Probe {
+  version?: string;
+  /** What the program printed when it is installed but refused to run. */
+  refusal?: string;
+}
+
+async function probe(deps: ProgramDeps, command: string): Promise<Probe> {
   try {
     const result = await deps.run(command, ['--version'], { timeoutMs: PROBE_TIMEOUT_MS });
-    return result.stdout.split('\n')[0]?.trim() || undefined;
-  } catch {
-    return undefined;
+    return { version: result.stdout.split('\n')[0]?.trim() || undefined };
+  } catch (error) {
+    return { refusal: refusalOf(error) };
   }
 }
