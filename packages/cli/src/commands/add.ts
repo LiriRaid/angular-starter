@@ -95,6 +95,15 @@ export async function addCommand(
   const stages = stagesFor(category, current, options, project.options);
   const style = createStyler(io.color);
 
+  // Nothing in the command says that Lucide comes along: say it, and why, before anything runs.
+  if (implied && project.options.icons !== implied) {
+    const icons = CAPABILITIES.icons.find((option) => option.id === implied)?.label ?? implied;
+    println(
+      io.stdout,
+      `${icons} will be installed too: the sa- components draw their icons with sa-icon, which needs it.`,
+    );
+  }
+
   if (flags.dryRun) {
     println(io.stdout, style.bold('Dry run: nothing was changed. Planned steps:'));
     stages
@@ -109,6 +118,9 @@ export async function addCommand(
   println(io.stdout);
   println(io.stdout, style.green(`${label?.label ?? choice} added.`));
   if (label?.docs) println(io.stdout, `Documentation: ${label.docs}`);
+  if (category === 'icons' && project.options.components === 'none') {
+    println(io.stdout, 'To draw an icon, add the sa-icon component: sa add components icon.');
+  }
 }
 
 /** What the new choice settles for the options that only mean something next to it (ADR-0010). */
@@ -145,10 +157,7 @@ function componentsAddition(
             .filter(Boolean);
   const unknown = requested.find((entry) => !ALL_COMPONENT_IDS.includes(entry));
   if (unknown !== undefined) {
-    throw new UsageError(
-      `"${unknown}" is not a component.`,
-      `Choose a collection (${addableValues('components').join(', ')}) or ids from: ${ALL_COMPONENT_IDS.join(', ')}.`,
-    );
+    throw new UsageError(`"${unknown}" is not a component.`, componentsHint());
   }
   const has = componentIdsOf(recorded);
   if (requested.every((id) => has.includes(id))) {
@@ -187,8 +196,17 @@ function chooseValue(capability: string, value: string | undefined): string {
   if (values.length === 1 && values[0]) return values[0];
   throw new UsageError(
     `Usage: sa add ${capability} <value>`,
-    values.length > 0 ? `Choose one of: ${values.join(', ')}.` : undefined,
+    capability === 'components'
+      ? componentsHint()
+      : values.length > 0
+        ? `Choose one of: ${values.join(', ')}.`
+        : undefined,
   );
+}
+
+/** What `sa add components` accepts: a collection, or the ids of the components one by one. */
+function componentsHint(): string {
+  return `Choose a collection (${addableValues('components').join(', ')}) or ids from: ${ALL_COMPONENT_IDS.join(', ')}.`;
 }
 
 /** The steps that bring a project from `current` to the new option, then record it. */

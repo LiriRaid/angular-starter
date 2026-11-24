@@ -728,3 +728,55 @@ describe('sa add components when tsconfig.json extends another file', () => {
     expect(await exists(join(project, 'src/app/shared'))).toBe(false);
   });
 });
+
+describe('sa add: what it says about Lucide Icons', () => {
+  const NO_ICONS = ['--components', 'none', '--icons', 'none'];
+
+  it('warns, before the steps, that adding components installs Lucide Icons too, and why', async () => {
+    const project = await createStarterProject(cwd, NO_ICONS);
+    const result = await add(project, ['components', 'icon', '--dry-run']);
+    expect(result.code, result.err).toBe(0);
+    const notice = result.out.indexOf('Lucide Icons will be installed too');
+    expect(notice).toBeGreaterThanOrEqual(0);
+    expect(result.out).toContain('sa-icon');
+    expect(notice).toBeLessThan(result.out.indexOf('Planned steps'));
+  });
+
+  it('says it when the components really are added, not only in a dry run', async () => {
+    const project = await createStarterProject(cwd, NO_ICONS);
+    const result = await add(project, ['components', 'button,modal']);
+    expect(result.code, result.err).toBe(0);
+    expect(result.out).toContain('Lucide Icons will be installed too');
+  });
+
+  it('warns when the app shell brings Lucide Icons, which it needs too', async () => {
+    const project = await createStarterProject(cwd, ['--app-shell', 'none', ...NO_ICONS]);
+    const result = await add(project, ['app-shell', '--dry-run']);
+    expect(result.code, result.err).toBe(0);
+    expect(result.out).toContain('Lucide Icons will be installed too');
+  });
+
+  it('keeps quiet when the project already has Lucide Icons', async () => {
+    const project = await createStarterProject(cwd, ['--components', 'none', '--icons', 'lucide']);
+    const result = await add(project, ['components', 'icon', '--dry-run']);
+    expect(result.code, result.err).toBe(0);
+    expect(result.out).not.toContain('Lucide Icons will be installed too');
+  });
+
+  it('suggests the sa-icon component when only Lucide Icons was added to a project with no components', async () => {
+    const project = await createStarterProject(cwd, NO_ICONS);
+    const result = await add(project, ['icons', 'lucide']);
+    expect(result.code, result.err).toBe(0);
+    expect(result.out).toContain('sa add components icon');
+  });
+
+  it('lists the components, not only the collections, when no value is given', async () => {
+    const project = await createStarterProject(cwd, NO_ICONS);
+    const result = await add(project, ['components']);
+    expect(result.code).toBe(2);
+    expect(result.err).toContain('recommended');
+    expect(result.err).toContain('icon');
+    expect(result.err).toContain('button');
+    expect(result.err).toContain('datepicker');
+  });
+});
