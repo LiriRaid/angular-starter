@@ -24,6 +24,7 @@ const HELP_SECTIONS: readonly {
   {
     title: 'Change an existing project (run it inside the project folder)',
     commands: [
+      ['init', 'init'],
       ['add', 'add <capability> [value]'],
       ['generate', 'generate, g <kind> <name>'],
     ],
@@ -45,6 +46,7 @@ const HELP_SECTIONS: readonly {
 const ROOT_EXAMPLES: readonly (readonly [string, string])[] = [
   ['as new InventorySystem', 'Create a project; choose each option in the wizard'],
   ['as new Shop --defaults --no-git', 'The default set, no questions'],
+  ['as init', 'Set up a project you already have'],
   ['as add icons lucide', 'Add Lucide Icons to a project you already have'],
   ['as add routing starter', 'Add the navigation tree, titles and breadcrumbs'],
   ['as generate feature billing', 'A feature with its routes, ready to build on'],
@@ -73,6 +75,23 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
     .exitOverride();
 
   registerNewCommand(program, io, deps);
+  program
+    .command('init')
+    .description('Set up an Angular project you already have, so the commands work on it')
+    .option('--force', 'Read the project again and replace its angular-starter.config.json')
+    .option('--dry-run', 'Show what it found without writing anything')
+    .addHelpText(
+      'after',
+      examples([
+        ['as init', 'Record what the project already has'],
+        ['as init --dry-run', 'Only show it'],
+      ]),
+    )
+    .action(async (flags: { force?: boolean; dryRun?: boolean }) => {
+      const { initCommand } = await import('./commands/init.js');
+      await initCommand(io, flags);
+    });
+
   registerAddCommand(program, io, deps);
   registerGenerateCommand(program, io);
 
