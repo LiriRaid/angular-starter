@@ -54,7 +54,7 @@ const ROOT_EXAMPLES: readonly (readonly [string, string])[] = [
 ];
 
 const ONLY_NEW =
-  'Only `as new` decides: architecture, stylesheet format, Tailwind CSS, the purpose of the Starter SSR, the layout of the shell, package manager and selector prefix.';
+  'Only `as new` decides: stylesheet format, Tailwind CSS, the purpose of the Starter SSR, the layout of the shell, package manager and selector prefix.';
 
 export function createProgram(io: CliIo, deps: ProgramDeps): Command {
   const program = new Command();
@@ -258,6 +258,10 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
       'Catalog of the components with live previews in the design preferences (needs the shell and the components)',
     ],
     ['rendering', 'Server-side rendering'],
+    [
+      'architecture',
+      'The Screaming Architecture (core, features, shared), only on a project that is still what ng new generates',
+    ],
   ];
   program
     .command('add')
@@ -312,12 +316,18 @@ function registerGenerateCommand(program: Command, io: CliIo): void {
     .argument('[name]', 'Name in lowercase with hyphens, for example user-profiles')
     .option('--feature <name>', 'Feature that receives the component')
     .option('--shared', 'Create the component in shared/components')
+    .option(
+      '--path <folder>',
+      'Folder below src/app for the component (projects that are not Screaming)',
+    )
     .option('--dry-run', 'Show what would be created without writing anything')
     .addHelpText(
       'after',
-      `\nKinds:\n${formatRows(kinds).join('\n')}\n\nIt needs the Screaming Architecture and uses your selector prefix.\n` +
+      `\nKinds:\n${formatRows(kinds).join('\n')}\n\nIt uses your selector prefix. Features and the --feature and --shared places need the Screaming Architecture; in any other project a component goes below src/app, or below --path.\n` +
         examples([
-          ['as generate feature billing', 'Create features/billing'],
+          ['as generate feature billing', 'Create features/billing (Screaming)'],
+          ['as generate component invoice-card', 'Create src/app/invoice-card (any other project)'],
+          ['as generate component invoice-card --path billing/ui', 'Below src/app/billing/ui'],
           ['as generate component invoice-card --feature billing', 'Inside the feature'],
           [
             'as generate component invoice-card --shared',

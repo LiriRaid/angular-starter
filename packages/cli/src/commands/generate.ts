@@ -14,6 +14,8 @@ export { GENERATE_KINDS };
 export interface GenerateFlags {
   feature?: string;
   shared?: boolean;
+  /** Folder below `src/app` for a component of a project that is not Screaming. */
+  path?: string;
   dryRun?: boolean;
 }
 
@@ -48,17 +50,20 @@ export async function generateCommand(
   }
 
   const project = await findProject(io.cwd);
-  if (project.options.architecture !== 'screaming') {
+  const screaming = project.options.architecture === 'screaming';
+  if (kind === 'feature' && !screaming) {
     throw new UsageError(
-      `"as generate" works with the Screaming Architecture; this project uses "${project.options.architecture}".`,
-      'Use "ng generate" for other structures.',
+      `"as generate feature" works with the Screaming Architecture; this project uses "${project.options.architecture}".`,
+      'Use "as generate component <name>" to make a component, or "ng generate" for other structures.',
     );
   }
 
   const plan =
     kind === 'feature'
       ? await planFeature(project, name)
-      : await planComponent(project, name, flags);
+      : screaming
+        ? await planComponent(project, name, flags)
+        : await planPlainComponent(project, name, flags);
 
   const style = createStyler(io.color);
   if (flags.dryRun) println(io.stdout, style.bold('Dry run: nothing was written. It would:'));
@@ -114,6 +119,11 @@ async function planComponent(
   name: string,
   flags: GenerateFlags,
 ): Promise<Plan> {
+  if (flags.path !== undefined) {
+    throw new UsageError(
+      '--path is for projects that are not Screaming; here --feature <name> or --shared decide where the component lives.',
+    );
+  }
   if (flags.shared && flags.feature !== undefined) {
     throw new UsageError('Use either --feature <name> or --shared, not both.');
   }
@@ -132,6 +142,16 @@ async function planComponent(
     }
     folder = `${APP}/features/${flags.feature}/${name}`;
   }
+  return componentPlan(project, name, folder, flags.shared === true);
+}
+
+/** The files of a component in `folder`, and the barrel line when it is a shared one. */
+async function componentPlan(
+  project: StarterProject,
+  name: string,
+  folder: string,
+  shared: boolean,
+): Promise<Plan> {
   if (await pathExists(join(project.root, folder))) {
     throw new UsageError(
       `The component "${name}" already exists (${folder}); nothing was changed.`,
@@ -151,7 +171,7 @@ async function planComponent(
   }
 
   const update = new Map<string, string>();
-  if (flags.shared) {
+  if (shared) {
     const barrel = `${APP}/shared/components/index.ts`;
     const line = `export { ${names.CLASS} } from './${name}/${name}';`;
     // The generated barrel starts as `export {};`, which stops being needed with the first export.
@@ -160,6 +180,39 @@ async function planComponent(
     );
   }
   return { create, update };
+}
+
+/**
+ * A component in a project that is not Screaming, like `ng generate component`: its folder below
+ * `src/app`, or below the `--path` folder (ADR-0019).
+ */
+async function planPlainComponent(
+  project: StarterProject,
+  name: string,
+  flags: GenerateFlags,
+): Promise<Plan> {
+  if (flags.shared || flags.feature !== undefined) {
+    throw new UsageError(
+      '--feature and --shared are places of the Screaming Architecture.',
+      `This project uses "${project.options.architecture}": use "as generate component ${name}" or --path <folder> below src/app.`,
+    );
+  }
+  const parent = flags.path === undefined ? APP : `${APP}/${plainPathOf(flags.path)}`;
+  return componentPlan(project, name, `${parent}/${name}`, false);
+}
+
+/** A folder below src/app: relative, without `..` and without a leading slash. */
+function plainPathOf(path: string): string {
+  const segments = path.replaceAll('\\', '/').split('/').filter(Boolean);
+  if (
+    path.startsWith('/') ||
+    /^[a-zA-Z]:/.test(path) ||
+    segments.includes('..') ||
+    segments.length === 0
+  ) {
+    throw new UsageError(`Invalid --path "${path}": use a folder below src/app, like billing/ui.`);
+  }
+  return segments.join('/');
 }
 
 /** The forms of a kebab-case name the templates use. */

@@ -229,3 +229,76 @@ describe('as generate', () => {
     expect(result.err).toContain('angular-starter.config.json');
   });
 });
+
+describe('as generate component in a project that is not Screaming', () => {
+  let plain: string;
+  let folder: string;
+
+  beforeEach(async () => {
+    plain = await mkdtemp(join(tmpdir(), 'as-generate-plain-'));
+    folder = await createStarterProject(plain, ['--architecture', 'angular-default']);
+  });
+
+  afterEach(async () => {
+    await rm(plain, { recursive: true, force: true });
+  });
+
+  it('creates the folder of the component below src/app, like ng generate component', async () => {
+    const result = await generate(['component', 'invoice-card'], folder);
+    expect(result.code, result.err).toBe(0);
+    for (const file of ['ts', 'html', 'css', 'spec.ts']) {
+      expect(await exists(join(folder, `src/app/invoice-card/invoice-card.${file}`)), file).toBe(
+        true,
+      );
+    }
+    const text = await readFile(join(folder, 'src/app/invoice-card/invoice-card.ts'), 'utf8');
+    expect(text).toContain("selector: 'app-invoice-card'");
+    expect(text).toContain('export class InvoiceCard');
+  });
+
+  it('puts it where --path says, below src/app', async () => {
+    const result = await generate(['component', 'invoice-card', '--path', 'billing/ui'], folder);
+    expect(result.code, result.err).toBe(0);
+    expect(await exists(join(folder, 'src/app/billing/ui/invoice-card/invoice-card.ts'))).toBe(
+      true,
+    );
+  });
+
+  it.each([['../outside'], ['/abs'], ['a/../../b']])('refuses the path %s', async (path) => {
+    const result = await generate(['component', 'invoice-card', '--path', path], folder);
+    expect(result.code).toBe(2);
+    expect(result.err).toContain('--path');
+  });
+
+  it('does not touch a component that exists', async () => {
+    await mkdir(join(folder, 'src/app/invoice-card'), { recursive: true });
+    await writeFile(join(folder, 'src/app/invoice-card/mine.ts'), 'keep');
+    const result = await generate(['component', 'invoice-card'], folder);
+    expect(result.code).toBe(2);
+    expect(result.err).toContain('already exists');
+  });
+
+  it('says that features and the --feature and --shared places belong to Screaming', async () => {
+    for (const args of [
+      ['component', 'invoice-card', '--shared'],
+      ['component', 'invoice-card', '--feature', 'billing'],
+    ]) {
+      const result = await generate(args, folder);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('Screaming');
+    }
+  });
+
+  it('shows what it would create with --dry-run and creates nothing', async () => {
+    const result = await generate(['component', 'invoice-card', '--dry-run'], folder);
+    expect(result.code).toBe(0);
+    expect(result.out).toContain('src/app/invoice-card/invoice-card.ts');
+    expect(await exists(join(folder, 'src/app/invoice-card'))).toBe(false);
+  });
+
+  it('refuses --path in a Screaming project, where --feature and --shared decide', async () => {
+    const result = await generate(['component', 'invoice-card', '--path', 'x']);
+    expect(result.code).toBe(2);
+    expect(result.err).toContain('--feature');
+  });
+});
