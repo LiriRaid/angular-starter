@@ -62,10 +62,10 @@ describe('Docs', () => {
     expect(first.querySelector('.docs-prev')).toBeNull();
   });
 
-  it('talks about AS Starter and this project, not about Angular links', async () => {
+  it('talks about Angular Starter and this project, not about Angular links', async () => {
     const { open } = await setup();
     const page = await open('/docs/getting-started');
-    expect(page.textContent).toContain('AS Starter');
+    expect(page.textContent).toContain('Angular Starter');
     expect(page.textContent).toContain('__PROJECT_NAME__');
     const hrefs = Array.from(page.querySelectorAll('a')).map((link) => link.getAttribute('href') ?? '');
     expect(hrefs.some((href) => href.includes('angular.dev'))).toBe(false);

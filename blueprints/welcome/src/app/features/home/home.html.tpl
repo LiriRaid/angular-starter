@@ -1,12 +1,12 @@
 <div class="home mx-auto flex w-full max-w-5xl flex-col gap-10 py-6">
   <header class="flex flex-col items-center gap-4 text-center">
-    <svg class="size-16" viewBox="0 0 64 64" role="img" aria-label="AS Starter">
+    <svg class="size-16" viewBox="0 0 64 64" role="img" aria-label="Angular Starter">
       <rect width="64" height="64" rx="16" fill="var(--as-primary-color)" />
       <text x="32" y="42" text-anchor="middle" font-size="26" font-weight="700" font-family="Inter, sans-serif" fill="var(--as-primary-contrast-color)">AS</text>
     </svg>
     <div class="flex flex-col gap-1">
       <h1 class="text-tittle-4-bold text-(--app-text-color)">{{ projectName() }}</h1>
-      <p class="text-body-2-regular text-(--app-text-subtle)">Your application is up and running, built with AS Starter.</p>
+      <p class="text-body-2-regular text-(--app-text-subtle)">Your application is up and running, built with Angular Starter.</p>
     </div>
   </header>
 
@@ -40,10 +40,10 @@
 
   <section class="flex flex-col gap-4 rounded-xl border border-(--app-border-color) p-4 sm:flex-row sm:items-center sm:justify-between" aria-labelledby="home-starter">
     <div class="flex flex-col gap-1">
-      <h2 id="home-starter" class="text-body-2-bold text-(--app-text-color)">AS Starter</h2>
+      <h2 id="home-starter" class="text-body-2-bold text-(--app-text-color)">Angular Starter</h2>
       <p class="text-caption-1-regular text-(--app-text-subtle)">The CLI that generated this project: documentation, architecture decisions and source code.</p>
     </div>
-    <nav class="flex flex-wrap gap-4" aria-label="AS Starter">
+    <nav class="flex flex-wrap gap-4" aria-label="Angular Starter">
       @for (link of starterLinks; track link.id) {
         <a class="home-link text-caption-1-semibold flex items-center gap-1 text-(--app-text-primary)" [href]="link.href" target="_blank" rel="noopener noreferrer">
           {{ link.label }} <as-icon name="ArrowUpRight" size="14" />

@@ -1,4 +1,4 @@
-# Contributing to AS Starter
+# Contributing to Angular Starter
 
 Thanks for your interest. The project is in a **pre-alpha planning phase**, so the contribution process is intentionally light and will grow with the project.
 

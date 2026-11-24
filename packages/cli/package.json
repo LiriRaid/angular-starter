@@ -1,12 +1,12 @@
 {
-  "name": "@as-starter/cli",
-  "version": "0.0.0",
+  "name": "@liriraid/angular-starter",
+  "version": "0.1.0",
   "description": "Angular Starter CLI: create Angular applications with a ready-made architecture and infrastructure.",
   "license": "MIT",
   "type": "module",
   "bin": {
-    "as-starter": "dist/bin.js",
-    "as": "dist/bin.js"
+    "as": "dist/bin.js",
+    "angular-starter": "dist/bin.js"
   },
   "files": [
     "dist",
@@ -15,9 +15,13 @@
   "engines": {
     "node": "^22.22.3 || ^24.15.0 || >=26.0.0"
   },
+  "homepage": "https://github.com/LiriRaid/angular-starter#readme",
+  "bugs": {
+    "url": "https://github.com/LiriRaid/angular-starter/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LiriRaid/as-starter.git",
+    "url": "git+https://github.com/LiriRaid/angular-starter.git",
     "directory": "packages/cli"
   },
   "scripts": {
