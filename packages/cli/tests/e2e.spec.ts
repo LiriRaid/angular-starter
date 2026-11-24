@@ -420,4 +420,69 @@ ${result.stderr}`,
     },
     INSTALL_TIMEOUT_MS,
   );
+
+  it(
+    'sets up a default Angular project that as new did not make, and adds components and a component to it',
+    async () => {
+      const project = await createInstalled(
+        'e2e-adopt',
+        '--architecture',
+        'angular-default',
+        '--routing',
+        'angular',
+        '--app-shell',
+        'none',
+        '--components',
+        'none',
+        '--icons',
+        'none',
+      );
+      // From here on the project is one the CLI knows nothing about.
+      await rm(join(project, 'angular-starter.config.json'));
+
+      await asProject(project, 'init');
+      await asProject(project, 'add', 'components', 'button,modal');
+      await asProject(project, 'generate', 'component', 'invoice-card', '--path', 'billing');
+
+      expect(existsSync(join(project, 'src/app/shared/components/as-modal/as-modal.ts'))).toBe(
+        true,
+      );
+      expect(existsSync(join(project, 'src/app/billing/invoice-card/invoice-card.ts'))).toBe(true);
+      expect(await read(project, 'tsconfig.json')).toContain('"@shared/*"');
+      expect(existsSync(join(project, 'src/app/features'))).toBe(false);
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
+    'gives the Screaming Architecture to a project that is still what ng new generates',
+    async () => {
+      const project = await create(
+        'e2e-adopt-architecture',
+        '--architecture',
+        'angular-default',
+        '--routing',
+        'angular',
+        '--app-shell',
+        'none',
+        '--components',
+        'none',
+        '--icons',
+        'none',
+      );
+      await rm(join(project, 'angular-starter.config.json'));
+
+      await asProject(project, 'init');
+      await asProject(project, 'add', 'architecture', 'screaming');
+
+      expect(existsSync(join(project, 'src/app/features/home/home.ts'))).toBe(true);
+      expect(await read(project, 'tsconfig.json')).toContain('"@features/*"');
+      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      expect(config.options.architecture).toBe('screaming');
+    },
+    TIMEOUT_MS,
+  );
 });
