@@ -103,16 +103,21 @@ export function listCommand(io: CliIo, category?: string): void {
   const narrow =
     width - textColumn < Math.max(MIN_TEXT_WIDTH, ...rows.map((row) => row.name.length));
 
+  const cells = (id: string, command: string, text: string): string =>
+    `${' '.repeat(INDENT)}${id.padEnd(idWidth)}${' '.repeat(GAP)}${command.padEnd(commandWidth)}${' '.repeat(GAP)}${text}`.trimEnd();
   const line = (id: string, command: string, text: string, paint = (value: string) => value) =>
+    println(io.stdout, cells(id, command, paint(text)));
+  // The headers are blue, like the headings of `ng --help`.
+  const header = () =>
     println(
       io.stdout,
-      `${' '.repeat(INDENT)}${id.padEnd(idWidth)}${' '.repeat(GAP)}${command.padEnd(commandWidth)}${' '.repeat(GAP)}${paint(text)}`.trimEnd(),
+      `${' '.repeat(INDENT)}${style.cyan('ID'.padEnd(idWidth))}${' '.repeat(GAP)}${style.cyan('Commands'.padEnd(commandWidth))}${' '.repeat(GAP)}${narrow ? '' : style.cyan('Option')}`.trimEnd(),
     );
 
   tables.forEach(({ name, rows: tableRows }, index) => {
     if (index > 0) println(io.stdout);
     println(io.stdout, style.bold(`${TITLES[name]} (${name})`));
-    line('ID', 'Commands', narrow ? '' : 'Option', style.dim);
+    header();
     for (const row of tableRows) {
       const details = (at: number): string[] => [
         ...wrapText(row.description, width - at),

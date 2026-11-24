@@ -23,6 +23,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- `as --help` lists the commands as `as <command>`, each with a one-sentence description, paints the
+  `Commands:` and `Options:` headings blue like `ng --help` and ends with where to read more; the headers of
+  the `as list` table (`ID`, `Commands`, `Option`) are blue too. Colors only show on a terminal.
 - The project is now called **angular-starter**: the package is `@liriraid/angular-starter` (0.1.0), the
   binaries are `as` and `angular-starter` (`as-starter` is gone), and the repository links, the README and the
   welcome and docs pages of the generated applications say Angular Starter. The README warns that `as` is the

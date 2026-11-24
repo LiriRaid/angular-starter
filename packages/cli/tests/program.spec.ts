@@ -26,7 +26,7 @@ describe('as (program)', () => {
     expect(out).toContain('Angular Starter CLI');
     expect(out).toContain('Usage: as [command] [options]');
     expect(out).toContain('Commands:');
-    for (const command of COMMANDS) expect(out).toMatch(new RegExp(`^ {2}${command}\\b`, 'm'));
+    for (const command of COMMANDS) expect(out).toMatch(new RegExp(`^ {2}as ${command}\\b`, 'm'));
     expect(out).toContain('-h, --help');
     expect(out).toContain('-v, --version');
   });
@@ -78,14 +78,14 @@ describe('as (program)', () => {
     const positions = [
       'Usage: as [command] [options]',
       'Commands:',
-      '  new ',
-      '  init',
-      '  add ',
-      '  generate',
-      '  list',
-      '  config',
-      '  doctor',
-      '  update',
+      '  as new ',
+      '  as init',
+      '  as add ',
+      '  as generate',
+      '  as list',
+      '  as config',
+      '  as doctor',
+      '  as update',
       'Options:',
       '-v, --version',
       '-h, --help',
@@ -103,10 +103,38 @@ describe('as (program)', () => {
     const out = fake.out();
     expect(out).not.toContain('Examples:');
     expect(out).not.toContain('Only `as new` decides');
-    expect(out).not.toMatch(/\bas (new|add|generate) \w/);
     const lines = out.trim().split('\n');
     expect(lines.length).toBeLessThanOrEqual(24);
-    for (const line of lines) expect(line.length, line).toBeLessThanOrEqual(80);
+    for (const line of lines) expect(line.length, line).toBeLessThanOrEqual(120);
+  });
+
+  it('describes each command in a sentence, like ng does', async () => {
+    const fake = createFakeIo();
+    await run(['--help'], fake.io);
+    for (const line of fake
+      .out()
+      .split('\n')
+      .filter((text) => /^ {2}as \w/.test(text))) {
+      expect(line, line).toMatch(/ {2}[A-Z][^.]{30,}\.$/);
+    }
+  });
+
+  it('ends the root help with where to read more', async () => {
+    const fake = createFakeIo();
+    await run(['--help'], fake.io);
+    expect(fake.out().trim().split('\n').at(-1)).toBe(
+      'For more information, see https://github.com/LiriRaid/angular-starter.',
+    );
+  });
+
+  it('paints the headings of the root help when the terminal has colors', async () => {
+    const colored = createFakeIo({ color: true });
+    await run(['--help'], colored.io);
+    expect(colored.out()).toContain('\u001b[36mCommands:\u001b[39m');
+    expect(colored.out()).toContain('\u001b[36mOptions:\u001b[39m');
+    const plain = createFakeIo();
+    await run(['--help'], plain.io);
+    expect(plain.out()).not.toContain('\u001b[');
   });
 
   it('leaves the examples to the help of each command', async () => {
