@@ -1,31 +1,31 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, it, beforeEach } from 'vitest';
 import { ComponentRef } from '@angular/core';
-import { AsSkeleton } from './as-skeleton';
+import { SaSkeleton } from './sa-skeleton';
 
-type AsSkeletonInternals = {
+type SaSkeletonInternals = {
   resolvedRadius: () => string;
   lineClass: () => string;
   fillWidth: () => string;
   fillHeight: () => string;
 };
 
-describe('AsSkeleton', () => {
-  let fixture: ComponentFixture<AsSkeleton>;
-  let component: AsSkeleton;
-  let internals: AsSkeletonInternals;
-  let ref: ComponentRef<AsSkeleton>;
+describe('SaSkeleton', () => {
+  let fixture: ComponentFixture<SaSkeleton>;
+  let component: SaSkeleton;
+  let internals: SaSkeletonInternals;
+  let ref: ComponentRef<SaSkeleton>;
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsSkeleton, { set: { imports: [], template: '' } });
+    TestBed.overrideComponent(SaSkeleton, { set: { imports: [], template: '' } });
 
     await TestBed.configureTestingModule({
-      imports: [AsSkeleton],
+      imports: [SaSkeleton],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsSkeleton);
+    fixture = TestBed.createComponent(SaSkeleton);
     component = fixture.componentInstance;
-    internals = component as unknown as AsSkeletonInternals;
+    internals = component as unknown as SaSkeletonInternals;
     ref = fixture.componentRef;
     fixture.detectChanges();
   });
@@ -50,7 +50,7 @@ describe('AsSkeleton', () => {
     ref.setInput('textClass', 'text-body-2');
     fixture.detectChanges();
     expect(internals.lineClass()).toContain('text-body-2');
-    expect(internals.lineClass()).toContain('as-skeleton-line');
+    expect(internals.lineClass()).toContain('sa-skeleton-line');
   });
 
   it('fillWidth returns 100% when fill is true', () => {

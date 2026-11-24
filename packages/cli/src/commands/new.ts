@@ -50,7 +50,7 @@ export async function newCommand(
   flags: NewFlags,
 ): Promise<void> {
   const style = createStyler(io.color);
-  println(io.stdout, style.bold('Angular Starter CLI'));
+  println(io.stdout, style.bold('Starter Angular CLI'));
   println(io.stdout, 'Create your next Angular application.');
   println(io.stdout);
 
@@ -116,7 +116,7 @@ async function resolveName(
   let name = argument?.trim();
   if (name === undefined || name === '') {
     if (!interactive) {
-      throw new UsageError('Project name is required.', 'Usage: as new <name> [options]');
+      throw new UsageError('Project name is required.', 'Usage: sa new <name> [options]');
     }
     name = await deps.prompter.input({
       name: 'projectName',
@@ -245,7 +245,7 @@ async function runDryRun(context: GenerationContext): Promise<void> {
       : ['Add the design base: tokens, theme, typography, animations, utilities and pipes']),
     ...(options.components === 'none'
       ? []
-      : [`Add the ${componentsLabel(options)} (as- components)`]),
+      : [`Add the ${componentsLabel(options)} (sa- components)`]),
     ...(options.appShell === 'none'
       ? []
       : [
@@ -266,7 +266,7 @@ async function runDryRun(context: GenerationContext): Promise<void> {
           `Add the ${labelOf('icons', options.icons)} package (${ICON_PACKAGES[options.icons]?.name})`,
         ]
       : []),
-    'Write angular-starter.config.json',
+    'Write starter-angular.config.json',
     ...(options.install ? [`Install dependencies: ${options.packageManager} install`] : []),
     ...(options.git ? ['Initialize a Git repository with an initial commit'] : []),
   ];

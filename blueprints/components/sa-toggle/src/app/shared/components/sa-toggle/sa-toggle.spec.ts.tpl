@@ -1,23 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ComponentRef } from '@angular/core';
-import { AsToggle } from './as-toggle';
+import { SaToggle } from './sa-toggle';
 
 type ToggleInternals = { localChecked: () => boolean };
 
-describe('AsToggle', () => {
-  let fixture: ComponentFixture<AsToggle>;
-  let component: AsToggle;
-  let ref: ComponentRef<AsToggle>;
+describe('SaToggle', () => {
+  let fixture: ComponentFixture<SaToggle>;
+  let component: SaToggle;
+  let ref: ComponentRef<SaToggle>;
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsToggle, { set: { imports: [], template: '' } });
+    TestBed.overrideComponent(SaToggle, { set: { imports: [], template: '' } });
 
     await TestBed.configureTestingModule({
-      imports: [AsToggle],
+      imports: [SaToggle],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsToggle);
+    fixture = TestBed.createComponent(SaToggle);
     component = fixture.componentInstance;
     ref = fixture.componentRef;
     fixture.detectChanges();

@@ -1,14 +1,14 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation, input, linkedSignal, output } from '@angular/core';
 
 @Component({
-  selector: 'as-toggle',
+  selector: 'sa-toggle',
   standalone: true,
-  templateUrl: './as-toggle.html',
-  styleUrl: './as-toggle.css',
+  templateUrl: './sa-toggle.html',
+  styleUrl: './sa-toggle.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
 })
-export class AsToggle {
+export class SaToggle {
   readonly checked = input<boolean>(false);
   readonly disabled = input<boolean>(false);
   readonly ariaLabel = input<string | undefined>(undefined);

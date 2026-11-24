@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { DestroyRef, computed, effect, inject, signal } from '@angular/core';
 import { PresenceService } from '@core/presence/presence.service';
 import { presenceStatusIcon, type PresenceStatus } from '@core/presence/presence.types';
-import type { AsPopover, SubPanelAnchor } from '@shared/components';
+import type { SaPopover, SubPanelAnchor } from '@shared/components';
 
 /** How long the pointer may leave a panel before it closes, so it can cross the gap to the next one. */
 const PANEL_CLOSE_DELAY_MS = 300;
@@ -57,7 +57,7 @@ export class UserStatusMenu {
    * @param popoverOpen whether it is open: the sub-panels close with it
    */
   constructor(
-    private readonly popover: () => AsPopover | undefined,
+    private readonly popover: () => SaPopover | undefined,
     popoverOpen: () => boolean,
   ) {
     inject(DestroyRef).onDestroy(() => {

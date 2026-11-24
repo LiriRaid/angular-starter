@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { AsIcon } from '@shared/components';
+import { SaIcon } from '@shared/components';
 
 interface Metric {
   readonly label: string;
@@ -18,7 +18,7 @@ interface Activity {
 /** Página de ejemplo con datos de muestra: reemplázala por el resumen real del producto. */
 @Component({
   selector: '__PREFIX__-dashboard',
-  imports: [AsIcon],
+  imports: [SaIcon],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

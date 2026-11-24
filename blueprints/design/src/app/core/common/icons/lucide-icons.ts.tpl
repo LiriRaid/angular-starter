@@ -154,11 +154,11 @@ import {
   LucideUpload,
 } from '@lucide/angular';
 
-type AsLucideIcon = LucideIcon | LucideIconData;
+type SaLucideIcon = LucideIcon | LucideIconData;
 
-const toLucideIconData = (icon: AsLucideIcon): LucideIconData => ('icon' in icon ? icon.icon : icon);
+const toLucideIconData = (icon: SaLucideIcon): LucideIconData => ('icon' in icon ? icon.icon : icon);
 
-const AsLucideIcons = {
+const SaLucideIcons = {
   Add: LucideCirclePlus,
   Angry: LucideAngry,
   Antenna: LucideAntenna,
@@ -313,8 +313,8 @@ const AsLucideIcons = {
   SquarePlay: LucideSquarePlay,
   Table: LucideTable,
   Upload: LucideUpload,
-} as const satisfies Record<string, AsLucideIcon>;
+} as const satisfies Record<string, SaLucideIcon>;
 
-export const LucideIcons = Object.fromEntries(Object.entries(AsLucideIcons).map(([name, icon]) => [name, toLucideIconData(icon)])) as { [Name in keyof typeof AsLucideIcons]: LucideIconData };
+export const LucideIcons = Object.fromEntries(Object.entries(SaLucideIcons).map(([name, icon]) => [name, toLucideIconData(icon)])) as { [Name in keyof typeof SaLucideIcons]: LucideIconData };
 
 export type LucideIconName = keyof typeof LucideIcons;

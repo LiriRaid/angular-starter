@@ -5,9 +5,9 @@
 
     <div class="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
       @for (mode of layoutModes; track mode.id) {
-        <button type="button" class="layout-card flex flex-col items-center gap-1 rounded-xl border p-2.5 text-center transition-colors" [class.border-(--as-primary-color)]="mode.id === activeLayout" [class.border-(--app-border-color)]="mode.id !== activeLayout" [class.opacity-60]="!mode.built" [class.cursor-not-allowed]="!mode.built" [disabled]="!mode.built" [attr.aria-pressed]="mode.id === activeLayout" [attr.aria-label]="mode.built ? mode.label : mode.label + ' (en construcción)'">
+        <button type="button" class="layout-card flex flex-col items-center gap-1 rounded-xl border p-2.5 text-center transition-colors" [class.border-(--sa-primary-color)]="mode.id === activeLayout" [class.border-(--app-border-color)]="mode.id !== activeLayout" [class.opacity-60]="!mode.built" [class.cursor-not-allowed]="!mode.built" [disabled]="!mode.built" [attr.aria-pressed]="mode.id === activeLayout" [attr.aria-label]="mode.built ? mode.label : mode.label + ' (en construcción)'">
           <div class="flex h-11 w-24 gap-1 rounded bg-(--app-surface-bg) p-1" [class.gap-1.5]="mode.floating">
-            <div class="flex flex-col gap-0.5 rounded-sm p-1" [class.w-3]="mode.compact" [class.w-6]="!mode.compact" [class.bg-(--as-primary-color)]="!mode.transparent" [class.bg-transparent]="mode.transparent">
+            <div class="flex flex-col gap-0.5 rounded-sm p-1" [class.w-3]="mode.compact" [class.w-6]="!mode.compact" [class.bg-(--sa-primary-color)]="!mode.transparent" [class.bg-transparent]="mode.transparent">
               <i class="block h-0.5 rounded bg-(--app-text-subtle)"></i>
               <i class="block h-0.5 rounded bg-(--app-text-subtle)"></i>
               <i class="block h-0.5 rounded bg-(--app-text-subtle)"></i>
@@ -30,7 +30,7 @@
   <section class="flex items-center justify-between gap-3 border-t border-(--app-border-color) pt-4">
     <span class="text-caption-1-semibold text-(--app-text-color)">Sidebar transparente</span>
     <div class="w-44">
-      <as-select label="Ancho" [options]="transparentWidths" optionLabel="label" optionValue="value" [searchable]="false" [formControl]="transparentWidth" />
+      <sa-select label="Ancho" [options]="transparentWidths" optionLabel="label" optionValue="value" [searchable]="false" [formControl]="transparentWidth" />
     </div>
   </section>
 </div>

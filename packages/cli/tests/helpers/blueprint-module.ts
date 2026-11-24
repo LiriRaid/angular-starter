@@ -13,7 +13,7 @@ export async function loadBlueprintModule<T>(
   folder: string,
   file: string,
 ): Promise<{ module: T; directory: string }> {
-  const directory = await mkdtemp(join(tmpdir(), 'as-blueprint-'));
+  const directory = await mkdtemp(join(tmpdir(), 'sa-blueprint-'));
   await cp(join(BLUEPRINTS_ROOT, blueprint, folder), directory, { recursive: true });
   for (const entry of await readdir(directory)) {
     if (entry.endsWith('.tpl')) {

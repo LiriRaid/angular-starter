@@ -1,27 +1,27 @@
 import { ChangeDetectionStrategy, Component, ElementRef, ViewEncapsulation, booleanAttribute, input, output, signal, viewChild } from '@angular/core';
 
 import type { LucideIconName } from '@core/common/icons/lucide-icons';
-import { AsButton } from '../as-button/as-button';
-import { AsIcon } from '../as-icon/as-icon';
-import { AsModal } from '../as-modal/as-modal';
+import { SaButton } from '../sa-button/sa-button';
+import { SaIcon } from '../sa-icon/sa-icon';
+import { SaModal } from '../sa-modal/sa-modal';
 
 /**
  * Caja de subida + preview de una sola imagen (logo, icono, avatar, etc).
  * Vacía: dropzone clickeable con ícono e instrucciones.
- * Con imagen: solo la imagen (sin instrucciones), clic abre as-modal en variant="preview"
+ * Con imagen: solo la imagen (sin instrucciones), clic abre sa-modal en variant="preview"
  * (panel ajustado al tamaño natural de la imagen, sin header, botón de cerrar flotando encima).
  * La validación de archivo (tipo/tamaño) queda del lado de quien lo consume, vía `fileSelected`.
  */
 @Component({
-  selector: 'as-preview',
+  selector: 'sa-preview',
   standalone: true,
-  imports: [AsIcon, AsModal, AsButton],
-  templateUrl: './as-preview.html',
-  styleUrl: './as-preview.css',
+  imports: [SaIcon, SaModal, SaButton],
+  templateUrl: './sa-preview.html',
+  styleUrl: './sa-preview.css',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsPreview {
+export class SaPreview {
   readonly imageUrl = input<string | null>(null);
   readonly label = input<string>('imagen');
   readonly hint = input<string>('');

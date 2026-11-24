@@ -3,23 +3,23 @@ import { booleanAttribute, ChangeDetectionStrategy, Component, DestroyRef, Eleme
 
 import { NativeOverlayRuntime, resolveOverlayTriggerElement } from '../../utils/native-overlay-dismiss';
 import { isOutOfBounds, visibleBounds } from '@shared/utils/panel-placement';
-import { AsButton } from '../as-button/as-button';
-import { AsTooltip } from '../as-tooltip/as-tooltip.directive';
-import { getPopoverPanelLayout, getPopoverSubPanelAnchor, resolvePopoverPlacement } from './as-popover.config';
-import type { AsPopoverActionItem, AsPopoverButtonVariant, AsPopoverPosition, PopoverPanelLayout, SubPanelAnchor } from './as-popover.entity';
+import { SaButton } from '../sa-button/sa-button';
+import { SaTooltip } from '../sa-tooltip/sa-tooltip.directive';
+import { getPopoverPanelLayout, getPopoverSubPanelAnchor, resolvePopoverPlacement } from './sa-popover.config';
+import type { SaPopoverActionItem, SaPopoverButtonVariant, SaPopoverPosition, PopoverPanelLayout, SubPanelAnchor } from './sa-popover.entity';
 
-export type { AsPopoverActionItem, AsPopoverButtonVariant, AsPopoverPosition, SubPanelAnchor } from './as-popover.entity';
+export type { SaPopoverActionItem, SaPopoverButtonVariant, SaPopoverPosition, SubPanelAnchor } from './sa-popover.entity';
 
 @Component({
-  selector: 'as-popover',
+  selector: 'sa-popover',
   standalone: true,
-  imports: [AsButton, AsTooltip],
-  templateUrl: './as-popover.html',
-  styleUrl: './as-popover.css',
+  imports: [SaButton, SaTooltip],
+  templateUrl: './sa-popover.html',
+  styleUrl: './sa-popover.css',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsPopover {
+export class SaPopover {
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -30,18 +30,18 @@ export class AsPopover {
   private readonly popoverPanel = viewChild<ElementRef<HTMLElement>>('popoverPanel');
 
   readonly actions = input(false, { transform: booleanAttribute });
-  readonly items = input<readonly AsPopoverActionItem[]>([]);
-  readonly position = input<AsPopoverPosition>('top');
+  readonly items = input<readonly SaPopoverActionItem[]>([]);
+  readonly position = input<SaPopoverPosition>('top');
 
   readonly triggerIcon = input<string | null>('EllipsisVertical');
   readonly triggerIconSize = input<string | number>('16');
   readonly triggerSize = input<'small' | 'medium' | 'high'>('high');
-  readonly triggerVariant = input<AsPopoverButtonVariant>('outlined');
+  readonly triggerVariant = input<SaPopoverButtonVariant>('outlined');
   readonly triggerStyleClass = input('');
   readonly triggerActiveClass = input('');
   readonly triggerAriaLabel = input('Abrir popover');
 
-  readonly optionVariant = input<AsPopoverButtonVariant>('outlined');
+  readonly optionVariant = input<SaPopoverButtonVariant>('outlined');
   readonly optionStyleClass = input('text-caption-1-medium');
 
   readonly triggerTooltip = input<string | TemplateRef<unknown> | null>('');
@@ -144,7 +144,7 @@ export class AsPopover {
     this.resetPopoverPosition();
   }
 
-  protected onActionClick(action: AsPopoverActionItem): void {
+  protected onActionClick(action: SaPopoverActionItem): void {
     if (action.disabled) return;
 
     this.actionSelected.emit(action.id);
@@ -154,7 +154,7 @@ export class AsPopover {
     }
   }
 
-  protected actionVariant(action: AsPopoverActionItem): AsPopoverButtonVariant {
+  protected actionVariant(action: SaPopoverActionItem): SaPopoverButtonVariant {
     return action.variant ?? this.optionVariant();
   }
 
@@ -163,14 +163,14 @@ export class AsPopover {
   }
 
   protected panelClass(): string {
-    return ['as-popover', 'as-popover--repositioned', this.actions() ? 'as-popover--actions' : '', this.popoverStyleClass()].filter(Boolean).join(' ');
+    return ['sa-popover', 'sa-popover--repositioned', this.actions() ? 'sa-popover--actions' : '', this.popoverStyleClass()].filter(Boolean).join(' ');
   }
 
-  protected actionClass(action: AsPopoverActionItem): string {
-    return ['as-popover-option', this.optionStyleClass(), action.styleClass].filter(Boolean).join(' ');
+  protected actionClass(action: SaPopoverActionItem): string {
+    return ['sa-popover-option', this.optionStyleClass(), action.styleClass].filter(Boolean).join(' ');
   }
 
-  protected trackAction(_: number, action: AsPopoverActionItem): string {
+  protected trackAction(_: number, action: SaPopoverActionItem): string {
     return action.id;
   }
 
@@ -222,15 +222,15 @@ export class AsPopover {
     panel.style.setProperty('margin-top', '0', 'important');
 
     if (styles.arrowX !== null) {
-      panel.style.setProperty('--as-popover-arrow-x', `${styles.arrowX}px`);
+      panel.style.setProperty('--sa-popover-arrow-x', `${styles.arrowX}px`);
     } else {
-      panel.style.removeProperty('--as-popover-arrow-x');
+      panel.style.removeProperty('--sa-popover-arrow-x');
     }
 
     if (styles.arrowY !== null) {
-      panel.style.setProperty('--as-popover-arrow-y', `${styles.arrowY}px`);
+      panel.style.setProperty('--sa-popover-arrow-y', `${styles.arrowY}px`);
     } else {
-      panel.style.removeProperty('--as-popover-arrow-y');
+      panel.style.removeProperty('--sa-popover-arrow-y');
     }
 
     panel.dataset['arrowPosition'] = styles.arrowPosition;
@@ -242,7 +242,7 @@ export class AsPopover {
 
     if (!panel) return;
 
-    for (const property of ['position', 'top', 'left', 'right', 'bottom', 'width', 'transform', 'margin-top', '--as-popover-arrow-x', '--as-popover-arrow-y']) {
+    for (const property of ['position', 'top', 'left', 'right', 'bottom', 'width', 'transform', 'margin-top', '--sa-popover-arrow-x', '--sa-popover-arrow-y']) {
       panel.style.removeProperty(property);
     }
 

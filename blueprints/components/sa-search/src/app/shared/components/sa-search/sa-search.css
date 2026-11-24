@@ -1,38 +1,38 @@
-as-search {
-  --as-search-height: clamp(2.2rem, 2.08rem + 0.32vw, 2.375rem);
-  --as-search-radius: clamp(0.7rem, 0.58rem + 0.24vw, 0.875rem);
+sa-search {
+  --sa-search-height: clamp(2.2rem, 2.08rem + 0.32vw, 2.375rem);
+  --sa-search-radius: clamp(0.7rem, 0.58rem + 0.24vw, 0.875rem);
 }
 
-as-search.as-search--input,
-as-search.as-search--chat {
+sa-search.sa-search--input,
+sa-search.sa-search--chat {
   display: block;
   width: 100%;
   max-width: 25rem;
 }
 
-as-search.as-search--input.w-full,
-as-search.as-search--chat.w-full {
+sa-search.sa-search--input.w-full,
+sa-search.sa-search--chat.w-full {
   max-width: none;
 }
 
-as-search.as-search--collapsed {
+sa-search.sa-search--collapsed {
   display: inline-flex;
 }
 
 /* Collapsed button */
 
-as-search .as-search-btn.as-btn {
-  border-radius: var(--as-search-radius);
+sa-search .sa-search-btn.sa-btn {
+  border-radius: var(--sa-search-radius);
   background: var(--app-search-input-bg);
   border-color: var(--app-search-input-border);
 }
 
-as-search .as-search-btn.as-btn:not(.as-disabled):hover {
-  background: var(--as-primary-color);
-  border-color: var(--as-primary-color);
+sa-search .sa-search-btn.sa-btn:not(.sa-disabled):hover {
+  background: var(--sa-primary-color);
+  border-color: var(--sa-primary-color);
 }
 
-/* Default mode: as-input con tokens del search */
+/* Default mode: sa-input con tokens del search */
 
 /* No override of --app-action-icon-color here: it keeps the usual faint gray (default
    --app-text-subtle, very close to --app-placeholder-color). It used to be overridden con --app-search-input-prefix (casi negro en claro / casi blanco en oscuro — ese token
@@ -40,24 +40,24 @@ as-search .as-search-btn.as-btn:not(.as-disabled):hover {
    contraste tan grande, al desvanecer el buscador colapsable con opacity el placeholder (ya
    tenue) se veía esfumarse gradual mientras el ícono se mantenía nítido casi hasta el final y ahí
    desaparecía de golpe. */
-as-search as-input {
+sa-search sa-input {
   --app-control-surface-bg: var(--app-search-input-bg);
   --app-control-surface-border: var(--app-search-input-border);
   --app-control-surface-text: var(--app-search-input-text);
 }
 
-as-search as-input .as-input-wrapper > .relative > div,
-as-search as-input .as-input-wrapper > .relative > fieldset {
-  min-height: var(--as-search-height);
-  border-radius: var(--as-search-radius);
+sa-search sa-input .sa-input-wrapper > .relative > div,
+sa-search sa-input .sa-input-wrapper > .relative > fieldset {
+  min-height: var(--sa-search-height);
+  border-radius: var(--sa-search-radius);
 }
 
 /* Chat mode: contenedor estilo input standalone */
 
-.as-search-chat-input {
+.sa-search-chat-input {
   padding: 6px 14px 6px 10px;
-  border-radius: var(--as-search-radius);
-  min-height: var(--as-search-height);
+  border-radius: var(--sa-search-radius);
+  min-height: var(--sa-search-height);
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -67,11 +67,11 @@ as-search as-input .as-input-wrapper > .relative > fieldset {
   transition: box-shadow 0.2s ease;
 }
 
-.as-search-chat-input:focus-within {
+.sa-search-chat-input:focus-within {
   box-shadow: inset 0 0 0 2px var(--app-control-focus-ring);
 }
 
-.as-search-chat-input as-button {
+.sa-search-chat-input sa-button {
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
@@ -79,7 +79,7 @@ as-search as-input .as-input-wrapper > .relative > fieldset {
 
 /* Campo de texto del modo chat */
 
-.as-search-chat-field {
+.sa-search-chat-field {
   flex: 1;
   min-width: 0;
   background-color: transparent;
@@ -97,13 +97,13 @@ as-search as-input .as-input-wrapper > .relative > fieldset {
   cursor: text;
 }
 
-.as-search-chat-field:focus,
-.as-search-chat-field:focus-visible {
+.sa-search-chat-field:focus,
+.sa-search-chat-field:focus-visible {
   outline: none;
   box-shadow: none;
 }
 
-.as-search-chat-field::placeholder {
+.sa-search-chat-field::placeholder {
   color: var(--app-placeholder-color);
   opacity: 1;
 }
@@ -111,13 +111,13 @@ as-search as-input .as-input-wrapper > .relative > fieldset {
 /* Back button: tamaño real 28x28 vía size="xsmall" (ver .html) — acá solo lo que
    size="xsmall" no cubre (fondo transparente y quitar el box-shadow por defecto). */
 
-as-search .as-search-back-btn.as-btn {
+sa-search .sa-search-back-btn.sa-btn {
   box-shadow: none;
   background: transparent;
 }
 
-as-search .as-search-back-btn.as-btn :is(.as-btn__icon, as-icon, svg),
-as-search .as-search-back-btn.as-btn as-icon * {
+sa-search .sa-search-back-btn.sa-btn :is(.sa-btn__icon, sa-icon, svg),
+sa-search .sa-search-back-btn.sa-btn sa-icon * {
   color: inherit !important;
   stroke: currentColor !important;
 }

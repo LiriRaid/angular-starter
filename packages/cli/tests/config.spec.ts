@@ -10,7 +10,7 @@ let cwd: string;
 let project: string;
 
 beforeEach(async () => {
-  cwd = await mkdtemp(join(tmpdir(), 'as-config-'));
+  cwd = await mkdtemp(join(tmpdir(), 'sa-config-'));
   project = await createStarterProject(cwd, ['--icons', 'none']);
 });
 
@@ -18,7 +18,7 @@ afterEach(async () => {
   await rm(cwd, { recursive: true, force: true });
 });
 
-describe('as config', () => {
+describe('sa config', () => {
   it('lists every option of the project', async () => {
     const fake = createFakeIo({ cwd: project });
     expect(await run(['config', 'list'], fake.io)).toBe(0);
@@ -50,26 +50,26 @@ describe('as config', () => {
   it('needs a key to get', async () => {
     const fake = createFakeIo({ cwd: project });
     expect(await run(['config', 'get'], fake.io)).toBe(2);
-    expect(fake.err()).toContain('Usage: as config get <key>');
+    expect(fake.err()).toContain('Usage: sa config get <key>');
   });
 
   it('is read-only and says which command decides the values', async () => {
     const fake = createFakeIo({ cwd: project });
     expect(await run(['config', 'set', 'prefix', 'x'], fake.io)).toBe(2);
     expect(fake.err()).toContain('read-only');
-    expect(fake.err()).toContain('as new');
+    expect(fake.err()).toContain('sa new');
   });
 
   it('fails outside a project', async () => {
     const fake = createFakeIo({ cwd });
     expect(await run(['config', 'list'], fake.io)).toBe(2);
-    expect(fake.err()).toContain('angular-starter.config.json');
+    expect(fake.err()).toContain('starter-angular.config.json');
   });
 
   it('does not accept a configuration file that is not valid', async () => {
-    await writeFile(join(project, 'angular-starter.config.json'), '{ "options": { "style": 1 } }');
+    await writeFile(join(project, 'starter-angular.config.json'), '{ "options": { "style": 1 } }');
     const fake = createFakeIo({ cwd: project });
     expect(await run(['config', 'list'], fake.io)).toBe(2);
-    expect(fake.err()).toContain('angular-starter.config.json');
+    expect(fake.err()).toContain('starter-angular.config.json');
   });
 });

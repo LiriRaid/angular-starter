@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AsDatepicker } from './as-datepicker';
+import { SaDatepicker } from './sa-datepicker';
 
-describe('AsDatepicker', () => {
-  let fixture: ComponentFixture<AsDatepicker>;
-  let component: AsDatepicker;
+describe('SaDatepicker', () => {
+  let fixture: ComponentFixture<SaDatepicker>;
+  let component: SaDatepicker;
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsDatepicker, { set: { imports: [], template: '' } });
+    TestBed.overrideComponent(SaDatepicker, { set: { imports: [], template: '' } });
 
-    await TestBed.configureTestingModule({ imports: [AsDatepicker] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [SaDatepicker] }).compileComponents();
 
-    fixture = TestBed.createComponent(AsDatepicker);
+    fixture = TestBed.createComponent(SaDatepicker);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

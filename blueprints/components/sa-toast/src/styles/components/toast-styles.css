@@ -2,28 +2,28 @@
   /* ── Toast color system ─────────────────────────────────────────────────── */
 
   /* Palette vars per type */
-  .as-toast-item--success {
+  .sa-toast-item--success {
     --_p: var(--color-green-500);
     --_p50: var(--color-green-50);
     --_p200: var(--color-green-200);
     --_p600: var(--color-green-600);
     --_p700: var(--color-green-700);
   }
-  .as-toast-item--error {
+  .sa-toast-item--error {
     --_p: var(--color-red-500);
     --_p50: var(--color-red-50);
     --_p200: var(--color-red-200);
     --_p600: var(--color-red-600);
     --_p700: var(--color-red-700);
   }
-  .as-toast-item--warn {
+  .sa-toast-item--warn {
     --_p: var(--color-yellow-500);
     --_p50: var(--color-yellow-50);
     --_p200: var(--color-yellow-200);
     --_p600: var(--color-yellow-600);
     --_p700: var(--color-yellow-700);
   }
-  .as-toast-item--info {
+  .sa-toast-item--info {
     --_p: var(--color-blue-500);
     --_p50: var(--color-blue-50);
     --_p200: var(--color-blue-200);
@@ -31,7 +31,7 @@
     --_p700: var(--color-blue-700);
   }
 
-  :is(.as-toast-item--success, .as-toast-item--error, .as-toast-item--warn, .as-toast-item--info) {
+  :is(.sa-toast-item--success, .sa-toast-item--error, .sa-toast-item--warn, .sa-toast-item--info) {
     --_toast-bg: color-mix(in srgb, var(--_p50) 95%, transparent);
     --_toast-border: var(--_p200);
     --_toast-color: var(--_p600);
@@ -39,10 +39,10 @@
 
   .dark
     :is(
-      .as-toast-item--success,
-      .as-toast-item--error,
-      .as-toast-item--warn,
-      .as-toast-item--info
+      .sa-toast-item--success,
+      .sa-toast-item--error,
+      .sa-toast-item--warn,
+      .sa-toast-item--info
     ) {
     --_toast-bg: color-mix(in srgb, var(--_p) 16%, transparent);
     --_toast-border: color-mix(in srgb, var(--_p700) 36%, transparent);
@@ -50,30 +50,30 @@
     backdrop-filter: blur(10px);
   }
 
-  .as-toast-item--secondary {
-    --_toast-bg: var(--as-surface-100);
-    --_toast-border: var(--as-surface-200);
-    --_toast-color: var(--as-surface-600);
+  .sa-toast-item--secondary {
+    --_toast-bg: var(--sa-surface-100);
+    --_toast-border: var(--sa-surface-200);
+    --_toast-color: var(--sa-surface-600);
   }
-  .as-toast-item--contrast {
-    --_toast-bg: var(--as-surface-900);
-    --_toast-border: var(--as-surface-700);
-    --_toast-color: var(--as-surface-50);
+  .sa-toast-item--contrast {
+    --_toast-bg: var(--sa-surface-900);
+    --_toast-border: var(--sa-surface-700);
+    --_toast-color: var(--sa-surface-50);
   }
-  .dark .as-toast-item--secondary {
-    --_toast-bg: var(--as-surface-800);
-    --_toast-border: var(--as-surface-700);
-    --_toast-color: var(--as-surface-300);
+  .dark .sa-toast-item--secondary {
+    --_toast-bg: var(--sa-surface-800);
+    --_toast-border: var(--sa-surface-700);
+    --_toast-color: var(--sa-surface-300);
   }
-  .dark .as-toast-item--contrast {
-    --_toast-bg: var(--as-surface-0);
-    --_toast-border: var(--as-surface-100);
-    --_toast-color: var(--as-surface-950);
+  .dark .sa-toast-item--contrast {
+    --_toast-bg: var(--sa-surface-0);
+    --_toast-border: var(--sa-surface-100);
+    --_toast-color: var(--sa-surface-950);
   }
 
   /* ── Actions ────────────────────────────────────────────────────────────── */
 
-  .as-toast-actions {
+  .sa-toast-actions {
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
@@ -82,7 +82,7 @@
 
   /* ── Progress bar ───────────────────────────────────────────────────────── */
 
-  .as-toast-progress {
+  .sa-toast-progress {
     position: absolute;
     right: 0;
     bottom: 0;
@@ -90,10 +90,10 @@
     height: 3px;
     background-color: currentColor;
     transform-origin: left;
-    animation: as-toast-progress var(--toast-duration, 4000ms) linear forwards;
+    animation: sa-toast-progress var(--toast-duration, 4000ms) linear forwards;
     opacity: 0.9;
   }
-  @keyframes as-toast-progress {
+  @keyframes sa-toast-progress {
     to {
       transform: scaleX(0);
     }
@@ -102,13 +102,13 @@
   /* ── Responsive ─────────────────────────────────────────────────────────── */
 
   @media (max-width: 480px) {
-    .as-toast-wrapper {
+    .sa-toast-wrapper {
       width: calc(100vw - 1.5rem);
     }
-    .as-toast-main {
+    .sa-toast-main {
       padding: 0.9rem;
     }
-    .as-toast-actions {
+    .sa-toast-actions {
       padding: 0 0.9rem 0.9rem;
     }
   }
@@ -117,7 +117,7 @@
 /* ── Close button ───────────────────────────────────────────────────────── */
 /* El botón nativo no puede tomar estas medidas desde `legacy-overrides`:
    sus estilos base no están en una capa CSS. */
-.as-toast-main .as-toast-close-button.as-btn {
+.sa-toast-main .sa-toast-close-button.sa-btn {
   width: 1.75rem;
   min-width: 1.75rem;
   height: 1.75rem;
@@ -132,16 +132,16 @@
   opacity: 0.8;
 }
 
-.as-toast-main .as-toast-close-button.as-btn:not(:disabled):hover {
+.sa-toast-main .sa-toast-close-button.sa-btn:not(:disabled):hover {
   color: currentColor;
   background: color-mix(in srgb, currentColor 12%, transparent);
   border-color: transparent;
   opacity: 1;
 }
 
-.as-toast-main .as-toast-close-button.as-btn .as-btn__icon,
-.as-toast-main .as-toast-close-button.as-btn as-icon,
-.as-toast-main .as-toast-close-button.as-btn svg {
+.sa-toast-main .sa-toast-close-button.sa-btn .sa-btn__icon,
+.sa-toast-main .sa-toast-close-button.sa-btn sa-icon,
+.sa-toast-main .sa-toast-close-button.sa-btn svg {
   width: 20px;
   height: 20px;
   margin: 0;

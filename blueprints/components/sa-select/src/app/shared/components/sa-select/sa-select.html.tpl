@@ -1,61 +1,61 @@
 <div
   [ngClass]="{
-    'as-select-on': variant() === 'on' && !isCompactMultiSelect(),
-    'as-select-in': variant() === 'in' && !isCompactMultiSelect(),
-    'as-select-over': variant() === 'over' && !isCompactMultiSelect(),
-    'as-select-over-float': variant() === 'over' && !!label() && !isCompactMultiSelect(),
-    'as-select-compact': isCompactMultiSelect() || isCompactSingleSelect(),
-    'as-select-has-left-icon': hasLeftIcon(),
-    'as-select-interaction-disabled': isInteractionDisabled(),
+    'sa-select-on': variant() === 'on' && !isCompactMultiSelect(),
+    'sa-select-in': variant() === 'in' && !isCompactMultiSelect(),
+    'sa-select-over': variant() === 'over' && !isCompactMultiSelect(),
+    'sa-select-over-float': variant() === 'over' && !!label() && !isCompactMultiSelect(),
+    'sa-select-compact': isCompactMultiSelect() || isCompactSingleSelect(),
+    'sa-select-has-left-icon': hasLeftIcon(),
+    'sa-select-interaction-disabled': isInteractionDisabled(),
   }"
 >
   <!-- Contenido de una opción "rica" (avatar/ícono/color/chip/barra + etiqueta), según
        `optionAvatar`/`optionIcon`/`optionColor`/`optionShape` — un solo template compartido por
        el listado simple y el multiselect en vez de repetirlo. El peso (bold solo si está
-       seleccionada) nunca se fija acá: lo hereda de la fila (`.as-select-option--selected`,
+       seleccionada) nunca se fija acá: lo hereda de la fila (`.sa-select-option--selected`,
        ver select-styles.css), así ningún consumidor necesita declarar nada por su cuenta. -->
   <ng-template #richOptionLabel let-option let-hideLabel="hideLabel">
     @if (hasAvatarOption()) {
-      <as-avatar [label]="optionAvatarLabelOf(option)" [imageUrl]="optionAvatarOf(option) ?? null" [background]="optionAccent(option)" [shape]="optionAvatarShape()" [size]="22" textClass="text-caption-2-bold" [mode]="optionPresence() ? 'presence' : 'avatar'" [presenceStatus]="optionPresenceOf(option)" />
+      <sa-avatar [label]="optionAvatarLabelOf(option)" [imageUrl]="optionAvatarOf(option) ?? null" [background]="optionAccent(option)" [shape]="optionAvatarShape()" [size]="22" textClass="text-caption-2-bold" [mode]="optionPresence() ? 'presence' : 'avatar'" [presenceStatus]="optionPresenceOf(option)" />
       @if (!hideLabel) {
         <span class="truncate">{{ labelForOption(option) }}</span>
       }
     } @else if (optionIconOf(option); as iconName) {
       @if (optionShape() === 'chip') {
-        <span class="as-mselect-chip" [style.background]="'color-mix(in srgb, ' + optionColorOf(option) + ' 14%, transparent)'" [style.border]="'1px solid color-mix(in srgb, ' + optionColorOf(option) + ' 30%, transparent)'">
-          <as-icon [name]="iconName" size="12" [color]="optionColorOf(option)" />
+        <span class="sa-mselect-chip" [style.background]="'color-mix(in srgb, ' + optionColorOf(option) + ' 14%, transparent)'" [style.border]="'1px solid color-mix(in srgb, ' + optionColorOf(option) + ' 30%, transparent)'">
+          <sa-icon [name]="iconName" size="12" [color]="optionColorOf(option)" />
           @if (!hideLabel) {
             <span class="truncate" [style.color]="optionColorOf(option)">{{ labelForOption(option) }}</span>
           }
         </span>
       } @else if (optionShape() === 'box') {
-        <span class="as-mselect-icon-box" [style.background]="'color-mix(in srgb, ' + optionColorOf(option) + ' 14%, transparent)'">
-          <as-icon [name]="iconName" size="13" [color]="optionColorOf(option)" />
+        <span class="sa-mselect-icon-box" [style.background]="'color-mix(in srgb, ' + optionColorOf(option) + ' 14%, transparent)'">
+          <sa-icon [name]="iconName" size="13" [color]="optionColorOf(option)" />
         </span>
         @if (!hideLabel) {
           <span class="truncate">{{ labelForOption(option) }}</span>
         }
       } @else {
-        <as-icon [name]="iconName" [size]="optionIconSize()" [color]="optionColorOf(option)" />
+        <sa-icon [name]="iconName" [size]="optionIconSize()" [color]="optionColorOf(option)" />
         @if (!hideLabel) {
           <span class="truncate">{{ labelForOption(option) }}</span>
         }
       }
     } @else if (optionColorOf(option); as dotColor) {
       @if (optionShape() === 'chip') {
-        <span class="as-mselect-chip" [style.background]="'color-mix(in srgb, ' + dotColor + ' 14%, transparent)'" [style.border]="'1px solid color-mix(in srgb, ' + dotColor + ' 30%, transparent)'">
-          <span class="as-mselect-dot" [style.background]="dotColor"></span>
+        <span class="sa-mselect-chip" [style.background]="'color-mix(in srgb, ' + dotColor + ' 14%, transparent)'" [style.border]="'1px solid color-mix(in srgb, ' + dotColor + ' 30%, transparent)'">
+          <span class="sa-mselect-dot" [style.background]="dotColor"></span>
           @if (!hideLabel) {
             <span class="truncate" [style.color]="dotColor">{{ labelForOption(option) }}</span>
           }
         </span>
       } @else if (optionShape() === 'bar') {
-        <span class="as-mselect-bar" [style.background]="dotColor"></span>
+        <span class="sa-mselect-bar" [style.background]="dotColor"></span>
         @if (!hideLabel) {
           <span class="truncate" [style.color]="dotColor">{{ labelForOption(option) }}</span>
         }
       } @else {
-        <span class="as-mselect-dot" [style.background]="dotColor"></span>
+        <span class="sa-mselect-dot" [style.background]="dotColor"></span>
         @if (!hideLabel) {
           <span class="truncate" [style.color]="dotColor">{{ labelForOption(option) }}</span>
         }
@@ -75,66 +75,66 @@
     }
 
     @if (isMultiSelect()) {
-      <div #triggerRef class="as-select-field as-select-field--multi" [class.as-select-field--disabled]="isDisabled() || readonly()" [class.as-select-field--open]="isOpen()" role="combobox" aria-haspopup="listbox" tabindex="0" [attr.id]="resolvedInputId()" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="resolvedInputId() + '-panel'" [attr.aria-describedby]="describedBy()" (keydown)="onTriggerKeydown($event)">
-        <div class="as-select-field-label">
-          <div class="as-select-multi-value" (click)="onMultiSelectSearchPointer($event)">
+      <div #triggerRef class="sa-select-field sa-select-field--multi" [class.sa-select-field--disabled]="isDisabled() || readonly()" [class.sa-select-field--open]="isOpen()" role="combobox" aria-haspopup="listbox" tabindex="0" [attr.id]="resolvedInputId()" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="resolvedInputId() + '-panel'" [attr.aria-describedby]="describedBy()" (keydown)="onTriggerKeydown($event)">
+        <div class="sa-select-field-label">
+          <div class="sa-select-multi-value" (click)="onMultiSelectSearchPointer($event)">
             @for (option of selectedOptions(); track optionTrackValue(option)) {
-              <span class="as-select-chip" (mousedown)="onSelectedChipPointer($event)" (click)="onSelectedChipPointer($event)">
+              <span class="sa-select-chip" (mousedown)="onSelectedChipPointer($event)" (click)="onSelectedChipPointer($event)">
                 <span class="truncate">{{ labelForOption(option) }}</span>
 
-                <button type="button" class="as-select-chip-remove" [disabled]="isDisabled() || readonly()" (mousedown)="onChipRemovePointer($event)" (click)="removeSelectedOption(option, $event)" aria-label="Eliminar opción">
-                  <as-icon name="CloseCircle" size="14" />
+                <button type="button" class="sa-select-chip-remove" [disabled]="isDisabled() || readonly()" (mousedown)="onChipRemovePointer($event)" (click)="removeSelectedOption(option, $event)" aria-label="Eliminar opción">
+                  <sa-icon name="CloseCircle" size="14" />
                 </button>
               </span>
             }
 
             @if (searchable()) {
-              <input #multiSearchInput type="text" class="as-select-search-input" [value]="searchTerm()" [placeholder]="multiSearchPlaceholder()" [disabled]="isDisabled() || readonly()" (focus)="onFocus()" (blur)="onBlur()" (click)="onMultiSelectSearchPointer($event)" (input)="onMultiSelectSearchInput($event)" (keydown)="onTriggerKeydown($event)" />
+              <input #multiSearchInput type="text" class="sa-select-search-input" [value]="searchTerm()" [placeholder]="multiSearchPlaceholder()" [disabled]="isDisabled() || readonly()" (focus)="onFocus()" (blur)="onBlur()" (click)="onMultiSelectSearchPointer($event)" (input)="onMultiSelectSearchInput($event)" (keydown)="onTriggerKeydown($event)" />
             } @else if (selectedOptions().length === 0 && shouldFloatLabel()) {
-              <span class="as-select-placeholder">{{ placeholder() }}</span>
+              <span class="sa-select-placeholder">{{ placeholder() }}</span>
             }
           </div>
         </div>
 
         @if (showClear() && hasValue() && !isDisabled() && !readonly()) {
-          <button type="button" class="as-select-clear-icon" tabindex="-1" aria-label="Limpiar selección" (mousedown)="$event.preventDefault()" (click)="clearValue($event)">
-            <as-icon name="X" size="14" />
+          <button type="button" class="sa-select-clear-icon" tabindex="-1" aria-label="Limpiar selección" (mousedown)="$event.preventDefault()" (click)="clearValue($event)">
+            <sa-icon name="X" size="14" />
           </button>
         }
 
-        <button type="button" class="as-select-dropdown" tabindex="-1" aria-hidden="true" (mousedown)="$event.preventDefault()" (click)="togglePanel()">
-          <as-icon name="ChevronDown" size="18" class="as-select-dropdown-icon" />
+        <button type="button" class="sa-select-dropdown" tabindex="-1" aria-hidden="true" (mousedown)="$event.preventDefault()" (click)="togglePanel()">
+          <sa-icon name="ChevronDown" size="18" class="sa-select-dropdown-icon" />
         </button>
       </div>
     } @else if (isCompactMultiSelect()) {
-      <button #triggerRef type="button" class="as-select-field as-select-field--count" [class.as-select-field--disabled]="isDisabled() || readonly()" [class.as-select-field--open]="isOpen()" [disabled]="isDisabled() || readonly()" [attr.id]="resolvedInputId()" aria-haspopup="listbox" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="resolvedInputId() + '-panel'" [attr.aria-describedby]="describedBy()" (click)="togglePanel()" (focus)="onFocus()" (blur)="onBlur()" (keydown)="onTriggerKeydown($event)">
-        <div class="as-select-field-label">
-          <div class="as-select-multi-value--count">
-            <span class="as-select-count-label">{{ label() || placeholder() }}</span>
+      <button #triggerRef type="button" class="sa-select-field sa-select-field--count" [class.sa-select-field--disabled]="isDisabled() || readonly()" [class.sa-select-field--open]="isOpen()" [disabled]="isDisabled() || readonly()" [attr.id]="resolvedInputId()" aria-haspopup="listbox" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="resolvedInputId() + '-panel'" [attr.aria-describedby]="describedBy()" (click)="togglePanel()" (focus)="onFocus()" (blur)="onBlur()" (keydown)="onTriggerKeydown($event)">
+        <div class="sa-select-field-label">
+          <div class="sa-select-multi-value--count">
+            <span class="sa-select-count-label">{{ label() || placeholder() }}</span>
             @if (selectedCount() > 0) {
-              <span class="as-select-count-badge">{{ selectedCount() }}</span>
+              <span class="sa-select-count-badge">{{ selectedCount() }}</span>
             }
           </div>
         </div>
 
-        <span class="as-select-dropdown">
-          <as-icon name="ChevronDown" size="18" class="as-select-dropdown-icon" />
+        <span class="sa-select-dropdown">
+          <sa-icon name="ChevronDown" size="18" class="sa-select-dropdown-icon" />
         </span>
       </button>
     } @else if (isCompactSingleSelect()) {
-      <button #triggerRef type="button" class="as-select-field as-select-field--count" [class.as-select-field--disabled]="isDisabled() || readonly()" [class.as-select-field--open]="isOpen()" [disabled]="isDisabled() || readonly()" [attr.id]="resolvedInputId()" aria-haspopup="listbox" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="resolvedInputId() + '-panel'" [attr.aria-describedby]="describedBy()" (click)="togglePanel()" (focus)="onFocus()" (blur)="onBlur()" (keydown)="onTriggerKeydown($event)">
-        <div class="as-select-field-label">
-          <span class="as-select-count-label">{{ hasValue() ? editableValue() : placeholder() }}</span>
+      <button #triggerRef type="button" class="sa-select-field sa-select-field--count" [class.sa-select-field--disabled]="isDisabled() || readonly()" [class.sa-select-field--open]="isOpen()" [disabled]="isDisabled() || readonly()" [attr.id]="resolvedInputId()" aria-haspopup="listbox" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="resolvedInputId() + '-panel'" [attr.aria-describedby]="describedBy()" (click)="togglePanel()" (focus)="onFocus()" (blur)="onBlur()" (keydown)="onTriggerKeydown($event)">
+        <div class="sa-select-field-label">
+          <span class="sa-select-count-label">{{ hasValue() ? editableValue() : placeholder() }}</span>
         </div>
 
-        <span class="as-select-dropdown">
-          <as-icon name="ChevronDown" size="18" class="as-select-dropdown-icon" />
+        <span class="sa-select-dropdown">
+          <sa-icon name="ChevronDown" size="18" class="sa-select-dropdown-icon" />
         </span>
       </button>
     } @else {
-      <div #triggerRef class="as-select-field" [class.as-select-field--disabled]="isDisabled() || readonly()" [class.as-select-field--open]="isOpen()">
+      <div #triggerRef class="sa-select-field" [class.sa-select-field--disabled]="isDisabled() || readonly()" [class.sa-select-field--open]="isOpen()">
         @if (searchable()) {
-          <input type="text" class="as-select-field-label" role="combobox" aria-haspopup="listbox" [attr.id]="resolvedInputId()" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="resolvedInputId() + '-panel'" [attr.aria-describedby]="describedBy()" [value]="editableValue()" [placeholder]="!label() || variant() === 'over' ? placeholder() : isFocused() && !hasValue() ? placeholder() : ' '" [disabled]="isDisabled() || readonly()" (input)="onSelectChange($any($event.target).value)" (click)="onEditableTriggerPointer($event)" (focus)="onEditableFocus()" (blur)="onBlur()" (keydown)="onTriggerKeydown($event)" />
+          <input type="text" class="sa-select-field-label" role="combobox" aria-haspopup="listbox" [attr.id]="resolvedInputId()" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="resolvedInputId() + '-panel'" [attr.aria-describedby]="describedBy()" [value]="editableValue()" [placeholder]="!label() || variant() === 'over' ? placeholder() : isFocused() && !hasValue() ? placeholder() : ' '" [disabled]="isDisabled() || readonly()" (input)="onSelectChange($any($event.target).value)" (click)="onEditableTriggerPointer($event)" (focus)="onEditableFocus()" (blur)="onBlur()" (keydown)="onTriggerKeydown($event)" />
         } @else {
           <!-- No searchable: nada de <input> — un <span> plano, igual que PrimeNG cuando
                `editable="false"` (ver primeng-select.mjs, rama `*ngIf="!editable"`). Un <input>
@@ -143,7 +143,7 @@
                la posición X contra el string COMPLETO (no el truncado) y hace scroll interno para
                mostrarlo — ahí se "rompía" el truncate. Un <span> nunca tiene caret, así que nunca
                puede pasarle eso. */ -->
-          <span class="as-select-field-label" role="combobox" aria-haspopup="listbox" tabindex="0" [attr.id]="resolvedInputId()" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="resolvedInputId() + '-panel'" [attr.aria-describedby]="describedBy()" (click)="togglePanel()" (focus)="onEditableFocus()" (blur)="onBlur()" (keydown)="onTriggerKeydown($event)">
+          <span class="sa-select-field-label" role="combobox" aria-haspopup="listbox" tabindex="0" [attr.id]="resolvedInputId()" [attr.aria-expanded]="isOpen()" [attr.aria-controls]="resolvedInputId() + '-panel'" [attr.aria-describedby]="describedBy()" (click)="togglePanel()" (focus)="onEditableFocus()" (blur)="onBlur()" (keydown)="onTriggerKeydown($event)">
             @if (hasValue()) {
               @if (hasAvatarOption() || optionIcon() || optionColor()) {
                 <ng-container *ngTemplateOutlet="richOptionLabel; context: { $implicit: resolvedSelectedOption(), hideLabel: hideOptionLabel() }" />
@@ -151,25 +151,25 @@
                 <span class="truncate">{{ editableValue() }}</span>
               }
             } @else {
-              <span class="truncate as-select-placeholder">{{ placeholder() }}</span>
+              <span class="truncate sa-select-placeholder">{{ placeholder() }}</span>
             }
           </span>
         }
 
         @if (showClear() && hasValue() && !isDisabled() && !readonly()) {
-          <button type="button" class="as-select-clear-icon" tabindex="-1" aria-label="Limpiar selección" (mousedown)="$event.preventDefault()" (click)="clearValue($event)">
-            <as-icon name="X" size="14" />
+          <button type="button" class="sa-select-clear-icon" tabindex="-1" aria-label="Limpiar selección" (mousedown)="$event.preventDefault()" (click)="clearValue($event)">
+            <sa-icon name="X" size="14" />
           </button>
         }
 
-        <button type="button" class="as-select-dropdown" tabindex="-1" aria-hidden="true" (mousedown)="$event.preventDefault()" (click)="togglePanel()">
-          <as-icon name="ChevronDown" size="18" class="as-select-dropdown-icon" />
+        <button type="button" class="sa-select-dropdown" tabindex="-1" aria-hidden="true" (mousedown)="$event.preventDefault()" (click)="togglePanel()">
+          <sa-icon name="ChevronDown" size="18" class="sa-select-dropdown-icon" />
         </button>
       </div>
     }
 
     @if (hasIcon() && lucideIcon()) {
-      <as-icon
+      <sa-icon
         [name]="lucideIcon()"
         [size]="16"
         class="pointer-events-none absolute top-1/2 z-10 -translate-y-1/2 transition-colors duration-150"
@@ -179,11 +179,11 @@
           'text-(--app-control-disabled-text)': isDisabled() || readonly(),
           'text-(--app-action-icon-color)': !isDisabled() && !readonly(),
         }"
-      ></as-icon>
+      ></sa-icon>
     }
 
     @if (label() && !isCompactMultiSelect() && !isCompactSingleSelect()) {
-      <label class="as-select-label absolute z-10 select-none px-2 py-0.5 pointer-events-none transition-all duration-180 rounded-md" [ngClass]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
+      <label class="sa-select-label absolute z-10 select-none px-2 py-0.5 pointer-events-none transition-all duration-180 rounded-md" [ngClass]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
         {{ label() }}
         @if (required()) {
           <span class="text-(--app-error-color)">*</span>
@@ -193,21 +193,21 @@
   </fieldset>
 
   @if (hasErrors() && showErrorMessage()) {
-    <small [id]="errorId()" class="as-select-error">
+    <small [id]="errorId()" class="sa-select-error">
       {{ errorMessage() }}
     </small>
   }
 
-  <div #panelRef popover [id]="resolvedInputId() + '-panel'" class="as-select-panel" [ngClass]="panelStyleClass()" [class.as-select-panel--multi]="isAnyMultiSelect()" (toggle)="onPanelToggle($event)">
-    <div class="as-select-list-container">
+  <div #panelRef popover [id]="resolvedInputId() + '-panel'" class="sa-select-panel" [ngClass]="panelStyleClass()" [class.sa-select-panel--multi]="isAnyMultiSelect()" (toggle)="onPanelToggle($event)">
+    <div class="sa-select-list-container">
       @if (activeOptions().length === 0) {
-        <div class="as-select-empty">Sin resultados</div>
+        <div class="sa-select-empty">Sin resultados</div>
       } @else if (isAnyMultiSelect()) {
-        <div class="as-select-list as-select-list--multi" role="listbox" aria-multiselectable="true">
+        <div class="sa-select-list sa-select-list--multi" role="listbox" aria-multiselectable="true">
           @for (option of activeOptions(); track optionTrackValue(option); let index = $index) {
-            <div class="as-select-option" [class.as-select-option--active]="activeIndex() === index" [class.as-select-option--selected]="isOptionSelected(option)" role="option" [attr.aria-selected]="isOptionSelected(option)" (mousedown)="$event.preventDefault()" (click)="selectOption(option)">
-              <div class="as-mselect-option-inner" [class.as-mselect-option-inner--all]="isSelectAllOption(option)">
-                <span class="as-mselect-cb" [class.as-mselect-cb--checked]="isOptionSelected(option)"></span>
+            <div class="sa-select-option" [class.sa-select-option--active]="activeIndex() === index" [class.sa-select-option--selected]="isOptionSelected(option)" role="option" [attr.aria-selected]="isOptionSelected(option)" (mousedown)="$event.preventDefault()" (click)="selectOption(option)">
+              <div class="sa-mselect-option-inner" [class.sa-mselect-option-inner--all]="isSelectAllOption(option)">
+                <span class="sa-mselect-cb" [class.sa-mselect-cb--checked]="isOptionSelected(option)"></span>
 
                 @if (isSelectAllOption(option)) {
                   <span class="truncate">{{ allVisibleSelected() ? 'Quitar todos' : 'Seleccionar todos' }}</span>
@@ -219,9 +219,9 @@
           }
         </div>
       } @else {
-        <div class="as-select-list" role="listbox">
+        <div class="sa-select-list" role="listbox">
           @for (option of activeOptions(); track optionTrackValue(option); let index = $index) {
-            <div class="as-select-option" [class.as-select-option--active]="activeIndex() === index" [class.as-select-option--selected]="isOptionSelected(option)" role="option" [attr.aria-selected]="isOptionSelected(option)" (mousedown)="$event.preventDefault()" (click)="selectOption(option)">
+            <div class="sa-select-option" [class.sa-select-option--active]="activeIndex() === index" [class.sa-select-option--selected]="isOptionSelected(option)" role="option" [attr.aria-selected]="isOptionSelected(option)" (mousedown)="$event.preventDefault()" (click)="selectOption(option)">
               <ng-container *ngTemplateOutlet="richOptionLabel; context: { $implicit: option, hideLabel: hideOptionLabel() }" />
             </div>
           }

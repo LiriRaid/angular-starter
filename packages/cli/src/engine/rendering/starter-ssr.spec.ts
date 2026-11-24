@@ -24,7 +24,7 @@ export const appConfig: ApplicationConfig = {
 let project: string;
 
 beforeEach(async () => {
-  project = await mkdtemp(join(tmpdir(), 'as-ssr-'));
+  project = await mkdtemp(join(tmpdir(), 'sa-ssr-'));
   await writeGeneratedWorkspace(project, { 'src/app/app.config.ts': SSR_APP_CONFIG });
 });
 
@@ -36,7 +36,7 @@ const read = (file: string): Promise<string> => readFile(join(project, file), 'u
 const apply = (architecture: string) =>
   starterSsrProfile.apply({ targetDir: project, name: 'demo', prefix: 'acme', architecture });
 
-describe('Angular Starter SSR profile', () => {
+describe('Starter Angular SSR profile', () => {
   it('is registered for the starter-ssr rendering strategy', () => {
     expect(RENDERING_PROFILES['starter-ssr']).toBe(starterSsrProfile);
   });

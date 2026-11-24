@@ -1,9 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, it, beforeEach } from 'vitest';
-import { AsAvatar } from './as-avatar';
+import { SaAvatar } from './sa-avatar';
 import { ComponentRef } from '@angular/core';
 
-type AsAvatarInternals = {
+type SaAvatarInternals = {
   radius: () => string;
   initialsClass: () => string;
   resolvedDotSize: () => string;
@@ -11,22 +11,22 @@ type AsAvatarInternals = {
   dotIcon: () => string | null;
 };
 
-describe('AsAvatar', () => {
-  let fixture: ComponentFixture<AsAvatar>;
-  let component: AsAvatar;
-  let internals: AsAvatarInternals;
-  let ref: ComponentRef<AsAvatar>;
+describe('SaAvatar', () => {
+  let fixture: ComponentFixture<SaAvatar>;
+  let component: SaAvatar;
+  let internals: SaAvatarInternals;
+  let ref: ComponentRef<SaAvatar>;
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsAvatar, { set: { imports: [], template: '' } });
+    TestBed.overrideComponent(SaAvatar, { set: { imports: [], template: '' } });
 
     await TestBed.configureTestingModule({
-      imports: [AsAvatar],
+      imports: [SaAvatar],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsAvatar);
+    fixture = TestBed.createComponent(SaAvatar);
     component = fixture.componentInstance;
-    internals = component as unknown as AsAvatarInternals;
+    internals = component as unknown as SaAvatarInternals;
     ref = fixture.componentRef;
     fixture.detectChanges();
   });

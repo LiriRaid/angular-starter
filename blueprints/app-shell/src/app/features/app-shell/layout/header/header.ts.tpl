@@ -7,12 +7,12 @@ import { DesignPreferencesService } from '@core/design-preferences/design-prefer
 import { LayoutService } from '../../services/layout.service';
 import { ThemeService } from '@core/theme/theme.service';
 
-import { AsButton, AsThemeColorPicker, AsTooltip } from '@shared/components';
+import { SaButton, SaThemeColorPicker, SaTooltip } from '@shared/components';
 
 @Component({
   selector: '__PREFIX__-header',
   standalone: true,
-  imports: [BreadcrumbComponent, AsButton, AsThemeColorPicker, AsTooltip],
+  imports: [BreadcrumbComponent, SaButton, SaThemeColorPicker, SaTooltip],
   templateUrl: './header.html',
   styleUrl: './header.css',
   encapsulation: ViewEncapsulation.None,

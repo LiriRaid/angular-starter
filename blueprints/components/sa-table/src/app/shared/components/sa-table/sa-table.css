@@ -1,4 +1,4 @@
-as-table {
+sa-table {
   display: block;
   min-width: 0;
   container-type: inline-size;
@@ -6,21 +6,21 @@ as-table {
 
 /* ── Fila expandible ─────────────────────────────────────────────────────── */
 
-.as-table-expansion > td {
+.sa-table-expansion > td {
   padding: 0;
   border: 0;
 }
 
-.as-table-expansion.is-open > td {
+.sa-table-expansion.is-open > td {
   border-bottom: 1px solid var(--app-border-color);
 }
 
-.as-table-expand-cell {
+.sa-table-expand-cell {
   overflow: visible;
   text-overflow: clip;
 }
 
-.as-table-chevron {
+.sa-table-chevron {
   border: 1px solid var(--app-chip-border);
   background: var(--app-chip-bg);
   color: var(--app-text-subtle);
@@ -30,60 +30,60 @@ as-table {
     color 0.15s ease;
 }
 
-.as-table-chevron:hover {
+.sa-table-chevron:hover {
   background: var(--app-action-hover-bg);
   color: var(--app-action-hover-color);
 }
 
-.as-table-expansion-grid {
+.sa-table-expansion-grid {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows 320ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.as-table-expansion.is-open .as-table-expansion-grid {
+.sa-table-expansion.is-open .sa-table-expansion-grid {
   grid-template-rows: 1fr;
 }
 
-.as-table-expansion-clip {
+.sa-table-expansion-clip {
   overflow: hidden;
   min-height: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .as-table-expansion-grid {
+  .sa-table-expansion-grid {
     transition: none;
   }
 }
 
 /* ── Checkbox cells ────────────────────────────────────────────────────────── */
-as-table .as-table-checkbox-th,
-as-table .as-table-checkbox-td {
+sa-table .sa-table-checkbox-th,
+sa-table .sa-table-checkbox-td {
   padding: 0.5rem;
   text-align: center;
   vertical-align: middle;
 }
 
-as-table .as-table-checkbox-th as-checkbox,
-as-table .as-table-checkbox-td as-checkbox {
+sa-table .sa-table-checkbox-th sa-checkbox,
+sa-table .sa-table-checkbox-td sa-checkbox {
   display: inline-flex;
 }
 
 /* ── Paginador propio ─────────────────────────────────────────────────────── */
 
-.as-paginator {
+.sa-paginator {
   padding: 0.5rem 0.25rem;
 }
 
-.as-paginator-current {
+.sa-paginator-current {
   color: var(--app-text-subtle);
   font-size: var(--font-size-caption-1);
   line-height: var(--line-height-caption-1);
   font-weight: 300;
 }
 
-.as-paginator-nav,
-.as-paginator-page {
+.sa-paginator-nav,
+.sa-paginator-page {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -103,25 +103,25 @@ as-table .as-table-checkbox-td as-checkbox {
     border-color 0.15s ease;
 }
 
-.as-paginator-nav:hover:not(:disabled),
-.as-paginator-page:hover:not(.is-active) {
+.sa-paginator-nav:hover:not(:disabled),
+.sa-paginator-page:hover:not(.is-active) {
   background: color-mix(in srgb, var(--app-border-color) 60%, transparent);
   color: var(--app-text-color);
 }
 
-.as-paginator-nav:disabled {
+.sa-paginator-nav:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
 
-.as-paginator-page.is-active {
-  background: var(--as-primary-color);
+.sa-paginator-page.is-active {
+  background: var(--sa-primary-color);
   color: white;
-  border-color: var(--as-primary-color);
+  border-color: var(--sa-primary-color);
   font-weight: 600;
 }
 
-.as-paginator-ellipsis {
+.sa-paginator-ellipsis {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -131,16 +131,16 @@ as-table .as-table-checkbox-td as-checkbox {
   font-size: var(--font-size-caption-1);
 }
 
-.as-paginator-rpp-dropdown {
+.sa-paginator-rpp-dropdown {
   font-size: var(--font-size-caption-1);
   line-height: var(--line-height-caption-1);
 }
 
 @container (max-width: 640px) {
-  .as-paginator-current,
-  .as-paginator-nav,
-  .as-paginator-page,
-  .as-paginator-rpp-dropdown {
+  .sa-paginator-current,
+  .sa-paginator-nav,
+  .sa-paginator-page,
+  .sa-paginator-rpp-dropdown {
     font-size: var(--font-size-caption-2);
     line-height: var(--line-height-caption-2);
   }

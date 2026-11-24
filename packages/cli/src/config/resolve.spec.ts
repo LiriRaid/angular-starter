@@ -69,12 +69,12 @@ describe('resolveOptions', () => {
     expect(run).toThrow(/angular-default/);
   });
 
-  it('accepts the Angular Starter routing on the Screaming architecture', () => {
+  it('accepts the Starter Angular routing on the Screaming architecture', () => {
     const options = resolveOptions({ flags: { architecture: 'screaming', routing: 'starter' } });
     expect(options.routing).toBe('starter');
   });
 
-  it('rejects the Angular Starter routing on an architecture without a profile', () => {
+  it('rejects the Starter Angular routing on an architecture without a profile', () => {
     const run = () =>
       resolveOptions({ flags: { architecture: 'angular-default', routing: 'starter' } });
     expect(run).toThrow(UsageError);
@@ -256,8 +256,8 @@ describe('resolveOptions', () => {
     expect(() => resolveOptions({ flags: { style: 'stylus' as never } })).toThrow(/style/);
   });
 
-  it('reserves the "as" prefix and validates the format', () => {
-    expect(() => resolveOptions({ flags: { prefix: 'as' } })).toThrow(/reserved/);
+  it('reserves the "sa" prefix and validates the format', () => {
+    expect(() => resolveOptions({ flags: { prefix: 'sa' } })).toThrow(/reserved/);
     expect(() => resolveOptions({ flags: { prefix: 'My_App' } })).toThrow(/prefix/);
   });
 

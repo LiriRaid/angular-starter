@@ -1,12 +1,12 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AsPopover, type AsPopoverActionItem } from './as-popover';
-import { getOppositePopoverPosition } from './as-popover.config';
+import { SaPopover, type SaPopoverActionItem } from './sa-popover';
+import { getOppositePopoverPosition } from './sa-popover.config';
 
-type AsPopoverInternals = {
+type SaPopoverInternals = {
   triggerClass: () => string;
   panelClass: () => string;
-  onActionClick: (action: AsPopoverActionItem) => void;
+  onActionClick: (action: SaPopoverActionItem) => void;
   resolveTriggerElement: (event: MouseEvent) => HTMLElement | null;
 };
 
@@ -15,13 +15,13 @@ const SAMPLE_ITEMS = [
   { id: 'delete', label: 'Eliminar', icon: 'Trash', disabled: true },
 ];
 
-describe('AsPopover', () => {
-  let fixture: ComponentFixture<AsPopover>;
-  let component: AsPopover;
-  let internals: AsPopoverInternals;
+describe('SaPopover', () => {
+  let fixture: ComponentFixture<SaPopover>;
+  let component: SaPopover;
+  let internals: SaPopoverInternals;
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsPopover, {
+    TestBed.overrideComponent(SaPopover, {
       set: {
         imports: [],
         template: '',
@@ -29,12 +29,12 @@ describe('AsPopover', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [AsPopover],
+      imports: [SaPopover],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsPopover);
+    fixture = TestBed.createComponent(SaPopover);
     component = fixture.componentInstance;
-    internals = component as unknown as AsPopoverInternals;
+    internals = component as unknown as SaPopoverInternals;
     fixture.componentRef.setInput('items', SAMPLE_ITEMS);
     fixture.detectChanges();
   });
@@ -55,8 +55,8 @@ describe('AsPopover', () => {
     fixture.componentRef.setInput('actions', true);
     fixture.componentRef.setInput('popoverStyleClass', 'custom-panel');
 
-    expect(internals.panelClass()).toContain('as-popover');
-    expect(internals.panelClass()).toContain('as-popover--actions');
+    expect(internals.panelClass()).toContain('sa-popover');
+    expect(internals.panelClass()).toContain('sa-popover--actions');
     expect(internals.panelClass()).toContain('custom-panel');
   });
 
@@ -79,7 +79,7 @@ describe('AsPopover', () => {
   it('resolves the trigger button from a wrapper element', () => {
     const wrapper = document.createElement('div');
     const button = document.createElement('button');
-    button.classList.add('as-btn');
+    button.classList.add('sa-btn');
     wrapper.appendChild(button);
 
     const event = { currentTarget: wrapper } as unknown as MouseEvent;

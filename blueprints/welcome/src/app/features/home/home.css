@@ -10,7 +10,7 @@
 }
 
 .home-card:hover {
-  border-color: var(--as-primary-color);
+  border-color: var(--sa-primary-color);
   box-shadow: var(--app-surface-shadow-soft);
 }
 

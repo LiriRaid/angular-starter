@@ -11,7 +11,7 @@ import { createFakeRunner } from './helpers/fake-runner.js';
 let cwd: string;
 
 beforeEach(async () => {
-  cwd = await mkdtemp(join(tmpdir(), 'as-new-'));
+  cwd = await mkdtemp(join(tmpdir(), 'sa-new-'));
 });
 
 afterEach(async () => {
@@ -24,7 +24,7 @@ const exists = (path: string): Promise<boolean> =>
     () => false,
   );
 
-describe('as new (non-interactive)', () => {
+describe('sa new (non-interactive)', () => {
   it('requires a project name', async () => {
     const fake = createFakeIo({ cwd });
     expect(await run(['new', '--defaults'], fake.io, { run: createFakeRunner().run })).toBe(2);
@@ -46,7 +46,7 @@ describe('as new (non-interactive)', () => {
         run: runner.run,
       }),
     ).toBe(0);
-    expect(await exists(join(cwd, 'InventorySystem', 'angular-starter.config.json'))).toBe(true);
+    expect(await exists(join(cwd, 'InventorySystem', 'starter-angular.config.json'))).toBe(true);
   });
 
   it('never overwrites an existing folder', async () => {
@@ -69,7 +69,7 @@ describe('as new (non-interactive)', () => {
     expect(runner.calls).toEqual([]);
   });
 
-  it('creates the project through every stage and writes the Angular Starter configuration', async () => {
+  it('creates the project through every stage and writes the Starter Angular configuration', async () => {
     const fake = createFakeIo({ cwd });
     const runner = createFakeRunner();
     const code = await run(['new', 'my-app', '--defaults'], fake.io, { run: runner.run });
@@ -79,7 +79,7 @@ describe('as new (non-interactive)', () => {
     for (const title of [
       'Validating environment',
       'Creating Angular workspace',
-      'Writing Angular Starter configuration',
+      'Writing Starter Angular configuration',
       'Installing dependencies',
       'Initializing Git repository',
       'Validating generated application',
@@ -109,7 +109,7 @@ describe('as new (non-interactive)', () => {
       true,
     );
 
-    const config = JSON.parse(await readFile(join(target, 'angular-starter.config.json'), 'utf8'));
+    const config = JSON.parse(await readFile(join(target, 'starter-angular.config.json'), 'utf8'));
     expect(config.schemaVersion).toBe(1);
     expect(config.generator.angularCli).toBe(ANGULAR_CLI_VERSION);
     expect(config.options).toMatchObject({
@@ -138,7 +138,7 @@ describe('as new (non-interactive)', () => {
     const order = [
       'Creating Angular workspace',
       'Applying architecture profile',
-      'Writing Angular Starter configuration',
+      'Writing Starter Angular configuration',
       'Installing dependencies',
     ].map((title) => out.indexOf(`✓ ${title}`));
     expect(order.every((index) => index >= 0)).toBe(true);
@@ -147,11 +147,11 @@ describe('as new (non-interactive)', () => {
     const target = join(cwd, 'my-app');
     expect(await exists(join(target, 'src/app/features/home/home.routes.ts'))).toBe(true);
     expect(await readFile(join(target, 'tsconfig.json'), 'utf8')).toContain('@features/*');
-    const config = JSON.parse(await readFile(join(target, 'angular-starter.config.json'), 'utf8'));
+    const config = JSON.parse(await readFile(join(target, 'starter-angular.config.json'), 'utf8'));
     expect(config.options.architecture).toBe('screaming');
   });
 
-  it('adds the Angular Starter routing after the architecture profile and before installing', async () => {
+  it('adds the Starter Angular routing after the architecture profile and before installing', async () => {
     const fake = createFakeIo({ cwd });
     const runner = createFakeRunner();
     const code = await run(
@@ -164,8 +164,8 @@ describe('as new (non-interactive)', () => {
     const out = fake.out();
     const order = [
       'Applying architecture profile',
-      'Adding Angular Starter routing',
-      'Writing Angular Starter configuration',
+      'Adding Starter Angular routing',
+      'Writing Starter Angular configuration',
       'Installing dependencies',
     ].map((title) => out.indexOf(`✓ ${title}`));
     expect(order.every((index) => index >= 0)).toBe(true);
@@ -176,7 +176,7 @@ describe('as new (non-interactive)', () => {
     expect(await readFile(join(target, 'src/app/app.config.ts'), 'utf8')).toContain(
       "provideNavigation(APP_NAVIGATION, { appName: 'my-app' })",
     );
-    const config = JSON.parse(await readFile(join(target, 'angular-starter.config.json'), 'utf8'));
+    const config = JSON.parse(await readFile(join(target, 'starter-angular.config.json'), 'utf8'));
     expect(config.options.routing).toBe('starter');
   });
 
@@ -199,7 +199,7 @@ describe('as new (non-interactive)', () => {
         { run: createFakeRunner().run },
       ),
     ).toBe(0);
-    expect(fake.out()).not.toContain('Angular Starter routing');
+    expect(fake.out()).not.toContain('Starter Angular routing');
     expect(await exists(join(cwd, 'my-app/src/app/core/navigation'))).toBe(false);
   });
 
@@ -231,7 +231,7 @@ describe('as new (non-interactive)', () => {
       { run: runner.run },
     );
     expect(code).toBe(1);
-    expect(fake.out()).toContain('✗ Adding Angular Starter routing');
+    expect(fake.out()).toContain('✗ Adding Starter Angular routing');
     expect(runner.calls.some((call) => call.args.includes('install'))).toBe(false);
   });
 
@@ -294,7 +294,7 @@ describe('as new (non-interactive)', () => {
     expect(manifest.dependencies['@lucide/angular']).toMatch(/^\^1\./);
     expect(manifest.dependencies['@angular/core']).toBe('^22.3.0');
     const config = JSON.parse(
-      await readFile(join(cwd, 'my-app', 'angular-starter.config.json'), 'utf8'),
+      await readFile(join(cwd, 'my-app', 'starter-angular.config.json'), 'utf8'),
     );
     expect(config.options.icons).toBe('lucide');
   });
@@ -429,7 +429,7 @@ describe('as new (non-interactive)', () => {
     expect(fake.out()).toContain('Apply the Screaming Architecture profile');
   });
 
-  it('mentions the Angular Starter routing in the --dry-run plan', async () => {
+  it('mentions the Starter Angular routing in the --dry-run plan', async () => {
     const fake = createFakeIo({ cwd });
     const code = await run(
       [
@@ -446,7 +446,7 @@ describe('as new (non-interactive)', () => {
       { run: createFakeRunner().run },
     );
     expect(code).toBe(0);
-    expect(fake.out()).toContain('Add the Angular Starter Routing (navigation tree');
+    expect(fake.out()).toContain('Add the Starter Angular Routing (navigation tree');
   });
 
   it.each([
@@ -511,8 +511,8 @@ export const appConfig: ApplicationConfig = {
     expect(code, fake.err()).toBe(0);
     const out = fake.out();
     const order = [
-      'Adding Angular Starter routing',
-      'Applying Angular Starter SSR',
+      'Adding Starter Angular routing',
+      'Applying Starter Angular SSR',
       'Adding icon library',
     ].map((title) => out.indexOf(`✓ ${title}`));
     expect(order.every((index) => index >= 0)).toBe(true);
@@ -560,7 +560,7 @@ export const appConfig: ApplicationConfig = {
       await readFile(join(target, 'src/app/features/app-shell/layout/main/main.ts'), 'utf8'),
     ).toContain("selector: 'app-main'");
     expect(await readFile(join(target, 'src/app/app.ts'), 'utf8')).toContain('provideLayout(');
-    const config = JSON.parse(await readFile(join(target, 'angular-starter.config.json'), 'utf8'));
+    const config = JSON.parse(await readFile(join(target, 'starter-angular.config.json'), 'utf8'));
     expect(config.options.appShell).toBe('starter');
   });
 
@@ -569,7 +569,7 @@ export const appConfig: ApplicationConfig = {
     await run(['new', 'plain-app', '--defaults', '--no-install', '--no-git'], plain.io, {
       run: createFakeRunner().run,
     });
-    expect(await readFile(join(cwd, 'plain-app', 'angular-starter.config.json'), 'utf8')).toContain(
+    expect(await readFile(join(cwd, 'plain-app', 'starter-angular.config.json'), 'utf8')).toContain(
       '"presence": "none"',
     );
     await expect(
@@ -595,7 +595,7 @@ export const appConfig: ApplicationConfig = {
     expect(await readFile(join(target, 'src/app/app.config.ts'), 'utf8')).toContain(
       'providePresence()',
     );
-    const config = JSON.parse(await readFile(join(target, 'angular-starter.config.json'), 'utf8'));
+    const config = JSON.parse(await readFile(join(target, 'starter-angular.config.json'), 'utf8'));
     expect(config.options.presence).toBe('starter');
   });
 
@@ -639,8 +639,8 @@ export const appConfig: ApplicationConfig = {
       "@import './styles/features/sidebar-styles.css';",
     );
     expect(
-      await readFile(join(target, 'src/app/shared/components/as-search/as-search.ts'), 'utf8'),
-    ).toContain('AsSearch');
+      await readFile(join(target, 'src/app/shared/components/sa-search/sa-search.ts'), 'utf8'),
+    ).toContain('SaSearch');
   });
 
   it('loads the Inter font only with the design base, never in an Angular default project', async () => {
@@ -698,7 +698,7 @@ export const appConfig: ApplicationConfig = {
       { run: createFakeRunner().run },
     );
     expect(code, fake.err()).toBe(0);
-    expect(await exists(join(cwd, 'plain/src/app/shared/components/as-button/as-button.ts'))).toBe(
+    expect(await exists(join(cwd, 'plain/src/app/shared/components/sa-button/sa-button.ts'))).toBe(
       true,
     );
     expect(await readFile(join(cwd, 'plain/tsconfig.json'), 'utf8')).toContain('"@shared/*"');
@@ -722,8 +722,8 @@ export const appConfig: ApplicationConfig = {
     await run(['new', 'my-app', '--defaults', '--dry-run'], fake.io, {
       run: createFakeRunner().run,
     });
-    expect(fake.out()).toContain('Add the Angular Starter App Shell');
-    expect(fake.out()).toMatch(/^ {2}App shell +Angular Starter App Shell$/m);
+    expect(fake.out()).toContain('Add the Starter Angular App Shell');
+    expect(fake.out()).toMatch(/^ {2}App shell +Starter Angular App Shell$/m);
   });
 
   it('records the layout, the purpose and the UI System, and shows them in the summary', async () => {
@@ -735,7 +735,7 @@ export const appConfig: ApplicationConfig = {
     expect(fake.out()).toMatch(/^ {2}Layout +Floating \(wide\)$/m);
     expect(fake.out()).toMatch(/^ {2}UI System +None$/m);
     const config = JSON.parse(
-      await readFile(join(cwd, 'my-app', 'angular-starter.config.json'), 'utf8'),
+      await readFile(join(cwd, 'my-app', 'starter-angular.config.json'), 'utf8'),
     );
     expect(config.options).toMatchObject({
       ssrPurpose: 'none',
@@ -768,7 +768,7 @@ export const appConfig: ApplicationConfig = {
       backoffice.err(),
     ).toBe(0);
     const config = JSON.parse(
-      await readFile(join(cwd, 'my-app', 'angular-starter.config.json'), 'utf8'),
+      await readFile(join(cwd, 'my-app', 'starter-angular.config.json'), 'utf8'),
     );
     expect(config.options).toMatchObject({ rendering: 'starter-ssr', ssrPurpose: 'backoffice' });
 
@@ -800,7 +800,7 @@ export const appConfig: ApplicationConfig = {
     expect(
       await readFile(join(target, 'src/app/features/preference-design/tabs/ui-tab.html'), 'utf8'),
     ).toContain('<app-ui-system />');
-    const config = JSON.parse(await readFile(join(target, 'angular-starter.config.json'), 'utf8'));
+    const config = JSON.parse(await readFile(join(target, 'starter-angular.config.json'), 'utf8'));
     expect(config.options.uiSystem).toBe('starter');
   });
 
@@ -837,14 +837,14 @@ export const appConfig: ApplicationConfig = {
     expect(code, fake.err()).toBe(0);
     const target = join(cwd, 'my-app');
     for (const id of ['modal', 'toggle', 'button', 'icon']) {
-      expect(await exists(join(target, `src/app/shared/components/as-${id}/as-${id}.ts`)), id).toBe(
+      expect(await exists(join(target, `src/app/shared/components/sa-${id}/sa-${id}.ts`)), id).toBe(
         true,
       );
     }
-    expect(await exists(join(target, 'src/app/shared/components/as-table/as-table.ts'))).toBe(
+    expect(await exists(join(target, 'src/app/shared/components/sa-table/sa-table.ts'))).toBe(
       false,
     );
-    const config = JSON.parse(await readFile(join(target, 'angular-starter.config.json'), 'utf8'));
+    const config = JSON.parse(await readFile(join(target, 'starter-angular.config.json'), 'utf8'));
     expect(config.options).toMatchObject({
       components: 'custom',
       componentList: ['modal', 'toggle'],
@@ -897,7 +897,7 @@ export const appConfig: ApplicationConfig = {
     const fake = createFakeIo();
     expect(await run(['new', '--help'], fake.io)).toBe(0);
     const out = fake.out();
-    expect(out).toContain('Usage: as new');
+    expect(out).toContain('Usage: sa new');
     expect(out).toContain('--package-manager');
     expect(out).toContain('--dry-run');
     expect(out).toContain('--config');
@@ -908,7 +908,7 @@ export const appConfig: ApplicationConfig = {
   });
 });
 
-describe('as new (interactive)', () => {
+describe('sa new (interactive)', () => {
   it('asks for the missing values, shows a summary and creates the project', async () => {
     const fake = createFakeIo({ cwd, interactive: true });
     const runner = createFakeRunner();
@@ -957,7 +957,7 @@ describe('as new (interactive)', () => {
     ]);
     expect(await run(['new'], fake.io, { run: runner.run, prompter })).toBe(0);
     expect(asked[0]?.name).toBe('projectName');
-    expect(await exists(join(cwd, 'my-app', 'angular-starter.config.json'))).toBe(true);
+    expect(await exists(join(cwd, 'my-app', 'starter-angular.config.json'))).toBe(true);
   });
 
   it('creates nothing when the final confirmation is declined', async () => {

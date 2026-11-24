@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { reflectComponentType, type Type } from '@angular/core';
-import { AsAvatar, AsButton, AsCheckbox, AsDivider, AsDrawer, AsIcon, AsInput, AsModal, AsPopover, AsSelect, AsSkeleton, AsTabs, AsTextarea, AsToggle } from '@shared/components';
+import { SaAvatar, SaButton, SaCheckbox, SaDivider, SaDrawer, SaIcon, SaInput, SaModal, SaPopover, SaSelect, SaSkeleton, SaTabs, SaTextarea, SaToggle } from '@shared/components';
 import { AlertService } from '@shared/services';
 import { UI_COMPONENTS, type UiComponentEntry } from './ui-system.catalog';
 import { UiSystem } from './ui-system';
@@ -39,7 +39,7 @@ describe('UiSystem', () => {
     const { root } = await render();
     const cards = root.querySelectorAll('article[data-component]');
     expect(cards).toHaveLength(UI_COMPONENTS.length);
-    expect(root.textContent).toContain('as-button');
+    expect(root.textContent).toContain('sa-button');
     expect(Array.from(cards).every((card) => card.querySelector('.border-dashed') !== null)).toBe(true);
   });
 
@@ -61,7 +61,7 @@ describe('UiSystem', () => {
   it('collapses the preview of a component with the accordion animation and expands it again', async () => {
     const { fixture, component, card } = await render();
     const collapse = () => card('button').querySelector('[data-preview]') as HTMLElement;
-    expect(collapse().classList.contains('as-collapse-grid')).toBe(true);
+    expect(collapse().classList.contains('sa-collapse-grid')).toBe(true);
     expect(collapse().classList.contains('is-collapsed')).toBe(false);
 
     component.setShown('button', false);
@@ -120,14 +120,14 @@ describe('UiSystem', () => {
         ]),
       );
       for (const id of idsOf('button')) {
-        expect(card('button').querySelector(`[data-variant="${id}"] as-button`), id).not.toBeNull();
+        expect(card('button').querySelector(`[data-variant="${id}"] sa-button`), id).not.toBeNull();
       }
     });
 
     it('shows the modes and the types of the text field', async () => {
       const { card } = await render();
       expect(idsOf('input')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over', 'type-text', 'type-number', 'type-tel', 'type-price', 'type-tags']));
-      expect(card('input').querySelectorAll('as-input').length).toBe(entryOf('input').variants.length);
+      expect(card('input').querySelectorAll('sa-input').length).toBe(entryOf('input').variants.length);
     });
 
     it('covers the options of the rest of the components', () => {
@@ -155,7 +155,7 @@ describe('UiSystem', () => {
   });
 
   describe('the properties of the components', () => {
-    const CLASSES: Record<string, Type<unknown>> = { icon: AsIcon, button: AsButton, input: AsInput, textarea: AsTextarea, checkbox: AsCheckbox, toggle: AsToggle, select: AsSelect, avatar: AsAvatar, divider: AsDivider, skeleton: AsSkeleton, modal: AsModal, drawer: AsDrawer, tabs: AsTabs, popover: AsPopover };
+    const CLASSES: Record<string, Type<unknown>> = { icon: SaIcon, button: SaButton, input: SaInput, textarea: SaTextarea, checkbox: SaCheckbox, toggle: SaToggle, select: SaSelect, avatar: SaAvatar, divider: SaDivider, skeleton: SaSkeleton, modal: SaModal, drawer: SaDrawer, tabs: SaTabs, popover: SaPopover };
 
     it('shows every input of every component, or says why it does not', () => {
       for (const [id, type] of Object.entries(CLASSES)) {
@@ -187,7 +187,7 @@ describe('UiSystem', () => {
       expect(figure().querySelector('input')?.getAttribute('type')).toBe('password');
       expect(figure().querySelector('svg.lucide-eye')).not.toBeNull();
 
-      (figure().querySelector('svg.lucide-eye')?.closest('as-icon') as HTMLElement).click();
+      (figure().querySelector('svg.lucide-eye')?.closest('sa-icon') as HTMLElement).click();
       await fixture.whenStable();
       expect(figure().querySelector('input')?.getAttribute('type')).toBe('text');
       expect(figure().querySelector('svg.lucide-eye-off')).not.toBeNull();
@@ -205,8 +205,8 @@ describe('UiSystem', () => {
   describe('tabs', () => {
     it('keep each example independent: choosing a tab in one does not change the others', async () => {
       const { fixture, card } = await render();
-      const active = (id: string) => card('tabs').querySelector(`[data-variant="${id}"] .as-tab--active`)?.textContent?.trim();
-      const second = (id: string) => card('tabs').querySelectorAll(`[data-variant="${id}"] .as-tab`)[1] as HTMLElement;
+      const active = (id: string) => card('tabs').querySelector(`[data-variant="${id}"] .sa-tab--active`)?.textContent?.trim();
+      const second = (id: string) => card('tabs').querySelectorAll(`[data-variant="${id}"] .sa-tab`)[1] as HTMLElement;
 
       second('pills').click();
       await fixture.whenStable();
@@ -233,8 +233,8 @@ describe('UiSystem', () => {
       for (const position of ['top', 'bottom', 'left', 'right']) {
         const host = card('tooltip').querySelector(`[data-variant="host-${position}"]`) as HTMLElement;
         const text = card('tooltip').querySelector(`[data-variant="text-${position}"]`) as HTMLElement;
-        expect(host.querySelector('as-button')?.hasAttribute('astooltip'), position).toBe(true);
-        expect(text.querySelector('as-button span[astooltip]'), position).not.toBeNull();
+        expect(host.querySelector('sa-button')?.hasAttribute('satooltip'), position).toBe(true);
+        expect(text.querySelector('sa-button span[satooltip]'), position).not.toBeNull();
         expect(host.querySelector('[data-chip]')?.textContent).toContain('host');
         expect(text.querySelector('[data-chip]')?.textContent).toContain('texto');
       }
@@ -329,9 +329,9 @@ describe('UiSystem', () => {
       for (const position of ['left', 'right', 'top', 'bottom', 'full']) {
         component.openOverlay(drawer, drawer.variants.find((variant) => variant.id === position)!);
         await fixture.whenStable();
-        const panel = overlay().querySelector('dialog.as-drawer') as HTMLElement | null;
+        const panel = overlay().querySelector('dialog.sa-drawer') as HTMLElement | null;
         expect(panel, position).not.toBeNull();
-        expect(panel?.classList.contains(`as-drawer-${position}`), position).toBe(true);
+        expect(panel?.classList.contains(`sa-drawer-${position}`), position).toBe(true);
         expect((fixture.nativeElement as HTMLElement).contains(panel), position).toBe(false);
         component.drawerOpen.set(false);
         await fixture.whenStable();
@@ -345,12 +345,12 @@ describe('UiSystem', () => {
       component.openOverlay(drawer, drawer.variants[0]);
       await fixture.whenStable();
 
-      const panel = overlay().querySelector('dialog.as-drawer') as HTMLElement;
-      expect(Array.from(panel.children).map((child) => child.className)).toEqual(['as-drawer-header', 'as-drawer-content', 'as-drawer-footer']);
-      expect(panel.querySelector('.as-drawer-header [drawer-header]')).not.toBeNull();
-      expect(panel.querySelector('.as-drawer-footer [drawer-footer]')).not.toBeNull();
-      expect(panel.querySelector('.as-drawer-close-button')).not.toBeNull();
-      expect(panel.classList.contains('as-drawer--flush')).toBe(true);
+      const panel = overlay().querySelector('dialog.sa-drawer') as HTMLElement;
+      expect(Array.from(panel.children).map((child) => child.className)).toEqual(['sa-drawer-header', 'sa-drawer-content', 'sa-drawer-footer']);
+      expect(panel.querySelector('.sa-drawer-header [drawer-header]')).not.toBeNull();
+      expect(panel.querySelector('.sa-drawer-footer [drawer-footer]')).not.toBeNull();
+      expect(panel.querySelector('.sa-drawer-close-button')).not.toBeNull();
+      expect(panel.classList.contains('sa-drawer--flush')).toBe(true);
       expect(component.codeOf(drawer)).toContain('flush');
       expect(component.codeOf(drawer)).toContain('class="p-5"');
     });
@@ -361,11 +361,11 @@ describe('UiSystem', () => {
       const closable = drawer.options!.find((option) => option.id === 'closable')!;
       component.openOverlay(drawer, drawer.variants[0]);
       await fixture.whenStable();
-      expect(overlay().querySelector('.as-drawer-close-button')).not.toBeNull();
+      expect(overlay().querySelector('.sa-drawer-close-button')).not.toBeNull();
 
       component.setOption(drawer, closable, false);
       await fixture.whenStable();
-      expect(overlay().querySelector('.as-drawer-close-button')).toBeNull();
+      expect(overlay().querySelector('.sa-drawer-close-button')).toBeNull();
       expect(component.codeOf(drawer)).toContain('[closable]="false"');
     });
 
@@ -376,13 +376,13 @@ describe('UiSystem', () => {
       component.openOverlay(modal, modal.variants[0]);
       await fixture.whenStable();
 
-      const panel = overlay().querySelector('.as-modal') as HTMLElement;
+      const panel = overlay().querySelector('.sa-modal') as HTMLElement;
       expect(panel).not.toBeNull();
       expect((fixture.nativeElement as HTMLElement).contains(panel)).toBe(false);
-      expect(panel.querySelector('.as-modal-header-title')?.textContent).toContain('Título');
-      expect(panel.querySelector('.as-modal-footer')).not.toBeNull();
+      expect(panel.querySelector('.sa-modal-header-title')?.textContent).toContain('Título');
+      expect(panel.querySelector('.sa-modal-footer')).not.toBeNull();
       expect(component.codeOf(modal)).toContain('showFooter');
-      expect(panel.classList.contains('as-modal--flush')).toBe(true);
+      expect(panel.classList.contains('sa-modal--flush')).toBe(true);
       expect(component.codeOf(modal)).toContain('flush');
       expect(component.codeOf(modal)).toContain('class="p-5"');
     });
@@ -394,8 +394,8 @@ describe('UiSystem', () => {
       component.openOverlay(modal, modal.variants[0]);
       await fixture.whenStable();
       expect(component.codeOf(modal)).not.toContain('draggable');
-      press(overlay().querySelector('.as-modal-header') as HTMLElement);
-      expect((overlay().querySelector('.as-modal') as HTMLElement).style.position).toBe('fixed');
+      press(overlay().querySelector('.sa-modal-header') as HTMLElement);
+      expect((overlay().querySelector('.sa-modal') as HTMLElement).style.position).toBe('fixed');
       document.dispatchEvent(new MouseEvent('mouseup'));
 
       component.modalOpen.set(false);
@@ -405,8 +405,8 @@ describe('UiSystem', () => {
       await fixture.whenStable();
 
       expect(component.codeOf(modal)).toContain('[draggable]="false"');
-      press(overlay().querySelector('.as-modal-header') as HTMLElement);
-      expect((overlay().querySelector('.as-modal') as HTMLElement).style.position).toBe('');
+      press(overlay().querySelector('.sa-modal-header') as HTMLElement);
+      expect((overlay().querySelector('.sa-modal') as HTMLElement).style.position).toBe('');
     });
   });
 
@@ -416,11 +416,11 @@ describe('UiSystem', () => {
       const modal = entryOf('modal');
       component.openOverlay(modal, modal.variants.find((variant) => variant.id === 'width-48')!);
       await fixture.whenStable();
-      expect((overlay().querySelector('.as-modal') as HTMLElement).style.width).toBe('48rem');
+      expect((overlay().querySelector('.sa-modal') as HTMLElement).style.width).toBe('48rem');
 
       component.openOverlay(modal, modal.variants.find((variant) => variant.id === 'preview')!);
       await fixture.whenStable();
-      expect(overlay().querySelector('.as-modal')?.classList.contains('as-modal--preview')).toBe(true);
+      expect(overlay().querySelector('.sa-modal')?.classList.contains('sa-modal--preview')).toBe(true);
     });
 
     it('gives the drawer the width of the chosen variant', async () => {
@@ -428,7 +428,7 @@ describe('UiSystem', () => {
       const drawer = entryOf('drawer');
       component.openOverlay(drawer, drawer.variants.find((variant) => variant.id === 'width-45')!);
       await fixture.whenStable();
-      expect((overlay().querySelector('dialog.as-drawer') as HTMLElement).style.getPropertyValue('--as-drawer-width')).toBe('45rem');
+      expect((overlay().querySelector('dialog.sa-drawer') as HTMLElement).style.getPropertyValue('--sa-drawer-width')).toBe('45rem');
     });
   });
 

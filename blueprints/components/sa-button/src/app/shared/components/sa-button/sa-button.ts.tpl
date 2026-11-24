@@ -1,8 +1,8 @@
 import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, booleanAttribute, computed, input, output } from '@angular/core';
 
-import { AsIcon } from '../as-icon/as-icon';
-import { AsRipple } from './as-ripple';
+import { SaIcon } from '../sa-icon/sa-icon';
+import { SaRipple } from './sa-ripple';
 
 /** Mismo vocabulario de severidades que exponía PrimeNG — se conserva para no tocar
  *  a ningún consumidor del wrapper (solo primary/secondary/success/danger se usan hoy). */
@@ -20,17 +20,17 @@ type ButtonClassParts = {
 };
 
 @Component({
-  selector: 'as-button',
+  selector: 'sa-button',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, AsIcon, AsRipple],
-  templateUrl: './as-button.html',
-  styleUrl: './as-button.css',
+  imports: [NgClass, NgTemplateOutlet, SaIcon, SaRipple],
+  templateUrl: './sa-button.html',
+  styleUrl: './sa-button.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '[class]': 'hostClass()',
   },
 })
-export class AsButton {
+export class SaButton {
   readonly label = input<string>('');
   readonly icon = input<string | null>(null);
   readonly badge = input<string | number | null>(null);
@@ -60,7 +60,7 @@ export class AsButton {
   /** El botón representa una opción actualmente elegida (ej. la pestaña "Responder" vs "Nota
    *  interna", un ícono de formato con el toggle prendido) — a diferencia de `:active` (CSS, solo
    *  mientras se mantiene el clic presionado), esto es un estado que el consumidor decide y puede
-   *  quedar prendido. Agrega `as-btn-selected`, que en `variant="text"` fuerza el texto/ícono a
+   *  quedar prendido. Agrega `sa-btn-selected`, que en `variant="text"` fuerza el texto/ícono a
    *  `--app-text-color` (blanco en dark) — el mismo color de hover, nunca gris — así ningún
    *  feature necesita repetir esa regla a mano (ver button-styles.css). El FONDO que distingue
    *  cuál opción es cuál (ej. tinte primary vs ámbar) sigue siendo cosa del consumidor. */
@@ -104,14 +104,14 @@ export class AsButton {
    *  su propia clase en el botón para el flex-direction real. */
   readonly isStackedIcon = computed(() => this.iconPos() === 'top' || this.iconPos() === 'bottom');
 
-  /** Clases base del botón (as-btn, as-btn-outlined, as-btn-{severity}, etc.), separadas
+  /** Clases base del botón (sa-btn, sa-btn-outlined, sa-btn-{severity}, etc.), separadas
    *  del resto para poder combinarlas con las de tamaño/forma en buttonClass. */
-  private readonly baseClasses = computed(() => this.joinClasses('as-btn', this.severity() ? `as-btn-${this.severity()}` : '', this.isOutlined() ? 'as-btn-outlined' : '', this.isTextVariant() ? 'as-btn-text' : '', this.isDashed() ? 'as-btn-dashed' : '', this.raised() ? 'as-btn-raised' : '', this.selected() ? 'as-btn-selected' : ''));
+  private readonly baseClasses = computed(() => this.joinClasses('sa-btn', this.severity() ? `sa-btn-${this.severity()}` : '', this.isOutlined() ? 'sa-btn-outlined' : '', this.isTextVariant() ? 'sa-btn-text' : '', this.isDashed() ? 'sa-btn-dashed' : '', this.raised() ? 'sa-btn-raised' : '', this.selected() ? 'sa-btn-selected' : ''));
 
-  /** as-btn-{size} fija un height pensado para una sola línea (icono+label en fila) — no
+  /** sa-btn-{size} fija un height pensado para una sola línea (icono+label en fila) — no
    *  aplica cuando el ícono va apilado arriba/abajo, porque ahí el alto lo debe dar el
    *  contenido (2 líneas), no un valor fijo pensado para la variante horizontal. */
-  readonly buttonClass = computed(() => this.joinClasses(this.baseClasses(), this.classParts().button, this.isStackedIcon() ? '' : `as-btn-${this.size()}`, this.isIconOnly() ? 'as-btn-icon' : '', this.isStackedIcon() ? 'as-btn-icon-stacked' : '', this.rounded() !== 'default' ? `as-btn-r-${this.rounded()}` : ''));
+  readonly buttonClass = computed(() => this.joinClasses(this.baseClasses(), this.classParts().button, this.isStackedIcon() ? '' : `sa-btn-${this.size()}`, this.isIconOnly() ? 'sa-btn-icon' : '', this.isStackedIcon() ? 'sa-btn-icon-stacked' : '', this.rounded() !== 'default' ? `sa-btn-r-${this.rounded()}` : ''));
 
   readonly hostClass = computed(() => {
     const widthTokens = this.toClassList(this.styleClass()).filter((token) => this.isWidthClass(token));
@@ -119,13 +119,13 @@ export class AsButton {
     return this.joinClasses(widthTokens.length ? 'block' : '', ...widthTokens);
   });
 
-  readonly iconClass = computed(() => `as-btn__icon as-btn__icon--${this.iconPos()}`);
+  readonly iconClass = computed(() => `sa-btn__icon sa-btn__icon--${this.iconPos()}`);
 
   readonly computedIconClass = computed(() => this.joinClasses(this.iconClass(), this.iconExtraClass()));
 
-  readonly computedLabelClass = computed(() => this.joinClasses('as-btn__label', this.classParts().label, this.labelClass()));
+  readonly computedLabelClass = computed(() => this.joinClasses('sa-btn__label', this.classParts().label, this.labelClass()));
 
-  readonly computedBadgeClass = computed(() => this.joinClasses('as-button__badge', this.badgeClass()));
+  readonly computedBadgeClass = computed(() => this.joinClasses('sa-button__badge', this.badgeClass()));
 
   readonly hasIcon = computed(() => Boolean(this.icon()));
   readonly isOutlined = computed(() => this.outlined() || this.variant() === 'outlined');

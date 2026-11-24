@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AsInput } from './as-input';
+import { SaInput } from './sa-input';
 
-describe('AsInput', () => {
-  let fixture: ComponentFixture<AsInput>;
-  let component: AsInput;
+describe('SaInput', () => {
+  let fixture: ComponentFixture<SaInput>;
+  let component: SaInput;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AsInput],
+      imports: [SaInput],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsInput);
+    fixture = TestBed.createComponent(SaInput);
     component = fixture.componentInstance;
   });
 
@@ -148,7 +148,7 @@ describe('AsInput', () => {
 
       component.onNumberWheel(new WheelEvent('wheel', { deltaY: 10, cancelable: true }));
       expect(component.displayValue()).toBe('1');
-      expect(fixture.nativeElement.querySelector('.as-input-stepper-btn')).toBeNull();
+      expect(fixture.nativeElement.querySelector('.sa-input-stepper-btn')).toBeNull();
     });
 
     it('en un input que no es numérico ni ↑/↓ ni la rueda se interceptan', () => {
@@ -174,7 +174,7 @@ describe('AsInput', () => {
     });
 
     it('con showStepper se renderizan los botones Aumentar y Disminuir', () => {
-      const labels = Array.from(fixture.nativeElement.querySelectorAll('.as-input-stepper-btn')).map((button) => (button as HTMLElement).getAttribute('aria-label'));
+      const labels = Array.from(fixture.nativeElement.querySelectorAll('.sa-input-stepper-btn')).map((button) => (button as HTMLElement).getAttribute('aria-label'));
 
       expect(labels).toEqual(['Aumentar', 'Disminuir']);
     });
@@ -247,7 +247,7 @@ describe('AsInput', () => {
     it('en `in` el label queda dentro, arriba, y el campo le deja sitio como el input', () => {
       fixture.componentRef.setInput('variant', 'in');
       fixture.detectChanges();
-      const box: HTMLElement = fixture.nativeElement.querySelector('.as-input-tags');
+      const box: HTMLElement = fixture.nativeElement.querySelector('.sa-input-tags');
 
       expect(label().classList.contains('bg-(--app-panel-bg)')).toBe(false);
       expect(box.style.paddingTop).toBe('1.3125rem');

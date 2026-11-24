@@ -145,8 +145,8 @@
 /* Mismo truco de `grid-template-rows` (0fr↔1fr) que slide-in-out-*, pero para el otro caso de
    uso: una tarjeta/sección que siempre está montada en el DOM y solo cambia entre
    mostrada/colapsada con un booleano a lo largo del tiempo (ej. las tarjetas colapsables del
-   detalle de ticket, mismo patrón que ya usa `as-table-expansion-grid`/`.is-open` en
-   as-table.css — revisar ahí primero antes de tocar esto).
+   detalle de ticket, mismo patrón que ya usa `sa-table-expansion-grid`/`.is-open` en
+   sa-table.css — revisar ahí primero antes de tocar esto).
    NO usar `slide-in-out-enter/leave` para esto: esas clases están pensadas para contenido que
    realmente aparece/desaparece del DOM vía `@if` (ej. el buscador de Conversaciones) — Angular
    dispara su animación en CADA montaje, incluida la primera carga de la página, así que un
@@ -154,23 +154,23 @@
    aparecer ya abierto. Acá el contenido siempre existe; solo `grid-template-rows` cambia por
    TRANSICIÓN cuando el usuario expande/colapsa — nunca al montar. */
 
-.as-collapse-grid {
+.sa-collapse-grid {
   display: grid;
   overflow: hidden;
   grid-template-rows: 1fr;
   transition: grid-template-rows 320ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.as-collapse-grid.is-collapsed {
+.sa-collapse-grid.is-collapsed {
   grid-template-rows: 0fr;
 }
 
-.as-collapse-grid > * {
+.sa-collapse-grid > * {
   min-height: 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .as-collapse-grid {
+  .sa-collapse-grid {
     transition: none;
   }
 }

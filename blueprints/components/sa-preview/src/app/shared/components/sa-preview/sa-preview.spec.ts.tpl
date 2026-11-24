@@ -1,21 +1,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi } from 'vitest';
 
-import { AsPreview } from './as-preview';
+import { SaPreview } from './sa-preview';
 
-async function setup(): Promise<{ fixture: ComponentFixture<AsPreview>; component: AsPreview }> {
+async function setup(): Promise<{ fixture: ComponentFixture<SaPreview>; component: SaPreview }> {
   await TestBed.configureTestingModule({
-    imports: [AsPreview],
+    imports: [SaPreview],
   }).compileComponents();
 
-  const fixture = TestBed.createComponent(AsPreview);
+  const fixture = TestBed.createComponent(SaPreview);
   const component = fixture.componentInstance;
   fixture.detectChanges();
 
   return { fixture, component };
 }
 
-describe('AsPreview', () => {
+describe('SaPreview', () => {
   it('creates the component', async () => {
     const { component } = await setup();
     expect(component).toBeTruthy();

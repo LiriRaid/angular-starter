@@ -1,16 +1,16 @@
-<as-button [icon]="triggerIcon()" [iconSize]="triggerIconSize()" [size]="triggerSize()" [variant]="triggerVariant()" [styleClass]="triggerClass()" [ariaLabel]="triggerAriaLabel()" [ariaExpanded]="isOpen()" [asTooltip]="$any(triggerTooltip()) || undefined" [tooltipPosition]="triggerTooltipPosition()" [tooltipStyleClass]="triggerTooltipStyleClass()" [showDelay]="triggerTooltipDelay()" (onClick)="toggle($event)">
+<sa-button [icon]="triggerIcon()" [iconSize]="triggerIconSize()" [size]="triggerSize()" [variant]="triggerVariant()" [styleClass]="triggerClass()" [ariaLabel]="triggerAriaLabel()" [ariaExpanded]="isOpen()" [saTooltip]="$any(triggerTooltip()) || undefined" [tooltipPosition]="triggerTooltipPosition()" [tooltipStyleClass]="triggerTooltipStyleClass()" [showDelay]="triggerTooltipDelay()" (onClick)="toggle($event)">
   <ng-content select="[popover-trigger]" />
-</as-button>
+</sa-button>
 
 <div #popoverPanel popover="manual" [class]="panelClass()" (toggle)="onPopoverToggle($event)">
-  <div class="as-popover-content">
+  <div class="sa-popover-content">
     @if (actions()) {
-      <div class="as-popover-actions">
+      <div class="sa-popover-actions">
         @for (action of items(); track trackAction($index, action); let last = $last) {
-          <as-button [label]="action.label" [icon]="action.icon" [iconSize]="action.iconSize ?? '16'" [disabled]="action.disabled ?? false" [variant]="actionVariant(action)" [styleClass]="actionClass(action)" (onClick)="onActionClick(action)" />
+          <sa-button [label]="action.label" [icon]="action.icon" [iconSize]="action.iconSize ?? '16'" [disabled]="action.disabled ?? false" [variant]="actionVariant(action)" [styleClass]="actionClass(action)" (onClick)="onActionClick(action)" />
 
           @if (!last) {
-            <hr class="as-popover-divider" aria-hidden="true" />
+            <hr class="sa-popover-divider" aria-hidden="true" />
           }
         }
       </div>

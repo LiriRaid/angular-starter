@@ -1,25 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { ComponentRef } from '@angular/core';
-import { AsTable } from './as-table';
+import { SaTable } from './sa-table';
 
 type TestRow = { id: number; name: string };
 
-describe('AsTable', () => {
-  let fixture: ComponentFixture<AsTable<TestRow>>;
-  let component: AsTable<TestRow>;
-  let ref: ComponentRef<AsTable<TestRow>>;
+describe('SaTable', () => {
+  let fixture: ComponentFixture<SaTable<TestRow>>;
+  let component: SaTable<TestRow>;
+  let ref: ComponentRef<SaTable<TestRow>>;
 
   const ITEMS = Array.from({ length: 25 }, (_, i) => ({ id: i + 1, name: `Item ${i + 1}` }));
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsTable, { set: { imports: [], template: '' } });
+    TestBed.overrideComponent(SaTable, { set: { imports: [], template: '' } });
 
     await TestBed.configureTestingModule({
-      imports: [AsTable],
+      imports: [SaTable],
     }).compileComponents();
 
-    fixture = TestBed.createComponent<AsTable<TestRow>>(AsTable);
+    fixture = TestBed.createComponent<SaTable<TestRow>>(SaTable);
     component = fixture.componentInstance;
     ref = fixture.componentRef;
     ref.setInput('value', ITEMS);

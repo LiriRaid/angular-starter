@@ -38,11 +38,11 @@ export async function generateCommand(
 ): Promise<void> {
   if (kind === undefined || !(GENERATE_KINDS as readonly string[]).includes(kind)) {
     throw new UsageError(
-      kind === undefined ? 'Usage: as generate <kind> <name>' : `Unknown kind "${kind}".`,
+      kind === undefined ? 'Usage: sa generate <kind> <name>' : `Unknown kind "${kind}".`,
       `Choose one of: ${GENERATE_KINDS.join(', ')}.`,
     );
   }
-  if (name === undefined) throw new UsageError(`Usage: as generate ${kind} <name>`);
+  if (name === undefined) throw new UsageError(`Usage: sa generate ${kind} <name>`);
   if (!NAME_PATTERN.test(name)) {
     throw new UsageError(
       `Invalid name "${name}": use lowercase letters, numbers and hyphens, starting with a letter.`,
@@ -53,8 +53,8 @@ export async function generateCommand(
   const screaming = project.options.architecture === 'screaming';
   if (kind === 'feature' && !screaming) {
     throw new UsageError(
-      `"as generate feature" works with the Screaming Architecture; this project uses "${project.options.architecture}".`,
-      'Use "as generate component <name>" to make a component, or "ng generate" for other structures.',
+      `"sa generate feature" works with the Screaming Architecture; this project uses "${project.options.architecture}".`,
+      'Use "sa generate component <name>" to make a component, or "ng generate" for other structures.',
     );
   }
 
@@ -137,7 +137,7 @@ async function planComponent(
   } else {
     if (!(await pathExists(join(project.root, `${APP}/features/${flags.feature}`)))) {
       throw new UsageError(
-        `The feature "${flags.feature}" does not exist; create it with "as generate feature ${flags.feature}".`,
+        `The feature "${flags.feature}" does not exist; create it with "sa generate feature ${flags.feature}".`,
       );
     }
     folder = `${APP}/features/${flags.feature}/${name}`;
@@ -194,7 +194,7 @@ async function planPlainComponent(
   if (flags.shared || flags.feature !== undefined) {
     throw new UsageError(
       '--feature and --shared are places of the Screaming Architecture.',
-      `This project uses "${project.options.architecture}": use "as generate component ${name}" or --path <folder> below src/app.`,
+      `This project uses "${project.options.architecture}": use "sa generate component ${name}" or --path <folder> below src/app.`,
     );
   }
   const parent = flags.path === undefined ? APP : `${APP}/${plainPathOf(flags.path)}`;

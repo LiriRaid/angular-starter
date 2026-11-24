@@ -6,10 +6,10 @@ the first render by `provideDesignPreferences()` in `app.config.ts`.
 
 | Preference       | What it changes                                            | How                                   |
 | ---------------- | ---------------------------------------------------------- | ------------------------------------- |
-| `radius`         | every `rounded-*`, buttons, selects, popovers and tooltips | `--as-ui-radius-scale` × `--radius-*` |
-| `buttonSize`     | the height of the `as-button` sizes                        | `--as-ui-button-scale`                |
-| `density`        | every spacing utility (padding, gaps, sizes)               | `--as-ui-density-scale` × `--spacing` |
-| `fontSize`       | everything sized in `rem`                                  | `--as-ui-font-scale` on `html`        |
+| `radius`         | every `rounded-*`, buttons, selects, popovers and tooltips | `--sa-ui-radius-scale` × `--radius-*` |
+| `buttonSize`     | the height of the `sa-button` sizes                        | `--sa-ui-button-scale`                |
+| `density`        | every spacing utility (padding, gaps, sizes)               | `--sa-ui-density-scale` × `--spacing` |
+| `fontSize`       | everything sized in `rem`                                  | `--sa-ui-font-scale` on `html`        |
 | `showBreadcrumb` | the breadcrumb of the header                               | read by the header                    |
 | `animations`     | transitions and animations                                 | `data-animations` attribute on `html` |
 

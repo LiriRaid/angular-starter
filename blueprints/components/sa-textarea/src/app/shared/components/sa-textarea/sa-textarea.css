@@ -6,7 +6,7 @@ fieldset {
   border-style: solid;
 }
 
-.as-textarea-wrapper {
+.sa-textarea-wrapper {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
@@ -14,16 +14,16 @@ fieldset {
 }
 
 /* Reserva el alto del label flotante-arriba (`variant="over"`) — mismo criterio que
-   `.as-input-over`/`.as-input-over-float`. */
-.as-textarea-over {
+   `.sa-input-over`/`.sa-input-over-float`. */
+.sa-textarea-over {
   transition: padding-top 150ms ease;
 }
 
-.as-textarea-over-float {
+.sa-textarea-over-float {
   padding-top: 1rem;
 }
 
-.as-textarea-field {
+.sa-textarea-field {
   background-color: transparent;
   border: none;
   box-shadow: none;
@@ -48,35 +48,35 @@ fieldset {
   transition: color 0.18s ease;
 }
 
-.as-textarea-field:focus,
-.as-textarea-field:focus-visible {
+.sa-textarea-field:focus,
+.sa-textarea-field:focus-visible {
   outline: none;
   box-shadow: none;
 }
 
-.as-textarea-field::placeholder {
+.sa-textarea-field::placeholder {
   color: var(--app-placeholder-color);
   opacity: 1;
   transition: color 0.18s ease;
 }
 
-.as-textarea-field:disabled {
+.sa-textarea-field:disabled {
   color: var(--app-control-disabled-text);
   cursor: not-allowed;
   resize: none;
 }
 
-.as-textarea-invalid .as-textarea-field {
+.sa-textarea-invalid .sa-textarea-field {
   border-color: var(--app-error-color);
 }
 
-.as-textarea-invalid label {
+.sa-textarea-invalid label {
   color: var(--app-error-color);
 }
 
 /* Grip decorativo en la esquina inferior derecha, igual al de portfolio-liriraid:
    puramente visual (pointer-events: none), el resize real está deshabilitado. */
-.as-textarea-grip::after {
+.sa-textarea-grip::after {
   content: '';
   position: absolute;
   right: 5px;
@@ -101,7 +101,7 @@ fieldset {
   );
 }
 
-.as-textarea-error {
+.sa-textarea-error {
   color: var(--app-error-color);
   font-size: 0.75rem;
   line-height: 1.4;

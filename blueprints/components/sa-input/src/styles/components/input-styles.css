@@ -28,30 +28,30 @@
   .dark input::selection,
   .dark textarea::selection,
   .dark [contenteditable]::selection {
-    background-color: color-mix(in srgb, var(--as-primary-400) 44%, transparent);
-    color: var(--as-surface-0);
+    background-color: color-mix(in srgb, var(--sa-primary-400) 44%, transparent);
+    color: var(--sa-surface-0);
   }
 
-  input:not(.as-input-field),
-  textarea:not(.as-input-field) {
+  input:not(.sa-input-field),
+  textarea:not(.sa-input-field) {
     box-shadow: none !important;
   }
 
-  input:not(.as-input-field):focus,
-  textarea:not(.as-input-field):focus {
+  input:not(.sa-input-field):focus,
+  textarea:not(.sa-input-field):focus {
     outline: none !important;
     box-shadow: none !important;
   }
 
-  as-input[type] {
+  sa-input[type] {
     border: none !important;
     padding: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
   }
 
-  /* Oculta los spinners nativos de los input[type=number] sueltos de la app. `as-input` ya no los usa:
-     su type="number" se dibuja como texto y [showStepper]="true" pinta botones propios (ver as-input.css). */
+  /* Oculta los spinners nativos de los input[type=number] sueltos de la app. `sa-input` ya no los usa:
+     su type="number" se dibuja como texto y [showStepper]="true" pinta botones propios (ver sa-input.css). */
   input[type='number']::-webkit-inner-spin-button,
   input[type='number']::-webkit-outer-spin-button {
     -webkit-appearance: none;

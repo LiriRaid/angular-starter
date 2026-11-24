@@ -3,10 +3,10 @@ import type { AbstractControl } from '@angular/forms';
 import type { ValidationErrors } from '@angular/forms';
 
 // El look del label (color, sombra del fieldset, posicionamiento flotante) es prácticamente
-// idéntico al de `as-input` — en vez de duplicar esas fórmulas se reusan directo sus
+// idéntico al de `sa-input` — en vez de duplicar esas fórmulas se reusan directo sus
 // funciones puras (ya pensadas para no depender de estado del componente dueño).
-import { resolveFieldsetBoxShadow, resolveLabelColor, resolveLabelPositionClass } from '../as-input/as-input.config';
-import type { AsIconPosition, AsSelectVariant } from './as-select.entity';
+import { resolveFieldsetBoxShadow, resolveLabelColor, resolveLabelPositionClass } from '../sa-input/sa-input.config';
+import type { SaIconPosition, SaSelectVariant } from './sa-select.entity';
 
 export const SELECT_ALL_VALUE = '__all__';
 
@@ -71,7 +71,7 @@ export function resolveSelectFieldsetBoxShadow(hasErrors: boolean, focused: bool
   return resolveFieldsetBoxShadow(hasErrors, focused, disabled, readonly);
 }
 
-export function resolveSelectLabelBackground(variant: AsSelectVariant, disabled: boolean, readonly: boolean): string {
+export function resolveSelectLabelBackground(variant: SaSelectVariant, disabled: boolean, readonly: boolean): string {
   if (variant !== 'on') return 'transparent';
   return disabled || readonly ? 'var(--app-control-disabled-bg)' : 'var(--app-control-surface-bg)';
 }
@@ -80,7 +80,7 @@ export function resolveSelectLabelColor(hasErrors: boolean, disabled: boolean, f
   return resolveLabelColor(hasErrors, disabled, focused, hasValue);
 }
 
-export function resolveSelectLabelClass(variant: AsSelectVariant, shouldFloat: boolean, hasLeftIcon: boolean): Record<string, boolean> {
+export function resolveSelectLabelClass(variant: SaSelectVariant, shouldFloat: boolean, hasLeftIcon: boolean): Record<string, boolean> {
   return resolveLabelPositionClass(variant, shouldFloat, hasLeftIcon, '-top-2.5');
 }
 
@@ -116,11 +116,11 @@ type SelectPresentationDeps = {
   generatedId: string;
   showErrorMessage: () => boolean;
   lucideIcon: () => unknown;
-  iconPosition: () => AsIconPosition;
+  iconPosition: () => SaIconPosition;
   isFocused: () => boolean;
   isDisabled: () => boolean;
   isInteractionDisabled: () => boolean;
-  variant: () => AsSelectVariant;
+  variant: () => SaSelectVariant;
   currentValues: () => unknown[];
   optionValueOf: (option: unknown) => unknown;
   labelForOption: (option: unknown) => string;

@@ -1,15 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { AsSelectableItem } from './as-selectable-item';
+import { SaSelectableItem } from './sa-selectable-item';
 
-describe('AsSelectableItem', () => {
-  let fixture: ComponentFixture<AsSelectableItem>;
+describe('SaSelectableItem', () => {
+  let fixture: ComponentFixture<SaSelectableItem>;
 
   const button = () => fixture.nativeElement.querySelector('button') as HTMLButtonElement;
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(AsSelectableItem);
+    fixture = TestBed.createComponent(SaSelectableItem);
     fixture.componentRef.setInput('title', 'Conexión principal');
   });
 
@@ -26,12 +26,12 @@ describe('AsSelectableItem', () => {
   it('anuncia si está elegida con aria-pressed y solo entonces muestra el check', () => {
     fixture.detectChanges();
     expect(button().getAttribute('aria-pressed')).toBe('false');
-    expect(fixture.nativeElement.querySelector('as-icon')).toBeNull();
+    expect(fixture.nativeElement.querySelector('sa-icon')).toBeNull();
 
     fixture.componentRef.setInput('selected', true);
     fixture.detectChanges();
     expect(button().getAttribute('aria-pressed')).toBe('true');
-    expect(fixture.nativeElement.querySelector('as-icon')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('sa-icon')).not.toBeNull();
   });
 
   it('el color de acento solo tiñe el borde cuando está elegida', () => {

@@ -1,8 +1,8 @@
-as-preview {
+sa-preview {
   display: block;
 }
 
-.as-preview-box {
+.sa-preview-box {
   position: relative;
   cursor: pointer;
   background: color-mix(in srgb, var(--app-panel-muted-bg) 78%, transparent);
@@ -11,30 +11,30 @@ as-preview {
     background-color 0.15s ease;
 }
 
-.as-preview-box:hover {
-  border-color: var(--as-primary-color);
+.sa-preview-box:hover {
+  border-color: var(--sa-primary-color);
   background: var(--app-accent-soft-bg);
 }
 
-.as-preview-box--filled {
+.sa-preview-box--filled {
   padding: 0;
   overflow: hidden;
 }
 
-.as-preview-box--readonly {
+.sa-preview-box--readonly {
   cursor: default;
 }
 
 /* Cancela el hover "activo" de la base cuando la caja está llena (la imagen ya da su propio feedback)
    o deshabilitada y vacía (no hay nada que abrir). */
-.as-preview-box--filled:hover,
-.as-preview-box--readonly:not(.as-preview-box--filled):hover {
+.sa-preview-box--filled:hover,
+.sa-preview-box--readonly:not(.sa-preview-box--filled):hover {
   border-color: var(--app-border-color);
   background: color-mix(in srgb, var(--app-panel-muted-bg) 78%, transparent);
 }
 
 /* Media + hover de zoom, mismo patrón que portfolio-carousel: overlay oscuro + escala de imagen + botón de lupa centrado. */
-.as-preview-media {
+.sa-preview-media {
   position: relative;
   display: flex;
   width: 100%;
@@ -46,7 +46,7 @@ as-preview {
   cursor: pointer;
 }
 
-.as-preview-media::after {
+.sa-preview-media::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -57,22 +57,22 @@ as-preview {
   pointer-events: none;
 }
 
-.as-preview-media:hover::after {
+.sa-preview-media:hover::after {
   opacity: 1;
 }
 
-.as-preview-image {
+.sa-preview-image {
   max-height: 100%;
   max-width: 100%;
   object-fit: contain;
   transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.3, 1);
 }
 
-.as-preview-media:hover .as-preview-image {
+.sa-preview-media:hover .sa-preview-image {
   transform: scale(1.06);
 }
 
-.as-preview-zoom {
+.sa-preview-zoom {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -94,23 +94,23 @@ as-preview {
 }
 
 /* Aparece con el hover de toda la imagen (como .expand-btn del portfolio, visible al pasar sobre la card)... */
-.as-preview-media:hover .as-preview-zoom {
+.sa-preview-media:hover .sa-preview-zoom {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
   pointer-events: auto;
 }
 
 /* ...pero solo se oscurece cuando el cursor está encima del círculo mismo, no de toda la imagen. */
-.as-preview-zoom:hover {
+.sa-preview-zoom:hover {
   background: rgba(0, 0, 0, 0.6);
 }
 
-.as-preview-remove {
+.sa-preview-remove {
   position: absolute;
   top: 0.5rem;
   right: 0.5rem;
   z-index: 3;
 }
 
-/* .as-btn.as-icon-overlay-btn vive en as-modal.css — as-preview ya depende
-   de AsModal (para el preview grande), así que ese CSS siempre está disponible aquí también. */
+/* .sa-btn.sa-icon-overlay-btn vive en sa-modal.css — sa-preview ya depende
+   de SaModal (para el preview grande), así que ese CSS siempre está disponible aquí también. */

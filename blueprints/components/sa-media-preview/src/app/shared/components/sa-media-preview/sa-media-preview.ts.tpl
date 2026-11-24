@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject, input, model } from '@angular/core';
 import { DomSanitizer, type SafeResourceUrl } from '@angular/platform-browser';
 
-import { AsButton } from '../as-button/as-button';
-import { AsModal } from '../as-modal/as-modal';
+import { SaButton } from '../sa-button/sa-button';
+import { SaModal } from '../sa-modal/sa-modal';
 import { downloadFile } from '@shared/utils/download-file';
 
 export type MediaPreviewKind = 'image' | 'pdf';
@@ -10,18 +10,18 @@ export type MediaPreviewKind = 'image' | 'pdf';
 const HTTP_URL = /^https?:\/\//i;
 
 /** Modal de zoom (imagen) / preview inline (PDF) de un adjunto del chat — construido sobre
- *  as-modal en variant="preview" (ya trae su propio botón de cerrar flotante, así
+ *  sa-modal en variant="preview" (ya trae su propio botón de cerrar flotante, así
  *  que acá solo se agrega el botón de descarga cuando aplica). */
 @Component({
-  selector: 'as-media-preview',
+  selector: 'sa-media-preview',
   standalone: true,
-  imports: [AsModal, AsButton],
-  templateUrl: './as-media-preview.html',
-  styleUrl: './as-media-preview.css',
+  imports: [SaModal, SaButton],
+  templateUrl: './sa-media-preview.html',
+  styleUrl: './sa-media-preview.css',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsMediaPreview {
+export class SaMediaPreview {
   private readonly sanitizer = inject(DomSanitizer);
 
   readonly visible = model<boolean>(false);

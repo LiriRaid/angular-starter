@@ -3,15 +3,15 @@ import { ChangeDetectionStrategy, Component, TemplateRef, ViewEncapsulation, inp
 import { CdkDrag, CdkDragDrop, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
-  selector: 'as-reorder-list',
+  selector: 'sa-reorder-list',
   standalone: true,
   imports: [CdkDropList, CdkDrag, NgTemplateOutlet],
-  templateUrl: './as-reorder-list.html',
-  styleUrl: './as-reorder-list.css',
+  templateUrl: './sa-reorder-list.html',
+  styleUrl: './sa-reorder-list.css',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsReorderList<T = unknown> {
+export class SaReorderList<T = unknown> {
   readonly items = input.required<T[]>();
   readonly itemTemplate = input.required<TemplateRef<unknown>>();
   readonly styleClass = input<string>('');

@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 
-import { AsToast } from './as-toast';
+import { SaToast } from './sa-toast';
 import { AlertService } from '@shared/services';
-import { EAsToastType, type IAsToastAction, type ToastItem } from './as-toast.types';
+import { EAsToastType, type IAsToastAction, type ToastItem } from './sa-toast.types';
 
-type AsToastInternals = {
+type SaToastInternals = {
   formattedMessage: (raw: string) => string;
   toastIcon: (msg: ToastItem) => string;
   actionSeverity: (action: IAsToastAction) => string | undefined;
@@ -30,18 +30,18 @@ function makeItem(overrides: Partial<ToastItem> = {}): ToastItem {
   };
 }
 
-describe('AsToast', () => {
+describe('SaToast', () => {
   let alertService: AlertService;
-  let internals: AsToastInternals;
+  let internals: SaToastInternals;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AsToast],
+      imports: [SaToast],
     }).compileComponents();
 
-    const fixture = TestBed.createComponent(AsToast);
+    const fixture = TestBed.createComponent(SaToast);
     alertService = TestBed.inject(AlertService);
-    internals = fixture.componentInstance as unknown as AsToastInternals;
+    internals = fixture.componentInstance as unknown as SaToastInternals;
     fixture.detectChanges();
   });
 

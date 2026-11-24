@@ -6,7 +6,7 @@ import type { RoutingProfile } from './profile.js';
 
 const APP_CONFIG = 'src/app/app.config.ts';
 
-/** Angular Starter Routing: the navigation tree with its title strategy and breadcrumb service. */
+/** Starter Angular Routing: the navigation tree with its title strategy and breadcrumb service. */
 export const starterRoutingProfile: RoutingProfile = {
   requiredFiles: [
     'src/app/core/navigation/breadcrumb.service.ts',

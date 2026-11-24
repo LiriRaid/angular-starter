@@ -31,7 +31,7 @@ const definitionsOf = (set: ComponentSet | readonly string[]) =>
   typeof set === 'string' ? componentsOf(set) : componentsOfIds(set);
 
 /**
- * The native `as-` components (ADR-0007): the collection's folders under `shared/components`, each
+ * The native `sa-` components (ADR-0007): the collection's folders under `shared/components`, each
  * with its spec, their global stylesheets imported from `styles.css`, the packages they import (the
  * CDK) and their exports in the
  * `@shared/components` barrel. A component that is already in the project is left alone, so a bigger
@@ -40,7 +40,7 @@ const definitionsOf = (set: ComponentSet | readonly string[]) =>
 export const componentsProfile = {
   /** Project files (forward slashes) that must exist once the collection has been applied. */
   requiredFilesFor: (set: ComponentSet | readonly string[]): string[] =>
-    definitionsOf(set).map(({ id }) => `${SHARED}/as-${id}/as-${id}.ts`),
+    definitionsOf(set).map(({ id }) => `${SHARED}/sa-${id}/sa-${id}.ts`),
 
   async apply({ targetDir, name, prefix, set }: ComponentsProject): Promise<void> {
     const definitions = definitionsOf(set);
@@ -59,9 +59,9 @@ export const componentsProfile = {
     ];
 
     for (const { id } of definitions) {
-      if (await pathExists(join(targetDir, SHARED, `as-${id}`))) continue;
+      if (await pathExists(join(targetDir, SHARED, `sa-${id}`))) continue;
       await copyBlueprint({
-        source: join(BLUEPRINTS_ROOT, 'components', `as-${id}`),
+        source: join(BLUEPRINTS_ROOT, 'components', `sa-${id}`),
         target: targetDir,
         variables: { PROJECT_NAME: name, PREFIX: prefix },
         // The flags sprite is an asset the project may already serve: it is replaced, not a collision.

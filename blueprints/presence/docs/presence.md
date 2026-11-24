@@ -351,7 +351,7 @@ session (a JWT, a session cookie) before using it for anything but a demo.
 ## 8. Check it
 
 1. Open the application in two browsers with different users: each one appears in the other's lists with
-   its dot (`mode="presence"` of `as-avatar`) the moment it connects.
+   its dot (`mode="presence"` of `sa-avatar`) the moment it connects.
 2. Choose `Ocupado` for 15 minutes in one: the other sees it at once, and the time left survives a refresh
    (it comes in the snapshot as `timerRemainingSeconds`).
 3. Leave a tab without touching it for 5 minutes, or hide it: the user goes `away`; moving the mouse

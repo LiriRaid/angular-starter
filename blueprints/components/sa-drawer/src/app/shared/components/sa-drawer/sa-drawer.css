@@ -1,4 +1,4 @@
-.as-drawer-backdrop {
+.sa-drawer-backdrop {
   position: fixed;
   inset: 0;
   z-index: 1040;
@@ -8,12 +8,12 @@
   transition: opacity 0.3s;
 }
 
-.as-drawer-backdrop--visible {
+.sa-drawer-backdrop--visible {
   opacity: 1;
   pointer-events: auto;
 }
 
-.as-drawer {
+.sa-drawer {
   inset: auto;
   margin: 0;
   padding: 0;
@@ -32,7 +32,7 @@
     display 0.3s allow-discrete;
 }
 
-.as-drawer-content {
+.sa-drawer-content {
   overflow-y: auto;
   flex-grow: 1;
   /* Sin esto un contenido alto empuja el pie fuera del panel en vez de hacer scroll aquí. */
@@ -41,7 +41,7 @@
 }
 
 /* Pie fijo (acciones de guardar/cancelar): no scrollea con el contenido y desaparece si el consumidor no proyecta nada. */
-.as-drawer-footer {
+.sa-drawer-footer {
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -51,11 +51,11 @@
   border-top: 1px solid var(--app-border-color);
 }
 
-.as-drawer-footer:empty {
+.sa-drawer-footer:empty {
   display: none;
 }
 
-.as-drawer-header {
+.sa-drawer-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -65,29 +65,29 @@
   border-bottom: 1px solid var(--app-border-color);
 }
 
-.as-drawer-header-content {
+.sa-drawer-header-content {
   flex: 1 1 auto;
   min-width: 0;
 }
 
-.as-drawer--compact .as-drawer-header {
+.sa-drawer--compact .sa-drawer-header {
   padding: 1rem 0.75rem;
 }
 
-.as-drawer--compact .as-drawer-content {
+.sa-drawer--compact .sa-drawer-content {
   padding: 1rem;
 }
 
-.as-drawer--compact .as-drawer-footer {
+.sa-drawer--compact .sa-drawer-footer {
   padding: 0.75rem;
 }
 
 /* El contenido maneja su propio espaciado: el cuerpo no le pone padding. */
-.as-drawer--flush .as-drawer-content {
+.sa-drawer--flush .sa-drawer-content {
   padding: 0;
 }
 
-.as-drawer-close-button {
+.sa-drawer-close-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -102,56 +102,56 @@
   transition: background-color 0.15s ease;
 }
 
-.as-drawer-close-button:hover {
+.sa-drawer-close-button:hover {
   background: var(--app-sidebar-hover-bg);
 }
 
-.as-drawer-close-button:focus-visible {
-  outline: 2px solid var(--as-primary-color);
+.sa-drawer-close-button:focus-visible {
+  outline: 2px solid var(--sa-primary-color);
   outline-offset: 0;
 }
 
 /* ── Posiciones ─────────────────────────────────────────────────────────── */
 
-.as-drawer-left {
+.sa-drawer-left {
   top: 0;
   left: 0;
-  width: min(100vw, var(--as-drawer-width, 20rem));
+  width: min(100vw, var(--sa-drawer-width, 20rem));
   height: 100%;
   border-inline-end: 1px solid var(--app-border-color);
   transform: translate3d(-100%, 0, 0);
 }
 
-.as-drawer-left[open] {
+.sa-drawer-left[open] {
   transform: translate3d(0, 0, 0);
 }
 
 @starting-style {
-  .as-drawer-left[open] {
+  .sa-drawer-left[open] {
     transform: translate3d(-100%, 0, 0);
   }
 }
 
-.as-drawer-right {
+.sa-drawer-right {
   top: 0;
   right: 0;
-  width: min(100vw, var(--as-drawer-width, 20rem));
+  width: min(100vw, var(--sa-drawer-width, 20rem));
   height: 100%;
   border-inline-start: 1px solid var(--app-border-color);
   transform: translate3d(100%, 0, 0);
 }
 
-.as-drawer-right[open] {
+.sa-drawer-right[open] {
   transform: translate3d(0, 0, 0);
 }
 
 @starting-style {
-  .as-drawer-right[open] {
+  .sa-drawer-right[open] {
     transform: translate3d(100%, 0, 0);
   }
 }
 
-.as-drawer-top {
+.sa-drawer-top {
   top: 0;
   left: 0;
   width: 100%;
@@ -160,17 +160,17 @@
   transform: translate3d(0, -100%, 0);
 }
 
-.as-drawer-top[open] {
+.sa-drawer-top[open] {
   transform: translate3d(0, 0, 0);
 }
 
 @starting-style {
-  .as-drawer-top[open] {
+  .sa-drawer-top[open] {
     transform: translate3d(0, -100%, 0);
   }
 }
 
-.as-drawer-bottom {
+.sa-drawer-bottom {
   bottom: 0;
   left: 0;
   width: 100%;
@@ -179,17 +179,17 @@
   transform: translate3d(0, 100%, 0);
 }
 
-.as-drawer-bottom[open] {
+.sa-drawer-bottom[open] {
   transform: translate3d(0, 0, 0);
 }
 
 @starting-style {
-  .as-drawer-bottom[open] {
+  .sa-drawer-bottom[open] {
     transform: translate3d(0, 100%, 0);
   }
 }
 
-.as-drawer-full {
+.sa-drawer-full {
   top: 0;
   left: 0;
   width: 100vw;
@@ -203,13 +203,13 @@
     display 0.3s allow-discrete;
 }
 
-.as-drawer-full:not([open]) {
+.sa-drawer-full:not([open]) {
   opacity: 0;
   transform: scale(0.93);
 }
 
 @starting-style {
-  .as-drawer-full[open] {
+  .sa-drawer-full[open] {
     opacity: 0;
     transform: scale(0.93);
   }

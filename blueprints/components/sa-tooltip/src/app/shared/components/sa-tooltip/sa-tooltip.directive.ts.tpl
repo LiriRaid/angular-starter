@@ -1,11 +1,11 @@
 import { DOCUMENT } from '@angular/common';
 import { ComponentRef, DestroyRef, Directive, ElementRef, TemplateRef, ViewContainerRef, inject, input } from '@angular/core';
 
-import { Tooltip } from './as-tooltip';
+import { Tooltip } from './sa-tooltip';
 
-export type AsTooltipPosition = 'top' | 'bottom' | 'left' | 'right';
+export type SaTooltipPosition = 'top' | 'bottom' | 'left' | 'right';
 
-const FALLBACK_ORDER: Record<AsTooltipPosition, AsTooltipPosition[]> = {
+const FALLBACK_ORDER: Record<SaTooltipPosition, SaTooltipPosition[]> = {
   top: ['top', 'bottom', 'right', 'left'],
   bottom: ['bottom', 'top', 'right', 'left'],
   left: ['left', 'right', 'top', 'bottom'],
@@ -13,7 +13,7 @@ const FALLBACK_ORDER: Record<AsTooltipPosition, AsTooltipPosition[]> = {
 };
 
 /**
- * La caja a la que se ancla el tooltip. Un host `display: inline` (un componente como `as-button`, un
+ * La caja a la que se ancla el tooltip. Un host `display: inline` (un componente como `sa-button`, un
  * elemento personalizado) solo reporta la caja de su línea de texto aunque lo que pinta dentro sea más alto
  * (el botón con su relleno): por eso `top` y `bottom` quedaban sobre el texto mientras `left` y `right`, que
  * solo miran el ancho, caían bien fuera del botón. Se ancla a la unión del host con lo que pinta dentro.
@@ -36,7 +36,7 @@ export function anchorRectOf(host: HTMLElement): DOMRect {
 }
 
 @Directive({
-  selector: '[asTooltip]',
+  selector: '[saTooltip]',
   standalone: true,
   host: {
     '(mouseenter)': 'onMouseEnter()',
@@ -46,9 +46,9 @@ export function anchorRectOf(host: HTMLElement): DOMRect {
     '(click)': 'onClick()',
   },
 })
-export class AsTooltip {
-  readonly content = input<string | TemplateRef<unknown> | undefined | null>(undefined, { alias: 'asTooltip' });
-  readonly tooltipPosition = input<AsTooltipPosition>('right');
+export class SaTooltip {
+  readonly content = input<string | TemplateRef<unknown> | undefined | null>(undefined, { alias: 'saTooltip' });
+  readonly tooltipPosition = input<SaTooltipPosition>('right');
   readonly tooltipStyleClass = input<string>('');
   readonly showDelay = input<number>(0);
 
@@ -123,11 +123,11 @@ export class AsTooltip {
     }
   }
 
-  private applyPosition(position: AsTooltipPosition): void {
+  private applyPosition(position: SaTooltipPosition): void {
     const panel = this.panel?.location.nativeElement as HTMLElement | undefined;
     if (!panel) return;
 
-    panel.className = ['as-tooltip', `as-tooltip--${position}`, this.tooltipStyleClass()].filter(Boolean).join(' ');
+    panel.className = ['sa-tooltip', `sa-tooltip--${position}`, this.tooltipStyleClass()].filter(Boolean).join(' ');
     const hostRect = anchorRectOf(this.host.nativeElement);
     const panelRect = panel.getBoundingClientRect();
     let top = 0;

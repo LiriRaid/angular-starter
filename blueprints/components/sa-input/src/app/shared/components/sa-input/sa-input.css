@@ -6,14 +6,14 @@ fieldset {
   border-style: solid;
 }
 
-.as-input-wrapper {
+.sa-input-wrapper {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
   width: 100%;
 }
 
-.as-input-field {
+.sa-input-field {
   background-color: transparent;
   border: none;
   box-shadow: none;
@@ -38,7 +38,7 @@ fieldset {
 /* Botones ▲▼ propios de [showStepper]="true": no son las flechas nativas (su stepUp() realinea el valor al
    múltiplo de step, ver stepNumberValue). Dos triángulos apilados sin caja ni borde, el mismo look minimalista
    del spinner nativo que reemplazan: por eso el <button> se resetea a mano. */
-.as-input-stepper-group {
+.sa-input-stepper-group {
   position: absolute;
   top: 0;
   right: 0.75rem;
@@ -50,7 +50,7 @@ fieldset {
   gap: 0.25rem;
 }
 
-.as-input-stepper-btn {
+.sa-input-stepper-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -64,39 +64,39 @@ fieldset {
   line-height: 0;
 }
 
-.as-input-stepper-btn:hover:not(:disabled) {
+.sa-input-stepper-btn:hover:not(:disabled) {
   color: var(--app-text-primary);
 }
 
-.as-input-stepper-btn:focus-visible {
-  outline: 2px solid var(--as-primary-color);
+.sa-input-stepper-btn:focus-visible {
+  outline: 2px solid var(--sa-primary-color);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
-.as-input-stepper-btn:disabled {
+.sa-input-stepper-btn:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
 
-.as-input-field:focus,
-.as-input-field:focus-visible {
+.sa-input-field:focus,
+.sa-input-field:focus-visible {
   outline: none;
   box-shadow: none;
 }
 
-.as-input-field::placeholder {
+.sa-input-field::placeholder {
   color: var(--app-placeholder-color);
   opacity: 1;
   transition: color 0.18s ease;
 }
 
-.as-input-field--disabled {
+.sa-input-field--disabled {
   color: var(--app-control-disabled-text);
   cursor: not-allowed;
 }
 
-.as-input-field--placeholder-hidden::placeholder {
+.sa-input-field--placeholder-hidden::placeholder {
   color: transparent;
   opacity: 0;
 }
@@ -110,24 +110,24 @@ fieldset {
 }
 
 /* Reserva el alto del label de `over` cuando hay label — vive siempre afuera/arriba del
-   campo, no solo mientras "flota" (ver resolveInputLabelClass en as-input.config.ts). */
-.as-input-over {
+   campo, no solo mientras "flota" (ver resolveInputLabelClass en sa-input.config.ts). */
+.sa-input-over {
   transition: padding-top 150ms ease;
 }
 
-.as-input-over-float {
+.sa-input-over-float {
   padding-top: 1rem;
 }
 
-.as-input-invalid .as-input-field {
+.sa-input-invalid .sa-input-field {
   border-color: var(--app-error-color);
 }
 
-.as-input-invalid label {
+.sa-input-invalid label {
   color: var(--app-error-color);
 }
 
-.as-input-error {
+.sa-input-error {
   color: var(--app-error-color);
   font-size: 0.75rem;
   line-height: 1.4;
@@ -136,12 +136,12 @@ fieldset {
   z-index: 10;
 }
 
-/* Phone mode (phoneCountryPicker): the trigger is an as-button `variant="text"`
+/* Phone mode (phoneCountryPicker): the trigger is an sa-button `variant="text"`
    `size="medium"` (no `severity`, no background or border of its own, 40px like the input) and
    the "|" line is the visual separator between it and the number. The country panel
-   reutiliza el mismo estilo de fila que as-select-option (separador inferior +
+   reutiliza el mismo estilo de fila que sa-select-option (separador inferior +
    hover sólido), ver src/styles/components/select-styles.css. */
-.as-phone-country-panel {
+.sa-phone-country-panel {
   position: fixed;
   inset: auto;
   margin: 0;
@@ -161,18 +161,18 @@ fieldset {
 /* El popover solo debe ser flex mientras está realmente abierto — si `display: flex` se
    aplica siempre, pisa el `display: none` por defecto del navegador para el estado cerrado
    y el panel queda visible y en flujo normal (ya no en el top layer) apenas se le hace hide. */
-.as-phone-country-panel:popover-open {
+.sa-phone-country-panel:popover-open {
   display: flex;
 }
 
-.as-phone-country-search {
+.sa-phone-country-search {
   flex-shrink: 0;
   padding: 0.5rem;
   border-bottom: 1px solid var(--app-control-surface-border);
   background: var(--app-panel-bg);
 }
 
-.as-phone-country-search input {
+.sa-phone-country-search input {
   width: 100%;
   padding: 0.25rem 0.5rem;
   border: 1px solid var(--app-control-surface-border);
@@ -183,18 +183,18 @@ fieldset {
   outline: none;
 }
 
-.as-phone-country-search input:focus {
+.sa-phone-country-search input:focus {
   border-color: var(--app-control-focus-ring);
   box-shadow: inset 0 0 0 1px var(--app-control-focus-ring);
 }
 
-.as-phone-country-list {
+.sa-phone-country-list {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
 }
 
-.as-phone-country-option {
+.sa-phone-country-option {
   display: flex;
   width: 100%;
   align-items: center;
@@ -209,17 +209,17 @@ fieldset {
   box-shadow: inset 0 -1px 0 var(--app-border-color);
 }
 
-.as-phone-country-option:last-child {
+.sa-phone-country-option:last-child {
   box-shadow: none;
 }
 
-.as-phone-country-option:hover,
-.as-phone-country-option--selected {
+.sa-phone-country-option:hover,
+.sa-phone-country-option--selected {
   background: var(--app-primary-button-bg);
   color: #fff;
 }
 
-.as-phone-country-empty {
+.sa-phone-country-empty {
   padding: 0.75rem;
   color: var(--app-text-muted);
   font-size: var(--font-size-caption-2, 0.75rem);

@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { AsWeeklySchedule, computeWeeklyHours, parseSchedule } from './as-weekly-schedule';
+import { SaWeeklySchedule, computeWeeklyHours, parseSchedule } from './sa-weekly-schedule';
 
-describe('AsWeeklySchedule', () => {
-  let fixture: ComponentFixture<AsWeeklySchedule>;
-  let component: AsWeeklySchedule;
+describe('SaWeeklySchedule', () => {
+  let fixture: ComponentFixture<SaWeeklySchedule>;
+  let component: SaWeeklySchedule;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [AsWeeklySchedule] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [SaWeeklySchedule] }).compileComponents();
 
-    fixture = TestBed.createComponent(AsWeeklySchedule);
+    fixture = TestBed.createComponent(SaWeeklySchedule);
     component = fixture.componentInstance;
     fixture.detectChanges();
     // El default (Lun-Vie 8:00-17:00) se siembra hacia `value` con un effect propio: hay que dejarlo asentar antes de leer el estado inicial.
@@ -103,7 +103,7 @@ describe('AsWeeklySchedule', () => {
   });
 
   it('cada interruptor de día tiene nombre accesible', () => {
-    const toggles = [...fixture.nativeElement.querySelectorAll('as-toggle button')] as HTMLElement[];
+    const toggles = [...fixture.nativeElement.querySelectorAll('sa-toggle button')] as HTMLElement[];
 
     expect(toggles).toHaveLength(7);
     expect(toggles[0].getAttribute('aria-label')).toBe('Activar Lunes');

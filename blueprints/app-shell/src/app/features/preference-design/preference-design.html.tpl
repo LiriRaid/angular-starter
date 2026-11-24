@@ -6,7 +6,7 @@
 
   <div class="rounded-xl border border-(--app-border-color) bg-(--app-panel-bg)">
     <div class="border-b border-(--app-border-color) p-3">
-      <as-tabs [tabs]="tabs" [active]="activeTab()" (activeChange)="activeTab.set($event)" ariaLabel="Preferencias de diseño" />
+      <sa-tabs [tabs]="tabs" [active]="activeTab()" (activeChange)="activeTab.set($event)" ariaLabel="Preferencias de diseño" />
     </div>
 
     <div class="p-5">
@@ -30,8 +30,8 @@
       @if (designPreferences.hasChanges()) {
         <span class="mr-auto text-caption-2-regular text-(--app-text-subtle)">Hay cambios sin guardar: se pierden al recargar.</span>
       }
-      <as-button variant="outlined" size="medium" icon="Refresh" iconSize="16" label="Restablecer" (onClick)="reset()" />
-      <as-button size="medium" icon="Check" iconSize="16" label="Guardar cambios" [disabled]="!designPreferences.hasChanges()" (onClick)="save()" />
+      <sa-button variant="outlined" size="medium" icon="Refresh" iconSize="16" label="Restablecer" (onClick)="reset()" />
+      <sa-button size="medium" icon="Check" iconSize="16" label="Guardar cambios" [disabled]="!designPreferences.hasChanges()" (onClick)="save()" />
     </footer>
   </div>
 </section>

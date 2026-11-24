@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { AsIcon } from '@shared/components';
+import { SaIcon } from '@shared/components';
 
 interface SampleReport {
   readonly name: string;
@@ -10,7 +10,7 @@ interface SampleReport {
 /** Página de ejemplo con datos de muestra: reemplázala por los reportes reales del producto. */
 @Component({
   selector: '__PREFIX__-reports',
-  imports: [AsIcon],
+  imports: [SaIcon],
   templateUrl: './reports.html',
   styleUrl: './reports.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

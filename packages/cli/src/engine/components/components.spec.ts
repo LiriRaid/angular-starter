@@ -77,9 +77,9 @@ describe('component manifest', () => {
   it.each(COMPONENTS.map((component) => [component.id, component] as const))(
     '%s has its blueprint, spec, barrel exports and stylesheets',
     async (_id, component) => {
-      const folder = join(COMPONENTS_ROOT, `as-${component.id}`, 'src/app/shared/components');
+      const folder = join(COMPONENTS_ROOT, `sa-${component.id}`, 'src/app/shared/components');
       const files = await listBlueprintFiles(folder);
-      const own = files.filter((file) => file.startsWith(`as-${component.id}/`));
+      const own = files.filter((file) => file.startsWith(`sa-${component.id}/`));
       expect(
         own.some((file) => file.endsWith('.spec.ts.tpl')),
         'spec',
@@ -101,7 +101,7 @@ describe('component manifest', () => {
         }
       }
       for (const style of component.styles) {
-        const sheet = join(COMPONENTS_ROOT, `as-${component.id}`, 'src/styles/components');
+        const sheet = join(COMPONENTS_ROOT, `sa-${component.id}`, 'src/styles/components');
         await expect(readFile(join(sheet, `${style}.css`), 'utf8'), style).resolves.toContain('{');
       }
     },
@@ -110,12 +110,12 @@ describe('component manifest', () => {
   it.each(COMPONENTS.map((component) => [component.id, component] as const))(
     '%s declares every component it imports',
     async (_id, component) => {
-      const folder = join(COMPONENTS_ROOT, `as-${component.id}`, 'src/app/shared/components');
+      const folder = join(COMPONENTS_ROOT, `sa-${component.id}`, 'src/app/shared/components');
       const imported = new Set<string>();
       for (const file of await listBlueprintFiles(folder)) {
         if (!file.endsWith('.ts.tpl') || file.includes('.spec.')) continue;
         const text = await readFile(join(folder, file), 'utf8');
-        for (const match of text.matchAll(/from '\.\.\/as-([a-z-]+)\//g)) {
+        for (const match of text.matchAll(/from '\.\.\/sa-([a-z-]+)\//g)) {
           if (match[1] !== component.id) imported.add(match[1] ?? '');
         }
       }
@@ -141,24 +141,24 @@ describe('component blueprints follow the rules of the starter', () => {
         const module = match[1] ?? '';
         if (module.startsWith('@angular/') || module.startsWith('@lucide/')) continue;
         expect(module, file).toMatch(
-          /^@(core\/(common|theme)|shared\/(utils|data|services|components\/as-toast))\b/,
+          /^@(core\/(common|theme)|shared\/(utils|data|services|components\/sa-toast))\b/,
         );
       }
     }
   });
 
-  it('are standalone, OnPush components prefixed with as-', async () => {
+  it('are standalone, OnPush components prefixed with sa-', async () => {
     for (const { file, text } of await sources()) {
       if (file.includes('.spec.') || !text.includes('@Component(')) continue;
       expect(text, file).toContain('ChangeDetectionStrategy.OnPush');
-      expect(text, file).toMatch(/selector: 'as-[a-zA-Z-]+'/);
+      expect(text, file).toMatch(/selector: 'sa-[a-zA-Z-]+'/);
       expect(text, file).not.toContain('NgModule');
     }
   });
 
-  it('render Lucide icons only through as-icon', async () => {
+  it('render Lucide icons only through sa-icon', async () => {
     for (const { file, text } of await sources()) {
-      if (file.includes('as-icon/')) continue;
+      if (file.includes('sa-icon/')) continue;
       expect(text, file).not.toContain('@lucide/angular');
     }
   });
@@ -166,11 +166,11 @@ describe('component blueprints follow the rules of the starter', () => {
   it('keep the reference application code: nothing was rewritten into a lighter version', async () => {
     // The ported button is the full one, with its ripple and its severities.
     const button = await readFile(
-      join(COMPONENTS_ROOT, 'as-button/src/app/shared/components/as-button/as-button.ts.tpl'),
+      join(COMPONENTS_ROOT, 'sa-button/src/app/shared/components/sa-button/sa-button.ts.tpl'),
       'utf8',
     );
     expect(button.split('\n').length).toBeGreaterThan(150);
-    expect(button).toContain('export class AsButton');
+    expect(button).toContain('export class SaButton');
   });
 });
 
@@ -178,7 +178,7 @@ describe('components profile', () => {
   let project: string;
 
   beforeEach(async () => {
-    project = await mkdtemp(join(tmpdir(), 'as-components-'));
+    project = await mkdtemp(join(tmpdir(), 'sa-components-'));
     await writeGeneratedWorkspace(project, { 'src/styles.css': "@import 'tailwindcss';\n" });
     await screamingProfile.apply({ targetDir: project, name: 'demo', prefix: 'app' });
     await designProfile.apply({ targetDir: project, name: 'demo', prefix: 'app' });
@@ -195,7 +195,7 @@ describe('components profile', () => {
   it('writes every component of the collection with its spec', async () => {
     await apply('recommended');
     for (const component of componentsOf('recommended')) {
-      const folder = `${SHARED}/as-${component.id}`;
+      const folder = `${SHARED}/sa-${component.id}`;
       const files = await readdir(join(project, folder));
       expect(
         files.some((file) => file.endsWith('.spec.ts')),
@@ -209,24 +209,24 @@ describe('components profile', () => {
     const barrel = await read(`${SHARED}/index.ts`);
     expect(barrel).not.toContain('export {};');
     for (const name of [
-      'AsButton',
-      'AsRipple',
-      'AsIcon',
-      'AsInput',
-      'AsSelect',
-      'AsModal',
-      'AsTabs',
+      'SaButton',
+      'SaRipple',
+      'SaIcon',
+      'SaInput',
+      'SaSelect',
+      'SaModal',
+      'SaTabs',
     ]) {
       expect(barrel, name).toContain(name);
     }
-    expect(barrel).toContain("from './as-button/as-button';");
+    expect(barrel).toContain("from './sa-button/sa-button';");
   });
 
   it('brings the flags sprite that the phone country picker of the input draws', async () => {
     await apply('recommended');
     const sprite = await read('public/assets/flags-sprite.svg');
     expect(sprite).toContain('<symbol id="fi-us"');
-    expect(await read(`${SHARED}/as-input/as-input.html`)).toContain('assets/flags-sprite.svg#fi-');
+    expect(await read(`${SHARED}/sa-input/sa-input.html`)).toContain('assets/flags-sprite.svg#fi-');
   });
 
   it('replaces a flags sprite that is already in the project instead of failing', async () => {
@@ -262,7 +262,7 @@ describe('components profile', () => {
   it('leaves no unresolved placeholder in a generated file', async () => {
     await apply('recommended');
     for (const component of componentsOf('recommended')) {
-      const folder = join(COMPONENTS_ROOT, `as-${component.id}`, 'src/app/shared/components');
+      const folder = join(COMPONENTS_ROOT, `sa-${component.id}`, 'src/app/shared/components');
       for (const file of await listBlueprintFiles(folder)) {
         const generated = file.replace(/\.tpl$/, '');
         expect(await read(`${SHARED}/${generated}`), generated).not.toMatch(/__[A-Z_]+__/);
@@ -274,7 +274,7 @@ describe('components profile', () => {
     await apply('recommended');
     await expect(apply('all')).resolves.toBeUndefined();
     const barrel = await read(`${SHARED}/index.ts`);
-    expect(barrel.match(/AsButton\b/g)?.length).toBe(1);
+    expect(barrel.match(/SaButton\b/g)?.length).toBe(1);
     const styles = await read('src/styles.css');
     expect(styles.match(/button-styles/g)?.length).toBe(1);
     expect(styles).toContain('table-styles');
@@ -282,18 +282,18 @@ describe('components profile', () => {
 
   it('never overwrites a file the developer changed', async () => {
     await apply('recommended');
-    await writeFile(join(project, `${SHARED}/as-button/as-button.css`), '/* mine */');
+    await writeFile(join(project, `${SHARED}/sa-button/sa-button.css`), '/* mine */');
     await apply('all');
-    expect(await read(`${SHARED}/as-button/as-button.css`)).toBe('/* mine */');
+    expect(await read(`${SHARED}/sa-button/sa-button.css`)).toBe('/* mine */');
   });
 
   it('lists in the README only the components and stylesheets that were generated', async () => {
     await apply('recommended');
     const readme = await read(`${SHARED}/README.md`);
     for (const component of componentsOf('recommended')) {
-      expect(readme, component.id).toContain(`\`as-${component.id}\``);
+      expect(readme, component.id).toContain(`\`sa-${component.id}\``);
     }
-    expect(readme).not.toContain('`as-table`');
+    expect(readme).not.toContain('`sa-table`');
     const styles = await read('src/styles/README.md');
     expect(styles).toContain('`components/button-styles.css`');
     expect(styles).not.toContain('table-styles.css');
@@ -305,10 +305,10 @@ describe('components profile', () => {
     await writeFile(path, `${await read(`${SHARED}/README.md`)}\nMy own note.\n`);
     await apply('all');
     const readme = await read(`${SHARED}/README.md`);
-    expect(readme).toContain('`as-table`');
-    expect(readme).toContain('`as-button`');
+    expect(readme).toContain('`sa-table`');
+    expect(readme).toContain('`sa-button`');
     expect(readme).toContain('My own note.');
-    expect(readme.match(/^- `as-button`/gm)).toHaveLength(1);
+    expect(readme.match(/^- `sa-button`/gm)).toHaveLength(1);
   });
 
   it('leaves a README without the generated block alone', async () => {
@@ -334,12 +334,12 @@ describe('components profile', () => {
   it('writes nothing when the barrel of shared/components is missing', async () => {
     await rm(join(project, `${SHARED}/index.ts`));
     await expect(apply('recommended')).rejects.toThrow(/Could not adapt/);
-    await expect(read(`${SHARED}/as-button/as-button.ts`)).rejects.toThrow();
+    await expect(read(`${SHARED}/sa-button/sa-button.ts`)).rejects.toThrow();
   });
 
   it('writes nothing when the design base is not in the stylesheet', async () => {
     await writeFile(join(project, 'src/styles.css'), "@import 'tailwindcss';\n");
     await expect(apply('recommended')).rejects.toThrow(/Could not adapt src\/styles\.css/);
-    await expect(read(`${SHARED}/as-button/as-button.ts`)).rejects.toThrow();
+    await expect(read(`${SHARED}/sa-button/sa-button.ts`)).rejects.toThrow();
   });
 });

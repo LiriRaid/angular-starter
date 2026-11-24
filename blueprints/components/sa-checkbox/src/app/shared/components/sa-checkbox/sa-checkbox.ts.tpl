@@ -1,26 +1,26 @@
 import { ChangeDetectionStrategy, Component, forwardRef, input, signal, ViewEncapsulation } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-import { AsIcon } from '../as-icon/as-icon';
+import { SaIcon } from '../sa-icon/sa-icon';
 
 @Component({
-  selector: 'as-checkbox',
+  selector: 'sa-checkbox',
   standalone: true,
-  imports: [AsIcon],
-  templateUrl: './as-checkbox.html',
-  styleUrl: './as-checkbox.css',
+  imports: [SaIcon],
+  templateUrl: './sa-checkbox.html',
+  styleUrl: './sa-checkbox.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => AsCheckbox), multi: true }],
+  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SaCheckbox), multi: true }],
   host: {
-    '[class.as-checkbox-checked]': 'value()',
-    '[class.as-checkbox-indeterminate]': 'indeterminate() && !value()',
-    '[class.as-checkbox-disabled]': 'isDisabled()',
-    '[attr.data-as-checked]': 'value()',
-    '[attr.data-as-disabled]': 'isDisabled()',
+    '[class.sa-checkbox-checked]': 'value()',
+    '[class.sa-checkbox-indeterminate]': 'indeterminate() && !value()',
+    '[class.sa-checkbox-disabled]': 'isDisabled()',
+    '[attr.data-sa-checked]': 'value()',
+    '[attr.data-sa-disabled]': 'isDisabled()',
   },
 })
-export class AsCheckbox implements ControlValueAccessor {
+export class SaCheckbox implements ControlValueAccessor {
   readonly inputId = input<string>('');
   readonly ariaLabel = input<string | undefined>(undefined);
   readonly ariaLabelledBy = input<string | undefined>(undefined);

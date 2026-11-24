@@ -6,23 +6,23 @@ import { AbstractControl, ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR, 
 import { LucideIconName } from '@core/common/icons/lucide-icons';
 import { deriveInitials } from '@shared/utils/derive-initials';
 import { accentFor } from '@shared/utils/avatar-accent';
-import { AsAvatar } from '../as-avatar/as-avatar';
-import { AsIcon } from '../as-icon/as-icon';
-import { createSelectInteractions } from './as-select.interactions';
-import { SELECT_ALL_VALUE, coerceBooleanAttribute, createSelectAllOption, createSelectPresentation, getSelectPanelLayout, normalizeSelectValue, pluckOption } from './as-select.config';
-import type { AsIconPosition, AsSelectVariant } from './as-select.entity';
+import { SaAvatar } from '../sa-avatar/sa-avatar';
+import { SaIcon } from '../sa-icon/sa-icon';
+import { createSelectInteractions } from './sa-select.interactions';
+import { SELECT_ALL_VALUE, coerceBooleanAttribute, createSelectAllOption, createSelectPresentation, getSelectPanelLayout, normalizeSelectValue, pluckOption } from './sa-select.config';
+import type { SaIconPosition, SaSelectVariant } from './sa-select.entity';
 
 @Component({
-  selector: 'as-select',
+  selector: 'sa-select',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, FormsModule, AsIcon, AsAvatar],
-  templateUrl: './as-select.html',
-  styleUrl: './as-select.css',
+  imports: [NgClass, NgTemplateOutlet, FormsModule, SaIcon, SaAvatar],
+  templateUrl: './sa-select.html',
+  styleUrl: './sa-select.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => AsSelect), multi: true }],
+  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SaSelect), multi: true }],
 })
-export class AsSelect implements ControlValueAccessor {
+export class SaSelect implements ControlValueAccessor {
   private static nextId = 0;
 
   private readonly triggerRef = viewChild<ElementRef<HTMLElement>>('triggerRef');
@@ -51,7 +51,7 @@ export class AsSelect implements ControlValueAccessor {
   readonly hideOptionLabel = input<boolean>(false);
   /** Tiñe el fondo del CAMPO con una mezcla suave de este color; sin definir, el fondo de siempre. */
   readonly accentColor = input<string | undefined>(undefined);
-  /** Clase(s) extra del panel desplegable, para escopar estilos propios sin tocar `.as-select-panel`, compartida por todos los selects. */
+  /** Clase(s) extra del panel desplegable, para escopar estilos propios sin tocar `.sa-select-panel`, compartida por todos los selects. */
   readonly panelStyleClass = input<string>('');
 
   readonly options = input<unknown[]>([]);
@@ -64,9 +64,9 @@ export class AsSelect implements ControlValueAccessor {
   readonly required = input<boolean>(false);
   readonly inputId = input<string>('');
 
-  readonly variant = input<AsSelectVariant>('on');
+  readonly variant = input<SaSelectVariant>('on');
   readonly lucideIcon = input<LucideIconName | ''>('');
-  readonly iconPosition = input<AsIconPosition>('left');
+  readonly iconPosition = input<SaIconPosition>('left');
   readonly searchable = input<boolean>(true);
   readonly multiselect = input<boolean | string>(false);
   readonly showClear = input<boolean>(false);
@@ -88,7 +88,7 @@ export class AsSelect implements ControlValueAccessor {
 
   private readonly validationTick = signal(0);
   private readonly valueSig = signal<unknown>(null);
-  private readonly generatedId = `as-select-${AsSelect.nextId++}`;
+  private readonly generatedId = `sa-select-${SaSelect.nextId++}`;
   private readonly preservePanelOpen = signal(false);
 
   private ngControl?: NgControl;
@@ -99,7 +99,7 @@ export class AsSelect implements ControlValueAccessor {
   readonly isInteractionDisabled = computed(() => coerceBooleanAttribute(this.interactionDisabled()));
 
   /** Si el select tiene `[optionAvatar]` configurado — muestra siempre el avatar (aunque la
-   *  opción puntual no traiga foto, `as-avatar` ya cae solo a las iniciales). */
+   *  opción puntual no traiga foto, `sa-avatar` ya cae solo a las iniciales). */
   readonly hasAvatarOption = computed(() => !!this.optionAvatar());
 
   private readonly presentation = createSelectPresentation({
@@ -238,7 +238,7 @@ export class AsSelect implements ControlValueAccessor {
     window.addEventListener('resize', this.onWindowResize);
   }
 
-  /** Igual que as-popover: showPopover()/hidePopover() se llaman directo y
+  /** Igual que sa-popover: showPopover()/hidePopover() se llaman directo y
    *  sincrónicamente desde el handler del click, en vez de reaccionar a un signal vía
    *  effect(). Si se derivara de un signal, un click sobre un elemento fuera del panel (la
    *  flechita del dropdown) dispara primero el light-dismiss nativo del navegador — si en ese
@@ -266,7 +266,7 @@ export class AsSelect implements ControlValueAccessor {
     this.onFocus();
   }
 
-  /** A diferencia de as-popover/as-theme-color-picker (que usan `popover="manual"`
+  /** A diferencia de sa-popover/sa-theme-color-picker (que usan `popover="manual"`
    *  y por eso arman a mano su propio outside-click/Escape con NativeOverlayRuntime), este panel
    *  usa `popover` en modo auto (ver template): el navegador ya da gratis el light-dismiss por
    *  click afuera y por Escape. Lo único que falta cubrir a mano es el reposicionamiento en

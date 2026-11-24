@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, ViewEncapsulation, afterRenderEffect, inject, input, model, signal } from '@angular/core';
-import { AsAvatar } from '../as-avatar/as-avatar';
-import { AsIcon } from '../as-icon/as-icon';
-import { AsRipple } from '../as-button/as-ripple';
-import { AsTooltip } from '../as-tooltip/as-tooltip.directive';
+import { SaAvatar } from '../sa-avatar/sa-avatar';
+import { SaIcon } from '../sa-icon/sa-icon';
+import { SaRipple } from '../sa-button/sa-ripple';
+import { SaTooltip } from '../sa-tooltip/sa-tooltip.directive';
 
-export interface AsTabAvatar {
+export interface SaTabAvatar {
   readonly label: string;
   readonly background: string;
   /** El avatar de una tab siempre es chico — SIEMPRE el ícono de marca, nunca el logo (el logo
@@ -12,33 +12,33 @@ export interface AsTabAvatar {
   readonly iconUrl?: string | null;
 }
 
-export interface AsTab {
+export interface SaTab {
   readonly id: string;
   readonly label?: string;
   readonly icon?: string | null;
   readonly count?: number;
   /** `danger` resalta un contador que espera una decisión (pendientes, errores); por defecto `primary`. */
   readonly countTone?: 'primary' | 'danger';
-  readonly avatar?: AsTabAvatar;
+  readonly avatar?: SaTabAvatar;
   readonly color?: string;
   readonly tooltip?: string;
 }
 
 @Component({
-  selector: 'as-tabs',
+  selector: 'sa-tabs',
   standalone: true,
-  imports: [AsAvatar, AsIcon, AsRipple, AsTooltip],
-  templateUrl: './as-tabs.html',
-  styleUrl: './as-tabs.css',
+  imports: [SaAvatar, SaIcon, SaRipple, SaTooltip],
+  templateUrl: './sa-tabs.html',
+  styleUrl: './sa-tabs.css',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.as-tabs--pills]': 'variant() === "pills"',
-    '[class.as-tabs--compact]': 'size() === "compact"',
+    '[class.sa-tabs--pills]': 'variant() === "pills"',
+    '[class.sa-tabs--compact]': 'size() === "compact"',
   },
 })
-export class AsTabs {
-  readonly tabs = input<readonly AsTab[]>([]);
+export class SaTabs {
+  readonly tabs = input<readonly SaTab[]>([]);
   readonly ariaLabel = input<string>('');
   readonly variant = input<'default' | 'pills'>('default');
   readonly size = input<'default' | 'compact'>('default');
@@ -75,7 +75,7 @@ export class AsTabs {
   }
 
   private get content(): HTMLElement | null {
-    return this.host.nativeElement.querySelector<HTMLElement>('.as-tablist-content');
+    return this.host.nativeElement.querySelector<HTMLElement>('.sa-tablist-content');
   }
 
   // Si el carril ya cabe, resetea scrollLeft para que las flechas queden ocultas.
@@ -107,7 +107,7 @@ export class AsTabs {
     content.scrollTo({ left: content.scrollLeft + delta, behavior: 'smooth' });
   }
 
-  selectTab(tab: AsTab, event: Event): void {
+  selectTab(tab: SaTab, event: Event): void {
     this.active.set(tab.id);
     const el = event.currentTarget as HTMLElement | null;
     if (!el) return;
@@ -136,15 +136,15 @@ export class AsTabs {
   // Ajusta la barra activa al ancho/posición exactos del tab seleccionado.
   private syncActiveBar(tab?: HTMLElement | null): void {
     const root = this.host.nativeElement;
-    const bar = root.querySelector<HTMLElement>('.as-tablist-active-bar');
-    const target = tab ?? root.querySelector<HTMLElement>('.as-tab--active');
+    const bar = root.querySelector<HTMLElement>('.sa-tablist-active-bar');
+    const target = tab ?? root.querySelector<HTMLElement>('.sa-tab--active');
     if (!bar || !target) return;
 
     bar.style.width = `${target.offsetWidth}px`;
     bar.style.left = `${target.offsetLeft}px`;
 
     if (this.variant() === 'pills') {
-      const color = target.style.getPropertyValue('--as-tab-color').trim();
+      const color = target.style.getPropertyValue('--sa-tab-color').trim();
       bar.style.background = color || '';
     }
   }

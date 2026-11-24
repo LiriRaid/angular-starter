@@ -1,22 +1,22 @@
 <div
-  class="as-textarea-wrapper"
+  class="sa-textarea-wrapper"
   [ngClass]="{
-    'as-textarea-invalid': hasErrors(),
-    'as-textarea-over': variant() === 'over',
-    'as-textarea-over-float': variant() === 'over' && !!label(),
+    'sa-textarea-invalid': hasErrors(),
+    'sa-textarea-over': variant() === 'over',
+    'sa-textarea-over-float': variant() === 'over' && !!label(),
   }"
 >
   <div class="relative w-full">
     @if (label() && variant() === 'on') {
-      <fieldset class="as-textarea-grip relative w-full rounded-lg border-0 text-caption-1-medium transition-all duration-180" style="padding: 0; margin: 0; min-inline-size: 0" [ngClass]="fieldsetClasses()" [style.box-shadow]="fieldsetBoxShadow()">
+      <fieldset class="sa-textarea-grip relative w-full rounded-lg border-0 text-caption-1-medium transition-all duration-180" style="padding: 0; margin: 0; min-inline-size: 0" [ngClass]="fieldsetClasses()" [style.box-shadow]="fieldsetBoxShadow()">
         <legend class="h-0 invisible overflow-hidden whitespace-nowrap block leading-none" style="padding: 0" [style.margin-left]="legendOffset()" [style.max-width]="legendMaxWidth()" [style.transition]="legendTransition()">
           <span class="px-2 text-caption-2-bold">{{ label() }}</span>
         </legend>
 
-        <textarea #textareaEl [id]="resolvedInputId()" [rows]="rows()" [disabled]="isDisabled()" [value]="displayValue()" [readOnly]="readonlyInput()" (input)="onInput($event)" (focus)="onFocus()" (blur)="onBlur()" (keyup)="keyup.emit($event)" [attr.autocomplete]="autocomplete() || null" [attr.placeholder]="placeholderAttr()" [attr.aria-invalid]="hasErrors() ? 'true' : null" [attr.aria-describedby]="describedBy()" [attr.data-resize-tick]="resizeTick()" class="as-textarea-field peer" [ngStyle]="fieldStyles()"></textarea>
+        <textarea #textareaEl [id]="resolvedInputId()" [rows]="rows()" [disabled]="isDisabled()" [value]="displayValue()" [readOnly]="readonlyInput()" (input)="onInput($event)" (focus)="onFocus()" (blur)="onBlur()" (keyup)="keyup.emit($event)" [attr.autocomplete]="autocomplete() || null" [attr.placeholder]="placeholderAttr()" [attr.aria-invalid]="hasErrors() ? 'true' : null" [attr.aria-describedby]="describedBy()" [attr.data-resize-tick]="resizeTick()" class="sa-textarea-field peer" [ngStyle]="fieldStyles()"></textarea>
 
         @if (hasIcon() && lucideIcon()) {
-          <as-icon
+          <sa-icon
             [name]="lucideIcon()"
             [size]="iconSize()"
             class="absolute transition-colors duration-150"
@@ -27,7 +27,7 @@
               'text-(--app-control-disabled-text)': isDisabled() || readonlyInput(),
               'text-(--app-action-icon-color)': !isDisabled() && !readonlyInput(),
             }"
-          ></as-icon>
+          ></sa-icon>
         }
 
         <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-180 rounded-md" [class.transition-none]="!transitionReady()" [ngClass]="resolvedLabelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
@@ -38,11 +38,11 @@
         </label>
       </fieldset>
     } @else {
-      <div class="as-textarea-grip relative w-full rounded-lg text-caption-1-medium transition-all duration-180" [ngClass]="fieldsetClasses()" [style.box-shadow]="fieldsetBoxShadow()">
-        <textarea #textareaEl [id]="resolvedInputId()" [rows]="rows()" [disabled]="isDisabled()" [value]="displayValue()" [readOnly]="readonlyInput()" (input)="onInput($event)" (focus)="onFocus()" (blur)="onBlur()" (keyup)="keyup.emit($event)" [attr.autocomplete]="autocomplete() || null" [attr.placeholder]="placeholderAttr()" [attr.aria-invalid]="hasErrors() ? 'true' : null" [attr.aria-describedby]="describedBy()" [attr.data-resize-tick]="resizeTick()" class="as-textarea-field peer" [ngStyle]="fieldStyles()"></textarea>
+      <div class="sa-textarea-grip relative w-full rounded-lg text-caption-1-medium transition-all duration-180" [ngClass]="fieldsetClasses()" [style.box-shadow]="fieldsetBoxShadow()">
+        <textarea #textareaEl [id]="resolvedInputId()" [rows]="rows()" [disabled]="isDisabled()" [value]="displayValue()" [readOnly]="readonlyInput()" (input)="onInput($event)" (focus)="onFocus()" (blur)="onBlur()" (keyup)="keyup.emit($event)" [attr.autocomplete]="autocomplete() || null" [attr.placeholder]="placeholderAttr()" [attr.aria-invalid]="hasErrors() ? 'true' : null" [attr.aria-describedby]="describedBy()" [attr.data-resize-tick]="resizeTick()" class="sa-textarea-field peer" [ngStyle]="fieldStyles()"></textarea>
 
         @if (hasIcon() && lucideIcon()) {
-          <as-icon
+          <sa-icon
             [name]="lucideIcon()"
             [size]="iconSize()"
             class="absolute transition-colors duration-150"
@@ -53,7 +53,7 @@
               'text-(--app-control-disabled-text)': isDisabled() || readonlyInput(),
               'text-(--app-action-icon-color)': !isDisabled() && !readonlyInput(),
             }"
-          ></as-icon>
+          ></sa-icon>
         }
       </div>
 
@@ -69,7 +69,7 @@
   </div>
 
   @if (hasErrors() && showErrorMessage()) {
-    <small [id]="errorId()" class="as-textarea-error">
+    <small [id]="errorId()" class="sa-textarea-error">
       {{ errorMessage() }}
     </small>
   }

@@ -10,7 +10,7 @@ import { CLI_VERSION } from '../version.js';
 
 export async function infoCommand(io: CliIo, deps: ProgramDeps): Promise<void> {
   const node = `v${deps.nodeVersion} (${isSupportedNode(deps.nodeVersion) ? 'supported' : `not supported, requires ${SUPPORTED_NODE_RANGE}`})`;
-  println(io.stdout, 'Angular Starter CLI');
+  println(io.stdout, 'Starter Angular CLI');
   for (const line of formatRows([
     ['CLI version', CLI_VERSION],
     ['Tested Angular CLI', ANGULAR_CLI_VERSION],

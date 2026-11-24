@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-import { AsIcon } from '../as-icon/as-icon';
+import { SaIcon } from '../sa-icon/sa-icon';
 
 /** Icon drawn in the presence dot for each status; `online` has none. */
 const PRESENCE_STATUS_ICONS: Readonly<Record<string, string | null>> = {
@@ -14,21 +14,21 @@ function presenceStatusIcon(status: string | null | undefined): string | null {
   return PRESENCE_STATUS_ICONS[status ?? ''] ?? null;
 }
 
-export type AsAvatarMode = 'avatar' | 'presence';
+export type SaAvatarMode = 'avatar' | 'presence';
 
 @Component({
-  selector: 'as-avatar',
+  selector: 'sa-avatar',
   standalone: true,
-  imports: [AsIcon],
+  imports: [SaIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  templateUrl: './as-avatar.html',
-  styleUrl: './as-avatar.css',
+  templateUrl: './sa-avatar.html',
+  styleUrl: './sa-avatar.css',
   host: {
     '[style.borderRadius]': 'radius()',
     '[style.position]': "mode() === 'presence' ? 'relative' : null",
   },
 })
-export class AsAvatar {
+export class SaAvatar {
   readonly label = input<string>('');
   readonly imageUrl = input<string | null>(null);
   readonly background = input<string>('var(--app-text-subtle)');
@@ -41,7 +41,7 @@ export class AsAvatar {
 
   /** 'presence' agrega el punto de estado (online/away/busy/invisible) sobre el avatar,
    *  reemplazando el <span class="presence-dot"> que antes se repetía en cada feature. */
-  readonly mode = input<AsAvatarMode>('avatar');
+  readonly mode = input<SaAvatarMode>('avatar');
   readonly presenceStatus = input<string | null | undefined>(undefined);
   /** Overrides manuales — si no se definen, el tamaño del punto se calcula en base a size(). */
   readonly dotSize = input<string | null>(null);
@@ -56,7 +56,7 @@ export class AsAvatar {
     if (this.shape() === 'circle') return '9999px';
     return this.cssSize() ? '28%' : `${Math.round(this.size() * 0.28)}px`;
   });
-  protected readonly initialsClass = computed(() => `as-avatar as-avatar--initials ${this.textClass()}`);
+  protected readonly initialsClass = computed(() => `sa-avatar sa-avatar--initials ${this.textClass()}`);
 
   protected readonly resolvedDotSize = computed(() => this.dotSize() ?? (this.size() <= 40 ? '0.875rem' : '1rem'));
   protected readonly resolvedDotIconSize = computed(() => this.dotIconSize() ?? (this.size() <= 40 ? 10 : 12));

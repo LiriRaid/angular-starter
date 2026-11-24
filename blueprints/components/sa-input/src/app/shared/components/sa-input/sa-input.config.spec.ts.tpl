@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { addPrecise, resolveInputFieldStyles, resolveInputLabelClass, resolveInputType, resolveTextareaFieldStyles, sanitizeDecimalInput, stepNumberValue } from './as-input.config';
+import { addPrecise, resolveInputFieldStyles, resolveInputLabelClass, resolveInputType, resolveTextareaFieldStyles, sanitizeDecimalInput, stepNumberValue } from './sa-input.config';
 
 describe('resolveInputType', () => {
   it('number se dibuja como texto: el <input type="number"> nativo borra estados intermedios como "1." y salta el cursor', () => {

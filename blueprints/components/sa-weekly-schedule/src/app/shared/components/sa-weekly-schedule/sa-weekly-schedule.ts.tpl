@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, model, signal } from '@angular/core';
 
-import { AsButton } from '../as-button/as-button';
-import { AsToggle } from '../as-toggle/as-toggle';
+import { SaButton } from '../sa-button/sa-button';
+import { SaToggle } from '../sa-toggle/sa-toggle';
 
 type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
 
-export interface AsScheduleDay {
+export interface SaScheduleDay {
   key: DayKey;
   label: string;
   abbr: string;
@@ -14,7 +14,7 @@ export interface AsScheduleDay {
   end: string;
 }
 
-const DAY_DEFS: Array<Pick<AsScheduleDay, 'key' | 'label' | 'abbr'>> = [
+const DAY_DEFS: Array<Pick<SaScheduleDay, 'key' | 'label' | 'abbr'>> = [
   { key: 'mon', label: 'Lunes', abbr: 'Lun' },
   { key: 'tue', label: 'Martes', abbr: 'Mar' },
   { key: 'wed', label: 'Miércoles', abbr: 'Mié' },
@@ -24,9 +24,9 @@ const DAY_DEFS: Array<Pick<AsScheduleDay, 'key' | 'label' | 'abbr'>> = [
   { key: 'sun', label: 'Domingo', abbr: 'Dom' },
 ];
 
-export type AsWeeklySchedulePreset = 'lv-8-17' | 'ls-9-18' | 'all-9-23' | '24h';
+export type SaWeeklySchedulePreset = 'lv-8-17' | 'ls-9-18' | 'all-9-23' | '24h';
 
-function defaultScheduleDays(): AsScheduleDay[] {
+function defaultScheduleDays(): SaScheduleDay[] {
   return DAY_DEFS.map((d, index) => ({ ...d, enabled: index <= 4, start: '08:00', end: '17:00' }));
 }
 
@@ -38,7 +38,7 @@ function formatTime(time: string): string {
   return `${h}:${String(m).padStart(2, '0')}`;
 }
 
-function formatSchedule(days: AsScheduleDay[]): string {
+function formatSchedule(days: SaScheduleDay[]): string {
   const groups: Array<{ start: number; end: number; time: string }> = [];
   let i = 0;
   while (i < days.length) {
@@ -67,7 +67,7 @@ function formatSchedule(days: AsScheduleDay[]): string {
 }
 
 /** Total de horas por semana de un horario; un tramo que termina antes de empezar (o a la misma hora) cruza la medianoche. Exportado para quien necesite el total fuera del propio editor (ej. una tarjeta-resumen) sin reparsear el string. */
-export function computeWeeklyHours(days: AsScheduleDay[]): number {
+export function computeWeeklyHours(days: SaScheduleDay[]): number {
   let totalMinutes = 0;
   for (const d of days) {
     if (!d.enabled || !TIME.test(d.start) || !TIME.test(d.end)) continue;
@@ -82,7 +82,7 @@ export function computeWeeklyHours(days: AsScheduleDay[]): number {
 }
 
 /** Parser best-effort del string que genera `formatSchedule` (su propio formato); exportado por el mismo motivo que `computeWeeklyHours`. */
-export function parseSchedule(value: string): AsScheduleDay[] {
+export function parseSchedule(value: string): SaScheduleDay[] {
   const days = defaultScheduleDays().map((d) => ({ ...d, enabled: false }));
   if (!value?.trim()) return days;
 
@@ -130,17 +130,17 @@ export function parseSchedule(value: string): AsScheduleDay[] {
  *
  *  Bidireccional con `[(value)]`. Un string vacío se interpreta como "todavía no hay dato guardado" y se muestra el predeterminado (Lun-Vie 8:00-17:00), no "cerrado toda la semana". */
 @Component({
-  selector: 'as-weekly-schedule',
-  imports: [AsButton, AsToggle],
-  templateUrl: './as-weekly-schedule.html',
-  styleUrl: './as-weekly-schedule.css',
+  selector: 'sa-weekly-schedule',
+  imports: [SaButton, SaToggle],
+  templateUrl: './sa-weekly-schedule.html',
+  styleUrl: './sa-weekly-schedule.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsWeeklySchedule {
+export class SaWeeklySchedule {
   readonly value = model<string>('');
   readonly label = input('Horario de atención');
 
-  readonly days = signal<AsScheduleDay[]>(defaultScheduleDays());
+  readonly days = signal<SaScheduleDay[]>(defaultScheduleDays());
   readonly summary = computed(() => formatSchedule(this.days()));
   readonly weeklyHours = computed(() => computeWeeklyHours(this.days()));
 
@@ -193,7 +193,7 @@ export class AsWeeklySchedule {
     this.emit();
   }
 
-  applyPreset(preset: AsWeeklySchedulePreset): void {
+  applyPreset(preset: SaWeeklySchedulePreset): void {
     this.days.update((days) =>
       days.map((d, index) => {
         switch (preset) {

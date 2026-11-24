@@ -4,12 +4,12 @@ import { SidebarStatus } from '../enums/sidebar-status.enum';
 import { Sidebar } from '../sidebar/sidebar';
 import { LayoutService } from '../../services/layout.service';
 import { Header } from '../header/header';
-import { AsToast } from '@shared/components';
+import { SaToast } from '@shared/components';
 import { AlertService } from '@shared/services';
 
 @Component({
   selector: '__PREFIX__-main',
-  imports: [RouterOutlet, Sidebar, Header, AsToast],
+  imports: [RouterOutlet, Sidebar, Header, SaToast],
   templateUrl: './main.html',
   styleUrl: './main.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

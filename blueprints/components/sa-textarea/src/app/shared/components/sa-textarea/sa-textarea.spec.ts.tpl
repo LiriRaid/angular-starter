@@ -1,15 +1,15 @@
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { AsTextarea } from './as-textarea';
+import { SaTextarea } from './sa-textarea';
 
-describe('AsTextarea · label en reposo', () => {
-  let fixture: ComponentFixture<AsTextarea>;
+describe('SaTextarea · label en reposo', () => {
+  let fixture: ComponentFixture<SaTextarea>;
   const label = (): HTMLLabelElement => fixture.nativeElement.querySelector('label');
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [AsTextarea] }).compileComponents();
-    fixture = TestBed.createComponent(AsTextarea);
+    await TestBed.configureTestingModule({ imports: [SaTextarea] }).compileComponents();
+    fixture = TestBed.createComponent(SaTextarea);
     fixture.componentRef.setInput('label', 'Mensaje');
   });
 
@@ -44,14 +44,14 @@ describe('AsTextarea · label en reposo', () => {
   });
 });
 
-describe('AsTextarea · espacio del label y de los iconos', () => {
-  let fixture: ComponentFixture<AsTextarea>;
+describe('SaTextarea · espacio del label y de los iconos', () => {
+  let fixture: ComponentFixture<SaTextarea>;
   const field = (): HTMLTextAreaElement => fixture.nativeElement.querySelector('textarea');
   const label = (): HTMLLabelElement => fixture.nativeElement.querySelector('label');
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [AsTextarea] }).compileComponents();
-    fixture = TestBed.createComponent(AsTextarea);
+    await TestBed.configureTestingModule({ imports: [SaTextarea] }).compileComponents();
+    fixture = TestBed.createComponent(SaTextarea);
     fixture.componentRef.setInput('label', 'Comentario');
   });
 
@@ -87,7 +87,7 @@ describe('AsTextarea · espacio del label y de los iconos', () => {
     fixture.componentRef.setInput('lucideIcon', 'Search');
     fixture.componentRef.setInput('variant', 'in');
     fixture.detectChanges();
-    const icon = (): HTMLElement => fixture.nativeElement.querySelector('as-icon');
+    const icon = (): HTMLElement => fixture.nativeElement.querySelector('sa-icon');
     expect(icon().style.top).toBe('1.625rem');
 
     fixture.componentRef.setInput('variant', 'on');

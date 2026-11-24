@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, it, beforeEach } from 'vitest';
 import { ComponentRef } from '@angular/core';
-import { AsDivider } from './as-divider';
+import { SaDivider } from './sa-divider';
 
-describe('AsDivider', () => {
-  let fixture: ComponentFixture<AsDivider>;
-  let component: AsDivider;
-  let ref: ComponentRef<AsDivider>;
+describe('SaDivider', () => {
+  let fixture: ComponentFixture<SaDivider>;
+  let component: SaDivider;
+  let ref: ComponentRef<SaDivider>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AsDivider],
+      imports: [SaDivider],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsDivider);
+    fixture = TestBed.createComponent(SaDivider);
     component = fixture.componentInstance;
     ref = fixture.componentRef;
     fixture.detectChanges();
@@ -24,7 +24,7 @@ describe('AsDivider', () => {
   });
 
   it('defaults to a horizontal solid divider aligned left', () => {
-    expect(component.hostClasses()).toBe('as-divider as-divider-horizontal as-divider-solid as-divider-left');
+    expect(component.hostClasses()).toBe('sa-divider sa-divider-horizontal sa-divider-solid sa-divider-left');
   });
 
   it('reflects layout, type and align inputs in the host classes', () => {
@@ -33,7 +33,7 @@ describe('AsDivider', () => {
     ref.setInput('align', 'bottom');
     fixture.detectChanges();
 
-    expect(component.hostClasses()).toBe('as-divider as-divider-vertical as-divider-dashed as-divider-bottom');
+    expect(component.hostClasses()).toBe('sa-divider sa-divider-vertical sa-divider-dashed sa-divider-bottom');
   });
 
   it('exposes aria-orientation matching the layout', () => {

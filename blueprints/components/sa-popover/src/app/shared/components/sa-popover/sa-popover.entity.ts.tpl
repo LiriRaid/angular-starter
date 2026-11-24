@@ -1,13 +1,13 @@
-export type AsPopoverButtonVariant = 'outlined' | 'text' | undefined;
-export type AsPopoverPosition = 'top' | 'right' | 'left' | 'bottom';
+export type SaPopoverButtonVariant = 'outlined' | 'text' | undefined;
+export type SaPopoverPosition = 'top' | 'right' | 'left' | 'bottom';
 
-export type AsPopoverActionItem = {
+export type SaPopoverActionItem = {
   readonly id: string;
   readonly label: string;
   readonly icon: string;
   readonly iconSize?: string | number;
   readonly disabled?: boolean;
-  readonly variant?: AsPopoverButtonVariant;
+  readonly variant?: SaPopoverButtonVariant;
   readonly styleClass?: string;
 };
 

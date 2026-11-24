@@ -1,24 +1,24 @@
-as-media-preview {
+sa-media-preview {
   display: contents;
 }
 
-/* El botón de descargar va del lado opuesto al de cerrar (que ya trae as-modal en
-   variant="preview") — mismo look de círculo oscuro flotante (as-icon-overlay-btn). */
-.as-media-preview-download {
+/* El botón de descargar va del lado opuesto al de cerrar (que ya trae sa-modal en
+   variant="preview") — mismo look de círculo oscuro flotante (sa-icon-overlay-btn). */
+.sa-media-preview-download {
   position: absolute;
   top: 0.75rem;
   left: 0.75rem;
   z-index: 10;
 }
 
-.as-media-preview-image {
+.sa-media-preview-image {
   display: block;
   max-width: min(900px, calc(100vw - 4rem));
   max-height: calc(100dvh - 4rem);
   object-fit: contain;
 }
 
-.as-media-preview-frame {
+.sa-media-preview-frame {
   width: 85vw;
   height: 80vh;
   max-width: calc(100vw - 4rem);

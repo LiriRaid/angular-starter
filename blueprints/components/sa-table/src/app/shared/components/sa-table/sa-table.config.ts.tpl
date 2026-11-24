@@ -1,15 +1,15 @@
-export type AsTableAlign = 'left' | 'center' | 'right';
+export type SaTableAlign = 'left' | 'center' | 'right';
 
-export interface AsTableColumn {
+export interface SaTableColumn {
   field: string;
   header: string;
   width?: string;
-  align?: AsTableAlign;
+  align?: SaTableAlign;
   headerClass?: string;
   cellClass?: string;
 }
 
-export interface AsTablePageEvent {
+export interface SaTablePageEvent {
   page: number;
   perPage: number;
 }
@@ -39,16 +39,16 @@ export function buildPageItems(current: number, total: number): (number | 'ellip
   return items;
 }
 
-export function alignClass(align: AsTableAlign | undefined): string {
+export function alignClass(align: SaTableAlign | undefined): string {
   if (align === 'center') return 'text-center';
   if (align === 'right') return 'text-right';
   return 'text-left';
 }
 
-export function headerClass(column: AsTableColumn): string {
+export function headerClass(column: SaTableColumn): string {
   return ['whitespace-nowrap px-4 py-3 text-caption-1-bold uppercase tracking-wider text-(--app-text-subtle)', alignClass(column.align), column.headerClass ?? ''].join(' ');
 }
 
-export function cellClass(column: AsTableColumn): string {
+export function cellClass(column: SaTableColumn): string {
   return ['px-4 py-3 text-caption-1-regular text-(--app-text-color)', alignClass(column.align), column.cellClass ?? ''].join(' ');
 }

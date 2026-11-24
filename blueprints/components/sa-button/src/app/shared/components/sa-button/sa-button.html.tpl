@@ -1,8 +1,8 @@
 <ng-template #buttonIcon>
   @if (loading()) {
-    <as-icon [name]="loadingIcon()" [spin]="true" [size]="iconSize()" [color]="iconColor()" [ngClass]="computedIconClass()" />
+    <sa-icon [name]="loadingIcon()" [spin]="true" [size]="iconSize()" [color]="iconColor()" [ngClass]="computedIconClass()" />
   } @else if (icon(); as iconName) {
-    <as-icon [name]="iconName" [size]="iconSize()" [color]="iconColor()" [ngClass]="computedIconClass()" />
+    <sa-icon [name]="iconName" [size]="iconSize()" [color]="iconColor()" [ngClass]="computedIconClass()" />
   }
 </ng-template>
 
@@ -30,16 +30,16 @@
   }
 
   @if (trailingIcon(); as trailingIconName) {
-    <as-icon [name]="trailingIconName" [size]="trailingIconSize()" [color]="trailingIconColor()" [extraClass]="trailingIconExtraClass()" class="as-button__trailing-icon" />
+    <sa-icon [name]="trailingIconName" [size]="trailingIconSize()" [color]="trailingIconColor()" [extraClass]="trailingIconExtraClass()" class="sa-button__trailing-icon" />
   }
 </ng-template>
 
 @if (href()) {
-  <a asRipple [href]="href()!" [attr.target]="target() || null" [attr.rel]="rel() || null" [attr.aria-label]="ariaLabel() || undefined" [attr.aria-controls]="ariaControls() || undefined" [attr.aria-expanded]="ariaExpanded() === null ? undefined : ariaExpanded()" [attr.aria-pressed]="ariaPressed() === null ? undefined : ariaPressed()" [attr.aria-busy]="loading() || null" [attr.aria-disabled]="isDisabled()" [attr.tabindex]="isDisabled() ? -1 : null" [class]="buttonClass()" [class.as-disabled]="isDisabled()" (click)="handleClick($event)">
+  <a saRipple [href]="href()!" [attr.target]="target() || null" [attr.rel]="rel() || null" [attr.aria-label]="ariaLabel() || undefined" [attr.aria-controls]="ariaControls() || undefined" [attr.aria-expanded]="ariaExpanded() === null ? undefined : ariaExpanded()" [attr.aria-pressed]="ariaPressed() === null ? undefined : ariaPressed()" [attr.aria-busy]="loading() || null" [attr.aria-disabled]="isDisabled()" [attr.tabindex]="isDisabled() ? -1 : null" [class]="buttonClass()" [class.sa-disabled]="isDisabled()" (click)="handleClick($event)">
     <ng-container [ngTemplateOutlet]="buttonContent" />
   </a>
 } @else {
-  <button asRipple [type]="type()" [disabled]="isDisabled()" [attr.aria-busy]="loading() || null" [attr.aria-label]="ariaLabel() || undefined" [attr.aria-controls]="ariaControls() || undefined" [attr.aria-expanded]="ariaExpanded() === null ? undefined : ariaExpanded()" [attr.aria-pressed]="ariaPressed() === null ? undefined : ariaPressed()" [class]="buttonClass()" [class.as-disabled]="isDisabled()" (click)="handleClick($event)">
+  <button saRipple [type]="type()" [disabled]="isDisabled()" [attr.aria-busy]="loading() || null" [attr.aria-label]="ariaLabel() || undefined" [attr.aria-controls]="ariaControls() || undefined" [attr.aria-expanded]="ariaExpanded() === null ? undefined : ariaExpanded()" [attr.aria-pressed]="ariaPressed() === null ? undefined : ariaPressed()" [class]="buttonClass()" [class.sa-disabled]="isDisabled()" (click)="handleClick($event)">
     <ng-container [ngTemplateOutlet]="buttonContent" />
   </button>
 }

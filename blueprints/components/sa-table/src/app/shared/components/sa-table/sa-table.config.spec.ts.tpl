@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { alignClass, buildPageItems, cellClass, headerClass, type AsTableColumn } from './as-table.config';
+import { alignClass, buildPageItems, cellClass, headerClass, type SaTableColumn } from './sa-table.config';
 
 describe('buildPageItems', () => {
   it('lista todas las paginas si son 7 o menos, sin elipsis', () => {
@@ -45,7 +45,7 @@ describe('alignClass', () => {
 });
 
 describe('headerClass / cellClass', () => {
-  const column: AsTableColumn = { field: 'name', header: 'Nombre', align: 'center', headerClass: 'extra-header', cellClass: 'extra-cell' };
+  const column: SaTableColumn = { field: 'name', header: 'Nombre', align: 'center', headerClass: 'extra-header', cellClass: 'extra-cell' };
 
   it('headerClass combina las clases base, de alineacion y la custom de la columna', () => {
     expect(headerClass(column)).toBe('whitespace-nowrap px-4 py-3 text-caption-1-bold uppercase tracking-wider text-(--app-text-subtle) text-center extra-header');
@@ -56,7 +56,7 @@ describe('headerClass / cellClass', () => {
   });
 
   it('headerClass/cellClass no rompen si la columna no define headerClass/cellClass', () => {
-    const minimal: AsTableColumn = { field: 'id', header: 'ID' };
+    const minimal: SaTableColumn = { field: 'id', header: 'ID' };
     expect(headerClass(minimal)).toBe('whitespace-nowrap px-4 py-3 text-caption-1-bold uppercase tracking-wider text-(--app-text-subtle) text-left ');
     expect(cellClass(minimal)).toBe('px-4 py-3 text-caption-1-regular text-(--app-text-color) text-left ');
   });

@@ -2,27 +2,27 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 import { ComponentRef, TemplateRef } from '@angular/core';
 import type { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { AsReorderList } from './as-reorder-list';
+import { SaReorderList } from './sa-reorder-list';
 
-describe('AsReorderList', () => {
-  let fixture: ComponentFixture<AsReorderList<string>>;
-  let component: AsReorderList<string>;
-  let ref: ComponentRef<AsReorderList<string>>;
+describe('SaReorderList', () => {
+  let fixture: ComponentFixture<SaReorderList<string>>;
+  let component: SaReorderList<string>;
+  let ref: ComponentRef<SaReorderList<string>>;
 
   function dragEvent(previousIndex: number, currentIndex: number): CdkDragDrop<string[]> {
     return { previousIndex, currentIndex } as CdkDragDrop<string[]>;
   }
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsReorderList, {
+    TestBed.overrideComponent(SaReorderList, {
       set: { template: '' },
     });
 
     await TestBed.configureTestingModule({
-      imports: [AsReorderList],
+      imports: [SaReorderList],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsReorderList<string>);
+    fixture = TestBed.createComponent(SaReorderList<string>);
     component = fixture.componentInstance;
     ref = fixture.componentRef;
     ref.setInput('items', ['a', 'b', 'c']);

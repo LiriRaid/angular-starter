@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { computeDragPosition, computeResizeSize } from './as-modal.config';
+import { computeDragPosition, computeResizeSize } from './sa-modal.config';
 
 describe('computeDragPosition', () => {
   const rect = { left: 100, top: 80, width: 400, height: 300 };

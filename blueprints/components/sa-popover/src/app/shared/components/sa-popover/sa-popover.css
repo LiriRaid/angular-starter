@@ -1,12 +1,12 @@
-as-popover {
+sa-popover {
   display: contents;
 }
 
-.as-popover--actions {
+.sa-popover--actions {
   min-width: 11rem;
 }
 
-.as-popover-actions {
+.sa-popover-actions {
   display: flex;
   min-width: 11rem;
   max-height: 21.5rem;
@@ -16,12 +16,12 @@ as-popover {
   background-color: var(--app-overlay-bg);
 }
 
-.as-popover-actions > as-button {
+.sa-popover-actions > sa-button {
   display: block;
   width: 100%;
 }
 
-.as-popover-option.as-btn {
+.sa-popover-option.sa-btn {
   width: 100%;
   min-height: 2.75rem;
   justify-content: flex-start;
@@ -33,38 +33,38 @@ as-popover {
   text-align: left;
 }
 
-.as-popover-option.as-btn:not(:disabled):hover,
-.as-popover-option.as-btn:not(:disabled):active,
-.as-popover-option.as-btn:not(:disabled):focus,
-.as-popover-option.as-btn:not(:disabled):focus-visible {
+.sa-popover-option.sa-btn:not(:disabled):hover,
+.sa-popover-option.sa-btn:not(:disabled):active,
+.sa-popover-option.sa-btn:not(:disabled):focus,
+.sa-popover-option.sa-btn:not(:disabled):focus-visible {
   border: 0 !important;
   box-shadow: none !important;
 }
 
-.as-popover-option.as-btn .as-btn__label {
+.sa-popover-option.sa-btn .sa-btn__label {
   min-width: 0;
   flex: 1 1 auto;
   text-align: left;
   white-space: nowrap;
 }
 
-.as-popover-option.as-btn .as-btn__icon,
-.as-popover-option.as-btn as-icon {
+.sa-popover-option.sa-btn .sa-btn__icon,
+.sa-popover-option.sa-btn sa-icon {
   flex-shrink: 0;
 }
 
-.as-popover-divider {
+.sa-popover-divider {
   border: none;
   border-top: 1px solid var(--app-border-color);
   margin: 0;
 }
 
-.as-popover-option.as-btn.as-popover-btn--danger {
+.sa-popover-option.sa-btn.sa-popover-btn--danger {
   color: var(--color-red-500);
 }
 
-.as-popover-option.as-btn.as-popover-btn--danger:not(:disabled):hover,
-.as-popover-option.as-btn.as-popover-btn--danger:not(:disabled):active {
+.sa-popover-option.sa-btn.sa-popover-btn--danger:not(:disabled):hover,
+.sa-popover-option.sa-btn.sa-popover-btn--danger:not(:disabled):active {
   background: var(--color-red-500) !important;
   color: white;
 }

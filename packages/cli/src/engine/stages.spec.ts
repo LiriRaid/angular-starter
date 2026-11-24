@@ -92,9 +92,9 @@ describe('validateEnvironment', () => {
     run: (command: string) => Promise<{ stdout: string; stderr: string }>,
   ): GenerationContext {
     return {
-      name: 'as-no-such-project',
+      name: 'sa-no-such-project',
       cwd: tmpdir(),
-      targetDir: join(tmpdir(), 'as-no-such-project'),
+      targetDir: join(tmpdir(), 'sa-no-such-project'),
       options: { ...DEFAULT_OPTIONS, packageManager: 'yarn', install: true, git: false },
       deps: { run, nodeVersion: '24.15.0' },
     } as unknown as GenerationContext;

@@ -1,2 +1,2 @@
-export type AsSelectVariant = 'over' | 'in' | 'on' | 'compact';
-export type AsIconPosition = 'left' | 'right';
+export type SaSelectVariant = 'over' | 'in' | 'on' | 'compact';
+export type SaIconPosition = 'left' | 'right';

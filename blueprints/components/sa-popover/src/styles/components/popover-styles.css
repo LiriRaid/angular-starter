@@ -2,7 +2,7 @@
   /* Base visual del panel [popover] nativo — resetea el UA stylesheet por defecto
      (padding/inset/margin/border propios de [popover]) además de dar el look de la app. */
 
-  .as-popover {
+  .sa-popover {
     inset: auto;
     margin: 0;
     padding: 0;
@@ -13,19 +13,19 @@
     box-shadow: var(--app-overlay-shadow);
   }
 
-  .as-popover.as-popover--repositioned {
+  .sa-popover.sa-popover--repositioned {
     opacity: 0;
     transition: opacity 0.15s ease;
   }
 
-  .as-popover.as-popover--repositioned[data-positioned='true'] {
+  .sa-popover.sa-popover--repositioned[data-positioned='true'] {
     opacity: 1;
   }
 
   /* Flecha custom. */
 
-  .as-popover::before,
-  .as-popover::after {
+  .sa-popover::before,
+  .sa-popover::after {
     content: '' !important;
     position: absolute !important;
     width: 0 !important;
@@ -35,9 +35,9 @@
   }
 
   /* Flecha abajo. */
-  .as-popover[data-arrow-position='bottom']::before,
-  .as-popover:not([data-arrow-position])::before {
-    left: var(--as-popover-arrow-x, 50%) !important;
+  .sa-popover[data-arrow-position='bottom']::before,
+  .sa-popover:not([data-arrow-position])::before {
+    left: var(--sa-popover-arrow-x, 50%) !important;
     transform: translateX(-50%) !important;
     margin-left: -2px !important;
     top: auto !important;
@@ -46,9 +46,9 @@
     border-color: var(--app-overlay-border) transparent transparent transparent !important;
   }
 
-  .as-popover[data-arrow-position='bottom']::after,
-  .as-popover:not([data-arrow-position])::after {
-    left: var(--as-popover-arrow-x, 50%) !important;
+  .sa-popover[data-arrow-position='bottom']::after,
+  .sa-popover:not([data-arrow-position])::after {
+    left: var(--sa-popover-arrow-x, 50%) !important;
     transform: translateX(-50%) !important;
     top: auto !important;
     bottom: -8px !important;
@@ -57,8 +57,8 @@
   }
 
   /* Flecha arriba. */
-  .as-popover[data-arrow-position='top']::before {
-    left: var(--as-popover-arrow-x, 50%) !important;
+  .sa-popover[data-arrow-position='top']::before {
+    left: var(--sa-popover-arrow-x, 50%) !important;
     transform: translateX(-50%) !important;
     margin-left: -2px !important;
     bottom: auto !important;
@@ -67,8 +67,8 @@
     border-color: transparent transparent var(--app-overlay-border) transparent !important;
   }
 
-  .as-popover[data-arrow-position='top']::after {
-    left: var(--as-popover-arrow-x, 50%) !important;
+  .sa-popover[data-arrow-position='top']::after {
+    left: var(--sa-popover-arrow-x, 50%) !important;
     transform: translateX(-50%) !important;
     bottom: auto !important;
     top: -8px !important;
@@ -76,8 +76,8 @@
     border-color: transparent transparent var(--app-overlay-bg) transparent !important;
   }
 
-  .as-popover[data-arrow-position='left']::before {
-    top: var(--as-popover-arrow-y, 50%) !important;
+  .sa-popover[data-arrow-position='left']::before {
+    top: var(--sa-popover-arrow-y, 50%) !important;
     left: -9px !important;
     margin: -2px 0 0 0 !important;
     transform: translateY(-50%) !important;
@@ -85,8 +85,8 @@
     border-color: transparent var(--app-overlay-border) transparent transparent !important;
   }
 
-  .as-popover[data-arrow-position='left']::after {
-    top: var(--as-popover-arrow-y, 50%) !important;
+  .sa-popover[data-arrow-position='left']::after {
+    top: var(--sa-popover-arrow-y, 50%) !important;
     left: -8px !important;
     margin: 0 !important;
     transform: translateY(-50%) !important;
@@ -94,8 +94,8 @@
     border-color: transparent var(--app-overlay-bg) transparent transparent !important;
   }
 
-  .as-popover[data-arrow-position='right']::before {
-    top: var(--as-popover-arrow-y, 50%) !important;
+  .sa-popover[data-arrow-position='right']::before {
+    top: var(--sa-popover-arrow-y, 50%) !important;
     right: -9px !important;
     left: auto !important;
     margin: -2px 0 0 0 !important;
@@ -104,8 +104,8 @@
     border-color: transparent transparent transparent var(--app-overlay-border) !important;
   }
 
-  .as-popover[data-arrow-position='right']::after {
-    top: var(--as-popover-arrow-y, 50%) !important;
+  .sa-popover[data-arrow-position='right']::after {
+    top: var(--sa-popover-arrow-y, 50%) !important;
     right: -8px !important;
     left: auto !important;
     margin: 0 !important;
@@ -114,7 +114,7 @@
     border-color: transparent transparent transparent var(--app-overlay-bg) !important;
   }
 
-  .as-popover-content {
+  .sa-popover-content {
     padding: 0 !important;
     overflow: hidden;
     border-radius: inherit;

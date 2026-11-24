@@ -1,32 +1,32 @@
 :host {
   display: block;
   /* Alturas semánticas — sobreridables desde el tema o componente padre.
-     input: campo con label flotante dentro del propio borde (as-input variant="on"/
-     as-select) — medido en DOM real: 40px total, la misma altura que "select" pese al
+     input: campo con label flotante dentro del propio borde (sa-input variant="on"/
+     sa-select) — medido en DOM real: 40px total, la misma altura que "select" pese al
      label, porque el label no ocupa una línea aparte. Excepción: textarea u otros controles
      con altura explícita propia no usan este atajo, van con `height` directo. */
-  --as-sk-input-h: 2.5rem;
-  --as-sk-select-h: 2.5rem;
-  --as-sk-button-h: 2.25rem;
-  --as-sk-button-sm-h: 1.875rem;
-  --as-sk-chip-h: 1.636rem;
+  --sa-sk-input-h: 2.5rem;
+  --sa-sk-select-h: 2.5rem;
+  --sa-sk-button-h: 2.25rem;
+  --sa-sk-button-sm-h: 1.875rem;
+  --sa-sk-chip-h: 1.636rem;
 }
 
-:host(.as-skeleton-fill) {
+:host(.sa-skeleton-fill) {
   width: 100%;
   height: 100%;
 }
 
 /* Placeholder nativo con shimmer — mismo efecto visual que traía p-skeleton
    (base tenue + banda de luz que cruza de izquierda a derecha en loop). */
-.as-skeleton {
+.sa-skeleton {
   display: block;
   position: relative;
   overflow: hidden;
   background: color-mix(in srgb, var(--app-text-subtle) 13%, transparent);
 }
 
-.as-skeleton::after {
+.sa-skeleton::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -37,10 +37,10 @@
     color-mix(in srgb, var(--app-text-subtle) 28%, transparent),
     transparent
   );
-  animation: as-skeleton-shimmer 1.2s infinite;
+  animation: sa-skeleton-shimmer 1.2s infinite;
 }
 
-@keyframes as-skeleton-shimmer {
+@keyframes sa-skeleton-shimmer {
   from {
     transform: translateX(-100%);
   }
@@ -49,29 +49,29 @@
   }
 }
 
-.as-skeleton-line {
+.sa-skeleton-line {
   display: block;
 }
 
-.as-skeleton-bar {
+.sa-skeleton-bar {
   display: inline-block;
   vertical-align: middle;
 }
 
 /* Alineacion del placeholder respecto al contenedor del host (que por defecto ocupa
    todo el ancho disponible, igual que el contenido real que reemplaza). Para la variante
-   "bar" (inline-block dentro de .as-skeleton-line) se centra con text-align en el bloque
+   "bar" (inline-block dentro de .sa-skeleton-line) se centra con text-align en el bloque
    padre; para el skeleton plano (block, con ancho explicito) se centra con margin auto. */
-.as-skeleton-line.as-align-center {
+.sa-skeleton-line.sa-align-center {
   text-align: center;
 }
-.as-skeleton-line.as-align-right {
+.sa-skeleton-line.sa-align-right {
   text-align: right;
 }
-.as-skeleton.as-align-center {
+.sa-skeleton.sa-align-center {
   margin-left: auto;
   margin-right: auto;
 }
-.as-skeleton.as-align-right {
+.sa-skeleton.sa-align-right {
   margin-left: auto;
 }

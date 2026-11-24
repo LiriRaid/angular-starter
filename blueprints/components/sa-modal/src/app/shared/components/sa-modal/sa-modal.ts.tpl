@@ -2,25 +2,25 @@ import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, TemplateRef
 import { Overlay, type OverlayRef } from '@angular/cdk/overlay';
 import { TemplatePortal } from '@angular/cdk/portal';
 
-import { AsButton } from '../as-button/as-button';
-import { AsIcon } from '../as-icon/as-icon';
-import { computeDragPosition, computeResizeSize } from './as-modal.config';
+import { SaButton } from '../sa-button/sa-button';
+import { SaIcon } from '../sa-icon/sa-icon';
+import { computeDragPosition, computeResizeSize } from './sa-modal.config';
 
 /** Tiempo que se deja montado el panel tras cerrar, antes de destruirlo del DOM —
  *  debe ser >= la transición CSS de salida (`opacity/scale 0.3s`). Mismo criterio que
- *  as-drawer. */
+ *  sa-drawer. */
 const CLOSE_TRANSITION_MS = 320;
 
 @Component({
-  selector: 'as-modal',
+  selector: 'sa-modal',
   standalone: true,
-  imports: [AsIcon, AsButton],
-  templateUrl: './as-modal.html',
-  styleUrl: './as-modal.css',
+  imports: [SaIcon, SaButton],
+  templateUrl: './sa-modal.html',
+  styleUrl: './sa-modal.css',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsModal {
+export class SaModal {
   readonly visible = model<boolean>(false);
 
   readonly title = input<string>('');
@@ -61,10 +61,10 @@ export class AsModal {
   readonly mounted = signal(false);
 
   readonly hostClasses = computed(() => {
-    const parts = ['as-modal'];
-    if (this.variant() === 'preview') parts.push('as-modal--preview');
-    if (!this.draggable()) parts.push('as-modal--fixed');
-    if (this.flush()) parts.push('as-modal--flush');
+    const parts = ['sa-modal'];
+    if (this.variant() === 'preview') parts.push('sa-modal--preview');
+    if (!this.draggable()) parts.push('sa-modal--fixed');
+    if (this.flush()) parts.push('sa-modal--flush');
 
     const extra = this.styleClass().trim();
     if (extra) parts.push(extra);
@@ -151,7 +151,7 @@ export class AsModal {
     // iniciar un arrastre — si no, el simple click ya fija `position: fixed` + left/top en píxeles
     // y mata el `margin: auto` que centra el modal, dejándolo descentrado ante cualquier cambio de
     // altura posterior (cambio de tab, cambio de modo) que ya no puede recentrarse solo.
-    if (target.closest('.as-modal-header-actions')) return;
+    if (target.closest('.sa-modal-header-actions')) return;
 
     const panel = this.panelRef()?.nativeElement;
     if (!panel) return;

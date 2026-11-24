@@ -46,7 +46,7 @@
     color: var(--app-status-invisible);
   }
 
-  .presence-dot as-icon {
+  .presence-dot sa-icon {
     display: inline-flex;
     line-height: 0;
   }

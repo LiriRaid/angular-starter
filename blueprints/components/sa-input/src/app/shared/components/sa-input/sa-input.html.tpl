@@ -1,23 +1,23 @@
 <!-- Botones ▲▼ de [showStepper]: un solo template para las dos ramas del campo (con y sin label sobre el borde). -->
 <ng-template #stepperButtons>
-  <div class="as-input-stepper-group">
-    <button type="button" class="as-input-stepper-btn" [disabled]="isDisabled() || readonly()" aria-label="Aumentar" (click)="stepValue(1)">
+  <div class="sa-input-stepper-group">
+    <button type="button" class="sa-input-stepper-btn" [disabled]="isDisabled() || readonly()" aria-label="Aumentar" (click)="stepValue(1)">
       <svg width="9" height="5" viewBox="0 0 10 8" aria-hidden="true"><polygon points="5,1 9,7 1,7" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /></svg>
     </button>
-    <button type="button" class="as-input-stepper-btn" [disabled]="isDisabled() || readonly()" aria-label="Disminuir" (click)="stepValue(-1)">
+    <button type="button" class="sa-input-stepper-btn" [disabled]="isDisabled() || readonly()" aria-label="Disminuir" (click)="stepValue(-1)">
       <svg width="9" height="5" viewBox="0 0 10 8" aria-hidden="true" style="transform: rotate(180deg)"><polygon points="5,1 9,7 1,7" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" /></svg>
     </button>
   </div>
 </ng-template>
 
 <div
-  class="as-input-wrapper"
+  class="sa-input-wrapper"
   [ngClass]="{
-    'as-input-invalid': hasErrors(),
-    'as-input-on': variant() === 'on',
-    'as-input-in': variant() === 'in',
-    'as-input-over': variant() === 'over',
-    'as-input-over-float': variant() === 'over' && !!label(),
+    'sa-input-invalid': hasErrors(),
+    'sa-input-on': variant() === 'on',
+    'sa-input-in': variant() === 'in',
+    'sa-input-over': variant() === 'over',
+    'sa-input-over-float': variant() === 'over' && !!label(),
   }"
 >
   <div class="relative w-full">
@@ -38,7 +38,7 @@
 
         <div class="relative w-full">
           <div class="relative flex w-full items-stretch overflow-hidden rounded-lg text-caption-1-medium transition-all duration-180" [ngClass]="fieldsetClasses()" [style.box-shadow]="fieldsetBoxShadow()">
-            <as-button
+            <sa-button
               #dialCodeTrigger
               type="button"
               variant="text"
@@ -46,7 +46,7 @@
               [disabled]="isDisabled() || readonly()"
               [trailingIcon]="isDisabled() || readonly() ? null : 'ChevronDown'"
               trailingIconSize="14"
-              trailingIconExtraClass="as-btn-trigger-chevron text-(--app-text-subtle)"
+              trailingIconExtraClass="sa-btn-trigger-chevron text-(--app-text-subtle)"
               [ariaExpanded]="dialCodeMenuOpen()"
               styleClass="!rounded-none !rounded-l-lg !outline-none !bg-transparent shrink-0 px-3 gap-1.5 !text-(--app-control-surface-text) hover:!bg-transparent hover:!text-(--app-text-primary)"
               (onClick)="toggleDialCodeMenu()"
@@ -57,7 +57,7 @@
               } @else {
                 <span class="text-caption-1-medium text-(--app-text-subtle)">País</span>
               }
-            </as-button>
+            </sa-button>
 
             <span class="w-px shrink-0 self-stretch bg-(--app-control-surface-border)"></span>
 
@@ -75,9 +75,9 @@
               [attr.placeholder]="placeholder() || ' '"
               [attr.aria-invalid]="hasErrors() ? 'true' : null"
               [attr.aria-describedby]="describedBy()"
-              class="as-input-field peer w-full min-w-0 border-0 focus:outline-none focus:ring-0"
+              class="sa-input-field peer w-full min-w-0 border-0 focus:outline-none focus:ring-0"
               [ngStyle]="inputFieldStyles()"
-              [ngClass]="{ 'as-input-field--disabled': isDisabled() || readonly() }"
+              [ngClass]="{ 'sa-input-field--disabled': isDisabled() || readonly() }"
             />
           </div>
 
@@ -91,20 +91,20 @@
           }
         </div>
 
-        <div #countryPanel popover [id]="resolvedInputId() + '-country-panel'" class="as-phone-country-panel" (toggle)="onCountryPanelToggle($event)">
-          <div class="as-phone-country-search">
+        <div #countryPanel popover [id]="resolvedInputId() + '-country-panel'" class="sa-phone-country-panel" (toggle)="onCountryPanelToggle($event)">
+          <div class="sa-phone-country-search">
             <input type="text" [value]="countrySearch()" (input)="onCountrySearch($event)" placeholder="Buscar país..." />
           </div>
 
-          <div class="as-phone-country-list">
+          <div class="sa-phone-country-list">
             @for (country of filteredPhoneCountries(); track country.iso2) {
-              <button type="button" class="as-phone-country-option" [class.as-phone-country-option--selected]="country.iso2 === selectedCountry()?.iso2" [class.text-caption-2-bold]="country.iso2 === selectedCountry()?.iso2" (click)="selectCountry(country)">
+              <button type="button" class="sa-phone-country-option" [class.sa-phone-country-option--selected]="country.iso2 === selectedCountry()?.iso2" [class.text-caption-2-bold]="country.iso2 === selectedCountry()?.iso2" (click)="selectCountry(country)">
                 <svg class="shrink-0 rounded-xs" style="width: 1.15rem; height: 0.85rem" aria-hidden="true"><use [attr.href]="'assets/flags-sprite.svg#fi-' + country.iso2" /></svg>
                 <span class="shrink-0">+{{ country.dialCode }}</span>
                 <span class="truncate">{{ country.name }}</span>
               </button>
             } @empty {
-              <div class="as-phone-country-empty">Sin resultados</div>
+              <div class="sa-phone-country-empty">Sin resultados</div>
             }
           </div>
         </div>
@@ -116,7 +116,7 @@
             <span class="px-2 text-caption-2-bold">{{ label() }}</span>
           </legend>
 
-          <input [id]="resolvedInputId()" [type]="inputType()" [disabled]="isDisabled()" [value]="displayValue()" [readOnly]="readonly()" (input)="onInput($event)" (focus)="onFocusInput()" (blur)="onBlurInput()" (keyup)="keyup.emit($event)" (keydown)="onNumberKeydown($event)" (wheel)="onNumberWheel($event)" [attr.inputmode]="type() === 'price' || type() === 'number' ? 'decimal' : null" [attr.autocomplete]="autocomplete() || null" [attr.placeholder]="placeholderAttr()" [attr.aria-invalid]="hasErrors() ? 'true' : null" [attr.aria-describedby]="describedBy()" class="as-input-field peer" [ngClass]="inputFieldNgClass()" [class]="inputClass()" [ngStyle]="inputFieldStyles()" />
+          <input [id]="resolvedInputId()" [type]="inputType()" [disabled]="isDisabled()" [value]="displayValue()" [readOnly]="readonly()" (input)="onInput($event)" (focus)="onFocusInput()" (blur)="onBlurInput()" (keyup)="keyup.emit($event)" (keydown)="onNumberKeydown($event)" (wheel)="onNumberWheel($event)" [attr.inputmode]="type() === 'price' || type() === 'number' ? 'decimal' : null" [attr.autocomplete]="autocomplete() || null" [attr.placeholder]="placeholderAttr()" [attr.aria-invalid]="hasErrors() ? 'true' : null" [attr.aria-describedby]="describedBy()" class="sa-input-field peer" [ngClass]="inputFieldNgClass()" [class]="inputClass()" [ngStyle]="inputFieldStyles()" />
 
           @if (hasNumberStepper()) {
             <ng-container *ngTemplateOutlet="stepperButtons" />
@@ -136,7 +136,7 @@
           }
 
           @if (hasIcon() && lucideIcon()) {
-            <as-icon
+            <sa-icon
               [name]="lucideIcon()"
               [size]="iconSize()"
               class="absolute top-1/2 -translate-y-1/2 transition-colors duration-150"
@@ -148,7 +148,7 @@
                 'cursor-pointer text-(--app-action-icon-color) hover:text-(--app-text-primary)': iconClickable() && !isDisabled() && !readonly(),
               }"
               (click)="onIconClick($event)"
-            ></as-icon>
+            ></sa-icon>
           }
 
           <label [attr.for]="resolvedInputId()" class="absolute z-10 px-2 py-px leading-none select-none pointer-events-none transition-all duration-180 rounded-md" [class.transition-none]="!transitionReady()" [ngClass]="labelClass()" [style.background]="labelBackground()" [style.color]="labelColor()">
@@ -160,7 +160,7 @@
         </fieldset>
       } @else {
         <div class="relative w-full rounded-lg text-caption-1-medium transition-all duration-180" [ngClass]="fieldsetClasses()" [class]="inputClass()" [style.box-shadow]="fieldsetBoxShadow()">
-          <input [id]="resolvedInputId()" [type]="inputType()" [disabled]="isDisabled()" [value]="displayValue()" [readOnly]="readonly()" (input)="onInput($event)" (focus)="onFocusInput()" (blur)="onBlurInput()" (keyup)="keyup.emit($event)" (keydown)="onNumberKeydown($event)" (wheel)="onNumberWheel($event)" [attr.inputmode]="type() === 'price' || type() === 'number' ? 'decimal' : null" [attr.autocomplete]="autocomplete() || null" [attr.placeholder]="placeholderAttr()" [attr.aria-invalid]="hasErrors() ? 'true' : null" [attr.aria-describedby]="describedBy()" class="as-input-field peer" [ngClass]="inputFieldNgClass()" [class]="inputClass()" [ngStyle]="inputFieldStyles()" />
+          <input [id]="resolvedInputId()" [type]="inputType()" [disabled]="isDisabled()" [value]="displayValue()" [readOnly]="readonly()" (input)="onInput($event)" (focus)="onFocusInput()" (blur)="onBlurInput()" (keyup)="keyup.emit($event)" (keydown)="onNumberKeydown($event)" (wheel)="onNumberWheel($event)" [attr.inputmode]="type() === 'price' || type() === 'number' ? 'decimal' : null" [attr.autocomplete]="autocomplete() || null" [attr.placeholder]="placeholderAttr()" [attr.aria-invalid]="hasErrors() ? 'true' : null" [attr.aria-describedby]="describedBy()" class="sa-input-field peer" [ngClass]="inputFieldNgClass()" [class]="inputClass()" [ngStyle]="inputFieldStyles()" />
 
           @if (hasNumberStepper()) {
             <ng-container *ngTemplateOutlet="stepperButtons" />
@@ -180,7 +180,7 @@
           }
 
           @if (hasIcon() && lucideIcon()) {
-            <as-icon
+            <sa-icon
               [name]="lucideIcon()"
               [size]="iconSize()"
               class="absolute top-1/2 -translate-y-1/2 transition-colors duration-150"
@@ -192,7 +192,7 @@
                 'cursor-pointer text-(--app-action-icon-color) hover:text-(--app-text-primary)': iconClickable() && !isDisabled() && !readonly(),
               }"
               (click)="onIconClick($event)"
-            ></as-icon>
+            ></sa-icon>
           }
 
           @if (label()) {
@@ -222,7 +222,7 @@
 
               @if (!readonly() && !isDisabled()) {
                 <button type="button" (click)="removeTag(i)" class="shrink-0 transition-colors duration-150 cursor-pointer text-(--app-action-icon-color) hover:text-(--app-text-primary)">
-                  <as-icon name="CloseCircle" size="16"></as-icon>
+                  <sa-icon name="CloseCircle" size="16"></sa-icon>
                 </button>
               }
             </span>
@@ -246,7 +246,7 @@
       </fieldset>
     } @else {
       <div
-        class="as-input-tags peer w-full py-[7px] border rounded-lg px-3 transition-all duration-150 focus-within:outline-none"
+        class="sa-input-tags peer w-full py-[7px] border rounded-lg px-3 transition-all duration-150 focus-within:outline-none"
         [style.padding-top]="tagsPaddingTop()"
         [ngClass]="{
           'bg-(--app-control-surface-bg) text-(--app-control-surface-text) border-(--app-control-surface-border)': !isDisabled() && !readonly() && !hasErrors(),
@@ -263,7 +263,7 @@
 
               @if (!readonly() && !isDisabled()) {
                 <button type="button" (click)="removeTag(i)" class="shrink-0 transition-colors duration-150 cursor-pointer text-(--app-action-icon-color) hover:text-(--app-text-primary)">
-                  <as-icon name="CloseCircle" size="16"></as-icon>
+                  <sa-icon name="CloseCircle" size="16"></sa-icon>
                 </button>
               }
             </span>
@@ -291,7 +291,7 @@
   </div>
 
   @if (hasErrors() && showErrorMessage()) {
-    <small [id]="errorId()" class="as-input-error">
+    <small [id]="errorId()" class="sa-input-error">
       {{ errorMessage() }}
     </small>
   }

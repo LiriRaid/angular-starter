@@ -2,20 +2,20 @@ import { SecurityContext } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DomSanitizer } from '@angular/platform-browser';
 
-import { AsMediaPreview } from './as-media-preview';
+import { SaMediaPreview } from './sa-media-preview';
 
-function srcFor(fixture: ComponentFixture<AsMediaPreview>, url: string): string | null {
+function srcFor(fixture: ComponentFixture<SaMediaPreview>, url: string): string | null {
   fixture.componentRef.setInput('url', url);
   return TestBed.inject(DomSanitizer).sanitize(SecurityContext.RESOURCE_URL, fixture.componentInstance.safeUrl());
 }
 
-describe('AsMediaPreview', () => {
-  let fixture: ComponentFixture<AsMediaPreview>;
-  let component: AsMediaPreview;
+describe('SaMediaPreview', () => {
+  let fixture: ComponentFixture<SaMediaPreview>;
+  let component: SaMediaPreview;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [AsMediaPreview] }).compileComponents();
-    fixture = TestBed.createComponent(AsMediaPreview);
+    await TestBed.configureTestingModule({ imports: [SaMediaPreview] }).compileComponents();
+    fixture = TestBed.createComponent(SaMediaPreview);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

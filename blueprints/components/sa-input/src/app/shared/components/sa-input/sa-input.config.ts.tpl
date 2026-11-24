@@ -3,9 +3,9 @@ import type { AbstractControl } from '@angular/forms';
 import type { ValidationErrors } from '@angular/forms';
 
 import { groupNationalDigits } from '@shared/utils/format-phone-number';
-import type { AsIconPosition, AsInputType, AsVariant } from './as-input.entity';
+import type { SaIconPosition, SaInputType, SaVariant } from './sa-input.entity';
 
-const ALLOWED_INPUT_TYPES: readonly AsInputType[] = ['text', 'password', 'email', 'number', 'date', 'tel', 'url', 'price'];
+const ALLOWED_INPUT_TYPES: readonly SaInputType[] = ['text', 'password', 'email', 'number', 'date', 'tel', 'url', 'price'];
 
 export function coerceReadonly(value: boolean | string): boolean {
   return value === '' || value === true || value === 'true';
@@ -16,7 +16,7 @@ export function coerceReadonly(value: boolean | string): boolean {
  * estado intermedio inválido como "1." (el instante en que se borra el último decimal) y de paso salta el cursor al inicio.
  * Con texto + `sanitizeDecimalInput` no hay saneo nativo y el punto y el cursor se comportan como en cualquier campo.
  */
-export function resolveInputType(type: AsInputType): string {
+export function resolveInputType(type: SaInputType): string {
   return type === 'price' || type === 'number' ? 'text' : ALLOWED_INPUT_TYPES.includes(type) ? type : 'text';
 }
 
@@ -71,7 +71,7 @@ export function resolveInputErrorMessage(errors: ValidationErrors | null | undef
   return `${label} es inválido`;
 }
 
-export function resolveInputFieldStyles(type: AsInputType, hasLeftIcon: boolean, showCurrencySymbol: boolean, hasRightIcon: boolean, variant: AsVariant, hasStepper = false): Record<string, string> {
+export function resolveInputFieldStyles(type: SaInputType, hasLeftIcon: boolean, showCurrencySymbol: boolean, hasRightIcon: boolean, variant: SaVariant, hasStepper = false): Record<string, string> {
   const paddingLeft = type === 'price' ? resolvePricePaddingLeft(hasLeftIcon, showCurrencySymbol) : hasLeftIcon ? '2.5rem' : '1rem';
 
   return {
@@ -84,11 +84,11 @@ export function resolveInputFieldStyles(type: AsInputType, hasLeftIcon: boolean,
 }
 
 /**
- * Relleno del `<textarea>` interno de `as-textarea`: en `in` el label vive dentro, arriba, y el texto
+ * Relleno del `<textarea>` interno de `sa-textarea`: en `in` el label vive dentro, arriba, y el texto
  * empieza debajo (24px, como el input); un icono a la izquierda o a la derecha reserva su lado para que el
  * texto no pase por debajo.
  */
-export function resolveTextareaFieldStyles(variant: AsVariant, hasLabel: boolean, hasLeftIcon: boolean, hasRightIcon: boolean): Record<string, string> {
+export function resolveTextareaFieldStyles(variant: SaVariant, hasLabel: boolean, hasLeftIcon: boolean, hasRightIcon: boolean): Record<string, string> {
   return {
     'padding-top': variant === 'in' && hasLabel ? '1.5rem' : '0.625rem',
     'padding-bottom': '0.625rem',
@@ -129,10 +129,10 @@ export function resolveLabelColor(hasErrors: boolean, disabled: boolean, focused
 }
 
 /**
- * Lógica de posicionamiento del label compartida por `as-input` y `as-select`
+ * Lógica de posicionamiento del label compartida por `sa-input` y `sa-select`
  * (mismas clases de Tailwind, mismas ramas por variante). La única diferencia real entre ambos
  * componentes es el offset vertical del label flotante en la variante "on" (ni `in` ni `over`):
- * `as-input` usa `-top-2`, `as-select` usa `-top-2.5` — por eso ese valor se recibe
+ * `sa-input` usa `-top-2`, `sa-select` usa `-top-2.5` — por eso ese valor se recibe
  * explícito en vez de codificarlo acá, para no perder esa diferencia deliberada entre ambos.
  */
 export function resolveLabelPositionClass(variant: string, shouldFloat: boolean, hasLeftAffordance: boolean, defaultFloatOffsetClass: string): Record<string, boolean> {
@@ -156,7 +156,7 @@ export function resolveLabelPositionClass(variant: string, shouldFloat: boolean,
   return { ...classes, ...(shouldFloat ? { [defaultFloatOffsetClass]: true, 'translate-y-0': true, 'text-caption-2-bold': true } : centeredLabelClasses()) };
 }
 
-export function resolveInputLabelClass(variant: AsVariant, shouldFloat: boolean, hasLeftAffordance: boolean): Record<string, boolean> {
+export function resolveInputLabelClass(variant: SaVariant, shouldFloat: boolean, hasLeftAffordance: boolean): Record<string, boolean> {
   return resolveLabelPositionClass(variant, shouldFloat, hasLeftAffordance, '-top-2');
 }
 
@@ -192,7 +192,7 @@ function centeredLabelClasses(): Record<string, boolean> {
 type InputPresentationDeps = {
   control: () => AbstractControl | null;
   validationTick: () => number;
-  type: () => AsInputType;
+  type: () => SaInputType;
   isTagInput: () => boolean;
   tags: () => readonly string[];
   value: () => string;
@@ -205,12 +205,12 @@ type InputPresentationDeps = {
   readonly: () => boolean;
   isFocused: () => boolean;
   isInputFocused: () => boolean;
-  variant: () => AsVariant;
+  variant: () => SaVariant;
   hasIcon: () => boolean;
-  iconPosition: () => AsIconPosition;
-  /** Ausente en consumidores sin stepper numérico (ej. as-textarea). */
+  iconPosition: () => SaIconPosition;
+  /** Ausente en consumidores sin stepper numérico (ej. sa-textarea). */
   showStepper?: () => boolean;
-  /** Ausente en consumidores que no tienen modo teléfono (ej. as-textarea). */
+  /** Ausente en consumidores que no tienen modo teléfono (ej. sa-textarea). */
   phoneCountryPicker?: () => boolean;
   /** iso2 del país seleccionado en el picker — define el patrón de agrupación de dígitos. */
   phoneCountryIso2?: () => string | undefined;
@@ -258,8 +258,8 @@ export function createInputPresentation(deps: InputPresentationDeps) {
     }),
     inputFieldStyles: computed(() => resolveInputFieldStyles(deps.type(), hasLeftIcon(), showCurrencySymbol(), deps.hasIcon() && deps.iconPosition() === 'right', deps.variant(), deps.type() === 'number' && !!deps.showStepper?.())),
     inputFieldNgClass: computed(() => ({
-      'as-input-field--disabled': deps.isDisabled() || deps.readonly(),
-      'as-input-field--placeholder-hidden': !shouldShowPlaceholder(),
+      'sa-input-field--disabled': deps.isDisabled() || deps.readonly(),
+      'sa-input-field--placeholder-hidden': !shouldShowPlaceholder(),
     })),
     inputBackground: computed(() => resolveControlBackground(deps.isDisabled(), deps.readonly())),
     inputTextColor: computed(() => resolveInputTextColor(deps.isDisabled(), deps.readonly())),

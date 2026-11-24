@@ -1,30 +1,30 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Injector, ViewEncapsulation, afterNextRender, computed, effect, inject, signal, viewChild, viewChildren } from '@angular/core';
 import { NgStyle } from '@angular/common';
-import { type ButtonSeverity } from '../as-button/as-button';
+import { type ButtonSeverity } from '../sa-button/sa-button';
 
-import { AsButton, AsIcon } from '..';
-import { EAsToastType, type IAsToastAction, type ToastItem } from './as-toast.types';
+import { SaButton, SaIcon } from '..';
+import { EAsToastType, type IAsToastAction, type ToastItem } from './sa-toast.types';
 import { AlertService } from '@shared/services';
 import { escapeHtml } from '@shared/utils/escape-html';
 
 const GAP = 8;
 
 @Component({
-  selector: 'as-toast',
+  selector: 'sa-toast',
   standalone: true,
-  imports: [NgStyle, AsIcon, AsButton],
-  templateUrl: './as-toast.html',
-  styleUrl: './as-toast.css',
+  imports: [NgStyle, SaIcon, SaButton],
+  templateUrl: './sa-toast.html',
+  styleUrl: './sa-toast.css',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsToast {
+export class SaToast {
   protected readonly alertService = inject(AlertService);
   protected readonly messages = this.alertService.messages;
   protected readonly position = computed(() => this.alertService.toastPosition());
   protected readonly hovered = signal(false);
   protected readonly newestId = signal<string | null>(null);
-  protected readonly AsToastType = EAsToastType;
+  protected readonly SaToastType = EAsToastType;
 
   protected readonly itemHeights = signal<number[]>([]);
   protected readonly isBottom = computed(() => this.position().startsWith('bottom'));
@@ -93,7 +93,7 @@ export class AsToast {
 
     /** `popover="manual"` en el wrapper entero (no en cada item) mete TODO el stack de
      *  toasts al "top layer" del navegador como una sola unidad — necesario porque un
-     *  `<dialog>` abierto (ej. as-drawer) también vive en el top layer y ningún
+     *  `<dialog>` abierto (ej. sa-drawer) también vive en el top layer y ningún
      *  z-index normal le gana. Ponerle popover a cada item por separado (lo que se probó
      *  antes) rompía el efecto de escalera, porque cada uno se iba a su propia capa aislada
      *  del top layer, perdiendo el posicionamiento relativo que calculan `layouts()`. */

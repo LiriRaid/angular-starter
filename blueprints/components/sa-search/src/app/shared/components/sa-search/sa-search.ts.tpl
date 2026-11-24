@@ -1,29 +1,29 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ViewEncapsulation, effect, inject, input, output, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { AsButton } from '../as-button/as-button';
-import { AsInput } from '../as-input/as-input';
+import { SaButton } from '../sa-button/sa-button';
+import { SaInput } from '../sa-input/sa-input';
 
-export type AsSearchMode = 'input' | 'collapsed' | 'chat';
+export type SaSearchMode = 'input' | 'collapsed' | 'chat';
 
 @Component({
-  selector: 'as-search',
+  selector: 'sa-search',
   standalone: true,
-  imports: [ReactiveFormsModule, AsButton, AsInput],
-  templateUrl: './as-search.html',
-  styleUrl: './as-search.css',
+  imports: [ReactiveFormsModule, SaButton, SaInput],
+  templateUrl: './sa-search.html',
+  styleUrl: './sa-search.css',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.as-search--input]': 'mode() !== "collapsed" && !renderCollapsed()',
-    '[class.as-search--collapsed]': 'renderCollapsed()',
-    '[class.as-search--chat]': 'mode() === "chat" && !renderCollapsed()',
+    '[class.sa-search--input]': 'mode() !== "collapsed" && !renderCollapsed()',
+    '[class.sa-search--collapsed]': 'renderCollapsed()',
+    '[class.sa-search--chat]': 'mode() === "chat" && !renderCollapsed()',
   },
 })
-export class AsSearch {
+export class SaSearch {
   private readonly collapseTransitionMs = 400;
 
-  readonly mode = input<AsSearchMode>('input');
+  readonly mode = input<SaSearchMode>('input');
   readonly control = input.required<FormControl<string | null>>();
   readonly placeholder = input<string>('Buscar...');
   readonly inputClass = input<string>('');

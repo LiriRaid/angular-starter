@@ -2,13 +2,13 @@ import { Component, signal } from '@angular/core';
 import { TestBed, type ComponentFixture } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { AsTable } from './as-table';
+import { SaTable } from './sa-table';
 
 @Component({
-  selector: 'as-table-footer-spec-host',
-  imports: [AsTable],
+  selector: 'sa-table-footer-spec-host',
+  imports: [SaTable],
   template: `
-    <as-table [value]="rows" [columns]="columns" [paginator]="false" [selectable]="selectable()" [footerTemplate]="withFooter() ? footer : null" />
+    <sa-table [value]="rows" [columns]="columns" [paginator]="false" [selectable]="selectable()" [footerTemplate]="withFooter() ? footer : null" />
     <ng-template #footer let-colspan="colspan"><button class="add-row" [attr.data-colspan]="colspan">Agregar</button></ng-template>
   `,
 })
@@ -22,7 +22,7 @@ class TableHost {
   readonly withFooter = signal(true);
 }
 
-describe('AsTable · footerTemplate', () => {
+describe('SaTable · footerTemplate', () => {
   let fixture: ComponentFixture<TableHost>;
   const footerCell = (): HTMLTableCellElement | null => fixture.nativeElement.querySelector('tfoot td');
 

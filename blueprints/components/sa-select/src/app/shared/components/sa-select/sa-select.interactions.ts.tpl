@@ -1,6 +1,6 @@
 import type { ElementRef } from '@angular/core';
 
-import { SELECT_ALL_VALUE } from './as-select.config';
+import { SELECT_ALL_VALUE } from './sa-select.config';
 
 type SelectInteractionsDeps = {
   isMultiSelect: () => boolean;
@@ -9,7 +9,7 @@ type SelectInteractionsDeps = {
   isDisabled: () => boolean;
   readonly: () => boolean;
   /** Bloquea abrir/cambiar el select SIN aplicar la apariencia visual de disabled (esa la
-   *  maneja aparte as-select.config.ts) — distinto de isDisabled/readonly, que si
+   *  maneja aparte sa-select.config.ts) — distinto de isDisabled/readonly, que si
    *  cambian el estilo. */
   interactionDisabled: () => boolean;
   hasValue: () => boolean;

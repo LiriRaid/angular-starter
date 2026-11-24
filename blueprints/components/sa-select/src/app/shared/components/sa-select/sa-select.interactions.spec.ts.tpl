@@ -1,7 +1,7 @@
 import type { ElementRef } from '@angular/core';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { createSelectInteractions } from './as-select.interactions';
-import { SELECT_ALL_VALUE } from './as-select.config';
+import { createSelectInteractions } from './sa-select.interactions';
+import { SELECT_ALL_VALUE } from './sa-select.config';
 
 type Option = { label: string; value: string };
 

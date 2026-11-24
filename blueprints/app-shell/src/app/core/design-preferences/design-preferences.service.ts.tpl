@@ -115,10 +115,10 @@ export class DesignPreferencesService {
 
   private apply(preferences: DesignPreferences): void {
     const style = this.rootElement.style;
-    style.setProperty('--as-ui-radius-scale', String(RADIUS_SCALE[preferences.radius]));
-    style.setProperty('--as-ui-button-scale', String(BUTTON_SCALE[preferences.buttonSize]));
-    style.setProperty('--as-ui-density-scale', String(DENSITY_SCALE[preferences.density]));
-    style.setProperty('--as-ui-font-scale', String(FONT_SCALE[preferences.fontSize]));
+    style.setProperty('--sa-ui-radius-scale', String(RADIUS_SCALE[preferences.radius]));
+    style.setProperty('--sa-ui-button-scale', String(BUTTON_SCALE[preferences.buttonSize]));
+    style.setProperty('--sa-ui-density-scale', String(DENSITY_SCALE[preferences.density]));
+    style.setProperty('--sa-ui-font-scale', String(FONT_SCALE[preferences.fontSize]));
     // Attributes, not `dataset`: the DOM of the server renderer has no `dataset`.
     this.rootElement.setAttribute('data-animations', preferences.animations ? 'on' : 'off');
   }

@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, ViewEncapsulation, computed, inject, input, signal, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { AsAvatar, AsButton, AsIcon, AsPopover } from '@shared/components';
+import { SaAvatar, SaButton, SaIcon, SaPopover } from '@shared/components';
 import { NAV_APP_NAME_TOKEN } from '@core/navigation/navigation.tokens';
 
 @Component({
   selector: '__PREFIX__-user-menu',
   standalone: true,
-  imports: [AsAvatar, AsButton, AsIcon, AsPopover],
+  imports: [SaAvatar, SaButton, SaIcon, SaPopover],
   templateUrl: './user-menu.html',
   styleUrl: './user-menu.css',
   encapsulation: ViewEncapsulation.None,
@@ -18,7 +18,7 @@ export class UserMenu {
 
   private readonly router = inject(Router);
 
-  private readonly popoverRef = viewChild(AsPopover);
+  private readonly popoverRef = viewChild(SaPopover);
 
   readonly appName = inject(NAV_APP_NAME_TOKEN);
 

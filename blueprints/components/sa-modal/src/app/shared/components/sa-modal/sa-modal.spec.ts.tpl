@@ -1,13 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AsModal } from './as-modal';
+import { SaModal } from './sa-modal';
 
-describe('AsModal', () => {
-  let fixture: ComponentFixture<AsModal>;
-  let component: AsModal;
+describe('SaModal', () => {
+  let fixture: ComponentFixture<SaModal>;
+  let component: SaModal;
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsModal, {
+    TestBed.overrideComponent(SaModal, {
       set: {
         imports: [],
         template: '',
@@ -15,10 +15,10 @@ describe('AsModal', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [AsModal],
+      imports: [SaModal],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsModal);
+    fixture = TestBed.createComponent(SaModal);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
@@ -87,6 +87,6 @@ describe('AsModal', () => {
     fixture.componentRef.setInput('styleClass', 'admin-host');
     fixture.detectChanges();
 
-    expect(component.hostClasses()).toBe('as-modal as-modal--preview admin-host');
+    expect(component.hostClasses()).toBe('sa-modal sa-modal--preview admin-host');
   });
 });

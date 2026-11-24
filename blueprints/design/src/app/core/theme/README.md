@@ -1,7 +1,7 @@
 # core/theme
 
 Light and dark mode, the primary colour and the surface colour of the application. The design tokens
-(`--as-primary-*`, `--as-surface-*`) are CSS variables that this folder sets on `<html>`, and the
+(`--sa-primary-*`, `--sa-surface-*`) are CSS variables that this folder sets on `<html>`, and the
 stylesheets of `src/styles` read them, so changing the theme never needs a rebuild.
 
 ```
@@ -20,9 +20,9 @@ theme/
 | `mode()`                     | signal with `'light'` or `'dark'`                                     |
 | `toggleMode()`, `setMode(m)` | switch the mode; the `dark` class of `<html>` is what the CSS reads   |
 | `primaryColorKey()`          | signal with the key of the chosen primary palette                     |
-| `applyColor(key)`            | sets `--as-primary-50` ... `--as-primary-950` and the semantic tokens |
+| `applyColor(key)`            | sets `--sa-primary-50` ... `--sa-primary-950` and the semantic tokens |
 | `surfaceColorKey()`          | signal with the key of the chosen surface palette                     |
-| `applySurface(key)`          | sets `--as-surface-50` ... `--as-surface-950`                         |
+| `applySurface(key)`          | sets `--sa-surface-50` ... `--sa-surface-950`                         |
 
 `provideThemeInitializer()` is in `app.config.ts`. On startup it restores what the user saved; with
 nothing saved it follows `prefers-color-scheme`. The choices are stored under the keys

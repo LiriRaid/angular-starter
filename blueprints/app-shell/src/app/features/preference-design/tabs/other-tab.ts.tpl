@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { DesignPreferencesService } from '@core/design-preferences/design-preferences.service';
-import { AsToggle } from '@shared/components';
+import { SaToggle } from '@shared/components';
 
 interface ToggleItem {
   readonly id: string;
@@ -13,7 +13,7 @@ interface ToggleItem {
 
 @Component({
   selector: '__PREFIX__-other-tab',
-  imports: [AsToggle],
+  imports: [SaToggle],
   templateUrl: './other-tab.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

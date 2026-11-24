@@ -7,7 +7,7 @@ const COUNTRIES_BY_DIAL_CODE_LENGTH = [...PHONE_COUNTRIES].sort((a, b) => b.dial
 
 /** Encuentra el país cuyo `dialCode` matchea el inicio de un número en dígitos puros (sin "+").
  *  Usado tanto para formatear números crudos como para parsear lo que se escribe/carga en el
- *  modo `phoneCountryPicker` de `as-input` (crear y editar comparten esta misma función,
+ *  modo `phoneCountryPicker` de `sa-input` (crear y editar comparten esta misma función,
  *  sin lógica duplicada). Si el dialCode es ambiguo (varios países), resuelve al preferido
  *  (`PREFERRED_COUNTRY_BY_DIAL_CODE`) en vez de al primero alfabético. */
 export function matchDialCode(digits: string): PhoneCountry | null {
@@ -41,7 +41,7 @@ export function groupNationalDigits(digits: string, iso2?: string): string {
 
 /** Formatea un telefono crudo/E.164 (ej. "+50496991587", "50496991587" o ya con espacios)
  *  agrupando el numero nacional segun el patron real de su pais (ej. "+504 9699 1587") — mismo
- *  criterio que el modo `phoneCountryPicker` de `as-input`. Si no matchea ningun
+ *  criterio que el modo `phoneCountryPicker` de `sa-input`. Si no matchea ningun
  *  codigo de pais conocido, solo antepone el "+" sin agrupar. */
 export function formatPhoneNumber(phone: string | null | undefined): string {
   const digits = (phone ?? '').replace(/\D/g, '');

@@ -1,23 +1,23 @@
 import { Directive } from '@angular/core';
 
 /** Réplica nativa del efecto pRipple de PrimeNG: al hacer clic crea un círculo
- *  (.as-ink, ver button-styles.css) centrado en el punto del clic que se expande
+ *  (.sa-ink, ver button-styles.css) centrado en el punto del clic que se expande
  *  y desvanece, y se elimina solo al terminar la animación. El host necesita
- *  position: relative + overflow: hidden (los .as-btn ya lo traen de base). */
+ *  position: relative + overflow: hidden (los .sa-btn ya lo traen de base). */
 @Directive({
-  selector: '[asRipple]',
+  selector: '[saRipple]',
   standalone: true,
   host: { '(click)': 'spawn($event)' },
 })
-export class AsRipple {
+export class SaRipple {
   protected spawn(event: MouseEvent): void {
     const host = event.currentTarget;
-    if (!(host instanceof HTMLElement) || host.matches(':disabled, .as-disabled')) return;
+    if (!(host instanceof HTMLElement) || host.matches(':disabled, .sa-disabled')) return;
 
     const rect = host.getBoundingClientRect();
     const diameter = Math.max(rect.width, rect.height);
     const ink = host.ownerDocument.createElement('span');
-    ink.className = 'as-ink';
+    ink.className = 'sa-ink';
     ink.style.width = `${diameter}px`;
     ink.style.height = `${diameter}px`;
     ink.style.left = `${event.clientX - rect.left - diameter / 2}px`;

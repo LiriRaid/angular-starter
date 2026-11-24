@@ -2,30 +2,30 @@ import { Component, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { AsSectionNav, type AsSectionNavItem } from './as-section-nav';
+import { SaSectionNav, type SaSectionNavItem } from './sa-section-nav';
 
-const ITEMS: readonly AsSectionNavItem[] = [
+const ITEMS: readonly SaSectionNavItem[] = [
   { id: 'metas', icon: 'Globe', title: 'Metas', summary: 'se dibujan como meta' },
   { id: 'cobertura', icon: 'Clock', title: 'Horario de cobertura', summary: 'fuera del horario se excluye' },
   { id: 'privacidad', icon: 'Lock', title: 'Privacidad' },
 ];
 
 @Component({
-  imports: [AsSectionNav],
+  imports: [SaSectionNav],
   template: `
-    <as-section-nav title="Métricas y Papers" description="Metas y alertas." [items]="items()" [(active)]="active">
+    <sa-section-nav title="Métricas y Papers" description="Metas y alertas." [items]="items()" [(active)]="active">
       <a sectionNavAction href="/metrics">Ir al módulo</a>
       <p class="body">cuerpo de {{ active() }}</p>
       <button sectionNavFooter type="button">Guardar</button>
-    </as-section-nav>
+    </sa-section-nav>
   `,
 })
 class Host {
-  readonly items = signal<readonly AsSectionNavItem[]>(ITEMS);
+  readonly items = signal<readonly SaSectionNavItem[]>(ITEMS);
   readonly active = signal('metas');
 }
 
-describe('AsSectionNav', () => {
+describe('SaSectionNav', () => {
   let fixture: ComponentFixture<Host>;
 
   const root = () => fixture.nativeElement as HTMLElement;
@@ -39,7 +39,7 @@ describe('AsSectionNav', () => {
   it('lista un botón por sección con su ícono, su nombre y su número en el orden dado', () => {
     expect(buttons().map((button) => button.querySelector('.truncate')?.textContent?.trim())).toEqual(['Metas', 'Horario de cobertura', 'Privacidad']);
     expect(buttons().map((button) => button.querySelector('[data-section-number]')?.textContent?.trim())).toEqual(['1', '2', '3']);
-    expect(buttons().every((button) => button.querySelector('as-icon') !== null)).toBe(true);
+    expect(buttons().every((button) => button.querySelector('sa-icon') !== null)).toBe(true);
     expect(root().querySelector('nav')?.getAttribute('aria-label')).toBe('Métricas y Papers');
     expect(root().textContent).toContain('Metas y alertas.');
     expect(root().querySelector('a[href="/metrics"]')?.textContent).toContain('Ir al módulo');

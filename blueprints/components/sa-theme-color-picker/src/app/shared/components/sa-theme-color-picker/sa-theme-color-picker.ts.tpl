@@ -4,20 +4,20 @@ import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, TemplateRef
 import { PRIMARY_COLORS, SURFACE_COLORS } from '@core/theme/theme-palettes';
 import { ThemeService } from '@core/theme/theme.service';
 import { addNativeOverlayListeners, isEventInsideOverlay, NativeOverlayScheduler, removeNativeOverlayListeners, resolveOverlayTriggerElement } from '../../utils/native-overlay-dismiss';
-import { AsButton } from '..';
-import { clamp } from '../as-popover/as-popover.config';
-import { AsTooltip } from '../as-tooltip/as-tooltip.directive';
+import { SaButton } from '..';
+import { clamp } from '../sa-popover/sa-popover.config';
+import { SaTooltip } from '../sa-tooltip/sa-tooltip.directive';
 
 @Component({
-  selector: 'as-theme-color-picker',
+  selector: 'sa-theme-color-picker',
   standalone: true,
-  imports: [AsButton, AsTooltip],
-  templateUrl: './as-theme-color-picker.html',
-  styleUrl: './as-theme-color-picker.css',
+  imports: [SaButton, SaTooltip],
+  templateUrl: './sa-theme-color-picker.html',
+  styleUrl: './sa-theme-color-picker.css',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsThemeColorPicker {
+export class SaThemeColorPicker {
   private readonly themeService = inject(ThemeService);
   private readonly document = inject(DOCUMENT);
   private readonly destroyRef = inject(DestroyRef);

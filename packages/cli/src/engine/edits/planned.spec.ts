@@ -7,7 +7,7 @@ import { planEdit, writeEdits } from './planned.js';
 let root: string;
 
 beforeEach(async () => {
-  root = await mkdtemp(join(tmpdir(), 'as-planned-'));
+  root = await mkdtemp(join(tmpdir(), 'sa-planned-'));
   await writeFile(join(root, 'a.txt'), 'one');
 });
 

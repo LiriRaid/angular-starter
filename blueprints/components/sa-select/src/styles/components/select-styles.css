@@ -1,5 +1,5 @@
 @layer legacy-overrides {
-  as-select .as-select-field {
+  sa-select .sa-select-field {
     display: flex;
     width: 100%;
     background: transparent;
@@ -9,23 +9,23 @@
     outline: 0;
   }
 
-  as-select .as-select-field:not(.as-select-field--multi):not(.as-select-field--count) {
+  sa-select .sa-select-field:not(.sa-select-field--multi):not(.sa-select-field--count) {
     min-height: 0;
     align-items: center;
   }
 
-  as-select .as-select-field--multi {
+  sa-select .sa-select-field--multi {
     min-height: 50px;
     align-items: stretch;
   }
 
-  as-select .as-select-field:focus,
-  as-select .as-select-field:focus-within {
+  sa-select .sa-select-field:focus,
+  sa-select .sa-select-field:focus-within {
     box-shadow: none;
     outline: 0;
   }
 
-  as-select .as-select-field-label {
+  sa-select .sa-select-field-label {
     flex: 1 1 auto;
     min-width: 0;
     border: 0;
@@ -39,9 +39,9 @@
   /* `display:flex` + `align-items:center` + `min-height` fijo: sin esto, una opción "rica"
      (avatar/chip/barra) más alta que una línea de texto plano empuja la fila hacia abajo en vez
      de quedar centrada — con esto, cualquier contenido queda centrado en la MISMA altura siempre. */
-  as-select
-    .as-select-field:not(.as-select-field--multi):not(.as-select-field--count)
-    .as-select-field-label {
+  sa-select
+    .sa-select-field:not(.sa-select-field--multi):not(.sa-select-field--count)
+    .sa-select-field-label {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -51,9 +51,9 @@
   /* Truncates with "…" instead of cutting the word in half. This is a native `<input>`, so the
      ellipsis has to be declared by hand. Sin esto un valor largo ("Actividad reciente") se veía
      cortado en seco sin "…" cuando no entraba en el ancho del select. */
-  as-select
-    .as-select-field:not(.as-select-field--multi):not(.as-select-field--count)
-    input.as-select-field-label {
+  sa-select
+    .sa-select-field:not(.sa-select-field--multi):not(.sa-select-field--count)
+    input.sa-select-field-label {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -61,70 +61,70 @@
 
   /* Bloquea abrir/cambiar el select sin aplicar el look completo de disabled — el texto/ícono se
      ve apagado pero el fondo se queda normal (ej. un select que depende de otro campo aún vacío). */
-  .as-select-interaction-disabled {
+  .sa-select-interaction-disabled {
     cursor: not-allowed;
   }
 
-  .as-select-interaction-disabled fieldset {
+  .sa-select-interaction-disabled fieldset {
     pointer-events: none;
     cursor: not-allowed;
   }
 
-  .as-select-interaction-disabled .as-select-field-label,
-  .as-select-interaction-disabled .as-select-dropdown-icon {
+  .sa-select-interaction-disabled .sa-select-field-label,
+  .sa-select-interaction-disabled .sa-select-dropdown-icon {
     color: var(--app-text-subtle);
   }
 
-  as-select
-    .as-select-field:not(.as-select-field--multi):not(.as-select-field--count)
-    .as-select-field-label {
+  sa-select
+    .sa-select-field:not(.sa-select-field--multi):not(.sa-select-field--count)
+    .sa-select-field-label {
     padding: 0.625rem 1rem;
   }
 
-  as-select .as-select-field--multi .as-select-field-label {
+  sa-select .sa-select-field--multi .sa-select-field-label {
     display: flex;
     min-height: 50px;
     padding: 10px 16px;
     overflow: visible;
   }
 
-  as-select .as-select-field-label-container {
+  sa-select .sa-select-field-label-container {
     min-width: 0;
   }
 
-  as-select .as-select-field-label::placeholder {
+  sa-select .sa-select-field-label::placeholder {
     color: var(--app-text-subtle);
   }
 
-  as-select .as-select-field:not(.as-select-field--disabled) {
+  sa-select .sa-select-field:not(.sa-select-field--disabled) {
     cursor: pointer;
   }
 
-  as-select input.as-select-field-label {
+  sa-select input.sa-select-field-label {
     cursor: text;
   }
 
-  as-select
-    .as-select-has-left-icon
-    .as-select-field:not(.as-select-field--multi):not(.as-select-field--count)
-    .as-select-field-label,
-  .as-select-has-left-icon .as-select-field--multi .as-select-field-label {
+  sa-select
+    .sa-select-has-left-icon
+    .sa-select-field:not(.sa-select-field--multi):not(.sa-select-field--count)
+    .sa-select-field-label,
+  .sa-select-has-left-icon .sa-select-field--multi .sa-select-field-label {
     padding-left: 2.5rem;
   }
 
-  .as-select-in
-    .as-select-field:not(.as-select-field--multi):not(.as-select-field--count)
-    .as-select-field-label {
+  .sa-select-in
+    .sa-select-field:not(.sa-select-field--multi):not(.sa-select-field--count)
+    .sa-select-field-label {
     padding-top: 24px;
     padding-bottom: 0.625rem;
   }
 
-  .as-select-in .as-select-field--multi .as-select-field-label {
+  .sa-select-in .sa-select-field--multi .sa-select-field-label {
     padding-top: 26px;
     padding-bottom: 8px;
   }
 
-  as-select .as-select-dropdown {
+  sa-select .sa-select-dropdown {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -135,24 +135,24 @@
     cursor: pointer;
   }
 
-  as-select
-    .as-select-field:not(.as-select-field--multi):not(.as-select-field--count)
-    .as-select-dropdown {
+  sa-select
+    .sa-select-field:not(.sa-select-field--multi):not(.sa-select-field--count)
+    .sa-select-dropdown {
     width: 2.5rem;
   }
 
-  as-select .as-select-field--multi .as-select-dropdown,
-  as-select .as-select-field--count .as-select-dropdown {
+  sa-select .sa-select-field--multi .sa-select-dropdown,
+  sa-select .sa-select-field--count .sa-select-dropdown {
     width: 40px;
   }
 
-  as-select .as-select-dropdown-icon {
+  sa-select .sa-select-dropdown-icon {
     width: 18px;
     height: 18px;
     transition: transform 150ms ease;
   }
 
-  as-select .as-select-field--open .as-select-dropdown-icon {
+  sa-select .sa-select-field--open .sa-select-dropdown-icon {
     transform: rotate(180deg);
   }
 
@@ -160,14 +160,14 @@
      elegido se vea borroso/ilegible. El fondo se deja transparente (no un gris propio) para que
      se vea el `bg-(--app-control-disabled-bg)` + el borde (`fieldsetBoxShadow`) que ya aplica el
      <fieldset> — un fondo opaco acá arriba tapaba ese borde y el select se veía sin marco. */
-  as-select .as-select-field--disabled {
+  sa-select .sa-select-field--disabled {
     opacity: 1;
     cursor: not-allowed;
     background: transparent;
   }
 
-  .as-select-field--disabled .as-select-field-label,
-  .as-select-field--disabled .as-select-dropdown-icon {
+  .sa-select-field--disabled .sa-select-field-label,
+  .sa-select-field--disabled .sa-select-dropdown-icon {
     color: var(--app-control-disabled-text);
   }
 
@@ -175,11 +175,11 @@
      Overlay base
   ========================= */
 
-  .as-select-panel {
-    /* Altura real medida de .as-select-option (padding 10px*2 + line-height 20px,
+  .sa-select-panel {
+    /* Altura real medida de .sa-select-option (padding 10px*2 + line-height 20px,
        border-box) — si esto queda desfasado del CSS real de la opción, el 5to renglón asoma
        un pedacito del 6to. */
-    --as-select-option-height: 40px;
+    --sa-select-option-height: 40px;
 
     position: fixed;
     inset: auto;
@@ -193,22 +193,22 @@
     z-index: 1090;
   }
 
-  .as-select-panel .as-select-list-container,
-  .as-select-panel .as-select-list {
+  .sa-select-panel .sa-select-list-container,
+  .sa-select-panel .sa-select-list {
     padding: 0;
   }
 
-  .as-select-panel .as-select-list-container {
-    max-height: calc(var(--as-select-option-height) * 5);
+  .sa-select-panel .sa-select-list-container {
+    max-height: calc(var(--sa-select-option-height) * 5);
     overflow-y: auto;
   }
 
-  .as-select-panel--multi .as-select-list-container {
-    max-height: calc((var(--as-select-option-height) * 5) + 24px);
+  .sa-select-panel--multi .sa-select-list-container {
+    max-height: calc((var(--sa-select-option-height) * 5) + 24px);
     overflow-y: auto;
   }
 
-  .as-select-empty {
+  .sa-select-empty {
     padding: 12px 16px;
     background: var(--app-overlay-bg);
     color: var(--app-text-muted);
@@ -219,7 +219,7 @@
      Single select options
   ========================= */
 
-  .as-select-panel .as-select-option {
+  .sa-select-panel .sa-select-option {
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -234,36 +234,36 @@
     cursor: pointer;
   }
 
-  .as-select-panel .as-select-option:last-child {
+  .sa-select-panel .sa-select-option:last-child {
     box-shadow: none;
   }
 
   /* Tinte clarito (no sólido) — así el texto/ícono/avatar propio de la opción se sigue leyendo
      perfecto encima, sin necesitar un tratamiento aparte para opciones "ricas" con color propio. */
-  .as-select-panel .as-select-option:not(.as-select-field--disabled):hover,
-  .as-select-panel .as-select-option--active,
-  .as-select-panel .as-select-option--selected {
-    background: color-mix(in srgb, var(--as-primary-color) 12%, transparent);
+  .sa-select-panel .sa-select-option:not(.sa-select-field--disabled):hover,
+  .sa-select-panel .sa-select-option--active,
+  .sa-select-panel .sa-select-option--selected {
+    background: color-mix(in srgb, var(--sa-primary-color) 12%, transparent);
     color: var(--app-text-color);
   }
 
-  .as-select-panel
-    .as-select-list:has(.as-select-option--active)
-    .as-select-option--selected:not(.as-select-option--active):not(:hover) {
+  .sa-select-panel
+    .sa-select-list:has(.sa-select-option--active)
+    .sa-select-option--selected:not(.sa-select-option--active):not(:hover) {
     background: var(--app-overlay-bg);
     color: var(--app-text-color);
   }
 
-  .as-select-panel .as-select-option.as-select-option--selected {
+  .sa-select-panel .sa-select-option.sa-select-option--selected {
     font-weight: 700;
   }
 
-  .as-select-panel-header {
+  .sa-select-panel-header {
     padding: 0.5rem;
     border-bottom: 1px solid var(--app-border-color);
   }
 
-  .as-select-filter-input {
+  .sa-select-filter-input {
     width: 100%;
     padding: 0.5rem 0.75rem;
     color: var(--app-control-surface-text);
@@ -273,7 +273,7 @@
     font-size: var(--font-size-caption-1, 0.875rem);
   }
 
-  .as-select-filter-input:focus {
+  .sa-select-filter-input:focus {
     outline: 0;
     border-color: var(--app-control-focus-ring);
     box-shadow: inset 0 0 0 1px var(--app-control-focus-ring);
@@ -283,16 +283,16 @@
      Multi select options
   ========================= */
 
-  .as-select-panel--multi .as-select-list--multi {
+  .sa-select-panel--multi .sa-select-list--multi {
     display: flex;
     flex-direction: column;
     gap: 4px;
     padding: 4px;
   }
 
-  .as-select-panel--multi .as-select-option {
+  .sa-select-panel--multi .sa-select-option {
     display: flex;
-    min-height: var(--as-select-option-height);
+    min-height: var(--sa-select-option-height);
     align-items: center;
     padding: 10px 12px;
     background: var(--app-overlay-bg);
@@ -306,23 +306,23 @@
   }
 
   /* Mismo tinte clarito que el select simple (ver arriba). */
-  .as-select-panel--multi .as-select-option:not(.as-select-field--disabled):hover,
-  .as-select-panel--multi .as-select-option--active,
-  .as-select-panel--multi .as-select-option--selected,
-  .as-select-panel--multi .as-select-option:has(.as-mselect-cb--checked) {
-    background: color-mix(in srgb, var(--as-primary-color) 12%, transparent);
+  .sa-select-panel--multi .sa-select-option:not(.sa-select-field--disabled):hover,
+  .sa-select-panel--multi .sa-select-option--active,
+  .sa-select-panel--multi .sa-select-option--selected,
+  .sa-select-panel--multi .sa-select-option:has(.sa-mselect-cb--checked) {
+    background: color-mix(in srgb, var(--sa-primary-color) 12%, transparent);
     color: var(--app-text-color);
   }
 
-  .as-select-panel--multi .as-select-option--selected,
-  .as-select-panel--multi .as-select-option:has(.as-mselect-cb--checked) {
+  .sa-select-panel--multi .sa-select-option--selected,
+  .sa-select-panel--multi .sa-select-option:has(.sa-mselect-cb--checked) {
     font-weight: 700;
   }
 
-  .as-select-panel--multi .as-select-option-check-icon,
-  .as-select-panel--multi .as-select-option > .as-select-icon,
-  .as-select-panel--multi .as-select-option > svg,
-  .as-select-panel--multi .as-select-option .as-select-checkbox {
+  .sa-select-panel--multi .sa-select-option-check-icon,
+  .sa-select-panel--multi .sa-select-option > .sa-select-icon,
+  .sa-select-panel--multi .sa-select-option > svg,
+  .sa-select-panel--multi .sa-select-option .sa-select-checkbox {
     display: none !important;
     width: 0 !important;
     min-width: 0 !important;
@@ -334,7 +334,7 @@
     pointer-events: none !important;
   }
 
-  .as-mselect-option-inner {
+  .sa-mselect-option-inner {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -344,16 +344,16 @@
 
   /* Tamaño de texto caption-2 para toda opción (mismas variables que usa `.text-caption-2-*` en
      typography-styles.css, no valores inventados) — a propósito SIN tocar font-weight acá: sigue
-     heredando el peso de `.as-mselect-option-inner .truncate` (400 normal / 700 cuando la
+     heredando el peso de `.sa-mselect-option-inner .truncate` (400 normal / 700 cuando la
      fila está seleccionada, ver arriba). */
-  .as-mselect-option-inner .truncate {
+  .sa-mselect-option-inner .truncate {
     font-size: var(--font-size-caption-2);
     line-height: var(--line-height-caption-2);
   }
 
   /* Punto de color de una opción "rica" sin avatar ni ícono propio (`[optionShape]="'dot'"`, el
      default). */
-  .as-mselect-dot {
+  .sa-mselect-dot {
     width: 6px;
     height: 6px;
     flex-shrink: 0;
@@ -361,7 +361,7 @@
   }
 
   /* `[optionShape]="'chip'"` — píldora con fondo tintado, color e ícono/punto propios de la opción. */
-  .as-mselect-chip {
+  .sa-mselect-chip {
     display: inline-flex;
     min-width: 0;
     align-items: center;
@@ -371,7 +371,7 @@
   }
 
   /* `[optionShape]="'bar'"` — barrita vertical de color. */
-  .as-mselect-bar {
+  .sa-mselect-bar {
     width: 2px;
     height: 14px;
     flex-shrink: 0;
@@ -379,7 +379,7 @@
   }
 
   /* `[optionShape]="'box'"` — ícono en caja tintada. */
-  .as-mselect-icon-box {
+  .sa-mselect-icon-box {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -389,7 +389,7 @@
     flex-shrink: 0;
   }
 
-  .as-mselect-cb {
+  .sa-mselect-cb {
     position: relative;
     display: flex;
     width: 18px;
@@ -407,12 +407,12 @@
 
   /* Mismo checkbox marcado que ya usa el resto de la app: fondo+borde en el primary color de
      siempre, check blanco (antes era al revés: fondo blanco con el check en color). */
-  .as-mselect-cb--checked {
-    background: var(--as-primary-color);
-    border-color: var(--as-primary-color);
+  .sa-mselect-cb--checked {
+    background: var(--sa-primary-color);
+    border-color: var(--sa-primary-color);
   }
 
-  .as-mselect-cb--checked::after {
+  .sa-mselect-cb--checked::after {
     content: '';
     position: absolute;
     top: 1px;
@@ -428,7 +428,7 @@
      Multi select value / chips
   ========================= */
 
-  .as-select-multi-value {
+  .sa-select-multi-value {
     display: flex;
     width: 100%;
     min-width: 0;
@@ -437,7 +437,7 @@
     gap: 8px;
   }
 
-  .as-select-chip {
+  .sa-select-chip {
     display: inline-flex;
     max-width: 100%;
     min-width: 0;
@@ -453,7 +453,7 @@
     line-height: 1;
   }
 
-  .as-select-chip-remove {
+  .sa-select-chip-remove {
     display: inline-flex;
     width: 16px;
     height: 16px;
@@ -474,22 +474,22 @@
       transform 140ms ease;
   }
 
-  .as-select-chip-remove:hover {
+  .sa-select-chip-remove:hover {
     background: color-mix(in srgb, var(--app-text-primary) 16%, transparent);
   }
 
-  .as-select-chip-remove:disabled {
+  .sa-select-chip-remove:disabled {
     opacity: 0.65;
     cursor: not-allowed;
   }
 
-  .as-select-chip-remove as-icon {
+  .sa-select-chip-remove sa-icon {
     display: inline-flex;
     flex-shrink: 0;
     transition: inherit;
   }
 
-  .as-select-search-input {
+  .sa-select-search-input {
     min-width: 120px;
     flex: 1 1 120px;
     padding: 4px 0;
@@ -501,8 +501,8 @@
     line-height: 1.25rem;
   }
 
-  .as-select-search-input::placeholder,
-  .as-select-placeholder {
+  .sa-select-search-input::placeholder,
+  .sa-select-placeholder {
     color: var(--app-text-subtle);
   }
 
@@ -510,12 +510,12 @@
      Multiselect — modo count
   ========================= */
 
-  as-select .as-select-field--count {
+  sa-select .sa-select-field--count {
     min-height: 0;
     align-items: center;
   }
 
-  as-select .as-select-field--count .as-select-field-label {
+  sa-select .sa-select-field--count .sa-select-field-label {
     min-height: 0;
     padding: 0.625rem 1rem;
     display: flex;
@@ -525,16 +525,16 @@
     overflow: hidden;
   }
 
-  .as-select-has-left-icon .as-select-field--count .as-select-field-label {
+  .sa-select-has-left-icon .sa-select-field--count .sa-select-field-label {
     padding-left: 2.5rem;
   }
 
   /* `flex:1` + `justify-content:space-between`: el label queda a la izquierda y el badge
      siempre pegado al botón del chevron (a la derecha), sin importar cuánto mida el label —
      antes el badge quedaba pegado al label (ambos empujados juntos), y como el label podía
-     crecer sin límite (sin `min-width:0` en `.as-select-count-label`), agregar el badge
+     crecer sin límite (sin `min-width:0` en `.sa-select-count-label`), agregar el badge
      ensanchaba todo el select en vez de quedarse dentro del mismo espacio. */
-  .as-select-multi-value--count {
+  .sa-select-multi-value--count {
     display: flex;
     flex: 1;
     align-items: center;
@@ -544,7 +544,7 @@
     overflow: hidden;
   }
 
-  .as-select-count-badge {
+  .sa-select-count-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -552,7 +552,7 @@
     height: 20px;
     padding: 0 6px;
     border-radius: 9999px;
-    background: var(--as-primary-color);
+    background: var(--sa-primary-color);
     color: #fff;
     font-size: 0.6875rem;
     font-weight: 700;
@@ -560,7 +560,7 @@
     flex-shrink: 0;
   }
 
-  .as-select-count-label {
+  .sa-select-count-label {
     flex: 1;
     min-width: 0;
     /* El trigger es un <button> nativo — el navegador le aplica `text-align: center` por

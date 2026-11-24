@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clamp, getPopoverPanelLayout, getPopoverSubPanelAnchor, resolvePopoverPlacement } from './as-popover.config';
+import { clamp, getPopoverPanelLayout, getPopoverSubPanelAnchor, resolvePopoverPlacement } from './sa-popover.config';
 
 const CONFIG = {
   viewportMargin: 12,

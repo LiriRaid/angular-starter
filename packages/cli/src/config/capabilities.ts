@@ -31,7 +31,7 @@ export interface OptionRequirements {
 export interface CapabilityOption {
   readonly id: string;
   readonly label: string;
-  /** One sentence: what it is, how it looks and when to use it. Shown by the wizard and `as list`. */
+  /** One sentence: what it is, how it looks and when to use it. Shown by the wizard and `sa list`. */
   readonly description: string;
   /** Official documentation of what gets installed; absent when nothing is installed. */
   readonly docs?: string;
@@ -41,7 +41,7 @@ export interface CapabilityOption {
   readonly recommended?: boolean;
   /** What `--defaults` and a flag-less run pick, without any badge in the wizard. */
   readonly default?: boolean;
-  /** What a project cannot be generated without: validated by `as new` and by `as add`. */
+  /** What a project cannot be generated without: validated by `sa new` and by `sa add`. */
   readonly requires?: OptionRequirements;
   /**
    * What the wizard and `--defaults` need to offer the option: the same shape as `requires`, but a
@@ -64,7 +64,7 @@ export interface RequirementContext {
   icons?: string;
 }
 
-const STARTER_DOCS = 'https://github.com/LiriRaid/angular-starter/blob/main/docs/adr';
+const STARTER_DOCS = 'https://github.com/LiriRaid/starter-angular/blob/main/docs/adr';
 const STARTER_PRESENCE_DOCS = `${STARTER_DOCS}/0009-presence-documentation-and-welcome-home.md`;
 const STARTER_COMPONENTS_DOCS = `${STARTER_DOCS}/0011-components-picker-and-design-preferences-tabs.md`;
 const STARTER_ROUTED_DOCS = `${STARTER_DOCS}/0010-routed-wizard-layout-modes-and-design-preferences.md`;
@@ -76,8 +76,8 @@ const STARTER_ROUTED_DOCS = `${STARTER_DOCS}/0010-routed-wizard-layout-modes-and
 export const SHOWN_WHEN_PLANNED: readonly CapabilityCategory[] = ['ssrPurpose', 'layout'];
 
 /**
- * Single registry of everything `as new` can offer. Setting `available` to true is the only change
- * needed to expose an option in the wizard, in `--help` and in `as list`; the wizard, the help and
+ * Single registry of everything `sa new` can offer. Setting `available` to true is the only change
+ * needed to expose an option in the wizard, in `--help` and in `sa list`; the wizard, the help and
  * the list read every text from here.
  */
 export const CAPABILITIES: Registry = {
@@ -138,7 +138,7 @@ export const CAPABILITIES: Registry = {
     },
     {
       id: 'starter',
-      label: 'Angular Starter Routing',
+      label: 'Starter Angular Routing',
       description:
         'One navigation tree that feeds page titles and breadcrumbs, ready for a sidebar. Needs the Screaming Architecture.',
       docs: `${STARTER_DOCS}/0003-starter-routing.md`,
@@ -206,7 +206,7 @@ export const CAPABILITIES: Registry = {
     },
     {
       id: 'starter-ssr',
-      label: 'Angular Starter SSR + Incremental Hydration',
+      label: 'Starter Angular SSR + Incremental Hydration',
       description:
         'Default SSR plus incremental hydration, event replay and view transitions, with a @defer (hydrate on viewport) example as in the maintainer portfolio. Use it for content-heavy public sites.',
       docs: 'https://angular.dev/guide/incremental-hydration',
@@ -218,7 +218,7 @@ export const CAPABILITIES: Registry = {
     {
       id: 'none',
       label: 'None',
-      description: 'Not applicable: only the Angular Starter SSR has a purpose.',
+      description: 'Not applicable: only the Starter Angular SSR has a purpose.',
       docs: STARTER_ROUTED_DOCS,
       available: true,
       requires: { rendering: ['csr', 'ssr'] },
@@ -257,13 +257,13 @@ export const CAPABILITIES: Registry = {
       id: 'none',
       label: 'None',
       description:
-        'No application shell: the project keeps the default Angular look, with no sidebar, header or content layout, and the root component is just the router outlet. You can add it later with as add app-shell.',
+        'No application shell: the project keeps the default Angular look, with no sidebar, header or content layout, and the root component is just the router outlet. You can add it later with sa add app-shell.',
       docs: `${STARTER_DOCS}/0008-app-shell.md`,
       available: true,
     },
     {
       id: 'starter',
-      label: 'Angular Starter App Shell',
+      label: 'Starter Angular App Shell',
       description:
         'A wide sidebar that floats, with the header and the content floating too, reading the navigation tree, with five example pages to try it. Needs the starter routing, Tailwind CSS and client-side rendering (server rendering is not supported yet).',
       docs: `${STARTER_DOCS}/0008-app-shell.md`,
@@ -349,13 +349,13 @@ export const CAPABILITIES: Registry = {
       id: 'none',
       label: 'None',
       description:
-        'No presence: the user menu has no status. You can add it later with as add presence.',
+        'No presence: the user menu has no status. You can add it later with sa add presence.',
       docs: STARTER_PRESENCE_DOCS,
       available: true,
     },
     {
       id: 'starter',
-      label: 'Angular Starter Presence',
+      label: 'Starter Angular Presence',
       description:
         'The user status of the reference (online, away, busy, invisible, with a duration) in the user menu, automatic away on inactivity, and a transport contract with an in-memory mock and a WebSocket transport, plus a guide to connect Redis and your API. Needs the application shell.',
       docs: STARTER_PRESENCE_DOCS,
@@ -367,7 +367,7 @@ export const CAPABILITIES: Registry = {
     {
       id: 'none',
       label: 'None',
-      description: 'No native components. You can add them later with as add components.',
+      description: 'No native components. You can add them later with sa add components.',
       docs: `${STARTER_DOCS}/0007-omni-structure-design-and-components.md`,
       available: true,
     },
@@ -375,7 +375,7 @@ export const CAPABILITIES: Registry = {
       id: 'recommended',
       label: 'Essential component collection',
       description:
-        'The essential 16 as- components (icon, button, input, textarea, checkbox, toggle, select, avatar, divider, skeleton, tooltip, modal, drawer, toast, tabs and popover) with the design base: tokens, light and dark theme, typography and animations. Needs Tailwind CSS.',
+        'The essential 16 sa- components (icon, button, input, textarea, checkbox, toggle, select, avatar, divider, skeleton, tooltip, modal, drawer, toast, tabs and popover) with the design base: tokens, light and dark theme, typography and animations. Needs Tailwind CSS.',
       docs: `${STARTER_DOCS}/0007-omni-structure-design-and-components.md`,
       available: true,
       default: true,
@@ -386,7 +386,7 @@ export const CAPABILITIES: Registry = {
       id: 'all',
       label: 'All available components',
       description:
-        'All 26 as- components: the 16 of the essential collection plus ten more (table, search, datepicker, section-nav, selectable-item, reorder-list, preview, media-preview, theme-color-picker and weekly-schedule), with the design base. Needs Tailwind CSS.',
+        'All 26 sa- components: the 16 of the essential collection plus ten more (table, search, datepicker, section-nav, selectable-item, reorder-list, preview, media-preview, theme-color-picker and weekly-schedule), with the design base. Needs Tailwind CSS.',
       docs: `${STARTER_DOCS}/0007-omni-structure-design-and-components.md`,
       available: true,
       requires: { tailwind: true, icons: ['lucide'] },
@@ -408,15 +408,15 @@ export const CAPABILITIES: Registry = {
       id: 'none',
       label: 'None',
       description:
-        'No UI System: the components keep the design base as it is generated. You can add it later with as add ui-system.',
+        'No UI System: the components keep the design base as it is generated. You can add it later with sa add ui-system.',
       docs: STARTER_ROUTED_DOCS,
       available: true,
     },
     {
       id: 'starter',
-      label: 'Angular Starter UI System',
+      label: 'Starter Angular UI System',
       description:
-        'A catalog of the installed as- components with a preview of each one, its code and what it affects, and the design tokens (radius, button size, density, font size) that you change in real time from the design preferences page. Needs the application shell and a component collection.',
+        'A catalog of the installed sa- components with a preview of each one, its code and what it affects, and the design tokens (radius, button size, density, font size) that you change in real time from the design preferences page. Needs the application shell and a component collection.',
       docs: STARTER_ROUTED_DOCS,
       available: true,
       requires: {
@@ -431,14 +431,14 @@ export const CAPABILITIES: Registry = {
     {
       id: 'none',
       label: 'None',
-      description: 'No icon library; add one later with as add icons.',
+      description: 'No icon library; add one later with sa add icons.',
       available: true,
     },
     {
       id: 'lucide',
       label: 'Lucide Icons',
       description:
-        'Open-source icon set (@lucide/angular): crisp stroke icons, tree-shaken. The as-icon component renders them.',
+        'Open-source icon set (@lucide/angular): crisp stroke icons, tree-shaken. The sa-icon component renders them.',
       docs: 'https://lucide.dev/guide/angular/getting-started',
       available: true,
       recommended: true,

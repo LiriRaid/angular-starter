@@ -5,8 +5,8 @@
   </div>
   <div class="flex gap-1 overflow-x-auto md:flex-col md:overflow-visible">
     @for (item of items(); track item.id; let index = $index) {
-      <button type="button" class="flex shrink-0 cursor-pointer items-center gap-2.5 whitespace-nowrap rounded-lg border-0 bg-transparent px-3 py-2 text-left text-(--app-text-subtle) transition-colors hover:bg-(--app-panel-muted-bg) hover:text-(--app-text-color) focus-visible:outline-2 focus-visible:outline-(--as-primary-color) aria-[current=true]:bg-(--app-sidebar-footer-settings-bg) aria-[current=true]:text-(--as-primary-color) md:w-full" [attr.aria-current]="item.id === current()?.id ? 'true' : null" (click)="active.set(item.id)">
-        <as-icon [name]="item.icon" [size]="16" />
+      <button type="button" class="flex shrink-0 cursor-pointer items-center gap-2.5 whitespace-nowrap rounded-lg border-0 bg-transparent px-3 py-2 text-left text-(--app-text-subtle) transition-colors hover:bg-(--app-panel-muted-bg) hover:text-(--app-text-color) focus-visible:outline-2 focus-visible:outline-(--sa-primary-color) aria-[current=true]:bg-(--app-sidebar-footer-settings-bg) aria-[current=true]:text-(--sa-primary-color) md:w-full" [attr.aria-current]="item.id === current()?.id ? 'true' : null" (click)="active.set(item.id)">
+        <sa-icon [name]="item.icon" [size]="16" />
         <span class="min-w-0 flex-1 truncate text-caption-1-medium">{{ item.title }}</span>
         <span data-section-number class="text-caption-2-regular tabular-nums text-(--app-text-subtle)" aria-hidden="true">{{ index + 1 }}</span>
       </button>

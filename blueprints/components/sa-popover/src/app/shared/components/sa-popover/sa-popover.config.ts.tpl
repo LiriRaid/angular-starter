@@ -1,5 +1,5 @@
 import { resolveSide, type IPanelBounds } from '@shared/utils/panel-placement';
-import type { AsPopoverPosition, PopoverPanelLayout, SubPanelAnchor } from './as-popover.entity';
+import type { SaPopoverPosition, PopoverPanelLayout, SubPanelAnchor } from './sa-popover.entity';
 
 type PopoverPositionConfig = {
   viewportMargin: number;
@@ -12,7 +12,7 @@ type PopoverPositionConfig = {
 };
 
 type PopoverPositionParams = {
-  placement: AsPopoverPosition;
+  placement: SaPopoverPosition;
   triggerRect: DOMRect;
   panelWidth: number;
   panelHeight: number;
@@ -25,7 +25,7 @@ type PopoverPositionParams = {
  * área y no contra toda la ventana, así el panel no se mete bajo un header ni fuera de una lista con scroll. Sigue eligiendo solo
  * entre el lado pedido y su opuesto; si ninguno cabe, el que tiene más espacio libre. Sin `bounds` se mide contra la ventana.
  */
-export function resolvePopoverPlacement(preferred: AsPopoverPosition, triggerRect: DOMRect, panelWidth: number, panelHeight: number, viewportWidth: number, viewportHeight: number, config: Pick<PopoverPositionConfig, 'viewportMargin' | 'panelGap'>, bounds?: IPanelBounds): AsPopoverPosition {
+export function resolvePopoverPlacement(preferred: SaPopoverPosition, triggerRect: DOMRect, panelWidth: number, panelHeight: number, viewportWidth: number, viewportHeight: number, config: Pick<PopoverPositionConfig, 'viewportMargin' | 'panelGap'>, bounds?: IPanelBounds): SaPopoverPosition {
   const opposite = getOppositePopoverPosition(preferred);
 
   if (bounds) {
@@ -56,7 +56,7 @@ export function getPopoverPanelLayout(params: PopoverPositionParams, config: Pop
   }
 }
 
-export function getPopoverSubPanelAnchor(position: AsPopoverPosition, panelRect: DOMRect, anchorRect: DOMRect, viewportWidth: number, viewportHeight: number, gap: number): SubPanelAnchor {
+export function getPopoverSubPanelAnchor(position: SaPopoverPosition, panelRect: DOMRect, anchorRect: DOMRect, viewportWidth: number, viewportHeight: number, gap: number): SubPanelAnchor {
   const bottom = viewportHeight - panelRect.bottom;
   const direction = resolveSubPanelDirection(position, panelRect, viewportWidth);
 
@@ -94,7 +94,7 @@ function getHorizontalPanelLayout(params: PopoverPositionParams, config: Popover
   };
 }
 
-function hasPopoverSpace(position: AsPopoverPosition, triggerRect: DOMRect, panelWidth: number, panelHeight: number, viewportWidth: number, viewportHeight: number, config: Pick<PopoverPositionConfig, 'viewportMargin' | 'panelGap'>): boolean {
+function hasPopoverSpace(position: SaPopoverPosition, triggerRect: DOMRect, panelWidth: number, panelHeight: number, viewportWidth: number, viewportHeight: number, config: Pick<PopoverPositionConfig, 'viewportMargin' | 'panelGap'>): boolean {
   switch (position) {
     case 'top':
       return triggerRect.top - panelHeight - config.panelGap >= config.viewportMargin;
@@ -109,7 +109,7 @@ function hasPopoverSpace(position: AsPopoverPosition, triggerRect: DOMRect, pane
   }
 }
 
-export function getOppositePopoverPosition(position: AsPopoverPosition): AsPopoverPosition {
+export function getOppositePopoverPosition(position: SaPopoverPosition): SaPopoverPosition {
   switch (position) {
     case 'top':
       return 'bottom';
@@ -122,7 +122,7 @@ export function getOppositePopoverPosition(position: AsPopoverPosition): AsPopov
   }
 }
 
-function resolveSubPanelDirection(position: AsPopoverPosition, panelRect: DOMRect, viewportWidth: number): 'left' | 'right' {
+function resolveSubPanelDirection(position: SaPopoverPosition, panelRect: DOMRect, viewportWidth: number): 'left' | 'right' {
   switch (position) {
     case 'left':
       return 'left';

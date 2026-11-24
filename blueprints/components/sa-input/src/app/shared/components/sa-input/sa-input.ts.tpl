@@ -3,28 +3,28 @@ import { afterNextRender, ChangeDetectionStrategy, Component, computed, DestroyR
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR, NgControl, ReactiveFormsModule } from '@angular/forms';
 
-import { AsButton } from '../as-button/as-button';
-import { AsIcon } from '../as-icon/as-icon';
-import { getSelectPanelLayout } from '../as-select/as-select.config';
+import { SaButton } from '../sa-button/sa-button';
+import { SaIcon } from '../sa-icon/sa-icon';
+import { getSelectPanelLayout } from '../sa-select/sa-select.config';
 import { LucideIconName } from '@core/common/icons/lucide-icons';
 import { PHONE_COUNTRIES, type PhoneCountry } from '@shared/data/phone-countries';
 import { groupNationalDigits, matchDialCode } from '@shared/utils/format-phone-number';
-import { coerceReadonly, createInputPresentation, sanitizeDecimalInput, stepNumberValue, unformatPrice } from './as-input.config';
-import type { AsIconPosition, AsInputType, AsVariant } from './as-input.entity';
+import { coerceReadonly, createInputPresentation, sanitizeDecimalInput, stepNumberValue, unformatPrice } from './sa-input.config';
+import type { SaIconPosition, SaInputType, SaVariant } from './sa-input.entity';
 
 @Component({
-  selector: 'as-input',
+  selector: 'sa-input',
   standalone: true,
-  imports: [NgClass, NgStyle, NgTemplateOutlet, FormsModule, ReactiveFormsModule, AsIcon, AsButton],
-  templateUrl: './as-input.html',
-  styleUrl: './as-input.css',
-  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => AsInput), multi: true }],
+  imports: [NgClass, NgStyle, NgTemplateOutlet, FormsModule, ReactiveFormsModule, SaIcon, SaButton],
+  templateUrl: './sa-input.html',
+  styleUrl: './sa-input.css',
+  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SaInput), multi: true }],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsInput implements ControlValueAccessor {
+export class SaInput implements ControlValueAccessor {
   private static nextInputId = 0;
 
-  readonly type = input<AsInputType>('text');
+  readonly type = input<SaInputType>('text');
   readonly inputId = input<string>('');
   readonly placeholder = input<string>('');
   readonly label = input<string | undefined>(undefined);
@@ -35,7 +35,7 @@ export class AsInput implements ControlValueAccessor {
   readonly tagPlaceholder = input<string>('Escribe para agregar un Tag');
   readonly currencySymbol = input<string>('$');
 
-  readonly variant = input<AsVariant>('on');
+  readonly variant = input<SaVariant>('on');
   /** Marca visual (*) junto al label — no valida nada por sí solo, solo indica visualmente que
    *  el campo es requerido (el `Validators.required` real vive en el `FormControl`). */
   readonly required = input<boolean>(false);
@@ -68,7 +68,7 @@ export class AsInput implements ControlValueAccessor {
 
   readonly lucideIcon = input<LucideIconName | ''>('');
   readonly iconSize = input<number>(16);
-  readonly iconPosition = input<AsIconPosition>('left');
+  readonly iconPosition = input<SaIconPosition>('left');
   readonly iconClickable = input<boolean>(false);
 
   readonly showErrorMessage = input<boolean>(true);
@@ -86,7 +86,7 @@ export class AsInput implements ControlValueAccessor {
   readonly max = input<number | undefined>(undefined);
 
   /** Clases extra aplicadas directo al <input> real (ej. "placeholder:text-surface-200").
-   *  Un [class] en el host de <as-input> no llega al input interno del template. */
+   *  Un [class] en el host de <sa-input> no llega al input interno del template. */
   readonly inputClass = input<string>('');
 
   readonly readonly = computed<boolean>(() => {
@@ -109,7 +109,7 @@ export class AsInput implements ControlValueAccessor {
 
   private readonly validationTick = signal(0);
   private placeholderTimer?: ReturnType<typeof setTimeout>;
-  private readonly generatedInputId = `as-input-${AsInput.nextInputId++}`;
+  private readonly generatedInputId = `sa-input-${SaInput.nextInputId++}`;
 
   private readonly valueSig = signal<string>('');
 
@@ -127,7 +127,7 @@ export class AsInput implements ControlValueAccessor {
   private readonly destroyRef = inject(DestroyRef);
   private ngControl?: NgControl;
 
-  // `read: ElementRef` es obligatorio acá: el ref apunta a un <as-button> (un componente),
+  // `read: ElementRef` es obligatorio acá: el ref apunta a un <sa-button> (un componente),
   // y sin esto viewChild() devuelve la instancia del componente en vez del ElementRef — .nativeElement
   // sería undefined, positionCountryPanel() retornaría antes de tiempo, y el panel se quedaría
   // en su posición estática por defecto (esquina superior izquierda) en vez de bajo el trigger.

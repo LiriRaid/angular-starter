@@ -2,10 +2,10 @@ import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, TemplateRef, ViewEncapsulation, computed, input } from '@angular/core';
 
 @Component({
-  selector: 'as-tooltip-panel',
+  selector: 'sa-tooltip-panel',
   standalone: true,
   imports: [NgTemplateOutlet],
-  templateUrl: './as-tooltip.html',
+  templateUrl: './sa-tooltip.html',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

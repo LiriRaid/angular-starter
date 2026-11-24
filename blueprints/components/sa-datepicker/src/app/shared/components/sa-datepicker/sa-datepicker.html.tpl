@@ -1,10 +1,10 @@
 <div
   class="flex w-full flex-col gap-1"
   [class]="{
-    'as-datepicker-on': variant() === 'on',
-    'as-datepicker-in': variant() === 'in',
-    'as-datepicker-over': variant() === 'over',
-    'as-datepicker-over-float': variant() === 'over' && !!label(),
+    'sa-datepicker-on': variant() === 'on',
+    'sa-datepicker-in': variant() === 'in',
+    'sa-datepicker-over': variant() === 'over',
+    'sa-datepicker-over-float': variant() === 'over' && !!label(),
   }"
 >
   <ng-template #fieldContent>
@@ -23,12 +23,12 @@
         [attr.aria-invalid]="hasErrors() ? 'true' : null"
         [attr.aria-describedby]="describedBy()"
         [attr.aria-expanded]="isOpen()"
-        class="as-datepicker-input peer"
+        class="sa-datepicker-input peer"
         [style]="inputFieldStyles()"
       />
 
       <button type="button" class="absolute inset-y-0 right-0 flex items-center px-3 transition-colors duration-150" [class]="isDisabled() ? 'text-(--app-control-disabled-text)' : 'text-(--app-action-icon-color) hover:text-(--app-text-primary)'" [disabled]="isDisabled()" (click)="toggleCalendar($event)">
-        <as-icon name="Calendar" size="18" />
+        <sa-icon name="Calendar" size="18" />
       </button>
     } @else {
       <!-- Sin hora manual no hay nada que tipear — el campo entero ES el botón (no un input +
@@ -38,8 +38,8 @@
       <button
         type="button"
         [id]="resolvedInputId()"
-        class="group relative flex w-full items-center rounded-lg text-left as-datepicker-input peer"
-        [class.as-datepicker-input--pickable]="!isDisabled()"
+        class="group relative flex w-full items-center rounded-lg text-left sa-datepicker-input peer"
+        [class.sa-datepicker-input--pickable]="!isDisabled()"
         [style]="inputFieldStyles()"
         [disabled]="isDisabled()"
         [attr.aria-haspopup]="true"
@@ -53,7 +53,7 @@
         <span class="truncate" [class]="{ 'text-(--app-placeholder-color)': !inputValue() }">{{ inputValue() || placeholder() }}</span>
 
         <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 transition-colors duration-150" [class]="isDisabled() ? 'text-(--app-control-disabled-text)' : 'text-(--app-action-icon-color) group-hover:text-(--app-text-primary)'">
-          <as-icon name="Calendar" size="18" />
+          <sa-icon name="Calendar" size="18" />
         </span>
       </button>
     }
@@ -92,20 +92,20 @@
   </div>
 
   @if (hasErrors() && showErrorMessage()) {
-    <small [id]="errorId()" class="as-datepicker-error">{{ errorMessage() }}</small>
+    <small [id]="errorId()" class="sa-datepicker-error">{{ errorMessage() }}</small>
   }
 
-  <div #panelRef popover="manual" [id]="resolvedInputId() + '-panel'" class="as-datepicker-panel" (toggle)="onPanelToggle($event)">
+  <div #panelRef popover="manual" [id]="resolvedInputId() + '-panel'" class="sa-datepicker-panel" (toggle)="onPanelToggle($event)">
     <div class="flex flex-col gap-2 p-3">
       <div class="flex items-center justify-between gap-1.5">
-        <as-button icon="ChevronLeft" variant="text" size="small" ariaLabel="Mes anterior" (onClick)="previousMonth()" />
+        <sa-button icon="ChevronLeft" variant="text" size="small" ariaLabel="Mes anterior" (onClick)="previousMonth()" />
 
         <div class="flex min-w-0 flex-1 items-center justify-center gap-2">
-          <as-select class="w-[9.5rem]" [formControl]="monthCtrl" [options]="monthOptions" optionLabel="label" optionValue="value" [searchable]="false" [showErrorMessage]="false" variant="compact" />
-          <as-select class="w-28" [formControl]="yearCtrl" [options]="yearOptions()" optionLabel="label" optionValue="value" [searchable]="false" [showErrorMessage]="false" variant="compact" />
+          <sa-select class="w-[9.5rem]" [formControl]="monthCtrl" [options]="monthOptions" optionLabel="label" optionValue="value" [searchable]="false" [showErrorMessage]="false" variant="compact" />
+          <sa-select class="w-28" [formControl]="yearCtrl" [options]="yearOptions()" optionLabel="label" optionValue="value" [searchable]="false" [showErrorMessage]="false" variant="compact" />
         </div>
 
-        <as-button icon="ChevronRight" variant="text" size="small" ariaLabel="Mes siguiente" (onClick)="nextMonth()" />
+        <sa-button icon="ChevronRight" variant="text" size="small" ariaLabel="Mes siguiente" (onClick)="nextMonth()" />
       </div>
 
       <div class="grid grid-cols-7 gap-1">
@@ -116,7 +116,7 @@
 
       <div class="grid grid-cols-7 gap-1 justify-items-center">
         @for (day of calendarDays(); track day.date.getTime()) {
-          <button type="button" class="as-datepicker-day flex h-8 w-8 items-center justify-center rounded-full text-caption-2-medium transition-colors duration-150" [disabled]="!day.enabled" [class]="dayClass(day)" (click)="selectDate(day)">
+          <button type="button" class="sa-datepicker-day flex h-8 w-8 items-center justify-center rounded-full text-caption-2-medium transition-colors duration-150" [disabled]="!day.enabled" [class]="dayClass(day)" (click)="selectDate(day)">
             {{ day.date.getDate() }}
           </button>
         }
@@ -124,7 +124,7 @@
 
       @if (allowManualTime() && hasSelectedDate()) {
         <div class="flex items-center gap-2 rounded-lg border border-(--color-blue-200) bg-(--color-blue-50) px-3 py-2">
-          <as-icon name="Info" size="14" color="var(--color-blue-600)" />
+          <sa-icon name="Info" size="14" color="var(--color-blue-600)" />
           <span class="text-caption-2-regular text-(--app-text-muted)">Fecha seleccionada: {{ formattedSelectedDate() }}</span>
         </div>
       }
@@ -133,19 +133,19 @@
 
       <div class="flex items-center justify-between gap-2">
         <div class="flex items-center gap-2">
-          <as-button label="Hoy" variant="text" size="small" (onClick)="selectToday()" />
+          <sa-button label="Hoy" variant="text" size="small" (onClick)="selectToday()" />
 
           @if (allowManualTime()) {
             <div class="flex items-center gap-1.5">
-              <input type="text" class="as-datepicker-hour-input" maxlength="5" placeholder="HH:MM" [value]="manualHour()" (input)="onHourInputChange($event)" (keydown)="onHourKeyDown($event)" />
-              <as-select class="w-24" [formControl]="amPmCtrl" [options]="amPmOptions" optionLabel="label" optionValue="value" [searchable]="false" [showErrorMessage]="false" variant="compact" />
+              <input type="text" class="sa-datepicker-hour-input" maxlength="5" placeholder="HH:MM" [value]="manualHour()" (input)="onHourInputChange($event)" (keydown)="onHourKeyDown($event)" />
+              <sa-select class="w-24" [formControl]="amPmCtrl" [options]="amPmOptions" optionLabel="label" optionValue="value" [searchable]="false" [showErrorMessage]="false" variant="compact" />
             </div>
           } @else if (showCurrentTime()) {
             <span class="text-caption-1-regular text-(--app-text-subtle)">{{ currentTime() }}</span>
           }
         </div>
 
-        <as-button label="Cerrar" variant="outlined" size="small" (onClick)="closeCalendar()" />
+        <sa-button label="Cerrar" variant="outlined" size="small" (onClick)="closeCalendar()" />
       </div>
     </div>
   </div>

@@ -1,10 +1,10 @@
 import { availableIds, type CapabilityCategory } from '../config/capabilities.js';
 import type { StarterOptions } from '../config/schema.js';
 
-// What `as` needs to describe `as add` in its help, apart from the command itself: the command pulls in
-// the whole engine, which the help, `--version` and `as list` do not need to load.
+// What `sa` needs to describe `sa add` in its help, apart from the command itself: the command pulls in
+// the whole engine, which the help, `--version` and `sa list` do not need to load.
 
-/** The capabilities `as add` can apply to an existing project, by the word the user types. */
+/** The capabilities `sa add` can apply to an existing project, by the word the user types. */
 export const ADDABLE: Readonly<Record<string, Extract<CapabilityCategory, keyof StarterOptions>>> =
   {
     icons: 'icons',

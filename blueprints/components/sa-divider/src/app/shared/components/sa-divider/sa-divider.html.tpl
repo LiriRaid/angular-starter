@@ -1,3 +1,3 @@
-<div class="as-divider-content">
+<div class="sa-divider-content">
   <ng-content></ng-content>
 </div>

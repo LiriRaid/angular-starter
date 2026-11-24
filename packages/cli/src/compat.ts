@@ -1,7 +1,7 @@
 import type { StarterOptions } from './config/schema.js';
 
 /**
- * Compatibility matrix. `as new` runs exactly this Angular CLI version. It is raised only after the
+ * Compatibility matrix. `sa new` runs exactly this Angular CLI version. It is raised only after the
  * generation tests pass against the new release.
  */
 export const ANGULAR_CLI_VERSION = '22.3.0';

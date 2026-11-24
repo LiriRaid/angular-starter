@@ -1,6 +1,6 @@
-import { buildCalendarDays, buildYearOptions, convertTo24Hour, formatDateValue, formatDisplayDate, formatHourMaskInput, formatTime12Hour, getMonthNames, getWeekdayNames, isDateEnabled, isSameDay, parseDateValue, parseInputDateTime } from './as-datepicker.config';
+import { buildCalendarDays, buildYearOptions, convertTo24Hour, formatDateValue, formatDisplayDate, formatHourMaskInput, formatTime12Hour, getMonthNames, getWeekdayNames, isDateEnabled, isSameDay, parseDateValue, parseInputDateTime } from './sa-datepicker.config';
 
-describe('as-datepicker.config', () => {
+describe('sa-datepicker.config', () => {
   describe('formatDateValue / parseDateValue', () => {
     it('formatea a yyyy-mm-dd (mismo contrato que producía el <input type="date"> nativo)', () => {
       expect(formatDateValue(new Date(2026, 8, 4))).toBe('2026-09-04');

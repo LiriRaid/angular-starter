@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AsSelect } from './as-select';
+import { SaSelect } from './sa-select';
 
 const OPTIONS = [
   { label: 'Apple', value: 'a' },
@@ -8,16 +8,16 @@ const OPTIONS = [
   { label: 'Cherry', value: 'c' },
 ];
 
-describe('AsSelect', () => {
-  let fixture: ComponentFixture<AsSelect>;
-  let component: AsSelect;
+describe('SaSelect', () => {
+  let fixture: ComponentFixture<SaSelect>;
+  let component: SaSelect;
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsSelect, { set: { imports: [], template: '' } });
+    TestBed.overrideComponent(SaSelect, { set: { imports: [], template: '' } });
 
-    await TestBed.configureTestingModule({ imports: [AsSelect] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [SaSelect] }).compileComponents();
 
-    fixture = TestBed.createComponent(AsSelect);
+    fixture = TestBed.createComponent(SaSelect);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('options', OPTIONS);
     fixture.componentRef.setInput('optionLabel', 'label');
@@ -92,15 +92,15 @@ describe('AsSelect', () => {
   });
 });
 
-describe('AsSelect · opciones con ícono (template)', () => {
+describe('SaSelect · opciones con ícono (template)', () => {
   const ICON_OPTIONS = [
     { label: 'Casa', value: 'home', icon: 'Home', color: '#3b82f6' },
     { label: 'Trabajo', value: 'work', icon: 'User', color: '#10b981' },
   ];
-  let fixture: ComponentFixture<AsSelect>;
+  let fixture: ComponentFixture<SaSelect>;
 
   const setup = (inputs: Record<string, unknown> = {}) => {
-    fixture = TestBed.createComponent(AsSelect);
+    fixture = TestBed.createComponent(SaSelect);
     const defaults = { options: ICON_OPTIONS, optionLabel: 'label', optionValue: 'value', optionIcon: 'icon', optionColor: 'color', searchable: false, ...inputs };
     for (const [name, value] of Object.entries(defaults)) fixture.componentRef.setInput(name, value);
     fixture.detectChanges();
@@ -108,29 +108,29 @@ describe('AsSelect · opciones con ícono (template)', () => {
   const el = () => fixture.nativeElement as HTMLElement;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [AsSelect] }).compileComponents();
+    await TestBed.configureTestingModule({ imports: [SaSelect] }).compileComponents();
   });
 
   it('el ícono plano de cada opción mide 14 por defecto y respeta optionIconSize', () => {
     setup();
-    expect(el().querySelector('.as-select-option svg')?.getAttribute('width')).toBe('14');
+    expect(el().querySelector('.sa-select-option svg')?.getAttribute('width')).toBe('14');
 
     fixture.componentRef.setInput('optionIconSize', 20);
     fixture.detectChanges();
-    expect(el().querySelector('.as-select-option svg')?.getAttribute('width')).toBe('20');
+    expect(el().querySelector('.sa-select-option svg')?.getAttribute('width')).toBe('20');
   });
 
   it('hideOptionLabel quita el texto de las filas y del campo cerrado, no el ícono', () => {
     setup();
-    expect(el().querySelector('.as-select-option .truncate')?.textContent).toContain('Casa');
+    expect(el().querySelector('.sa-select-option .truncate')?.textContent).toContain('Casa');
 
     fixture.componentRef.setInput('hideOptionLabel', true);
     fixture.componentInstance.writeValue('work');
     fixture.detectChanges();
 
-    expect(el().querySelector('.as-select-option .truncate')).toBeNull();
-    expect(el().querySelector('.as-select-field-label .truncate')).toBeNull();
-    expect(el().querySelector('.as-select-field-label svg')).toBeTruthy();
+    expect(el().querySelector('.sa-select-option .truncate')).toBeNull();
+    expect(el().querySelector('.sa-select-field-label .truncate')).toBeNull();
+    expect(el().querySelector('.sa-select-field-label svg')).toBeTruthy();
   });
 
   it('accentColor tiñe el fondo del campo y sin él no pone estilo propio', () => {
@@ -146,9 +146,9 @@ describe('AsSelect · opciones con ícono (template)', () => {
 
   it('panelStyleClass se suma a la clase del panel desplegable', () => {
     setup({ panelStyleClass: 'mi-panel otra' });
-    const panel = el().querySelector('.as-select-panel') as HTMLElement;
+    const panel = el().querySelector('.sa-select-panel') as HTMLElement;
     expect(panel.classList.contains('mi-panel')).toBe(true);
     expect(panel.classList.contains('otra')).toBe(true);
-    expect(panel.classList.contains('as-select-panel')).toBe(true);
+    expect(panel.classList.contains('sa-select-panel')).toBe(true);
   });
 });

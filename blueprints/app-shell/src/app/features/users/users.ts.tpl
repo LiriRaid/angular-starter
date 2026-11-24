@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { AsAvatar } from '@shared/components';
+import { SaAvatar } from '@shared/components';
 
 interface SampleUser {
   readonly name: string;
@@ -11,7 +11,7 @@ interface SampleUser {
 /** Página de ejemplo con datos de muestra: reemplázala por la gestión real de usuarios. */
 @Component({
   selector: '__PREFIX__-users',
-  imports: [AsAvatar],
+  imports: [SaAvatar],
   templateUrl: './users.html',
   styleUrl: './users.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

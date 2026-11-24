@@ -1,14 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AsModal } from './as-modal';
+import { SaModal } from './sa-modal';
 
-describe('AsModal · contenido sin relleno (flush)', () => {
-  let fixture: ComponentFixture<AsModal>;
-  const panel = () => document.querySelector('.cdk-overlay-container .as-modal') as HTMLElement;
+describe('SaModal · contenido sin relleno (flush)', () => {
+  let fixture: ComponentFixture<SaModal>;
+  const panel = () => document.querySelector('.cdk-overlay-container .sa-modal') as HTMLElement;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [AsModal] }).compileComponents();
-    fixture = TestBed.createComponent(AsModal);
+    await TestBed.configureTestingModule({ imports: [SaModal] }).compileComponents();
+    fixture = TestBed.createComponent(SaModal);
     fixture.componentRef.setInput('title', 'Título');
     fixture.componentRef.setInput('visible', true);
     fixture.detectChanges();
@@ -16,14 +16,14 @@ describe('AsModal · contenido sin relleno (flush)', () => {
   });
 
   it('por defecto el contenido lleva su relleno', () => {
-    expect(panel().classList.contains('as-modal--flush')).toBe(false);
+    expect(panel().classList.contains('sa-modal--flush')).toBe(false);
   });
 
   it('con flush el panel lo marca para que el contenido maneje su propio espaciado', () => {
     fixture.componentRef.setInput('flush', true);
     fixture.detectChanges();
 
-    expect(panel().classList.contains('as-modal--flush')).toBe(true);
-    expect(panel().classList.contains('as-modal')).toBe(true);
+    expect(panel().classList.contains('sa-modal--flush')).toBe(true);
+    expect(panel().classList.contains('sa-modal')).toBe(true);
   });
 });

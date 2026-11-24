@@ -1,8 +1,8 @@
 /**
- * Wiring compartida por los paneles `[popover="manual"]` propios (as-popover,
- * as-theme-color-picker): cierre por click afuera / Escape, y reposicionamiento
+ * Wiring compartida por los paneles `[popover="manual"]` propios (sa-popover,
+ * sa-theme-color-picker): cierre por click afuera / Escape, y reposicionamiento
  * agendado por requestAnimationFrame en scroll/resize. No incluye el cálculo de la posición
- * en sí (eso vive en as-popover.config.ts) porque cada consumidor tiene su propia
+ * en sí (eso vive en sa-popover.config.ts) porque cada consumidor tiene su propia
  * fórmula de layout — esto solo evita duplicar la parte de lifecycle/listeners.
  */
 
@@ -55,15 +55,15 @@ export class NativeOverlayScheduler {
   }
 }
 
-/** Ambos paneles envuelven su trigger en un `as-button`, cuyo `<button>`/`<a>` interno
- *  siempre lleva la clase `as-btn` (nombre heredado del theme, no de una dependencia real de
+/** Ambos paneles envuelven su trigger en un `sa-button`, cuyo `<button>`/`<a>` interno
+ *  siempre lleva la clase `sa-btn` (nombre heredado del theme, no de una dependencia real de
  *  PrimeNG en runtime). */
 export function resolveOverlayTriggerElement(event: MouseEvent): HTMLElement | null {
   const element = event.currentTarget as HTMLElement | null;
 
   if (!element) return null;
 
-  return element.classList.contains('as-btn') ? element : (element.querySelector<HTMLElement>('.as-btn') ?? element);
+  return element.classList.contains('sa-btn') ? element : (element.querySelector<HTMLElement>('.sa-btn') ?? element);
 }
 
 export function isEventInsideOverlay(event: Event, panel: HTMLElement | null | undefined, trigger: HTMLElement | null): boolean {
@@ -76,7 +76,7 @@ export function isEventInsideOverlay(event: Event, panel: HTMLElement | null | u
 
 /** Versión de alto nivel: además del wiring de bajo nivel de arriba, decide ella misma cuándo
  *  hay que cerrar el panel (click afuera / Escape) — pensada para consumidores que no necesitan
- *  testear esa decisión de forma aislada (as-popover). */
+ *  testear esa decisión de forma aislada (sa-popover). */
 export type NativeOverlayHandlers = {
   getPanelElement: () => HTMLElement | null | undefined;
   getTriggerElement: () => HTMLElement | null;

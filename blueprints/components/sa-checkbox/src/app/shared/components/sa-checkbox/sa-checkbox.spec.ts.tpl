@@ -1,19 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { AsCheckbox } from './as-checkbox';
+import { SaCheckbox } from './sa-checkbox';
 
-describe('AsCheckbox', () => {
-  let fixture: ComponentFixture<AsCheckbox>;
-  let component: AsCheckbox;
+describe('SaCheckbox', () => {
+  let fixture: ComponentFixture<SaCheckbox>;
+  let component: SaCheckbox;
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsCheckbox, { set: { imports: [], template: '' } });
+    TestBed.overrideComponent(SaCheckbox, { set: { imports: [], template: '' } });
 
     await TestBed.configureTestingModule({
-      imports: [AsCheckbox],
+      imports: [SaCheckbox],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsCheckbox);
+    fixture = TestBed.createComponent(SaCheckbox);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

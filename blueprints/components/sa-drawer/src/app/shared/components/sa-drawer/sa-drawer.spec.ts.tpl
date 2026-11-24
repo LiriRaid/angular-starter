@@ -1,21 +1,21 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { Component, ComponentRef, signal } from '@angular/core';
-import { AsDrawer } from './as-drawer';
+import { SaDrawer } from './sa-drawer';
 
-describe('AsDrawer', () => {
-  let fixture: ComponentFixture<AsDrawer>;
-  let component: AsDrawer;
-  let ref: ComponentRef<AsDrawer>;
+describe('SaDrawer', () => {
+  let fixture: ComponentFixture<SaDrawer>;
+  let component: SaDrawer;
+  let ref: ComponentRef<SaDrawer>;
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsDrawer, { set: { imports: [], template: '' } });
+    TestBed.overrideComponent(SaDrawer, { set: { imports: [], template: '' } });
 
     await TestBed.configureTestingModule({
-      imports: [AsDrawer],
+      imports: [SaDrawer],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsDrawer);
+    fixture = TestBed.createComponent(SaDrawer);
     component = fixture.componentInstance;
     ref = fixture.componentRef;
     fixture.detectChanges();
@@ -60,16 +60,16 @@ describe('AsDrawer', () => {
 });
 
 @Component({
-  selector: 'as-drawer-spec-host',
-  imports: [AsDrawer],
+  selector: 'sa-drawer-spec-host',
+  imports: [SaDrawer],
   template: `
-    <as-drawer [visible]="true" position="right" [ariaLabel]="label()" [width]="width()" [density]="density()" [flush]="flush()" [closeIcon]="closeIcon()" [closeLabel]="closeLabel()" styleClass="host-class">
+    <sa-drawer [visible]="true" position="right" [ariaLabel]="label()" [width]="width()" [density]="density()" [flush]="flush()" [closeIcon]="closeIcon()" [closeLabel]="closeLabel()" styleClass="host-class">
       <h2 drawer-header class="header-title">Título</h2>
       <p class="body">Contenido</p>
       @if (withFooter()) {
         <div drawer-footer class="footer-action">Guardar</div>
       }
-    </as-drawer>
+    </sa-drawer>
   `,
 })
 class DrawerHost {
@@ -82,7 +82,7 @@ class DrawerHost {
   readonly closeLabel = signal('Cerrar');
 }
 
-describe('AsDrawer · template', () => {
+describe('SaDrawer · template', () => {
   let fixture: ComponentFixture<DrawerHost>;
   /** El panel se monta en el contenedor de overlays (hijo de <body>), no dentro del host. */
   const dialog = () => document.querySelector('.cdk-overlay-container dialog') as HTMLDialogElement;
@@ -109,20 +109,20 @@ describe('AsDrawer · template', () => {
     expect(dialog().hasAttribute('aria-label')).toBe(false);
   });
 
-  it('el ancho se pasa por la variable --as-drawer-width', () => {
-    expect(dialog().style.getPropertyValue('--as-drawer-width')).toBe('30rem');
+  it('el ancho se pasa por la variable --sa-drawer-width', () => {
+    expect(dialog().style.getPropertyValue('--sa-drawer-width')).toBe('30rem');
 
     fixture.componentInstance.width.set(null);
     fixture.detectChanges();
-    expect(dialog().style.getPropertyValue('--as-drawer-width')).toBe('');
+    expect(dialog().style.getPropertyValue('--sa-drawer-width')).toBe('');
   });
 
   it('el contenido con [drawer-footer] va al pie, fuera del área con scroll', () => {
-    const footer = dialog().querySelector('.as-drawer-footer');
+    const footer = dialog().querySelector('.sa-drawer-footer');
     expect(footer?.querySelector('.footer-action')?.textContent).toContain('Guardar');
     expect(
       dialog()
-        .querySelector('.as-drawer-content')
+        .querySelector('.sa-drawer-content')
         ?.contains(footer as Node),
     ).toBe(false);
   });
@@ -131,7 +131,7 @@ describe('AsDrawer · template', () => {
     fixture.componentInstance.withFooter.set(false);
     fixture.detectChanges();
 
-    const footer = dialog().querySelector('.as-drawer-footer') as HTMLElement;
+    const footer = dialog().querySelector('.sa-drawer-footer') as HTMLElement;
     expect(footer.childElementCount).toBe(0);
     expect(footer.textContent?.trim()).toBe('');
   });
@@ -139,18 +139,18 @@ describe('AsDrawer · template', () => {
   it('se monta sobre toda la página: en el contenedor de overlays y no dentro del host', () => {
     expect(dialog()).toBeTruthy();
     expect(fixture.nativeElement.contains(dialog())).toBe(false);
-    expect(document.querySelector('.cdk-overlay-container .as-drawer-backdrop')).toBeTruthy();
+    expect(document.querySelector('.cdk-overlay-container .sa-drawer-backdrop')).toBeTruthy();
   });
 
   it('cabecera, contenido y pie van en ese orden, cada uno en su zona', () => {
     const zones = Array.from(dialog().children).map((el) => el.className);
-    expect(zones).toEqual(['as-drawer-header', 'as-drawer-content', 'as-drawer-footer']);
-    expect(dialog().querySelector('.as-drawer-header .header-title')?.textContent).toContain('Título');
-    expect(dialog().querySelector('.as-drawer-content .body')?.textContent).toContain('Contenido');
+    expect(zones).toEqual(['sa-drawer-header', 'sa-drawer-content', 'sa-drawer-footer']);
+    expect(dialog().querySelector('.sa-drawer-header .header-title')?.textContent).toContain('Título');
+    expect(dialog().querySelector('.sa-drawer-content .body')?.textContent).toContain('Contenido');
   });
 
   it('el botón de cerrar va en la cabecera con el nombre accesible y el ícono pedidos', () => {
-    const button = dialog().querySelector('.as-drawer-header .as-drawer-close-button') as HTMLButtonElement;
+    const button = dialog().querySelector('.sa-drawer-header .sa-drawer-close-button') as HTMLButtonElement;
     expect(button.getAttribute('aria-label')).toBe('Cerrar');
     expect(button.querySelector('svg.lucide-x')).toBeTruthy();
 
@@ -162,15 +162,15 @@ describe('AsDrawer · template', () => {
   });
 
   it('density y flush se reflejan como clases del panel, junto con styleClass', () => {
-    expect(dialog().classList.contains('as-drawer--compact')).toBe(false);
-    expect(dialog().classList.contains('as-drawer--flush')).toBe(false);
+    expect(dialog().classList.contains('sa-drawer--compact')).toBe(false);
+    expect(dialog().classList.contains('sa-drawer--flush')).toBe(false);
     expect(dialog().classList.contains('host-class')).toBe(true);
 
     fixture.componentInstance.density.set('compact');
     fixture.componentInstance.flush.set(true);
     fixture.detectChanges();
-    expect(dialog().classList.contains('as-drawer--compact')).toBe(true);
-    expect(dialog().classList.contains('as-drawer--flush')).toBe(true);
-    expect(dialog().classList.contains('as-drawer-right')).toBe(true);
+    expect(dialog().classList.contains('sa-drawer--compact')).toBe(true);
+    expect(dialog().classList.contains('sa-drawer--flush')).toBe(true);
+    expect(dialog().classList.contains('sa-drawer-right')).toBe(true);
   });
 });

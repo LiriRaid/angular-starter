@@ -1,20 +1,20 @@
 @layer legacy-overrides {
   /* ==========================================================================
-     as-table — skin nativo (antes p-table de PrimeNG con el tema de As).
+     sa-table — skin nativo (antes p-table de PrimeNG con el tema de As).
      El padding/tipografía/anchos de th/td viven en el HTML (Tailwind + typography).
      ========================================================================== */
 
-  as-table {
+  sa-table {
     display: block;
     min-width: 0;
   }
 
-  as-table .as-table {
+  sa-table .sa-table {
     min-width: 0;
   }
 
   /* Panel contenedor: borde redondeado + scroll horizontal para una sola línea */
-  as-table .as-table-container {
+  sa-table .sa-table-container {
     overflow-x: auto;
     overflow-y: hidden;
     border: 1px solid var(--app-border-color);
@@ -23,7 +23,7 @@
     box-shadow: var(--app-surface-shadow-soft);
   }
 
-  as-table .as-table {
+  sa-table .sa-table {
     width: 100%;
     table-layout: fixed;
     border-collapse: separate;
@@ -31,7 +31,7 @@
   }
 
   /* Cabecera — tinte del borde sobre transparente: igual al override del componente */
-  as-table .as-table-head > tr > th {
+  sa-table .sa-table-head > tr > th {
     background: color-mix(in srgb, var(--app-border-color) 20%, transparent);
     border-bottom: 1px solid var(--app-border-color);
     overflow: hidden;
@@ -39,45 +39,45 @@
   }
 
   /* Filas */
-  as-table .as-table-body > tr {
+  sa-table .sa-table-body > tr {
     background: var(--app-panel-bg);
     transition: background-color 0.2s ease;
   }
 
-  as-table .as-table-body > tr > td {
+  sa-table .sa-table-body > tr > td {
     border-bottom: 1px solid color-mix(in srgb, var(--app-border-color) 65%, transparent);
     overflow: hidden;
     text-overflow: ellipsis;
     vertical-align: middle;
   }
 
-  as-table .as-table-body > tr:last-child > td {
+  sa-table .sa-table-body > tr:last-child > td {
     border-bottom: 0;
   }
 
-  as-table .as-table-body > tr:hover {
+  sa-table .sa-table-body > tr:hover {
     background: var(--app-accent-soft-bg);
   }
 
-  as-table .as-table-body > tr.as-table-empty-row:hover {
+  sa-table .sa-table-body > tr.sa-table-empty-row:hover {
     background: var(--app-panel-bg);
   }
 
-  as-table .as-table-body > tr.as-table-expansion:hover {
+  sa-table .sa-table-body > tr.sa-table-expansion:hover {
     background: transparent;
     cursor: default;
   }
 
-  as-table .as-table-body > tr.as-table-empty-row > td {
+  sa-table .sa-table-body > tr.sa-table-empty-row > td {
     border-bottom: 0;
   }
 
   /* Pie opcional (`footerTemplate`): mismo fondo que las filas y una línea que lo separa del cuerpo */
-  as-table .as-table-foot > tr {
+  sa-table .sa-table-foot > tr {
     background: var(--app-panel-bg);
   }
 
-  as-table .as-table-foot > tr > td {
+  sa-table .sa-table-foot > tr > td {
     border-top: 1px solid color-mix(in srgb, var(--app-border-color) 65%, transparent);
     vertical-align: middle;
   }

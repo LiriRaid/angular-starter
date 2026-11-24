@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 
 import { DesignPreferencesService } from '@core/design-preferences/design-preferences.service';
-import { AsButton, AsTabs, type AsTab } from '@shared/components';
+import { SaButton, SaTabs, type SaTab } from '@shared/components';
 import { AppearanceTab } from './tabs/appearance-tab';
 import { OtherTab } from './tabs/other-tab';
 import { ThemeTab } from './tabs/theme-tab';
@@ -13,14 +13,14 @@ import { UiTab } from './tabs/ui-tab';
  */
 @Component({
   selector: '__PREFIX__-preference-design',
-  imports: [AsButton, AsTabs, AppearanceTab, ThemeTab, UiTab, OtherTab],
+  imports: [SaButton, SaTabs, AppearanceTab, ThemeTab, UiTab, OtherTab],
   templateUrl: './preference-design.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PreferenceDesign {
   readonly designPreferences = inject(DesignPreferencesService);
 
-  readonly tabs: readonly AsTab[] = [
+  readonly tabs: readonly SaTab[] = [
     { id: 'appearance', label: 'Apariencia' },
     { id: 'theme', label: 'Tema' },
     { id: 'ui', label: 'UI' },

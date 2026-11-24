@@ -4,23 +4,23 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, NgControl, ReactiveFormsModule } from '@angular/forms';
 
 import { NativeOverlayRuntime } from '../../utils/native-overlay-dismiss';
-import { AsButton } from '../as-button/as-button';
-import { AsIcon } from '../as-icon/as-icon';
-import { AsSelect } from '../as-select/as-select';
-import { buildCalendarDays, buildDatepickerPanelLayout, buildYearOptions, convertTo24Hour, createDatepickerPresentation, formatDateTimeValue, formatDateValue, formatDisplayDate, formatHourMaskInput, formatTime12Hour, getMonthNames, getWeekdayNames, isDateEnabled, parseDateValue, parseInputDateTime } from './as-datepicker.config';
-import type { AsAmPm, AsCalendarDay, AsDatepickerVariant } from './as-datepicker.entity';
+import { SaButton } from '../sa-button/sa-button';
+import { SaIcon } from '../sa-icon/sa-icon';
+import { SaSelect } from '../sa-select/sa-select';
+import { buildCalendarDays, buildDatepickerPanelLayout, buildYearOptions, convertTo24Hour, createDatepickerPresentation, formatDateTimeValue, formatDateValue, formatDisplayDate, formatHourMaskInput, formatTime12Hour, getMonthNames, getWeekdayNames, isDateEnabled, parseDateValue, parseInputDateTime } from './sa-datepicker.config';
+import type { SaAmPm, SaCalendarDay, SaDatepickerVariant } from './sa-datepicker.entity';
 
 @Component({
-  selector: 'as-datepicker',
+  selector: 'sa-datepicker',
   standalone: true,
-  imports: [NgTemplateOutlet, ReactiveFormsModule, AsButton, AsIcon, AsSelect],
-  templateUrl: './as-datepicker.html',
-  styleUrl: './as-datepicker.css',
+  imports: [NgTemplateOutlet, ReactiveFormsModule, SaButton, SaIcon, SaSelect],
+  templateUrl: './sa-datepicker.html',
+  styleUrl: './sa-datepicker.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.None,
-  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => AsDatepicker), multi: true }],
+  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SaDatepicker), multi: true }],
 })
-export class AsDatepicker implements ControlValueAccessor {
+export class SaDatepicker implements ControlValueAccessor {
   private static nextId = 0;
 
   private readonly document = inject(DOCUMENT);
@@ -33,7 +33,7 @@ export class AsDatepicker implements ControlValueAccessor {
   readonly label = input<string | undefined>('Fecha');
   readonly placeholder = input<string>('Escriba o seleccione una fecha');
   readonly required = input(false);
-  readonly variant = input<AsDatepickerVariant>('over');
+  readonly variant = input<SaDatepickerVariant>('over');
   readonly minDate = input<Date | undefined>(undefined);
   readonly maxDate = input<Date | undefined>(undefined);
   /** Habilita hora manual (input HH:MM + AM/PM) — sin consumidor todavía, se deja construido
@@ -53,11 +53,11 @@ export class AsDatepicker implements ControlValueAccessor {
 
   readonly monthCtrl = new FormControl<number>(new Date().getMonth(), { nonNullable: true });
   readonly yearCtrl = new FormControl<number>(new Date().getFullYear(), { nonNullable: true });
-  readonly amPmCtrl = new FormControl<AsAmPm>('AM', { nonNullable: true });
+  readonly amPmCtrl = new FormControl<SaAmPm>('AM', { nonNullable: true });
 
   readonly weekdayNames = getWeekdayNames();
   readonly monthOptions = getMonthNames().map((name, index) => ({ label: name, value: index }));
-  readonly amPmOptions: { label: string; value: AsAmPm }[] = [
+  readonly amPmOptions: { label: string; value: SaAmPm }[] = [
     { label: 'AM', value: 'AM' },
     { label: 'PM', value: 'PM' },
   ];
@@ -68,7 +68,7 @@ export class AsDatepicker implements ControlValueAccessor {
   private readonly currentMonth = signal(new Date().getMonth());
   private readonly currentYear = signal(new Date().getFullYear());
   private readonly validationTick = signal(0);
-  private readonly generatedId = `as-datepicker-${AsDatepicker.nextId++}`;
+  private readonly generatedId = `sa-datepicker-${SaDatepicker.nextId++}`;
 
   private ngControl?: NgControl;
 
@@ -82,7 +82,7 @@ export class AsDatepicker implements ControlValueAccessor {
     return date ? formatDisplayDate(date, true) : '';
   });
 
-  readonly calendarDays = computed<AsCalendarDay[]>(() => buildCalendarDays(this.currentMonth(), this.currentYear(), this.selectedDate(), this.minDate(), this.maxDate()));
+  readonly calendarDays = computed<SaCalendarDay[]>(() => buildCalendarDays(this.currentMonth(), this.currentYear(), this.selectedDate(), this.minDate(), this.maxDate()));
 
   private readonly presentation = createDatepickerPresentation({
     control: () => this.control,
@@ -233,7 +233,7 @@ export class AsDatepicker implements ControlValueAccessor {
     this.closeCalendar();
   }
 
-  selectDate(day: AsCalendarDay): void {
+  selectDate(day: SaCalendarDay): void {
     if (!day.enabled || this.isDisabled()) return;
 
     const base = this.selectedDate();
@@ -291,12 +291,12 @@ export class AsDatepicker implements ControlValueAccessor {
 
   // Cada clase en su propia clave (el binding `[class]` del template, a diferencia de
   // `[ngClass]`, no soporta varias clases separadas por espacio dentro de una misma clave).
-  dayClass(day: AsCalendarDay): Record<string, boolean> {
+  dayClass(day: SaCalendarDay): Record<string, boolean> {
     return {
-      'bg-(--as-primary-color)': day.selected,
+      'bg-(--sa-primary-color)': day.selected,
       'text-white': day.selected,
-      'border-(--as-primary-color)': day.today && !day.selected,
-      'text-(--as-primary-color)': day.today && !day.selected,
+      'border-(--sa-primary-color)': day.today && !day.selected,
+      'text-(--sa-primary-color)': day.today && !day.selected,
       'text-(--app-text-subtle)': !day.currentMonth && !day.selected,
       'text-(--app-text-color)': day.currentMonth && !day.selected && !day.today,
       'opacity-40': !day.enabled,

@@ -3,21 +3,21 @@ import { afterNextRender, ChangeDetectionStrategy, Component, ElementRef, comput
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR, NgControl, ReactiveFormsModule } from '@angular/forms';
 
-import { AsIcon } from '../as-icon/as-icon';
+import { SaIcon } from '../sa-icon/sa-icon';
 import { LucideIconName } from '@core/common/icons/lucide-icons';
-import { createInputPresentation, resolveTextareaFieldStyles } from '../as-input/as-input.config';
-import type { AsIconPosition, AsVariant } from '../as-input/as-input.entity';
+import { createInputPresentation, resolveTextareaFieldStyles } from '../sa-input/sa-input.config';
+import type { SaIconPosition, SaVariant } from '../sa-input/sa-input.entity';
 
 @Component({
-  selector: 'as-textarea',
+  selector: 'sa-textarea',
   standalone: true,
-  imports: [NgClass, NgStyle, FormsModule, ReactiveFormsModule, AsIcon],
-  templateUrl: './as-textarea.html',
-  styleUrl: './as-textarea.css',
-  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => AsTextarea), multi: true }],
+  imports: [NgClass, NgStyle, FormsModule, ReactiveFormsModule, SaIcon],
+  templateUrl: './sa-textarea.html',
+  styleUrl: './sa-textarea.css',
+  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SaTextarea), multi: true }],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsTextarea implements ControlValueAccessor {
+export class SaTextarea implements ControlValueAccessor {
   private static nextInputId = 0;
 
   readonly inputId = input<string>('');
@@ -32,13 +32,13 @@ export class AsTextarea implements ControlValueAccessor {
 
   readonly lucideIcon = input<LucideIconName | ''>('');
   readonly iconSize = input<number>(16);
-  readonly iconPosition = input<AsIconPosition>('left');
+  readonly iconPosition = input<SaIconPosition>('left');
 
   readonly showErrorMessage = input<boolean>(true);
   readonly readonlyInput = input<boolean>(false);
   /** Default `'on'` preserva el comportamiento de siempre para todo consumidor que no lo pase
    *  explícito (label sobre el borde, legend cutout) — solo `add-contact-modal` pasa `'over'`. */
-  readonly variant = input<AsVariant>('on');
+  readonly variant = input<SaVariant>('on');
   readonly required = input(false);
 
   readonly valueChange = output<string>();
@@ -61,7 +61,7 @@ export class AsTextarea implements ControlValueAccessor {
   private readonly textareaEl = viewChild<ElementRef<HTMLTextAreaElement>>('textareaEl');
 
   private readonly validationTick = signal(0);
-  private readonly generatedInputId = `as-textarea-${AsTextarea.nextInputId++}`;
+  private readonly generatedInputId = `sa-textarea-${SaTextarea.nextInputId++}`;
 
   private readonly valueSig = signal<string>('');
 

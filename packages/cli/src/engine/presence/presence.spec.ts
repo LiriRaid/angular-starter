@@ -17,7 +17,7 @@ const MENU = 'src/app/features/app-shell/layout/sidebar/user-menu';
 let project: string;
 
 beforeEach(async () => {
-  project = await mkdtemp(join(tmpdir(), 'as-presence-'));
+  project = await mkdtemp(join(tmpdir(), 'sa-presence-'));
   await writeGeneratedWorkspace(project);
   const base = { targetDir: project, name: 'demo', prefix: 'app' };
   await screamingProfile.apply(base);

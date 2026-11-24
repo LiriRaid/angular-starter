@@ -1,17 +1,17 @@
 import { FormControl } from '@angular/forms';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AsSearch } from './as-search';
+import { SaSearch } from './sa-search';
 
-describe('AsSearch', () => {
-  let fixture: ComponentFixture<AsSearch>;
-  let component: AsSearch;
+describe('SaSearch', () => {
+  let fixture: ComponentFixture<SaSearch>;
+  let component: SaSearch;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AsSearch],
+      imports: [SaSearch],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsSearch);
+    fixture = TestBed.createComponent(SaSearch);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('control', new FormControl<string | null>(''));
     fixture.detectChanges();

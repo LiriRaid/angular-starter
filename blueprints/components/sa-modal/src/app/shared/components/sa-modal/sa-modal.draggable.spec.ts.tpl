@@ -1,16 +1,16 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AsModal } from './as-modal';
+import { SaModal } from './sa-modal';
 
-describe('AsModal · arrastre', () => {
-  let fixture: ComponentFixture<AsModal>;
-  const panel = () => document.querySelector('.cdk-overlay-container .as-modal') as HTMLElement;
-  const header = () => panel().querySelector('.as-modal-header') as HTMLElement;
+describe('SaModal · arrastre', () => {
+  let fixture: ComponentFixture<SaModal>;
+  const panel = () => document.querySelector('.cdk-overlay-container .sa-modal') as HTMLElement;
+  const header = () => panel().querySelector('.sa-modal-header') as HTMLElement;
   const press = (target: HTMLElement) => target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 10, clientY: 10 }));
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [AsModal] }).compileComponents();
-    fixture = TestBed.createComponent(AsModal);
+    await TestBed.configureTestingModule({ imports: [SaModal] }).compileComponents();
+    fixture = TestBed.createComponent(SaModal);
     fixture.componentRef.setInput('title', 'Título');
     fixture.componentRef.setInput('visible', true);
     fixture.detectChanges();
@@ -37,14 +37,14 @@ describe('AsModal · arrastre', () => {
 
     expect(panel().style.position).toBe('');
     expect(panel().style.margin).toBe('');
-    expect(panel().classList.contains('as-modal--fixed')).toBe(true);
+    expect(panel().classList.contains('sa-modal--fixed')).toBe(true);
   });
 
   it('con draggable apagado el botón de cerrar y el resize siguen funcionando', () => {
     fixture.componentRef.setInput('draggable', false);
     fixture.detectChanges();
 
-    expect(panel().querySelector('.as-modal-resize-handle')).not.toBeNull();
-    expect(header().querySelector('as-button')).not.toBeNull();
+    expect(panel().querySelector('.sa-modal-resize-handle')).not.toBeNull();
+    expect(header().querySelector('sa-button')).not.toBeNull();
   });
 });

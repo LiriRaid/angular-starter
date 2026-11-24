@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { ThemeService } from '@core/theme/theme.service';
-import { AsThemeColorPicker } from './as-theme-color-picker';
+import { SaThemeColorPicker } from './sa-theme-color-picker';
 
 type MockPopoverPanel = { togglePopover: () => void; hidePopover: () => void };
 
-type AsThemeColorPickerInternals = {
+type SaThemeColorPickerInternals = {
   toggle: (panel: MockPopoverPanel, event: MouseEvent) => void;
   selectPrimary: (key: string, panel: MockPopoverPanel) => void;
   selectSurface: (key: string) => void;
@@ -40,14 +40,14 @@ function makeDomRect(overrides: Partial<DOMRect> = {}): DOMRect {
   return { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0, toJSON: () => '', ...overrides } as DOMRect;
 }
 
-describe('AsThemeColorPicker', () => {
-  let fixture: ComponentFixture<AsThemeColorPicker>;
-  let component: AsThemeColorPicker;
-  let internals: AsThemeColorPickerInternals;
+describe('SaThemeColorPicker', () => {
+  let fixture: ComponentFixture<SaThemeColorPicker>;
+  let component: SaThemeColorPicker;
+  let internals: SaThemeColorPickerInternals;
   let themeService: ThemeServiceMock;
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsThemeColorPicker, {
+    TestBed.overrideComponent(SaThemeColorPicker, {
       set: {
         imports: [],
         template: '',
@@ -55,14 +55,14 @@ describe('AsThemeColorPicker', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [AsThemeColorPicker],
+      imports: [SaThemeColorPicker],
       providers: [{ provide: ThemeService, useClass: ThemeServiceMock }],
     }).compileComponents();
 
     themeService = TestBed.inject(ThemeService) as unknown as ThemeServiceMock;
-    fixture = TestBed.createComponent(AsThemeColorPicker);
+    fixture = TestBed.createComponent(SaThemeColorPicker);
     component = fixture.componentInstance;
-    internals = component as unknown as AsThemeColorPickerInternals;
+    internals = component as unknown as SaThemeColorPickerInternals;
     fixture.detectChanges();
   });
 
@@ -151,16 +151,16 @@ describe('AsThemeColorPicker', () => {
       expect(internals.resolveTriggerElement({ currentTarget: null } as unknown as MouseEvent)).toBeNull();
     });
 
-    it('retorna el propio elemento si ya tiene la clase as-btn', () => {
+    it('retorna el propio elemento si ya tiene la clase sa-btn', () => {
       const el = document.createElement('button');
-      el.classList.add('as-btn');
+      el.classList.add('sa-btn');
       expect(internals.resolveTriggerElement({ currentTarget: el } as unknown as MouseEvent)).toBe(el);
     });
 
-    it('busca un descendiente .as-btn si el elemento no lo es', () => {
+    it('busca un descendiente .sa-btn si el elemento no lo es', () => {
       const wrapper = document.createElement('div');
       const inner = document.createElement('button');
-      inner.classList.add('as-btn');
+      inner.classList.add('sa-btn');
       wrapper.appendChild(inner);
       expect(internals.resolveTriggerElement({ currentTarget: wrapper } as unknown as MouseEvent)).toBe(inner);
     });

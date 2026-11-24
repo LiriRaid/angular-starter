@@ -36,7 +36,7 @@ export const designProfile = {
     'src/styles/typography/typography-styles.css',
     'src/app/shared/animations/animations.css',
     'src/app/core/theme/theme.service.ts',
-    'src/app/core/common/icons/as-icons.ts',
+    'src/app/core/common/icons/sa-icons.ts',
     'src/app/shared/utils/slugify.ts',
   ],
 
@@ -52,10 +52,10 @@ export const designProfile = {
           addProvider(text, 'provideThemeInitializer()', [
             { module: '@core/theme/theme.initializer', names: ['provideThemeInitializer'] },
           ]),
-          '{ provide: LUCIDE_ICONS, useExisting: AS_LUCIDE_ICONS }',
+          '{ provide: LUCIDE_ICONS, useExisting: SA_LUCIDE_ICONS }',
           [
             { module: '@lucide/angular', names: ['LUCIDE_ICONS'] },
-            { module: '@core/common/icons/lucide-icons.provider', names: ['AS_LUCIDE_ICONS'] },
+            { module: '@core/common/icons/lucide-icons.provider', names: ['SA_LUCIDE_ICONS'] },
           ],
         ),
       ),

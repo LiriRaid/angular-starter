@@ -7,7 +7,7 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
  *  del markup real de siempre), sin duplicar el árbol. No mide ni recuerda nada entre
  *  cargas (ver [[feedback_skeleton_no_dynamic_size_learning]] en memoria de proyecto).
  *
- *  CONVENCIÓN — botones/acciones estáticas NUNCA van adentro de un `as-skeleton` ni
+ *  CONVENCIÓN — botones/acciones estáticas NUNCA van adentro de un `sa-skeleton` ni
  *  detrás de un `@if (isLoading())`: "Editar", "Nuevo ticket", "Agregar", "Crear usuario", etc.
  *  no dependen de la data que está cargando (solo ejecutan una acción), así que se renderizan
  *  siempre, desde el primer render — igual que en Usuarios/Marcas/Roles y Permisos. Únicamente
@@ -16,21 +16,21 @@ import { ChangeDetectionStrategy, Component, computed, input } from '@angular/co
  *  en el template, no lógica que se pueda extraer; este comentario es la referencia compartida
  *  para no reinventar el criterio feature por feature. */
 @Component({
-  selector: 'as-skeleton',
+  selector: 'sa-skeleton',
   standalone: true,
-  imports: [AsSkeleton],
-  templateUrl: './as-skeleton.html',
-  styleUrl: './as-skeleton.css',
+  imports: [SaSkeleton],
+  templateUrl: './sa-skeleton.html',
+  styleUrl: './sa-skeleton.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
-    '[class.as-skeleton-fill]': 'fill()',
+    '[class.sa-skeleton-fill]': 'fill()',
     // Clase de tipografía en el HOST (no solo en el hijo proyectado) — mismo textClass del shimmer.
     '[class]': 'textClass()',
     // display:contents: sin caja propia ni en 'stat' ni con loading=false (el contenido real se comporta como si no hubiera wrapper).
     '[style.display]': "!loading() || layout() === 'stat' ? 'contents' : null",
   },
 })
-export class AsSkeleton {
+export class SaSkeleton {
   readonly layout = input<'line' | 'stat' | 'row' | 'circles'>('line');
 
   // ── modo 'line' (átomo original) ──────────────────────────────────────
@@ -78,12 +78,12 @@ export class AsSkeleton {
 
   protected readonly resolvedAvatarRadius = computed(() => (this.avatarShape() === 'circle' ? '9999px' : this.avatarRadius()));
   protected readonly resolvedRadius = computed(() => (this.shape() === 'circle' ? '50%' : this.radius()));
-  protected readonly lineClass = computed(() => `as-skeleton-line ${this.textClass()} ${this.alignClass()}`);
+  protected readonly lineClass = computed(() => `sa-skeleton-line ${this.textClass()} ${this.alignClass()}`);
   protected readonly paragraphLines = computed(() => Array.from({ length: this.lines() }, (_, i) => i));
   protected readonly circlesRange = computed(() => Array.from({ length: this.count() }, (_, i) => i));
   protected readonly alignClass = computed(() => {
-    if (this.align() === 'center') return 'as-align-center';
-    if (this.align() === 'right') return 'as-align-right';
+    if (this.align() === 'center') return 'sa-align-center';
+    if (this.align() === 'right') return 'sa-align-right';
     return '';
   });
 
@@ -92,15 +92,15 @@ export class AsSkeleton {
     if (this.fill()) return '100%';
     switch (this.variant()) {
       case 'input':
-        return 'var(--as-sk-input-h, 3.25rem)';
+        return 'var(--sa-sk-input-h, 3.25rem)';
       case 'select':
-        return 'var(--as-sk-select-h, 2.5rem)';
+        return 'var(--sa-sk-select-h, 2.5rem)';
       case 'button':
-        return 'var(--as-sk-button-h, 2.25rem)';
+        return 'var(--sa-sk-button-h, 2.25rem)';
       case 'button-sm':
-        return 'var(--as-sk-button-sm-h, 1.875rem)';
+        return 'var(--sa-sk-button-sm-h, 1.875rem)';
       case 'chip':
-        return 'var(--as-sk-chip-h, 1.625rem)';
+        return 'var(--sa-sk-chip-h, 1.625rem)';
       default:
         return this.height();
     }

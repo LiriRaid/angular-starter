@@ -304,7 +304,7 @@ async function runFlow(
           canGoBack,
           choices: ALL_COMPONENT_IDS.map((id) => ({
             value: id,
-            name: `as-${id}`,
+            name: `sa-${id}`,
             description: describeComponent(id, context().appShell === 'starter'),
             checked: (previous ?? preset).includes(id),
           })),

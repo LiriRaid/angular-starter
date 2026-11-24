@@ -132,7 +132,7 @@ const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/
 
 /**
  * True when `current` is the file of the architecture's blueprint, whatever the project name was
- * when it was generated (`as add app-shell` knows the package name, `as new` the name typed).
+ * when it was generated (`sa add app-shell` knows the package name, `sa new` the name typed).
  */
 async function isPristine(targetDir: string, file: string, prefix: string): Promise<boolean> {
   const current = await readFile(join(targetDir, HOME_FOLDER, file), 'utf8').catch(() => undefined);
@@ -144,14 +144,14 @@ async function isPristine(targetDir: string, file: string, prefix: string): Prom
   return new RegExp(`^${pattern}$`).test(current.replaceAll('\r\n', '\n'));
 }
 
-/** The documentation of Angular Starter that the welcome page links to (ADR-0015). */
+/** The documentation of Starter Angular that the welcome page links to (ADR-0015). */
 const DOCS_FEATURE = 'docs';
 
 /**
  * Replaces the neutral home of the architecture with the welcome page (ADR-0009), only while the
  * four files of `home` are still the ones the architecture wrote: a home the developer changed, or
  * that Starter SSR added its deferred section to, is theirs and stays as it is. The welcome page
- * comes with the documentation of Angular Starter its cards open (`features/docs`, its route and its
+ * comes with the documentation of Starter Angular its cards open (`features/docs`, its route and its
  * item in the navigation tree); a documentation feature the developer already has is theirs too.
  */
 async function applyWelcomeHome({ targetDir, name, prefix }: AppShellProject): Promise<void> {

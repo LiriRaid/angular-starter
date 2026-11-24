@@ -1,12 +1,12 @@
 import { computed } from '@angular/core';
 import type { AbstractControl } from '@angular/forms';
 
-import { clamp } from '../as-popover/as-popover.config';
+import { clamp } from '../sa-popover/sa-popover.config';
 // El look del campo (borde, sombra de foco, color del label, etc.) es idéntico al de
-// `as-input` — en vez de duplicar esas fórmulas se reusan directo sus funciones puras
+// `sa-input` — en vez de duplicar esas fórmulas se reusan directo sus funciones puras
 // (ya pensadas para no depender de estado del componente dueño).
-import { resolveFieldsetBoxShadow, resolveInputErrorMessage, resolveInputFieldStyles, resolveInputLabelClass, resolveLabelColor } from '../as-input/as-input.config';
-import type { AsAmPm, AsCalendarDay, AsDatepickerVariant, AsParsedDateTime } from './as-datepicker.entity';
+import { resolveFieldsetBoxShadow, resolveInputErrorMessage, resolveInputFieldStyles, resolveInputLabelClass, resolveLabelColor } from '../sa-input/sa-input.config';
+import type { SaAmPm, SaCalendarDay, SaDatepickerVariant, SaParsedDateTime } from './sa-datepicker.entity';
 
 /** dd/mm/yyyy, with an optional time "hh:mm[:ss] AM/PM": the format accepted when typing a date. */
 const DATE_TIME_REGEX = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?\s*(AM|PM)?)?$/i;
@@ -77,7 +77,7 @@ export function isDateEnabled(date: Date, minDate?: Date, maxDate?: Date): boole
 }
 
 /** Grid de 6 semanas (42 celdas) empezando en el domingo anterior (o igual) al día 1 del mes. */
-export function buildCalendarDays(month: number, year: number, selected: Date | null, minDate?: Date, maxDate?: Date, today: Date = new Date()): AsCalendarDay[] {
+export function buildCalendarDays(month: number, year: number, selected: Date | null, minDate?: Date, maxDate?: Date, today: Date = new Date()): SaCalendarDay[] {
   const startDate = new Date(year, month, 1);
   startDate.setDate(startDate.getDate() - startDate.getDay());
 
@@ -94,15 +94,15 @@ export function buildCalendarDays(month: number, year: number, selected: Date | 
   });
 }
 
-export function formatTime12Hour(date: Date): { hour: string; ampm: AsAmPm } {
+export function formatTime12Hour(date: Date): { hour: string; ampm: SaAmPm } {
   const hours24 = date.getHours();
-  const ampm: AsAmPm = hours24 >= 12 ? 'PM' : 'AM';
+  const ampm: SaAmPm = hours24 >= 12 ? 'PM' : 'AM';
   const hours12 = hours24 % 12 === 0 ? 12 : hours24 % 12;
 
   return { hour: `${pad2(hours12)}:${pad2(date.getMinutes())}`, ampm };
 }
 
-export function convertTo24Hour(hour12: number, ampm: AsAmPm): number {
+export function convertTo24Hour(hour12: number, ampm: SaAmPm): number {
   if (ampm === 'AM') return hour12 === 12 ? 0 : hour12;
   return hour12 === 12 ? 12 : hour12 + 12;
 }
@@ -117,7 +117,7 @@ export function formatDisplayDate(date: Date, includeTime: boolean): string {
 
 /** Parsea lo tipeado a mano en el input — devuelve `null` si el texto no matchea el formato o
  *  trae valores fuera de rango (ej. 31/02, hora 13 PM). */
-export function parseInputDateTime(raw: string, allowTime: boolean): AsParsedDateTime | null {
+export function parseInputDateTime(raw: string, allowTime: boolean): SaParsedDateTime | null {
   const trimmed = raw.trim();
   if (!trimmed) return null;
 
@@ -139,7 +139,7 @@ export function parseInputDateTime(raw: string, allowTime: boolean): AsParsedDat
   const hour12 = Number(hourStr);
   const minute = Number(minuteStr);
   const second = secondStr !== undefined ? Number(secondStr) : 0;
-  const ampm = (ampmStr?.toUpperCase() as AsAmPm | undefined) || 'AM';
+  const ampm = (ampmStr?.toUpperCase() as SaAmPm | undefined) || 'AM';
 
   if (hour12 < 1 || hour12 > 12 || minute < 0 || minute > 59 || second < 0 || second > 59) return null;
 
@@ -186,7 +186,7 @@ type DatepickerPresentationDeps = {
   isDisabled: () => boolean;
   isFocused: () => boolean;
   hasValue: () => boolean;
-  variant: () => AsDatepickerVariant;
+  variant: () => SaDatepickerVariant;
 };
 
 export function createDatepickerPresentation(deps: DatepickerPresentationDeps) {
@@ -205,8 +205,8 @@ export function createDatepickerPresentation(deps: DatepickerPresentationDeps) {
     shouldFloat,
     resolvedInputId,
     // Solo lo usa la variante `on` (fieldset + legend que corta el borde, igual que
-    // `as-input`) — acá no hay ícono a la izquierda que desplace el corte, por eso el
-    // offset es siempre el mismo (a diferencia de `as-input`, que sí lo varía).
+    // `sa-input`) — acá no hay ícono a la izquierda que desplace el corte, por eso el
+    // offset es siempre el mismo (a diferencia de `sa-input`, que sí lo varía).
     legendOffset: computed(() => '0.75rem'),
     legendMaxWidth: computed(() => (shouldFloat() ? '999px' : '0px')),
     legendTransition: computed(() => (shouldFloat() ? 'max-width 180ms ease' : 'max-width 80ms ease')),

@@ -1,11 +1,11 @@
-as-modal {
+sa-modal {
   display: contents;
 }
 
 /* El panel se monta vía CDK Overlay, no como `<dialog>` con `showModal()` — no vive en el
    "top layer" del navegador, así que necesita su propio backdrop (no hay `::backdrop`
    disponible) y su propio z-index para quedar por encima del resto de la página. */
-.as-modal-backdrop {
+.sa-modal-backdrop {
   position: fixed;
   inset: 0;
   z-index: 1040;
@@ -15,12 +15,12 @@ as-modal {
   transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.as-modal-backdrop--visible {
+.sa-modal-backdrop--visible {
   opacity: 1;
   pointer-events: auto;
 }
 
-.as-modal {
+.sa-modal {
   margin: auto;
   padding: 0;
   border: none;
@@ -52,19 +52,19 @@ as-modal {
   transform: scale(0.93);
 }
 
-.as-modal--visible {
+.sa-modal--visible {
   opacity: 1;
   transform: scale(1);
 }
 
 @starting-style {
-  .as-modal--visible {
+  .sa-modal--visible {
     opacity: 0;
     transform: scale(0.93);
   }
 }
 
-.as-modal-resize-handle {
+.sa-modal-resize-handle {
   position: absolute;
   display: block;
   cursor: se-resize;
@@ -75,7 +75,7 @@ as-modal {
   z-index: 1;
 }
 
-.as-modal-header {
+.sa-modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -85,24 +85,24 @@ as-modal {
   border-bottom: 1px solid var(--app-border-color);
 }
 
-.as-modal-header-actions {
+.sa-modal-header-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.as-modal-content {
+.sa-modal-content {
   overflow-y: auto;
   flex-grow: 1;
   padding: 1.25rem;
 }
 
 /* El contenido maneja su propio espaciado: el relleno va en su interior, no en el área que se desplaza. */
-.as-modal--flush .as-modal-content {
+.sa-modal--flush .sa-modal-content {
   padding: 0;
 }
 
-.as-modal-footer {
+.sa-modal-footer {
   flex-shrink: 0;
   display: flex;
   justify-content: flex-end;
@@ -114,7 +114,7 @@ as-modal {
 /* variant="preview" — el panel se ajusta al tamaño natural del contenido (ej. una imagen), sin header/padding,
    sin borde (ni en light ni en dark — solo la sombra marca el borde, igual que el portfolio),
    con el botón de cerrar flotando encima en vez de en una barra de header aparte. */
-.as-modal--preview {
+.sa-modal--preview {
   max-width: calc(100vw - 4rem);
   max-height: calc(100dvh - 4rem);
   background: var(--app-panel-muted-bg);
@@ -122,7 +122,7 @@ as-modal {
   box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
 }
 
-.as-modal--preview .as-modal-content {
+.sa-modal--preview .sa-modal-content {
   position: relative;
   display: flex;
   align-items: center;
@@ -131,14 +131,14 @@ as-modal {
   background: transparent;
 }
 
-.as-modal--preview .as-modal-content > img {
+.sa-modal--preview .sa-modal-content > img {
   display: block;
   max-width: min(900px, calc(100vw - 4rem));
   max-height: calc(100dvh - 4rem);
   object-fit: contain;
 }
 
-.as-modal-preview-close {
+.sa-modal-preview-close {
   position: absolute;
   top: 0.75rem;
   right: 0.75rem;
@@ -146,8 +146,8 @@ as-modal {
 }
 
 /* Botón icono flotando sobre una imagen (cerrar preview, quitar imagen) — fondo oscuro fijo,
-   igual en modo light y dark, nunca blanco. Se usa con as-button (nunca <button> nativo). */
-.as-btn.as-icon-overlay-btn {
+   igual en modo light y dark, nunca blanco. Se usa con sa-button (nunca <button> nativo). */
+.sa-btn.sa-icon-overlay-btn {
   background: rgba(0, 0, 0, 0.45);
   border-color: transparent;
   color: #ffffff;
@@ -156,11 +156,11 @@ as-modal {
   transition: background-color 0.2s ease;
 }
 
-.as-btn.as-icon-overlay-btn:hover {
+.sa-btn.sa-icon-overlay-btn:hover {
   background: rgba(0, 0, 0, 0.7);
 }
 
-.as-modal-title-dot {
+.sa-modal-title-dot {
   height: 0.625rem;
   width: 0.625rem;
   flex-shrink: 0;

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { AsIconsSVG } from '@core/common/icons/as-icons';
-import { AsIcon } from './as-icon';
+import { SaIconsSVG } from '@core/common/icons/sa-icons';
+import { SaIcon } from './sa-icon';
 
-describe('AsIcon', () => {
-  let fixture: ComponentFixture<AsIcon>;
+describe('SaIcon', () => {
+  let fixture: ComponentFixture<SaIcon>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AsIcon],
+      imports: [SaIcon],
     }).compileComponents();
   });
 
   it('renders a Lucide svg when the icon name maps to the registry', () => {
-    fixture = TestBed.createComponent(AsIcon);
+    fixture = TestBed.createComponent(SaIcon);
     fixture.componentRef.setInput('name', 'Home');
     fixture.detectChanges();
 
@@ -23,8 +23,8 @@ describe('AsIcon', () => {
   });
 
   it('renders a single SVG image reference when the icon name maps to a colored local asset', () => {
-    AsIconsSVG.push({ name: 'Demo', url: 'assets/svg/demo.svg', colored: true });
-    fixture = TestBed.createComponent(AsIcon);
+    SaIconsSVG.push({ name: 'Demo', url: 'assets/svg/demo.svg', colored: true });
+    fixture = TestBed.createComponent(SaIcon);
     fixture.componentRef.setInput('name', 'Demo');
     fixture.detectChanges();
 
@@ -34,6 +34,6 @@ describe('AsIcon', () => {
     expect(imageElement).not.toBeNull();
     expect(imageElement.getAttribute('href')).toContain('assets/svg/demo.svg');
     expect(htmlImageElement).toBeNull();
-    AsIconsSVG.pop();
+    SaIconsSVG.pop();
   });
 });

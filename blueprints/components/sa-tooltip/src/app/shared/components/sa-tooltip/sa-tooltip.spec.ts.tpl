@@ -3,15 +3,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import { AsTooltip, anchorRectOf } from './as-tooltip.directive';
+import { SaTooltip, anchorRectOf } from './sa-tooltip.directive';
 
 @Component({
-  template: '<button asTooltip="Detalle">Ver detalle</button>',
-  imports: [AsTooltip],
+  template: '<button saTooltip="Detalle">Ver detalle</button>',
+  imports: [SaTooltip],
 })
 class TooltipHost {}
 
-describe('AsTooltip', () => {
+describe('SaTooltip', () => {
   let fixture: ComponentFixture<TooltipHost>;
 
   beforeEach(async () => {
@@ -21,7 +21,7 @@ describe('AsTooltip', () => {
   });
 
   it('habilita la directiva con una única importación', () => {
-    const directive = fixture.debugElement.query(By.directive(AsTooltip)).injector.get(AsTooltip);
+    const directive = fixture.debugElement.query(By.directive(SaTooltip)).injector.get(SaTooltip);
 
     expect(directive.content()).toBe('Detalle');
   });

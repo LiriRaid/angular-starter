@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 
-import { EAsToastType, type IAsToastAction, type ToastItem, type ToastPosition } from '@shared/components/as-toast/as-toast.types';
+import { EAsToastType, type IAsToastAction, type ToastItem, type ToastPosition } from '@shared/components/sa-toast/sa-toast.types';
 
 @Injectable({
   providedIn: 'root',

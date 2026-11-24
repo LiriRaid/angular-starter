@@ -1,6 +1,6 @@
 <input
   type="checkbox"
-  class="as-checkbox-input"
+  class="sa-checkbox-input"
   [attr.id]="inputId() || null"
   [checked]="value()"
   [indeterminate]="indeterminate() && !value()"
@@ -11,8 +11,8 @@
   (blur)="onInputBlur()"
 />
 
-<div class="as-checkbox-box">
+<div class="sa-checkbox-box">
   @if (value()) {
-    <as-icon name="Check" size="18" class="as-checkbox-icon" />
+    <sa-icon name="Check" size="18" class="sa-checkbox-icon" />
   }
 </div>

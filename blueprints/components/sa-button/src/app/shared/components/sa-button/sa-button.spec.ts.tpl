@@ -1,17 +1,17 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, expect, it, vi, beforeEach } from 'vitest';
-import { AsButton } from './as-button';
+import { SaButton } from './sa-button';
 
-describe('AsButton', () => {
-  let fixture: ComponentFixture<AsButton>;
-  let component: AsButton;
+describe('SaButton', () => {
+  let fixture: ComponentFixture<SaButton>;
+  let component: SaButton;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AsButton],
+      imports: [SaButton],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsButton);
+    fixture = TestBed.createComponent(SaButton);
     component = fixture.componentInstance;
   });
 
@@ -148,15 +148,15 @@ describe('AsButton', () => {
 
   it('rounded añade la clase de radio y sin él no cambia el borde por defecto', () => {
     fixture.detectChanges();
-    expect(component.buttonClass()).not.toContain('as-btn-r-');
+    expect(component.buttonClass()).not.toContain('sa-btn-r-');
 
     fixture.componentRef.setInput('rounded', 'lg');
     fixture.detectChanges();
-    expect(component.buttonClass()).toContain('as-btn-r-lg');
+    expect(component.buttonClass()).toContain('sa-btn-r-lg');
 
     fixture.componentRef.setInput('rounded', 'full');
     fixture.detectChanges();
-    expect(component.buttonClass()).toContain('as-btn-r-full');
-    expect(component.buttonClass()).not.toContain('as-btn-r-lg');
+    expect(component.buttonClass()).toContain('sa-btn-r-full');
+    expect(component.buttonClass()).not.toContain('sa-btn-r-lg');
   });
 });

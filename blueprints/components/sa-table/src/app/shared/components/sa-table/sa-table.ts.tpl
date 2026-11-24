@@ -2,26 +2,26 @@ import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, TemplateRef, ViewEncapsulation, computed, input, linkedSignal, model, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { AsCheckbox } from '../as-checkbox/as-checkbox';
-import { AsIcon } from '../as-icon/as-icon';
-import { AsSelect } from '../as-select/as-select';
-import { AsSkeleton } from '../as-skeleton/as-skeleton';
-import { buildPageItems, cellClass as buildCellClass, headerClass as buildHeaderClass, type AsTableAlign, type AsTableColumn, type AsTablePageEvent } from './as-table.config';
+import { SaCheckbox } from '../sa-checkbox/sa-checkbox';
+import { SaIcon } from '../sa-icon/sa-icon';
+import { SaSelect } from '../sa-select/sa-select';
+import { SaSkeleton } from '../sa-skeleton/sa-skeleton';
+import { buildPageItems, cellClass as buildCellClass, headerClass as buildHeaderClass, type SaTableAlign, type SaTableColumn, type SaTablePageEvent } from './sa-table.config';
 
-export type { AsTableAlign, AsTableColumn, AsTablePageEvent };
+export type { SaTableAlign, SaTableColumn, SaTablePageEvent };
 
 @Component({
-  selector: 'as-table',
+  selector: 'sa-table',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, FormsModule, AsCheckbox, AsSelect, AsSkeleton, AsIcon],
-  templateUrl: './as-table.html',
-  styleUrl: './as-table.css',
+  imports: [NgClass, NgTemplateOutlet, FormsModule, SaCheckbox, SaSelect, SaSkeleton, SaIcon],
+  templateUrl: './sa-table.html',
+  styleUrl: './sa-table.css',
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AsTable<T = Record<string, unknown>> {
+export class SaTable<T = Record<string, unknown>> {
   readonly value = input<T[]>([]);
-  readonly columns = input<readonly AsTableColumn[]>([]);
+  readonly columns = input<readonly SaTableColumn[]>([]);
   readonly dataKey = input<string | undefined>(undefined);
 
   readonly cellTemplates = input<Record<string, TemplateRef<unknown>>>({});
@@ -38,7 +38,7 @@ export class AsTable<T = Record<string, unknown>> {
   /** Modo server-side: la tabla no pagina el array, usa totalRecords del API */
   readonly lazy = input<boolean>(false);
   readonly lazyTotalRecords = input<number | null>(null);
-  readonly pageChange = output<AsTablePageEvent>();
+  readonly pageChange = output<SaTablePageEvent>();
 
   readonly itemLabel = input<string>('registros');
   readonly tableMinWidth = input<string>('60rem');
@@ -224,11 +224,11 @@ export class AsTable<T = Record<string, unknown>> {
     return (row as Record<string, unknown>)[field];
   }
 
-  headerClass(column: AsTableColumn): string {
+  headerClass(column: SaTableColumn): string {
     return buildHeaderClass(column);
   }
 
-  cellClass(column: AsTableColumn): string {
+  cellClass(column: SaTableColumn): string {
     return buildCellClass(column);
   }
 

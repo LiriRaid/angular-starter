@@ -1,15 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { AsTabs, type AsTab } from './as-tabs';
+import { SaTabs, type SaTab } from './sa-tabs';
 
-const TABS: readonly AsTab[] = [
+const TABS: readonly SaTab[] = [
   { id: 'info', label: 'Información' },
   { id: 'prefs', label: 'Preferencias', icon: 'Settings' },
   { id: 'activity', label: 'Actividad' },
 ];
 
-type AsTabsInternals = {
-  selectTab: (tab: AsTab, event: Event) => void;
+type SaTabsInternals = {
+  selectTab: (tab: SaTab, event: Event) => void;
   scrollTabIntoView: (tab: HTMLElement) => void;
   syncActiveBar: (tab?: HTMLElement | null) => void;
 };
@@ -20,13 +20,13 @@ function defineLayout(el: HTMLElement, props: Partial<Record<'offsetLeft' | 'off
   }
 }
 
-describe('AsTabs', () => {
-  let fixture: ComponentFixture<AsTabs>;
-  let component: AsTabs;
-  let internals: AsTabsInternals;
+describe('SaTabs', () => {
+  let fixture: ComponentFixture<SaTabs>;
+  let component: SaTabs;
+  let internals: SaTabsInternals;
 
   beforeEach(async () => {
-    TestBed.overrideComponent(AsTabs, {
+    TestBed.overrideComponent(SaTabs, {
       set: {
         imports: [],
         template: '',
@@ -34,12 +34,12 @@ describe('AsTabs', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [AsTabs],
+      imports: [SaTabs],
     }).compileComponents();
 
-    fixture = TestBed.createComponent(AsTabs);
+    fixture = TestBed.createComponent(SaTabs);
     component = fixture.componentInstance;
-    internals = component as unknown as AsTabsInternals;
+    internals = component as unknown as SaTabsInternals;
     fixture.componentRef.setInput('tabs', TABS);
     component.active.set('info');
     fixture.detectChanges();
@@ -64,14 +64,14 @@ describe('AsTabs', () => {
   describe('scrollTabIntoView', () => {
     function buildContent(): HTMLElement {
       const content = document.createElement('div');
-      content.className = 'as-tablist-content';
+      content.className = 'sa-tablist-content';
       content.scrollTo = vi.fn();
       defineLayout(content, { clientWidth: 200 });
       fixture.nativeElement.appendChild(content);
       return content;
     }
 
-    it('sin carril de tabs (.as-tablist-content ausente) no hace nada', () => {
+    it('sin carril de tabs (.sa-tablist-content ausente) no hace nada', () => {
       const tab = document.createElement('div');
       expect(() => internals.scrollTabIntoView(tab)).not.toThrow();
     });
@@ -113,12 +113,12 @@ describe('AsTabs', () => {
   describe('syncActiveBar', () => {
     function buildBar(): HTMLElement {
       const bar = document.createElement('div');
-      bar.className = 'as-tablist-active-bar';
+      bar.className = 'sa-tablist-active-bar';
       fixture.nativeElement.appendChild(bar);
       return bar;
     }
 
-    it('sin barra activa (.as-tablist-active-bar ausente) no hace nada', () => {
+    it('sin barra activa (.sa-tablist-active-bar ausente) no hace nada', () => {
       const tab = document.createElement('div');
       expect(() => internals.syncActiveBar(tab)).not.toThrow();
     });
@@ -134,10 +134,10 @@ describe('AsTabs', () => {
       expect(bar.style.left).toBe('24px');
     });
 
-    it('sin tab explícito, usa .as-tab--active como referencia', () => {
+    it('sin tab explícito, usa .sa-tab--active como referencia', () => {
       const bar = buildBar();
       const active = document.createElement('div');
-      active.className = 'as-tab--active';
+      active.className = 'sa-tab--active';
       defineLayout(active, { offsetLeft: 5, offsetWidth: 30 });
       fixture.nativeElement.appendChild(active);
 
@@ -147,12 +147,12 @@ describe('AsTabs', () => {
       expect(bar.style.left).toBe('5px');
     });
 
-    it('en variant pills, toma el color del tab desde --as-tab-color', () => {
+    it('en variant pills, toma el color del tab desde --sa-tab-color', () => {
       fixture.componentRef.setInput('variant', 'pills');
       const bar = buildBar();
       const tab = document.createElement('div');
       defineLayout(tab, { offsetLeft: 0, offsetWidth: 10 });
-      tab.style.setProperty('--as-tab-color', '#ff0000');
+      tab.style.setProperty('--sa-tab-color', '#ff0000');
 
       internals.syncActiveBar(tab);
 
@@ -180,19 +180,19 @@ describe('AsTabs', () => {
   });
 });
 
-describe('AsTabs · contador (template real)', () => {
-  let fixture: ComponentFixture<AsTabs>;
+describe('SaTabs · contador (template real)', () => {
+  let fixture: ComponentFixture<SaTabs>;
 
-  const counters = (): HTMLElement[] => Array.from(fixture.nativeElement.querySelectorAll('.as-tab-count'));
+  const counters = (): HTMLElement[] => Array.from(fixture.nativeElement.querySelectorAll('.sa-tab-count'));
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({ imports: [AsTabs] }).compileComponents();
-    fixture = TestBed.createComponent(AsTabs);
+    await TestBed.configureTestingModule({ imports: [SaTabs] }).compileComponents();
+    fixture = TestBed.createComponent(SaTabs);
     fixture.componentRef.setInput('tabs', [
       { id: 'a', label: 'Abiertas', count: 3 },
       { id: 'b', label: 'Pendientes', count: 5, countTone: 'danger' },
       { id: 'c', label: 'Cerradas' },
-    ] satisfies readonly AsTab[]);
+    ] satisfies readonly SaTab[]);
     fixture.detectChanges();
   });
 

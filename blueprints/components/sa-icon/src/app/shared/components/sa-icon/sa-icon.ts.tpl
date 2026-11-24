@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { LucideDynamicIcon } from '@lucide/angular';
-import { AS_LUCIDE_ICONS } from '@core/common/icons/lucide-icons.provider';
-import { AsIconsSVG } from '@core/common/icons/as-icons';
+import { SA_LUCIDE_ICONS } from '@core/common/icons/lucide-icons.provider';
+import { SaIconsSVG } from '@core/common/icons/sa-icons';
 
 @Component({
-  selector: 'as-icon',
+  selector: 'sa-icon',
   standalone: true,
   imports: [LucideDynamicIcon],
   template: `
@@ -73,10 +73,10 @@ import { AsIconsSVG } from '@core/common/icons/as-icons';
       }
 
       .spin {
-        animation: as-icon-spin 1s linear infinite;
+        animation: sa-icon-spin 1s linear infinite;
       }
 
-      @keyframes as-icon-spin {
+      @keyframes sa-icon-spin {
         from {
           transform: rotate(0deg);
         }
@@ -87,12 +87,12 @@ import { AsIconsSVG } from '@core/common/icons/as-icons';
     `,
   ],
 })
-export class AsIcon {
+export class SaIcon {
   private static nextFilterId = 0;
 
-  private readonly lucideIcons = inject(AS_LUCIDE_ICONS);
-  private readonly svgIcons = AsIconsSVG;
-  protected readonly coloredFilterId = `as-colored-icon-${AsIcon.nextFilterId++}`;
+  private readonly lucideIcons = inject(SA_LUCIDE_ICONS);
+  private readonly svgIcons = SaIconsSVG;
+  protected readonly coloredFilterId = `sa-colored-icon-${SaIcon.nextFilterId++}`;
 
   readonly name = input.required<string>();
   readonly size = input<string | number>('1.25rem');

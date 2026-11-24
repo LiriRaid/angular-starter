@@ -5,36 +5,36 @@
   width: 100%;
 }
 
-.as-select-over {
+.sa-select-over {
   transition: padding-top 150ms ease;
 }
 
-.as-select-over-float {
+.sa-select-over-float {
   padding-top: 1rem;
 }
 
-.as-select-label {
+.sa-select-label {
   line-height: 1.25;
   overflow: visible;
 }
 
-.as-select-error {
+.sa-select-error {
   padding-left: 1.25rem;
   color: var(--app-error-color);
   font-size: 0.75rem;
   line-height: 1.4;
 }
 
-.as-select-field.as-select-field--disabled .as-select-field-label {
+.sa-select-field.sa-select-field--disabled .sa-select-field-label {
   color: var(--app-control-disabled-text);
   opacity: 1;
 }
 
-input.as-select-field-label:read-only {
+input.sa-select-field-label:read-only {
   cursor: pointer;
 }
 
-.as-select-clear-icon {
+.sa-select-clear-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;

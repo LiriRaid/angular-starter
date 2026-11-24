@@ -1,74 +1,74 @@
-as-tabs {
+sa-tabs {
   display: block;
   min-width: 0;
 
-  --as-tabs-nav-size: clamp(2.875rem, 2.76rem + 0.023vw, 3rem);
-  --as-tabs-nav-fade: 0.85rem;
-  --as-tabs-nav-knob: var(--app-overlay-bg);
-  --as-tabs-icon-size: clamp(0.9375rem, 0.836rem + 0.452vw, 1.125rem);
-  --as-tabs-mask-fade: calc(var(--as-tabs-nav-size) + var(--as-tabs-nav-fade));
-  --as-tabs-mask-left: linear-gradient(
+  --sa-tabs-nav-size: clamp(2.875rem, 2.76rem + 0.023vw, 3rem);
+  --sa-tabs-nav-fade: 0.85rem;
+  --sa-tabs-nav-knob: var(--app-overlay-bg);
+  --sa-tabs-icon-size: clamp(0.9375rem, 0.836rem + 0.452vw, 1.125rem);
+  --sa-tabs-mask-fade: calc(var(--sa-tabs-nav-size) + var(--sa-tabs-nav-fade));
+  --sa-tabs-mask-left: linear-gradient(
     to right,
     transparent 0,
-    transparent var(--as-tabs-nav-size),
-    #000 var(--as-tabs-mask-fade)
+    transparent var(--sa-tabs-nav-size),
+    #000 var(--sa-tabs-mask-fade)
   );
-  --as-tabs-mask-right: linear-gradient(
+  --sa-tabs-mask-right: linear-gradient(
     to left,
     transparent 0,
-    transparent var(--as-tabs-nav-size),
-    #000 var(--as-tabs-mask-fade)
+    transparent var(--sa-tabs-nav-size),
+    #000 var(--sa-tabs-mask-fade)
   );
-  --as-tabs-mask-both: linear-gradient(
+  --sa-tabs-mask-both: linear-gradient(
     to right,
     transparent 0,
-    transparent var(--as-tabs-nav-size),
-    #000 var(--as-tabs-mask-fade),
-    #000 calc(100% - var(--as-tabs-mask-fade)),
-    transparent calc(100% - var(--as-tabs-nav-size)),
+    transparent var(--sa-tabs-nav-size),
+    #000 var(--sa-tabs-mask-fade),
+    #000 calc(100% - var(--sa-tabs-mask-fade)),
+    transparent calc(100% - var(--sa-tabs-nav-size)),
     transparent 100%
   );
 }
 
-as-tabs .as-tablist,
-as-tabs .as-tablist-content {
+sa-tabs .sa-tablist,
+sa-tabs .sa-tablist-content {
   min-width: 0;
 }
 
-as-tabs .as-tablist {
+sa-tabs .sa-tablist {
   position: relative;
   display: flex;
   background: transparent;
 }
 
-as-tabs .as-tablist-content {
+sa-tabs .sa-tablist-content {
   flex: 1 1 auto;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
-  scroll-padding-inline: var(--as-tabs-nav-size);
+  scroll-padding-inline: var(--sa-tabs-nav-size);
 }
 
-as-tabs .as-tablist-content::-webkit-scrollbar {
+sa-tabs .sa-tablist-content::-webkit-scrollbar {
   display: none;
 }
 
-as-tabs .as-tablist:has(.as-tablist-prev-button) .as-tablist-content {
-  -webkit-mask-image: var(--as-tabs-mask-left);
-  mask-image: var(--as-tabs-mask-left);
+sa-tabs .sa-tablist:has(.sa-tablist-prev-button) .sa-tablist-content {
+  -webkit-mask-image: var(--sa-tabs-mask-left);
+  mask-image: var(--sa-tabs-mask-left);
 }
 
-as-tabs .as-tablist:has(.as-tablist-next-button) .as-tablist-content {
-  -webkit-mask-image: var(--as-tabs-mask-right);
-  mask-image: var(--as-tabs-mask-right);
+sa-tabs .sa-tablist:has(.sa-tablist-next-button) .sa-tablist-content {
+  -webkit-mask-image: var(--sa-tabs-mask-right);
+  mask-image: var(--sa-tabs-mask-right);
 }
 
-as-tabs .as-tablist:has(.as-tablist-prev-button):has(.as-tablist-next-button) .as-tablist-content {
-  -webkit-mask-image: var(--as-tabs-mask-both);
-  mask-image: var(--as-tabs-mask-both);
+sa-tabs .sa-tablist:has(.sa-tablist-prev-button):has(.sa-tablist-next-button) .sa-tablist-content {
+  -webkit-mask-image: var(--sa-tabs-mask-both);
+  mask-image: var(--sa-tabs-mask-both);
 }
 
-as-tabs .as-tablist-tab-list {
+sa-tabs .sa-tablist-tab-list {
   position: relative;
   display: grid;
   grid-auto-flow: column;
@@ -79,7 +79,7 @@ as-tabs .as-tablist-tab-list {
   padding: 0.25rem 0.25rem 0.75rem;
 }
 
-as-tabs .as-tablist-tab-list::before {
+sa-tabs .sa-tablist-tab-list::before {
   content: '';
   position: absolute;
   top: 0;
@@ -92,60 +92,60 @@ as-tabs .as-tablist-tab-list::before {
   pointer-events: none;
 }
 
-as-tabs .as-tablist,
-as-tabs .as-tablist-content,
-as-tabs .as-tablist-tab-list,
-as-tabs .as-tab {
+sa-tabs .sa-tablist,
+sa-tabs .sa-tablist-content,
+sa-tabs .sa-tablist-tab-list,
+sa-tabs .sa-tab {
   border: 0;
   border-color: transparent;
 }
 
-as-tabs .as-tab {
+sa-tabs .sa-tab {
   margin: 0;
   position: relative;
   z-index: 1;
 }
 
-as-tabs .as-tablist-active-bar {
+sa-tabs .sa-tablist-active-bar {
   z-index: 1;
 }
 
-as-tabs .as-tab > as-icon svg,
-as-tabs .as-tab > as-icon i,
-as-tabs .as-tab > as-icon span {
-  width: var(--as-tabs-icon-size) !important;
-  height: var(--as-tabs-icon-size) !important;
+sa-tabs .sa-tab > sa-icon svg,
+sa-tabs .sa-tab > sa-icon i,
+sa-tabs .sa-tab > sa-icon span {
+  width: var(--sa-tabs-icon-size) !important;
+  height: var(--sa-tabs-icon-size) !important;
 }
 
-as-tabs .as-tab:hover:not(.as-tab--active) {
-  background: color-mix(in srgb, var(--as-primary-color) 10%, transparent);
+sa-tabs .sa-tab:hover:not(.sa-tab--active) {
+  background: color-mix(in srgb, var(--sa-primary-color) 10%, transparent);
   color: var(--app-text-color);
 }
 
-as-tabs .as-tab.as-tab--active {
+sa-tabs .sa-tab.sa-tab--active {
   background: color-mix(in srgb, var(--app-panel-bg) 85%, white 15%);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  /* `--app-text-color` (blanco en dark, negro en light), no `--as-primary-color` — el primary
+  /* `--app-text-color` (blanco en dark, negro en light), no `--sa-primary-color` — el primary
      puro como texto se ve opaco/bajo contraste en dark mode. */
   color: var(--app-text-color);
 }
 
-as-tabs .as-tablist-active-bar {
+sa-tabs .sa-tablist-active-bar {
   position: absolute;
   bottom: 0.25rem;
   height: 2px;
-  background: var(--as-primary-color);
+  background: var(--sa-primary-color);
 }
 
-as-tabs .as-tablist-nav-button {
+sa-tabs .sa-tablist-nav-button {
   position: absolute;
   top: 0;
   z-index: 2;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--as-tabs-nav-size);
-  min-width: var(--as-tabs-nav-size);
+  width: var(--sa-tabs-nav-size);
+  min-width: var(--sa-tabs-nav-size);
   height: 100%;
   padding: 0;
   border: 0;
@@ -156,15 +156,15 @@ as-tabs .as-tablist-nav-button {
   cursor: pointer;
 }
 
-as-tabs .as-tablist-prev-button {
+sa-tabs .sa-tablist-prev-button {
   left: 0;
 }
 
-as-tabs .as-tablist-next-button {
+sa-tabs .sa-tablist-next-button {
   right: 0;
 }
 
-as-tabs .as-tablist-nav-button::before {
+sa-tabs .sa-tablist-nav-button::before {
   content: '';
   position: absolute;
   top: 50%;
@@ -173,69 +173,69 @@ as-tabs .as-tablist-nav-button::before {
   width: 2.375rem;
   height: 2.375rem;
   border-radius: 50%;
-  background: var(--as-tabs-nav-knob);
+  background: var(--sa-tabs-nav-knob);
 }
 
-as-tabs .as-tablist-nav-button svg {
+sa-tabs .sa-tablist-nav-button svg {
   position: relative;
   z-index: 1;
 }
 
-as-tabs .as-tablist-nav-button:hover::before {
-  background: color-mix(in srgb, var(--as-primary-color) 14%, var(--as-tabs-nav-knob));
+sa-tabs .sa-tablist-nav-button:hover::before {
+  background: color-mix(in srgb, var(--sa-primary-color) 14%, var(--sa-tabs-nav-knob));
 }
 
-as-tabs .as-tablist-nav-button:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--as-primary-color) 45%, transparent);
+sa-tabs .sa-tablist-nav-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--sa-primary-color) 45%, transparent);
   outline-offset: 0;
 }
 
-as-tabs .as-tab:focus-visible {
+sa-tabs .sa-tab:focus-visible {
   outline: none;
   box-shadow: none;
 }
 
-/* Ripple al hacer click — mismo tratamiento visual que .as-btn .as-ink (button-styles.css),
-   reusando el mismo @keyframes as-ripple (global, no atado a ningún componente). */
-as-tabs .as-tab .as-ink {
+/* Ripple al hacer click — mismo tratamiento visual que .sa-btn .sa-ink (button-styles.css),
+   reusando el mismo @keyframes sa-ripple (global, no atado a ningún componente). */
+sa-tabs .sa-tab .sa-ink {
   display: block;
   position: absolute;
   background: rgba(0, 0, 0, 0.1);
   border-radius: 100%;
   transform: scale(0);
   pointer-events: none;
-  animation: as-ripple 0.4s linear;
+  animation: sa-ripple 0.4s linear;
 }
 
-.dark as-tabs .as-tab .as-ink {
+.dark sa-tabs .sa-tab .sa-ink {
   background: rgba(255, 255, 255, 0.3);
 }
 
 /* ── Tamaño Compact ───────────────────────────────────────────────────────── */
-as-tabs.as-tabs--compact .as-tab {
+sa-tabs.sa-tabs--compact .sa-tab {
   padding-inline: 10px !important;
   padding-block: 6px !important;
 }
 
 /* ── Variante Pills ────────────────────────────────────────────────────────── */
-as-tabs.as-tabs--pills {
-  --as-tabs-icon-size: 16px;
-  --as-tabs-pill-border: color-mix(in srgb, var(--app-text-subtle) 40%, transparent);
+sa-tabs.sa-tabs--pills {
+  --sa-tabs-icon-size: 16px;
+  --sa-tabs-pill-border: color-mix(in srgb, var(--app-text-subtle) 40%, transparent);
 }
 
-as-tabs.as-tabs--pills .as-tablist-tab-list {
+sa-tabs.sa-tabs--pills .sa-tablist-tab-list {
   grid-auto-columns: max-content;
   min-width: 100%;
   gap: 8px;
 }
 
-as-tabs.as-tabs--pills .as-tablist-active-bar {
-  background: var(--as-tab-color, var(--as-primary-color));
+sa-tabs.sa-tabs--pills .sa-tablist-active-bar {
+  background: var(--sa-tab-color, var(--sa-primary-color));
 }
 
-as-tabs.as-tabs--pills .as-tab {
+sa-tabs.sa-tabs--pills .sa-tab {
   border-radius: 999px !important;
-  border: 1px solid var(--as-tabs-pill-border) !important;
+  border: 1px solid var(--sa-tabs-pill-border) !important;
   padding-inline: 6px !important;
   padding-block: 4px !important;
   height: 28px;
@@ -243,35 +243,35 @@ as-tabs.as-tabs--pills .as-tab {
   color: var(--app-text-subtle);
 }
 
-as-tabs.as-tabs--pills .as-tab.as-tab--icon-only {
+sa-tabs.sa-tabs--pills .sa-tab.sa-tab--icon-only {
   width: 28px;
   height: 28px;
   padding: 0;
 }
 
-/* `color` cae a `--app-text-color` (no `--as-primary-color`) cuando el tab no trae un
-   `--as-tab-color` propio (ej. la pestaña "Todos", sin canal específico) — el border/fondo se
+/* `color` cae a `--app-text-color` (no `--sa-primary-color`) cuando el tab no trae un
+   `--sa-tab-color` propio (ej. la pestaña "Todos", sin canal específico) — el border/fondo se
    quedan con el tinte primary, solo el texto plano necesitaba el cambio por contraste. */
-as-tabs.as-tabs--pills .as-tab:hover {
+sa-tabs.sa-tabs--pills .sa-tab:hover {
   border-color: color-mix(
     in srgb,
-    var(--as-tab-color, var(--as-primary-color)) 50%,
+    var(--sa-tab-color, var(--sa-primary-color)) 50%,
     transparent
   ) !important;
-  background: color-mix(in srgb, var(--as-tab-color, var(--as-primary-color)) 6%, transparent);
-  color: var(--as-tab-color, var(--app-text-color));
+  background: color-mix(in srgb, var(--sa-tab-color, var(--sa-primary-color)) 6%, transparent);
+  color: var(--sa-tab-color, var(--app-text-color));
 }
 
-as-tabs.as-tabs--pills .as-tab.as-tab--active {
+sa-tabs.sa-tabs--pills .sa-tab.sa-tab--active {
   border-color: color-mix(
     in srgb,
-    var(--as-tab-color, var(--as-primary-color)) 55%,
+    var(--sa-tab-color, var(--sa-primary-color)) 55%,
     transparent
   ) !important;
-  background: color-mix(in srgb, var(--as-tab-color, var(--as-primary-color)) 12%, transparent);
-  color: var(--as-tab-color, var(--app-text-color));
+  background: color-mix(in srgb, var(--sa-tab-color, var(--sa-primary-color)) 12%, transparent);
+  color: var(--sa-tab-color, var(--app-text-color));
 }
 
-as-tabs.as-tabs--pills .as-tab.as-tab--active:hover {
-  background: color-mix(in srgb, var(--as-tab-color, var(--as-primary-color)) 18%, transparent);
+sa-tabs.sa-tabs--pills .sa-tab.sa-tab--active:hover {
+  background: color-mix(in srgb, var(--sa-tab-color, var(--sa-primary-color)) 18%, transparent);
 }

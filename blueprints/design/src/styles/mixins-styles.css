@@ -14,7 +14,7 @@
   inset: 0;
   background: linear-gradient(
     90deg,
-    color-mix(in srgb, var(--as-primary-color) 16%, transparent) 0%,
+    color-mix(in srgb, var(--sa-primary-color) 16%, transparent) 0%,
     transparent 80%
   );
   border-radius: 0.25rem;
