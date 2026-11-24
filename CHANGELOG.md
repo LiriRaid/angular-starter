@@ -23,6 +23,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- `sa add components` and `sa add app-shell` say, before they run, that Lucide Icons is installed too and
+  why (`sa-icon` draws the icons with it); `sa add icons lucide` on a project with no components suggests
+  `sa add components icon`; and `sa add components` with no value lists every component id next to the
+  collections. Nothing else about the commands changes.
 - The project is now called **Starter Angular** (the website says Starter for Angular): the package is
   `@liriraid/starter-angular` (0.1.0), the binaries are `sa` and `starter-angular` (`as` and `angular-starter`
   are gone), the selector prefix of the native components is `sa-` (`sa-button`, `SaButton`, `--sa-*`), the
