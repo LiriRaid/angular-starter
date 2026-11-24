@@ -80,6 +80,14 @@ describe('as list: the command of each option', () => {
 });
 
 describe('as list: one table for the whole listing', () => {
+  it('paints the headers of the columns when the terminal has colors', async () => {
+    const fake = createFakeIo({ columns: 160, color: true });
+    expect(await run(['list', 'rendering'], fake.io)).toBe(0);
+    expect(fake.out()).toContain('\u001b[36mID');
+    expect(fake.out()).toContain('\u001b[36mCommands');
+    expect(fake.out()).toContain('\u001b[36mOption');
+  });
+
   it('names the three columns under the title of each category', async () => {
     const out = await wide('rendering');
     expect(out).toMatch(/^ {2}ID +Commands +Option$/m);

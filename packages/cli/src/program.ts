@@ -12,23 +12,26 @@ import type { NewFlags } from './commands/new.js';
 import type { ProgramDeps } from './deps.js';
 import { RuntimeError } from './errors.js';
 import { println, type CliIo } from './io.js';
-import { formatRows } from './ui/format.js';
+import { createStyler, formatRows, type Styler } from './ui/format.js';
 import { VERSION_TEXT } from './version.js';
 
 /** The commands of the root help, in order, with the usage each one is listed with. */
 const ROOT_COMMANDS: readonly (readonly [name: string, term: string])[] = [
-  ['new', 'new [name]'],
-  ['init', 'init'],
-  ['add', 'add <capability> [value]'],
-  ['generate', 'generate, g <kind> <name>'],
-  ['list', 'list [category]'],
-  ['info', 'info'],
-  ['config', 'config <list|get> [key]'],
-  ['doctor', 'doctor'],
-  ['update', 'update'],
-  ['version', 'version'],
-  ['help', 'help [command]'],
+  ['new', 'as new [name]'],
+  ['init', 'as init'],
+  ['add', 'as add <capability> [value]'],
+  ['generate', 'as generate, g <kind> <name>'],
+  ['list', 'as list [category]'],
+  ['info', 'as info'],
+  ['config', 'as config <list|get> [key]'],
+  ['doctor', 'as doctor'],
+  ['update', 'as update'],
+  ['version', 'as version'],
+  ['help', 'as help [command]'],
 ];
+
+/** Where the help sends to read more, until the project has a site of its own. */
+const HOMEPAGE = 'https://github.com/LiriRaid/angular-starter';
 
 const ONLY_NEW =
   'Only `as new` decides: stylesheet format, Tailwind CSS, the purpose of the Starter SSR, the layout of the shell, package manager and selector prefix.';
@@ -39,22 +42,27 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
     .name('as')
     .description('Angular Starter CLI')
     .usage('[command] [options]')
-    .version(VERSION_TEXT, '-v, --version', 'Display versions')
-    .helpOption('-h, --help', 'Display help')
-    .helpCommand('help [command]', 'Display command help')
-    .configureOutput({ writeOut: io.stdout, writeErr: io.stderr })
+    .version(VERSION_TEXT, '-v, --version', 'Shows the CLI and Angular CLI versions.')
+    .helpOption('-h, --help', 'Shows a help message for this command in the console.')
+    .helpCommand('help [command]', 'Shows the help of one command, or the list of commands.')
+    .configureOutput({
+      writeOut: io.stdout,
+      writeErr: io.stderr,
+      getOutHasColors: () => io.color,
+      getErrHasColors: () => io.color,
+    })
     .configureHelp({
       formatHelp: (command, helper) =>
         command.parent
           ? Help.prototype.formatHelp.call(helper, command, helper)
-          : formatRootHelp(command, helper),
+          : formatRootHelp(command, helper, createStyler(io.color)),
     })
     .exitOverride();
 
   registerNewCommand(program, io, deps);
   program
     .command('init')
-    .description('Prepare an Angular project you already have')
+    .description('Prepares an Angular project you already have so the other commands work on it.')
     .option('--force', 'Read the project again and replace its angular-starter.config.json')
     .option('--dry-run', 'Show what it found without writing anything')
     .addHelpText(
@@ -74,7 +82,9 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
 
   program
     .command('list')
-    .description('List the options, with their commands and docs')
+    .description(
+      'Lists every option with the commands that add it, what it is and its documentation.',
+    )
     .argument(
       '[category]',
       'architecture, routing, style, rendering, ssrPurpose, appShell, layout, presence, components, uiSystem, icons or packageManager',
@@ -92,14 +102,14 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
 
   program
     .command('info')
-    .description('Display CLI and project information')
+    .description('Outputs the CLI, Angular CLI and Node versions and the options of the project.')
     .action(async () => {
       await infoCommand(io, deps);
     });
 
   program
     .command('config')
-    .description('Read the options recorded in the project')
+    .description('Reads the options recorded in the project configuration file.')
     .usage('<list|get> [key]')
     .argument('[action]', 'list: every option · get <key>: one option')
     .argument('[key]', 'Option to read')
@@ -119,14 +129,14 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
 
   program
     .command('doctor')
-    .description('Diagnose your environment')
+    .description('Diagnoses your environment and says what is missing to run the commands.')
     .action(async () => {
       await doctorCommand(io, deps);
     });
 
   program
     .command('update')
-    .description('Update a project (not available yet)')
+    .description('Updates the capabilities of a project to a newer version (not available yet).')
     .allowUnknownOption()
     .allowExcessArguments()
     .argument('[args...]')
@@ -138,7 +148,7 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
 
   program
     .command('version')
-    .description('Display the CLI and Angular CLI versions')
+    .description('Outputs the version of the CLI and of the Angular CLI that `as new` runs.')
     .action(() => {
       println(io.stdout, VERSION_TEXT);
     });
@@ -159,7 +169,7 @@ function examples(rows: readonly (readonly [string, string])[]): string {
 function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): void {
   program
     .command('new')
-    .description('Create a new Angular application')
+    .description('Creates a new Angular application, with the options you pick or the defaults.')
     .argument('[name]', 'Name of the project, also the folder that is created')
     .option('--architecture <id>', `Project architecture (${valuesOf('architecture')})`)
     .option('--routing <id>', `Routing system (${valuesOf('routing')})`)
@@ -242,7 +252,9 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
   ];
   program
     .command('add')
-    .description('Add a capability to an existing project')
+    .description(
+      'Adds a capability, such as components, routing, an app shell or icons, to a project.',
+    )
     .usage('<capability> [value]')
     .argument('[capability]', Object.keys(ADDABLE).join(', '))
     .argument('[value]', 'What to add; optional when the capability has one option')
@@ -287,7 +299,7 @@ function registerGenerateCommand(program: Command, io: CliIo): void {
   program
     .command('generate')
     .alias('g')
-    .description('Generate project files that follow the architecture')
+    .description('Generates a feature or a component that follows the architecture of the project.')
     .usage('<kind> <name> [options]')
     .argument('[kind]', GENERATE_KINDS.join(', '))
     .argument('[name]', 'Name in lowercase with hyphens, for example user-profiles')
@@ -319,7 +331,7 @@ function registerGenerateCommand(program: Command, io: CliIo): void {
 }
 
 /** Only the commands and the options, like `ng --help`; the examples live in the help of each command. */
-function formatRootHelp(program: Command, helper: Help): string {
+function formatRootHelp(program: Command, helper: Help, style: Styler): string {
   const descriptions = new Map(
     helper
       .visibleCommands(program)
@@ -334,11 +346,12 @@ function formatRootHelp(program: Command, helper: Help): string {
     '',
     'Usage: as [command] [options]',
     '',
-    'Commands:',
+    style.cyan('Commands:'),
     ...formatRows(ROOT_COMMANDS.map(([name, term]) => [term, descriptions.get(name) ?? ''])),
     '',
-    'Options:',
+    style.cyan('Options:'),
     ...formatRows(options),
     '',
+    `For more information, see ${HOMEPAGE}.`,
   ].join('\n');
 }
