@@ -311,15 +311,128 @@ describe('sa add', () => {
       '--icons',
       'none',
     ];
+    const WITH_COMPONENTS = [
+      '--architecture',
+      'angular-default',
+      '--routing',
+      'angular',
+      '--app-shell',
+      'none',
+      '--components',
+      'recommended',
+      '--icons',
+      'lucide',
+    ];
+    const read = (project: string, file: string): Promise<string> =>
+      readFile(join(project, file), 'utf8');
 
-    it('gives a project that is still what ng new generates the Screaming Architecture', async () => {
+    it('gives a project that is still what ng new generates the folders, the aliases and a clean root', async () => {
       const project = await createStarterProject(cwd, PLAIN);
       const result = await add(project, ['architecture', 'screaming']);
       expect(result.code, result.err).toBe(0);
-      expect(await exists(join(project, 'src/app/features/home/home.ts'))).toBe(true);
-      expect(await exists(join(project, 'src/app/shared/components/index.ts'))).toBe(true);
-      expect(await readFile(join(project, 'tsconfig.json'), 'utf8')).toContain('"@features/*"');
+      for (const folder of ['core', 'features', 'shared']) {
+        expect(await exists(join(project, `src/app/${folder}/README.md`)), folder).toBe(true);
+      }
+      const tsconfig = await read(project, 'tsconfig.json');
+      for (const alias of ['@core/*', '@features/*', '@shared/*']) {
+        expect(tsconfig).toContain(`"${alias}"`);
+      }
+      const root = await read(project, 'src/app/app.ts');
+      expect(root).toContain('<router-outlet />');
+      expect(root).not.toContain('templateUrl');
+      expect(await exists(join(project, 'src/app/app.html'))).toBe(false);
+      expect(await exists(join(project, 'src/app/app.css'))).toBe(false);
+      expect(await read(project, 'src/app/app.spec.ts')).not.toContain('should render title');
+      expect(await exists(join(project, 'src/app/features/home'))).toBe(false);
       expect((await readConfig(project)).architecture).toBe('screaming');
+    });
+
+    it('says what it adapted and what to do next', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      const result = await add(project, ['architecture', 'screaming']);
+      expect(result.code, result.err).toBe(0);
+      expect(result.out).toContain('src/app/app.ts');
+      expect(result.out).toContain('sa generate feature');
+      expect(result.out).toContain('sa add routing starter');
+    });
+
+    it('keeps the components the project already has and adds only what is missing', async () => {
+      const project = await createStarterProject(cwd, WITH_COMPONENTS);
+      const barrel = await read(project, 'src/app/shared/components/index.ts');
+      const result = await add(project, ['architecture', 'screaming']);
+      expect(result.code, result.err).toBe(0);
+      expect(await read(project, 'src/app/shared/components/index.ts')).toBe(barrel);
+      expect(await exists(join(project, 'src/app/shared/components/sa-button/sa-button.ts'))).toBe(
+        true,
+      );
+      expect(await exists(join(project, 'src/app/features/README.md'))).toBe(true);
+      expect(await read(project, 'tsconfig.json')).toContain('"@features/*"');
+      expect((await readConfig(project)).components).toBe('recommended');
+    });
+
+    it('does not move, replace or refuse the code the project has, not even a features folder', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      await mkdir(join(project, 'src/app/features/billing'), { recursive: true });
+      await writeFile(
+        join(project, 'src/app/features/billing/billing.ts'),
+        'export const a = 1;\n',
+      );
+      await mkdir(join(project, 'src/app/orders'), { recursive: true });
+      await writeFile(join(project, 'src/app/orders/orders.ts'), 'export const b = 2;\n');
+      const result = await add(project, ['architecture', 'screaming']);
+      expect(result.code, result.err).toBe(0);
+      expect(await read(project, 'src/app/features/billing/billing.ts')).toBe(
+        'export const a = 1;\n',
+      );
+      expect(await read(project, 'src/app/orders/orders.ts')).toBe('export const b = 2;\n');
+      expect(await exists(join(project, 'src/app/features/README.md'))).toBe(true);
+    });
+
+    it('leaves a root component that was changed as it is and names it in a notice', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      await writeFile(join(project, 'src/app/app.ts'), 'export const notAComponent = 1;\n');
+      const result = await add(project, ['architecture', 'screaming']);
+      expect(result.code, result.err).toBe(0);
+      expect(await read(project, 'src/app/app.ts')).toBe('export const notAComponent = 1;\n');
+      expect(await exists(join(project, 'src/app/app.html'))).toBe(true);
+      expect(result.out).toContain('src/app/app.ts');
+      expect(result.out).toMatch(/review|delete/i);
+      expect((await readConfig(project)).architecture).toBe('screaming');
+    });
+
+    it('keeps a welcome template the developer changed, and says it is no longer used', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      await writeFile(join(project, 'src/app/app.html'), '<h1>My own page</h1>\n');
+      const result = await add(project, ['architecture', 'screaming']);
+      expect(result.code, result.err).toBe(0);
+      expect(await read(project, 'src/app/app.html')).toBe('<h1>My own page</h1>\n');
+      expect(result.out).toContain('src/app/app.html');
+    });
+
+    it('stops, writing nothing, when an alias of the architecture points somewhere else', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      const tsconfig = await read(project, 'tsconfig.json');
+      await writeFile(
+        join(project, 'tsconfig.json'),
+        tsconfig.replace(
+          '"compilerOptions": {',
+          '"compilerOptions": { "baseUrl": ".", "paths": { "@features/*": ["./elsewhere/*"] },',
+        ),
+      );
+      const result = await add(project, ['architecture', 'screaming']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('@features/*');
+      expect(await exists(join(project, 'src/app/features'))).toBe(false);
+      expect((await readConfig(project)).architecture).toBe('angular-default');
+    });
+
+    it('lets sa generate feature work in the project afterwards', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      expect((await add(project, ['architecture', 'screaming'])).code).toBe(0);
+      const fake = createFakeIo({ cwd: project });
+      const code = await run(['generate', 'feature', 'billing'], fake.io);
+      expect(code, fake.err()).toBe(0);
+      expect(await exists(join(project, 'src/app/features/billing/billing.ts'))).toBe(true);
     });
 
     it('refuses a project that already has it', async () => {
@@ -327,25 +440,6 @@ describe('sa add', () => {
       const result = await add(project, ['architecture', 'screaming']);
       expect(result.code).toBe(2);
       expect(result.err).toContain('already');
-    });
-
-    it('refuses a project that has folders of its own where the architecture goes, and writes nothing', async () => {
-      const project = await createStarterProject(cwd, PLAIN);
-      await mkdir(join(project, 'src/app/features/billing'), { recursive: true });
-      const result = await add(project, ['architecture', 'screaming']);
-      expect(result.code).toBe(2);
-      expect(result.err).toContain('src/app/features');
-      expect(await exists(join(project, 'src/app/features/home'))).toBe(false);
-      expect((await readConfig(project)).architecture).toBe('angular-default');
-    });
-
-    it('refuses a project whose root component was changed and says which file', async () => {
-      const project = await createStarterProject(cwd, PLAIN);
-      await writeFile(join(project, 'src/app/app.ts'), 'export const notAComponent = 1;\n');
-      const result = await add(project, ['architecture', 'screaming']);
-      expect(result.code).toBe(2);
-      expect(result.err).toContain('src/app/app.ts');
-      expect(await exists(join(project, 'src/app/features'))).toBe(false);
     });
 
     it('refuses an architecture that is only planned', async () => {
@@ -361,6 +455,48 @@ describe('sa add', () => {
       expect(result.code).toBe(0);
       expect(result.out).toContain('Dry run');
       expect(await exists(join(project, 'src/app/features'))).toBe(false);
+    });
+
+    describe('in a terminal', () => {
+      async function ask(project: string, answers: unknown[], extra: string[] = []) {
+        const fake = createFakeIo({ cwd: project, interactive: true });
+        const runner = createFakeRunner();
+        const { prompter, asked } = createFakePrompter(answers);
+        const code = await run(['add', 'architecture', 'screaming', ...extra], fake.io, {
+          run: runner.run,
+          prompter,
+        });
+        return { code, out: fake.out(), err: fake.err(), asked };
+      }
+
+      it('asks whether to add the routing and the app shell too, and stops there on a no', async () => {
+        const project = await createStarterProject(cwd, PLAIN);
+        const result = await ask(project, [false]);
+        expect(result.code, result.err).toBe(0);
+        expect(result.asked).toHaveLength(1);
+        expect(result.asked[0]?.kind).toBe('confirm');
+        const options = await readConfig(project);
+        expect(options).toMatchObject({ architecture: 'screaming', routing: 'angular' });
+        expect(options.appShell).toBe('none');
+      });
+
+      it('adds the Starter routing and the app shell on a yes', async () => {
+        const project = await createStarterProject(cwd, PLAIN);
+        const result = await ask(project, [true]);
+        expect(result.code, result.err).toBe(0);
+        expect(await readConfig(project)).toMatchObject({
+          architecture: 'screaming',
+          routing: 'starter',
+          appShell: 'starter',
+        });
+      });
+
+      it('does not ask in a dry run', async () => {
+        const project = await createStarterProject(cwd, PLAIN);
+        const result = await ask(project, [], ['--dry-run']);
+        expect(result.code, result.err).toBe(0);
+        expect(result.asked).toEqual([]);
+      });
     });
   });
 

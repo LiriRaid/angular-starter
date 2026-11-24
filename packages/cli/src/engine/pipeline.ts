@@ -14,6 +14,8 @@ export interface GenerationContext {
   verbose: boolean;
   /** Non-fatal problems, shown after the success message. */
   warnings: string[];
+  /** What a stage tells the developer after the steps: what it did and what to do next. */
+  notes?: string[];
   /** True once the project folder has been created by this run. */
   created: boolean;
 }
