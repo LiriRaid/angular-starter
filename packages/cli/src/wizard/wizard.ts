@@ -63,7 +63,7 @@ const TITLES: Record<SelectKey | 'componentList' | 'git' | 'install', string> = 
 const yesNo = (value: boolean): string => (value ? 'Yes' : 'No');
 
 /** What a component is, what it brings with it and the global stylesheet it adds. */
-function describeComponent(id: string, shellBrings: boolean): string {
+export function describeComponent(id: string, shellBrings: boolean): string {
   const definition = COMPONENTS.find((component) => component.id === id);
   const brings = definition?.uses.length ? ` Also brings: ${definition.uses.join(', ')}.` : '';
   const styles = definition?.styles.length

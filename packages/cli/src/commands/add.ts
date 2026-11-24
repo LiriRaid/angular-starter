@@ -28,6 +28,7 @@ import {
 import { UsageError } from '../errors.js';
 import { pathExists } from '../engine/fs.js';
 import { println, type CliIo } from '../io.js';
+import { describeComponent } from '../wizard/wizard.js';
 import { findProject } from '../project/find.js';
 import { ADDABLE, NOT_ADDABLE, addableValues } from './addable.js';
 import { createStyler } from '../ui/format.js';
@@ -44,7 +45,7 @@ export async function addCommand(
   io: CliIo,
   deps: ProgramDeps,
   capability: string | undefined,
-  value: string | undefined,
+  given: string | undefined,
   flags: AddFlags,
 ): Promise<void> {
   const category = capability === undefined ? undefined : ADDABLE[capability];
@@ -59,6 +60,9 @@ export async function addCommand(
 
   const project = await findProject(io.cwd);
   const current = project.options[category];
+  // In a terminal, a capability with several options and no value asks which one instead of failing.
+  const value =
+    given ?? (io.interactive ? await askValue(deps, capability, project.options) : undefined);
   // Components are added to what the project has: the union is what gets recorded (ADR-0011).
   const addition =
     capability === 'components' && value !== undefined
@@ -202,6 +206,53 @@ function chooseValue(capability: string, value: string | undefined): string {
         ? `Choose one of: ${values.join(', ')}.`
         : undefined,
   );
+}
+
+/** The value a person picks in the terminal, for the capabilities that have more than one option. */
+async function askValue(
+  deps: ProgramDeps,
+  capability: string,
+  options: StarterOptions,
+): Promise<string | undefined> {
+  if (capability === 'components') return askComponents(deps, options);
+  if (capability === 'rendering') return askRendering(deps, options);
+  return undefined;
+}
+
+/** The components the project lacks, with the essential ones ticked, like the wizard's list. */
+async function askComponents(deps: ProgramDeps, options: StarterOptions): Promise<string> {
+  const has = componentIdsOf(options);
+  const missing = ALL_COMPONENT_IDS.filter((id) => !has.includes(id));
+  if (missing.length === 0) throw new UsageError('This project already has every component.');
+  const ticked = await deps.prompter.checkbox({
+    name: 'components',
+    message: 'Which components do you want to add?',
+    choices: missing.map((id) => ({
+      value: id,
+      name: `sa-${id}`,
+      description: describeComponent(id, options.appShell === 'starter'),
+      checked: ESSENTIAL_COMPONENT_IDS.includes(id),
+    })),
+  });
+  if (ticked.length === 0) throw new UsageError('No component was ticked: nothing to add.');
+  return ticked.join(',');
+}
+
+/** Default Angular SSR or the Starter SSR, each with what it is. */
+async function askRendering(deps: ProgramDeps, options: StarterOptions): Promise<string> {
+  const choices = addableValues('rendering')
+    .filter((id) => id !== options.rendering)
+    .map((id) => {
+      const option = CAPABILITIES.rendering.find((candidate) => candidate.id === id);
+      return { value: id, name: option?.label ?? id, description: option?.description ?? '' };
+    });
+  if (choices.length === 0)
+    throw new UsageError('This project already has every rendering option.');
+  return deps.prompter.select({
+    name: 'rendering',
+    message: 'Which server rendering do you want to add?',
+    choices,
+  });
 }
 
 /** What `sa add components` accepts: a collection, or the ids of the components one by one. */

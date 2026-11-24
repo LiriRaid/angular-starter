@@ -30,6 +30,22 @@ const ROOT_COMMANDS: readonly (readonly [name: string, term: string])[] = [
   ['help', 'sa help [command]'],
 ];
 
+/** What `sa list <category>` shows, in the order of the wizard; it is how a person learns the ids. */
+const LISTS: readonly (readonly [category: string, text: string])[] = [
+  ['architecture', 'Lists the architectures a project can follow.'],
+  ['routing', 'Lists the routing systems a project can use.'],
+  ['style', 'Lists the stylesheet formats a project can use.'],
+  ['rendering', 'Lists how a project renders: in the browser or on the server.'],
+  ['ssr-purpose', 'Lists what the Starter SSR can be built for.'],
+  ['app-shell', 'Lists the application shells with sidebar, header and breadcrumb.'],
+  ['layout', 'Lists the layout modes of the application shell.'],
+  ['presence', 'Lists the presence options for the application shell.'],
+  ['components', 'Lists every native sa- component and the collections that group them.'],
+  ['ui-system', 'Lists the UI Systems that catalog the components.'],
+  ['icons', 'Lists the icon libraries a project can use.'],
+  ['package-manager', 'Lists the package managers a project can install with.'],
+];
+
 /** Where the help sends to read more, until the project has a site of its own. */
 const HOMEPAGE = 'https://github.com/LiriRaid/starter-angular';
 
@@ -268,6 +284,8 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
       });
       return (
         `\nCapabilities:\n${formatRows(rows).join('\n')}\n\n${ONLY_NEW}\n` +
+        'Without a value, in a terminal, "sa add components" opens a checklist and "sa add rendering" a selector.\n' +
+        'Run "sa list <category>" to see every value, for example "sa list components" for the ids of the components.\n' +
         examples([
           ['sa add icons lucide', 'Install Lucide Icons'],
           ['sa add routing starter', 'Navigation tree, titles and breadcrumbs'],
@@ -313,6 +331,7 @@ function registerGenerateCommand(program: Command, io: CliIo): void {
     .addHelpText(
       'after',
       `\nKinds:\n${formatRows(kinds).join('\n')}\n\nIt uses your selector prefix. Features and the --feature and --shared places need the Screaming Architecture; in any other project a component goes below src/app, or below --path.\n` +
+        'The name is the one you give to your own component. The ready-made sa- components come with "sa add components"; see "sa list components".\n' +
         examples([
           ['sa generate feature billing', 'Create features/billing (Screaming)'],
           ['sa generate component invoice-card', 'Create src/app/invoice-card (any other project)'],
@@ -348,6 +367,9 @@ function formatRootHelp(program: Command, helper: Help, style: Styler): string {
     '',
     style.cyan('Commands:'),
     ...formatRows(ROOT_COMMANDS.map(([name, term]) => [term, descriptions.get(name) ?? ''])),
+    '',
+    style.cyan('Lists:'),
+    ...formatRows(LISTS.map(([category, text]) => [`sa list ${category}`, text])),
     '',
     style.cyan('Options:'),
     ...formatRows(options),

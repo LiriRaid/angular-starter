@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- In a terminal, `sa add components` with no value opens a checklist of the components the project does
+  not have yet, with the essential ones ticked, and `sa add rendering` with no value opens a selector
+  (Angular SSR or the Starter SSR). Outside a terminal they still ask for the value, now listing the ids.
+- `sa list components` lists the 26 components one by one (id, `sa add components <id>`, name and
+  description, the essential ones marked) after the collections, and `sa --help` has a `Lists:` section
+  with every `sa list <category>`. The help of `add` and `generate` point to the lists and to each other.
 - `as init` sets up an Angular project that `as new` did not make: it reads what the project has
   (architecture, routing, stylesheet format, Tailwind CSS, rendering, shell, presence, components, icons,
   package manager, prefix), shows it and writes `angular-starter.config.json` without touching code, so
