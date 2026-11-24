@@ -7,6 +7,8 @@ export interface CliIo {
   /** True when prompts can be shown: stdin and stdout are terminals and this is not a CI run. */
   readonly interactive: boolean;
   readonly color: boolean;
+  /** Width of the terminal; absent when the output is not one (a pipe, a file, a test). */
+  readonly columns?: number;
 }
 
 export function createProcessIo(): CliIo {
@@ -23,6 +25,7 @@ export function createProcessIo(): CliIo {
     env,
     interactive: isTerminal && !isCi(env),
     color: Boolean(process.stdout.isTTY) && env['NO_COLOR'] === undefined && env['TERM'] !== 'dumb',
+    ...(process.stdout.isTTY && process.stdout.columns ? { columns: process.stdout.columns } : {}),
   };
 }
 

@@ -2,7 +2,7 @@ import { CAPABILITIES, CATEGORIES, type CapabilityCategory } from '../config/cap
 import { UsageError } from '../errors.js';
 import { ADDABLE, addableValues } from './addable.js';
 import { println, type CliIo } from '../io.js';
-import { createStyler } from '../ui/format.js';
+import { createStyler, wrapText } from '../ui/format.js';
 
 const TITLES: Record<CapabilityCategory, string> = {
   architecture: 'Architectures',
@@ -42,26 +42,96 @@ const ADD_WORD = new Map(Object.entries(ADDABLE).map(([word, category]) => [cate
 const kebab = (name: string): string =>
   name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 
+/** Used when the output is not a terminal. */
+const DEFAULT_COLUMNS = 100;
+/** Below this width the third column cannot hold a description: it goes under the row. */
+const MIN_TEXT_WIDTH = 40;
+const INDENT = 2;
+const GAP = 2;
+
+interface Row {
+  id: string;
+  /** `as add ...` when a project can add the option, then `as new --...`; none when it is planned. */
+  commands: string[];
+  name: string;
+  description: string;
+  docs?: string;
+}
+
+function rowsOf(name: CapabilityCategory): Row[] {
+  const word = ADD_WORD.get(name);
+  return CAPABILITIES[name].map((option) => {
+    const badge = option.available ? (option.recommended ? ' (Recommended)' : '') : ' (planned)';
+    const commands = option.available
+      ? [
+          ...(word && addableValues(word).includes(option.id)
+            ? [`as add ${word} ${option.id}`]
+            : []),
+          `as new ${NEW_FLAGS[name]} ${option.id}`,
+        ]
+      : [];
+    return {
+      id: option.id,
+      commands,
+      name: `${option.label}${badge}`,
+      description: option.description,
+      ...(option.docs ? { docs: option.docs } : {}),
+    };
+  });
+}
+
+/**
+ * Prints the options as one table: id, commands, and the name with its description and link. Every
+ * category shares the widths of the first two columns, so nothing starts further right than a row of
+ * another category.
+ */
 export function listCommand(io: CliIo, category?: string): void {
   const style = createStyler(io.color);
   const selected = selectCategories(category);
-  selected.forEach((name, index) => {
+  const tables = selected.map((name) => ({ name, rows: rowsOf(name) }));
+  const rows = tables.flatMap((table) => table.rows);
+  const idWidth = Math.max('ID'.length, ...rows.map((row) => row.id.length));
+  const commandWidth = Math.max(
+    'Commands'.length,
+    ...rows.flatMap((row) => row.commands.map((command) => command.length)),
+  );
+  const commandColumn = INDENT + idWidth + GAP;
+  const textColumn = commandColumn + commandWidth + GAP;
+  const width = io.columns ?? DEFAULT_COLUMNS;
+  // The name never wraps, so the third column must hold the longest one.
+  const narrow =
+    width - textColumn < Math.max(MIN_TEXT_WIDTH, ...rows.map((row) => row.name.length));
+
+  const line = (id: string, command: string, text: string, paint = (value: string) => value) =>
+    println(
+      io.stdout,
+      `${' '.repeat(INDENT)}${id.padEnd(idWidth)}${' '.repeat(GAP)}${command.padEnd(commandWidth)}${' '.repeat(GAP)}${paint(text)}`.trimEnd(),
+    );
+
+  tables.forEach(({ name, rows: tableRows }, index) => {
     if (index > 0) println(io.stdout);
     println(io.stdout, style.bold(`${TITLES[name]} (${name})`));
-    const options = CAPABILITIES[name];
-    const idWidth = Math.max(...options.map((option) => option.id.length));
-    const margin = ' '.repeat(2 + idWidth + 2);
-    for (const option of options) {
-      const badge = option.available ? (option.recommended ? ' (Recommended)' : '') : ' (planned)';
-      println(io.stdout, `  ${option.id.padEnd(idWidth)}  ${option.label}${badge}`);
-      println(io.stdout, style.dim(`${margin}${option.description}`));
-      if (option.docs) println(io.stdout, style.dim(`${margin}${option.docs}`));
-      if (option.available) {
-        const word = ADD_WORD.get(name);
-        if (word && addableValues(word).includes(option.id)) {
-          println(io.stdout, style.dim(`${margin}Add: as add ${word} ${option.id}`));
+    line('ID', 'Commands', 'Option', style.dim);
+    for (const row of tableRows) {
+      const details = (at: number): string[] => [
+        ...wrapText(row.description, width - at),
+        ...(row.docs ? [row.docs] : []),
+      ];
+      const third = narrow ? [] : [row.name, ...details(textColumn)];
+      for (let at = 0; at < Math.max(row.commands.length, third.length, 1); at++) {
+        line(
+          at === 0 ? row.id : '',
+          row.commands[at] ?? '',
+          third[at] ?? '',
+          at === 0 ? undefined : style.dim,
+        );
+      }
+      // A narrow terminal has no third column: the name and the description go under the row.
+      if (narrow) {
+        println(io.stdout, `${' '.repeat(commandColumn)}${row.name}`);
+        for (const extra of details(commandColumn)) {
+          println(io.stdout, style.dim(`${' '.repeat(commandColumn)}${extra}`));
         }
-        println(io.stdout, style.dim(`${margin}New: as new ${NEW_FLAGS[name]} ${option.id}`));
       }
     }
   });

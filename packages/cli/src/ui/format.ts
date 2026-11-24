@@ -33,3 +33,19 @@ export function formatRows(rows: ReadonlyArray<readonly [string, string]>, inden
     `${' '.repeat(indent)}${term.padEnd(width)}  ${description}`.trimEnd(),
   );
 }
+
+/** Breaks `text` into lines of at most `width` characters at spaces; a longer word stays whole. */
+export function wrapText(text: string, width: number): string[] {
+  const lines: string[] = [];
+  let line = '';
+  for (const word of text.split(/\s+/).filter(Boolean)) {
+    if (line !== '' && line.length + 1 + word.length > width) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = line === '' ? word : `${line} ${word}`;
+    }
+  }
+  if (line !== '') lines.push(line);
+  return lines;
+}
