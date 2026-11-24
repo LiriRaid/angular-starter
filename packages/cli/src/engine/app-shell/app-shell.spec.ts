@@ -403,20 +403,20 @@ describe('App Shell profile', () => {
   describe('welcome home', () => {
     const HOME = 'src/app/features/home';
 
-    it('replaces the neutral home with a welcome page: logo, name, cards, AS Starter and GitHub', async () => {
+    it('replaces the neutral home with a welcome page: logo, name, cards, Angular Starter and GitHub', async () => {
       await apply('Inventory System');
       const html = await read(`${HOME}/home.html`);
       expect(html).toContain('<svg');
       expect(html).toContain('{{ projectName() }}');
       expect(html).toContain('@for (card of cards');
-      expect(html).toContain('AS Starter');
+      expect(html).toContain('Angular Starter');
       expect(html).toContain('socialLinks');
       const ts = await read(`${HOME}/home.ts`);
       expect(ts).toContain("selector: 'app-home'");
       expect(ts).toContain("signal('Inventory System')");
       const data = await read(`${HOME}/home.data.ts`);
       expect(data).toContain('WELCOME_CARDS');
-      expect(data).toContain('https://github.com/LiriRaid/as-starter');
+      expect(data).toContain('https://github.com/LiriRaid/angular-starter');
       expect(data).not.toMatch(/twitter|linkedin|facebook|instagram/i);
       expect(await read(`${HOME}/home.spec.ts`)).toContain('Inventory System');
     });
@@ -434,7 +434,7 @@ describe('App Shell profile', () => {
       expect(data).not.toContain('/presence');
     });
 
-    it('sends the documentation and tutorials cards to the pages of AS Starter, not to Angular', async () => {
+    it('sends the documentation and tutorials cards to the pages of Angular Starter, not to Angular', async () => {
       await apply();
       const data = await read(`${HOME}/home.data.ts`);
       expect(data).not.toContain('angular.dev');
@@ -447,7 +447,7 @@ describe('App Shell profile', () => {
     describe('documentation', () => {
       const DOCS = 'src/app/features/docs';
 
-      it('brings the documentation of AS Starter with its pages, its tutorials and its README', async () => {
+      it('brings the documentation of Angular Starter with its pages, its tutorials and its README', async () => {
         await apply('Inventory System');
         for (const file of [
           'docs.ts',
@@ -469,7 +469,7 @@ describe('App Shell profile', () => {
         ]) {
           expect(data, page).toContain(`id: '${page}'`);
         }
-        expect(data).toContain('as-starter');
+        expect(data).toContain('angular-starter');
         expect(data).not.toContain('angular.dev');
         expect(await read(`${DOCS}/docs.ts`)).toContain("selector: 'app-docs'");
       });

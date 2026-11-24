@@ -4,7 +4,7 @@ import { ActivatedRoute, RouterLink, RouterLinkActive } from '@angular/router';
 import { AsIcon } from '@shared/components';
 import { DOC_PAGES, DOC_SECTIONS } from './docs.data';
 
-/** The documentation of AS Starter inside the application: a side menu and the page that the route names. */
+/** The documentation of Angular Starter inside the application: a side menu and the page that the route names. */
 @Component({
   selector: '__PREFIX__-docs',
   imports: [AsIcon, RouterLink, RouterLinkActive],
