@@ -16,6 +16,6 @@ Installed from npm, not vendored. Each keeps its own license:
 
 ## Vendored assets in generated projects
 
-- `public/assets/flags-sprite.svg`, written with the `as-input` component: the country flags of
+- `public/assets/flags-sprite.svg`, written with the `sa-input` component: the country flags of
   [flag-icons](https://github.com/lipis/flag-icons) (MIT, Copyright (c) 2013 Panayiotis Lipiridis)
   as one SVG sprite. The phone country picker of the input draws them.
