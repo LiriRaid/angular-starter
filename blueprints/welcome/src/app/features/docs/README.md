@@ -1,6 +1,6 @@
 # docs
 
-The documentation of AS Starter inside the application, in the style of the Angular guides: a side menu
+The documentation of Angular Starter inside the application, in the style of the Angular guides: a side menu
 and one page per topic (`/docs/getting-started`, `/docs/design-base`, `/docs/components`,
 `/docs/app-shell` and `/docs/tutorials`). The welcome page links to it.
 

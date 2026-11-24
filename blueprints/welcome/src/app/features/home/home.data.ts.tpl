@@ -17,14 +17,14 @@ export interface WelcomeLink {
   readonly href: string;
 }
 
-/** The website of AS Starter; until it exists, the repository is its home. */
-export const AS_STARTER_URL = 'https://github.com/LiriRaid/as-starter';
+/** The website of Angular Starter; until it exists, the repository is its home. */
+export const ANGULAR_STARTER_URL = 'https://github.com/LiriRaid/angular-starter';
 
-/** What to explore: the documentation of AS Starter, and what this project brings. Edit it, or delete the page. */
+/** What to explore: the documentation of Angular Starter, and what this project brings. Edit it, or delete the page. */
 export const WELCOME_CARDS: readonly WelcomeCard[] = [
   {
     id: 'starter-docs',
-    title: 'AS Starter documentation',
+    title: 'Angular Starter documentation',
     description: 'Guides for this project: the structure, the design base, the components and the app shell.',
     icon: 'FileText',
     route: '/docs',
@@ -70,13 +70,13 @@ export const WELCOME_CARDS: readonly WelcomeCard[] = [
   },
 ];
 
-/** The links to AS Starter. */
+/** The links to Angular Starter. */
 export const STARTER_LINKS: readonly WelcomeLink[] = [
-  { id: 'docs', label: 'Documentation', href: `${AS_STARTER_URL}/tree/main/docs` },
-  { id: 'adr', label: 'Architecture decisions', href: `${AS_STARTER_URL}/tree/main/docs/adr` },
-  { id: 'source', label: 'Source code', href: AS_STARTER_URL },
+  { id: 'docs', label: 'Documentation', href: `${ANGULAR_STARTER_URL}/tree/main/docs` },
+  { id: 'adr', label: 'Architecture decisions', href: `${ANGULAR_STARTER_URL}/tree/main/docs/adr` },
+  { id: 'source', label: 'Source code', href: ANGULAR_STARTER_URL },
 ];
 
 export const SOCIAL_LINKS: readonly WelcomeLink[] = [
-  { id: 'github', label: 'GitHub', href: AS_STARTER_URL },
+  { id: 'github', label: 'GitHub', href: ANGULAR_STARTER_URL },
 ];

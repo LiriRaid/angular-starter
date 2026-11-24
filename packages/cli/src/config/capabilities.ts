@@ -64,7 +64,7 @@ export interface RequirementContext {
   icons?: string;
 }
 
-const STARTER_DOCS = 'https://github.com/LiriRaid/as-starter/blob/main/docs/adr';
+const STARTER_DOCS = 'https://github.com/LiriRaid/angular-starter/blob/main/docs/adr';
 const STARTER_PRESENCE_DOCS = `${STARTER_DOCS}/0009-presence-documentation-and-welcome-home.md`;
 const STARTER_COMPONENTS_DOCS = `${STARTER_DOCS}/0011-components-picker-and-design-preferences-tabs.md`;
 const STARTER_ROUTED_DOCS = `${STARTER_DOCS}/0010-routed-wizard-layout-modes-and-design-preferences.md`;

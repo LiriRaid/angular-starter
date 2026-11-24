@@ -31,11 +31,11 @@ const GETTING_STARTED: DocPage = {
   id: 'getting-started',
   title: 'Getting started',
   icon: 'Play',
-  summary: 'What AS Starter generated for __PROJECT_NAME__ and how to work with it.',
+  summary: 'What Angular Starter generated for __PROJECT_NAME__ and how to work with it.',
   blocks: [
     {
       kind: 'text',
-      text: 'This is a regular Angular application. AS Starter generated it and is not a dependency of it: nothing here talks to the CLI at runtime, and the official Angular CLI keeps working as usual.',
+      text: 'This is a regular Angular application. Angular Starter generated it and is not a dependency of it: nothing here talks to the CLI at runtime, and the official Angular CLI keeps working as usual.',
     },
     { kind: 'heading', text: 'Run it' },
     {
@@ -66,7 +66,7 @@ const GETTING_STARTED: DocPage = {
       items: [
         'Follow the tutorials to add a page, use a component and change the theme.',
         'Every piece has a README next to it: src/app/core/theme/README.md, src/app/shared/components/README.md and src/app/features/app-shell/README.md.',
-        'The decisions behind AS Starter are in its repository: github.com/LiriRaid/as-starter/tree/main/docs.',
+        'The decisions behind Angular Starter are in its repository: github.com/LiriRaid/angular-starter/tree/main/docs.',
       ],
     },
   ],

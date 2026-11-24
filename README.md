@@ -1,10 +1,12 @@
-# AS Starter
+# Angular Starter
 
 > **Status: pre-alpha.** The CLI creates Angular applications with the recommended structure (Screaming Architecture, navigation tree, design base and native `as-` components) and can add or generate more in an existing project. The app shell (sidebar, header, breadcrumb) is available in its first layout mode. Names, scope and commands are provisional.
 
-AS Starter is an independent, community-driven ecosystem of developer tools for [Angular](https://angular.dev/). Its goal is to remove the repetitive work every Angular team redoes when starting an application: architecture, routing, app shell, layouts, theming and reusable UI.
+Angular Starter is an independent, community-driven ecosystem of developer tools for [Angular](https://angular.dev/). Its goal is to remove the repetitive work every Angular team redoes when starting an application: architecture, routing, app shell, layouts, theming and reusable UI.
 
-The generated code belongs entirely to the developer. AS Starter is not a runtime dependency of the applications it creates, and the official Angular CLI keeps working as usual.
+Angular Starter is an independent project by [LiriRaid](https://github.com/LiriRaid). It is not affiliated with, sponsored by, or endorsed by Google or the Angular team: "Angular" is a trademark of Google, used here only to describe what the tools are for.
+
+The generated code belongs entirely to the developer. Angular Starter is not a runtime dependency of the applications it creates, and the official Angular CLI keeps working as usual.
 
 ## Planned scope
 
@@ -37,19 +39,19 @@ The generated code belongs entirely to the developer. AS Starter is not a runtim
 
 **Press Esc to go back.** Every question of the wizard (lists, the components checklist, yes/no) goes back to the one before it with its answer selected, and what depends on the change is asked again; the first question has nothing before it. The last question lists _Create the project_, _Change an answer_ (pick which one from the answers so far) and _Cancel_ ([ADR-0013](docs/adr/0013-wizard-can-go-back.md)). Values given with flags or `--config` are never asked, so never revisited.
 
-What you get, without any business logic: the **Screaming Architecture** ([ADR-0002](docs/adr/0002-screaming-architecture-profile.md)); a navigation tree with page titles and breadcrumbs ([ADR-0003](docs/adr/0003-starter-routing.md)); and, with the components, the structure of the reference application ([ADR-0007](docs/adr/0007-omni-structure-design-and-components.md)): `src/styles.css` importing the `src/styles/**/*-styles.css` files (theme tokens, typography, scrollbars, one stylesheet per component) and `shared/animations`, `core/theme` (`ThemeService`, palettes), `core/common/icons` (Lucide registration), the generic utilities of `shared`, and the **`as-` components** (button, input, select, modal, drawer, toast, tabs, table, datepicker, ...) ported whole, each with its spec. The design and the components are Tailwind CSS code, so they need Tailwind CSS, the Screaming Architecture and Lucide Icons; the wizard enforces it ([ADR-0004](docs/adr/0004-explicit-wizard-and-recommended-defaults.md)). With the **App Shell** ([ADR-0008](docs/adr/0008-app-shell.md)), a new project opens in the reference application's layout without its business: a wide sidebar that floats, with the header and the content floating too, reading the navigation tree, plus five example pages (`home`, `dashboard`, `users`, `reports` and a `settings` with two sections) to try the sidebar, the search, the breadcrumb and the titles before building your product. It brings the `as-` components it draws with. The user menu's **Preferencias de Diseño** opens `/preference-design` ([ADR-0010](docs/adr/0010-routed-wizard-layout-modes-and-design-preferences.md)), a page with the tabs Apariencia, Tema, UI and Otros whose changes (layout cards, colours, light or dark, radius, button size, density, font size, breadcrumb, animations) apply in real time and are kept with _Guardar cambios_; with the **UI System** its UI tab also lists every installed component with a live preview, its code and the tokens that change it. It is client-side only for now, and `home` becomes a welcome page (the logo, the project name, cards to explore, links to AS Starter and GitHub) while the developer has not changed it; it brings the documentation of AS Starter inside the application (`/docs`, with a side menu, the topics and step-by-step tutorials; [ADR-0015](docs/adr/0015-ui-system-final-fixes-and-starter-docs.md)). **Presence** ([ADR-0009](docs/adr/0009-presence-documentation-and-welcome-home.md)) adds the status of the user menu (online, away, busy, invisible, with a duration) with a `PresenceService` that talks to the server through a `PresenceTransport` (an in-memory one that works with no backend, and a WebSocket one) and a guide, `docs/presence.md`, to connect it to Redis and your API. Every piece a project brings has a README next to it. The root component is composed in `app.ts` (`<router-outlet />`). Authentication, guards and interceptors are yours to build.
+What you get, without any business logic: the **Screaming Architecture** ([ADR-0002](docs/adr/0002-screaming-architecture-profile.md)); a navigation tree with page titles and breadcrumbs ([ADR-0003](docs/adr/0003-starter-routing.md)); and, with the components, the structure of the reference application ([ADR-0007](docs/adr/0007-omni-structure-design-and-components.md)): `src/styles.css` importing the `src/styles/**/*-styles.css` files (theme tokens, typography, scrollbars, one stylesheet per component) and `shared/animations`, `core/theme` (`ThemeService`, palettes), `core/common/icons` (Lucide registration), the generic utilities of `shared`, and the **`as-` components** (button, input, select, modal, drawer, toast, tabs, table, datepicker, ...) ported whole, each with its spec. The design and the components are Tailwind CSS code, so they need Tailwind CSS, the Screaming Architecture and Lucide Icons; the wizard enforces it ([ADR-0004](docs/adr/0004-explicit-wizard-and-recommended-defaults.md)). With the **App Shell** ([ADR-0008](docs/adr/0008-app-shell.md)), a new project opens in the reference application's layout without its business: a wide sidebar that floats, with the header and the content floating too, reading the navigation tree, plus five example pages (`home`, `dashboard`, `users`, `reports` and a `settings` with two sections) to try the sidebar, the search, the breadcrumb and the titles before building your product. It brings the `as-` components it draws with. The user menu's **Preferencias de Diseño** opens `/preference-design` ([ADR-0010](docs/adr/0010-routed-wizard-layout-modes-and-design-preferences.md)), a page with the tabs Apariencia, Tema, UI and Otros whose changes (layout cards, colours, light or dark, radius, button size, density, font size, breadcrumb, animations) apply in real time and are kept with _Guardar cambios_; with the **UI System** its UI tab also lists every installed component with a live preview, its code and the tokens that change it. It is client-side only for now, and `home` becomes a welcome page (the logo, the project name, cards to explore, links to Angular Starter and GitHub) while the developer has not changed it; it brings the documentation of Angular Starter inside the application (`/docs`, with a side menu, the topics and step-by-step tutorials; [ADR-0015](docs/adr/0015-ui-system-final-fixes-and-starter-docs.md)). **Presence** ([ADR-0009](docs/adr/0009-presence-documentation-and-welcome-home.md)) adds the status of the user menu (online, away, busy, invisible, with a duration) with a `PresenceService` that talks to the server through a `PresenceTransport` (an in-memory one that works with no backend, and a WebSocket one) and a guide, `docs/presence.md`, to connect it to Redis and your API. Every piece a project brings has a README next to it. The root component is composed in `app.ts` (`<router-outlet />`). Authentication, guards and interceptors are yours to build.
 
 ## Install the CLI
 
 The package is not published yet. Once it is, any package manager works:
 
-| Package manager | Install globally                  | Run without installing                |
-| --------------- | --------------------------------- | ------------------------------------- |
-| npm             | `npm install -g @as-starter/cli`  | `npx @as-starter/cli new my-app`      |
-| pnpm            | `pnpm add -g @as-starter/cli`     | `pnpm dlx @as-starter/cli new my-app` |
-| Yarn            | `yarn global add @as-starter/cli` | `yarn dlx @as-starter/cli new my-app` |
+| Package manager | Install globally                            | Run without installing                          |
+| --------------- | ------------------------------------------- | ----------------------------------------------- |
+| npm             | `npm install -g @liriraid/angular-starter`  | `npx @liriraid/angular-starter new my-app`      |
+| pnpm            | `pnpm add -g @liriraid/angular-starter`     | `pnpm dlx @liriraid/angular-starter new my-app` |
+| Yarn            | `yarn global add @liriraid/angular-starter` | `yarn dlx @liriraid/angular-starter new my-app` |
 
-Yarn 2 and later have no global installs; use `yarn dlx`. Then run `as-starter new my-app`. Until
+Yarn 2 and later have no global installs; use `yarn dlx`. Then run `as new my-app` (or `angular-starter new my-app`). Until
 the package is published, install it from a clone (see below). The package manager of the
 generated project is chosen separately, with `--package-manager` or in the wizard.
 
@@ -72,7 +74,7 @@ explicitly, then installs dependencies and creates the initial Git commit. Inter
 non-interactive runs (`--defaults`, flags, `--config <file>`) produce the same validated
 configuration, which is saved in `angular-starter.config.json` inside the new project.
 
-`as --help` groups the commands by what they do and `as <command> --help` shows their flags and examples:
+`as --help` lists the commands and the options, like `ng --help`; `as <command> --help` shows the flags and examples of each one:
 
 | Command                            | What it does                                                                              |
 | ---------------------------------- | ----------------------------------------------------------------------------------------- |
@@ -82,16 +84,22 @@ configuration, which is saved in `angular-starter.config.json` inside the new pr
 | `list`, `info`, `config`, `doctor` | See what each option is, the project's options and the environment                        |
 | `update`                           | Planned                                                                                   |
 
+`as version` (or `-v`) prints the version of the CLI and the one of the Angular CLI that `as new` runs (the tested one, not the latest on npm). `as list` prints one table: the id of each option, the commands that add it and ask for it (`as add ...`, `as new --...`, none while it is planned) and its name, description and documentation.
+
 Only `as new` decides the architecture, the stylesheet format, Tailwind CSS, the package manager and
 the selector prefix. Only options that can really be generated are offered; `as list` shows what each
-one is, its official documentation and what is planned ([ADR-0006](docs/adr/0006-project-commands.md)). The package installs two binaries, `as-starter` and the short alias `as`; on macOS and
-Linux `as` is normally the system assembler, so prefer `as-starter` or `npx @as-starter/cli` there.
+one is, its official documentation and what is planned ([ADR-0006](docs/adr/0006-project-commands.md)). The package installs two binaries with the same behavior: the short `as` and the full name
+`angular-starter`.
+
+> **`as` on Linux and macOS.** There `as` is the GNU assembler that `gcc` and `clang` use, and it can sit
+> before the CLI in your `PATH`. `angular-starter` works whatever `as` points to, so use it there (or
+> `npx @liriraid/angular-starter`).
 
 To install your clone as a global command (no publishing involved), after `pnpm build`:
 `pnpm add -g ./packages/cli`, or `npm pack` inside `packages/cli` and `npm install -g` the `.tgz`.
 
 Tests: `pnpm test`. End-to-end tests that run the real Angular CLI (network required) are opt-in:
-`AS_E2E=1 pnpm --filter @as-starter/cli exec vitest run tests/e2e.spec.ts` (PowerShell:
+`AS_E2E=1 pnpm --filter @liriraid/angular-starter exec vitest run tests/e2e.spec.ts` (PowerShell:
 `$env:AS_E2E=1`).
 
 ## What this project is not

@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { ANGULAR_CLI_VERSION } from '../src/compat.js';
 import { run } from '../src/main.js';
+import { CLI_VERSION } from '../src/version.js';
 import { createFakeIo } from './helpers/fake-io.js';
 
 const COMMANDS = [
+  'new',
+  'init',
   'generate',
   'add',
   'config',
@@ -22,6 +25,7 @@ describe('as (program)', () => {
     const out = fake.out();
     expect(out).toContain('Angular Starter CLI');
     expect(out).toContain('Usage: as [command] [options]');
+    expect(out).toContain('Commands:');
     for (const command of COMMANDS) expect(out).toMatch(new RegExp(`^ {2}${command}\\b`, 'm'));
     expect(out).toContain('-h, --help');
     expect(out).toContain('-v, --version');
@@ -33,11 +37,16 @@ describe('as (program)', () => {
     expect(fake.out()).toContain('Usage: as [command] [options]');
   });
 
-  it.each([['--version'], ['-v'], ['version']])('prints the version with %s', async (flag) => {
-    const fake = createFakeIo();
-    expect(await run([flag], fake.io)).toBe(0);
-    expect(fake.out().trim()).toMatch(/^\d+\.\d+\.\d+/);
-  });
+  it.each([['--version'], ['-v'], ['version']])(
+    'prints the version of the CLI and of the Angular CLI it runs with %s',
+    async (flag) => {
+      const fake = createFakeIo();
+      expect(await run([flag], fake.io)).toBe(0);
+      expect(fake.out()).toBe(
+        `angular-starter ${CLI_VERSION}\nAngular CLI ${ANGULAR_CLI_VERSION}\n`,
+      );
+    },
+  );
 
   it('shows command help', async () => {
     const fake = createFakeIo();
@@ -62,22 +71,24 @@ describe('as (program)', () => {
     expect(fake.err()).toContain('not available yet');
   });
 
-  it('groups the commands by what they do, in the root help', async () => {
+  it('lists the commands, then the options, in the root help', async () => {
     const fake = createFakeIo();
     await run(['--help'], fake.io);
     const out = fake.out();
     const positions = [
-      'Create a project',
+      'Usage: as [command] [options]',
+      'Commands:',
       '  new ',
-      'Change an existing project',
+      '  init',
       '  add ',
       '  generate',
-      'Inspect',
       '  list',
       '  config',
       '  doctor',
-      'Planned',
       '  update',
+      'Options:',
+      '-v, --version',
+      '-h, --help',
     ].map((text) => out.indexOf(text));
     expect(
       positions.every((position) => position >= 0),
@@ -86,16 +97,24 @@ describe('as (program)', () => {
     expect(positions).toEqual([...positions].sort((a, b) => a - b));
   });
 
-  it('shows examples and says what only `as new` can decide, in the root help', async () => {
+  it('keeps the root help short: one line per command and option, no examples or notes', async () => {
     const fake = createFakeIo();
     await run(['--help'], fake.io);
     const out = fake.out();
-    expect(out).toContain('Examples:');
-    expect(out).toContain('as new InventorySystem');
-    expect(out).toContain('as add icons lucide');
-    expect(out).toContain('as generate feature billing');
-    expect(out).toMatch(/Only `as new` decides:.*stylesheet.*package manager/s);
-    expect(out).toContain('as <command> --help');
+    expect(out).not.toContain('Examples:');
+    expect(out).not.toContain('Only `as new` decides');
+    expect(out).not.toMatch(/\bas (new|add|generate) \w/);
+    const lines = out.trim().split('\n');
+    expect(lines.length).toBeLessThanOrEqual(24);
+    for (const line of lines) expect(line.length, line).toBeLessThanOrEqual(80);
+  });
+
+  it('leaves the examples to the help of each command', async () => {
+    for (const command of ['new', 'add', 'generate', 'init', 'list', 'config']) {
+      const fake = createFakeIo();
+      await run([command, '--help'], fake.io);
+      expect(fake.out(), command).toContain('Examples:');
+    }
   });
 
   it('documents every flag and example of `new`', async () => {
@@ -171,7 +190,7 @@ describe('as (program)', () => {
   });
 
   it('lists available and planned options', async () => {
-    const fake = createFakeIo();
+    const fake = createFakeIo({ columns: 160 });
     expect(await run(['list'], fake.io)).toBe(0);
     const out = fake.out();
     expect(out).toContain('angular-default');
@@ -180,65 +199,65 @@ describe('as (program)', () => {
   });
 
   it('explains every option in the list: label, documentation and description', async () => {
-    const fake = createFakeIo();
+    const fake = createFakeIo({ columns: 160 });
     expect(await run(['list', 'style'], fake.io)).toBe(0);
     const out = fake.out();
     expect(out).toContain('Stylesheet formats (style)');
-    expect(out).toMatch(/^ {2}tailwind +Tailwind CSS \(Recommended\)/m);
+    expect(out).toMatch(/^ {2}tailwind .* Tailwind CSS \(Recommended\)/m);
     expect(out).toContain('https://tailwindcss.com');
     expect(out).toContain('Utility-first');
-    expect(out).toMatch(/^ {2}css +CSS/m);
+    expect(out).toMatch(/^ {2}css .* CSS/m);
   });
 
   it('lists the application shell options with the link to their decision', async () => {
-    const fake = createFakeIo();
+    const fake = createFakeIo({ columns: 160 });
     expect(await run(['list', 'appShell'], fake.io)).toBe(0);
     const out = fake.out();
     expect(out).toContain('Application shells (appShell)');
-    expect(out).toMatch(/^ {2}starter +Angular Starter App Shell/m);
+    expect(out).toMatch(/^ {2}starter .* Angular Starter App Shell/m);
     expect(out).toContain('0008-app-shell.md');
     expect(out).not.toMatch(/App Shell \(Recommended\)/);
   });
 
   it('lists the layout modes of the shell: the one that exists and the ones under construction', async () => {
-    const fake = createFakeIo();
+    const fake = createFakeIo({ columns: 160 });
     expect(await run(['list', 'layout'], fake.io)).toBe(0);
     const out = fake.out();
     expect(out).toContain('Layout modes of the application shell (layout)');
-    expect(out).toMatch(/^ {2}floating-wide +Floating \(wide\) \(Recommended\)/m);
+    expect(out).toMatch(/^ {2}floating-wide .* Floating \(wide\) \(Recommended\)/m);
     expect(out).toMatch(/^ {2}compact-joined +Compact sidebar \(joined\) \(planned\)/m);
     expect(out).toMatch(/^ {2}transparent-floating +Transparent \(floating\) \(planned\)/m);
   });
 
   it('lists what the Starter SSR can be for', async () => {
-    const fake = createFakeIo();
+    const fake = createFakeIo({ columns: 160 });
     expect(await run(['list', 'ssrPurpose'], fake.io)).toBe(0);
     const out = fake.out();
     expect(out).toContain('Purposes of the Starter SSR (ssrPurpose)');
-    expect(out).toMatch(/^ {2}backoffice +Backoffice(?! \(planned\))/m);
+    expect(out).toMatch(/^ {2}backoffice .* Backoffice(?! \(planned\))/m);
     expect(out).toMatch(/^ {2}landing +Landing page \(planned\)/m);
     expect(out).toMatch(/^ {2}ecommerce +Ecommerce \(planned\)/m);
   });
 
   it('lists the UI System', async () => {
-    const fake = createFakeIo();
+    const fake = createFakeIo({ columns: 160 });
     expect(await run(['list', 'uiSystem'], fake.io)).toBe(0);
     expect(fake.out()).toContain('UI Systems (uiSystem)');
-    expect(fake.out()).toMatch(/^ {2}starter +Angular Starter UI System/m);
+    expect(fake.out()).toMatch(/^ {2}starter .* Angular Starter UI System/m);
   });
 
   it('lists the presence options with the link to their decision', async () => {
-    const fake = createFakeIo();
+    const fake = createFakeIo({ columns: 160 });
     expect(await run(['list', 'presence'], fake.io)).toBe(0);
     const out = fake.out();
     expect(out).toContain('Presence (presence)');
-    expect(out).toMatch(/^ {2}starter +Angular Starter Presence/m);
+    expect(out).toMatch(/^ {2}starter .* Angular Starter Presence/m);
     expect(out).toContain('0009-presence-documentation-and-welcome-home.md');
     expect(out).not.toMatch(/Presence \(Recommended\)/);
   });
 
   it('prints environment information', async () => {
-    const fake = createFakeIo();
+    const fake = createFakeIo({ columns: 160 });
     expect(await run(['info'], fake.io)).toBe(0);
     expect(fake.out()).toContain(process.versions.node);
     expect(fake.out()).toContain(ANGULAR_CLI_VERSION);

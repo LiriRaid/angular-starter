@@ -18,9 +18,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   `src/app/<name>/`, or below `--path <folder>`.
 - `as list` shows the command of each option (`Add: as add ...`, `New: as new --...`) and takes
   `app-shell`, `ui-system`, `ssr-purpose` and `package-manager` as category names.
+- `as version` (and `-v`, `--version`) prints the version of the CLI and the version of the Angular CLI
+  that `as new` runs, not the latest one on npm.
 
 ### Changed
 
+- The project is now called **angular-starter**: the package is `@liriraid/angular-starter` (0.1.0), the
+  binaries are `as` and `angular-starter` (`as-starter` is gone), and the repository links, the README and the
+  welcome and docs pages of the generated applications say Angular Starter. The README warns that `as` is the
+  GNU assembler on Linux and macOS and that the project is not affiliated with Google (ADR-0020 and plan 0017).
+- `as list` prints one table, with the same columns in every category: the id, the commands (`as add ...` and
+  `as new --...`, none while an option is planned) and the name with its description and link. On a narrow
+  terminal the description goes under the row.
+- `as --help` lists only the commands and the options, like `ng --help`; the examples are in
+  `as <command> --help`.
 - The native components no longer need the Screaming Architecture: `as add components` and
   `as new --components` work with any, creating `src/app/shared` and `src/app/core` and the `@shared` and
   `@core` aliases when the project has none. The wizard still offers them with the Screaming Architecture.
