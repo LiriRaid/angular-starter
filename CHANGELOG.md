@@ -29,6 +29,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- `sa add architecture screaming` now adds the structure to a project at any point: the folders and READMEs
+  that are missing and the `@core`, `@features` and `@shared` aliases, without overwriting or moving
+  anything, so it works after the components (before, `core` and `shared` stopped it). It adapts `app.ts`,
+  `app.config.ts` and Angular's welcome page only while they are as `ng new` leaves them, lists what it
+  left for the developer to review, gives no starting page, and in a terminal asks whether to add the
+  routing and the app shell too (ADR-0022 and plan 0019).
 - `sa add components` and `sa add app-shell` say, before they run, that Lucide Icons is installed too and
   why (`sa-icon` draws the icons with it); `sa add icons lucide` on a project with no components suggests
   `sa add components icon`; and `sa add components` with no value lists every component id next to the

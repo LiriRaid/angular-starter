@@ -83,9 +83,11 @@ export class App {
   protected readonly title = signal('demo');
 }
 `,
-  'src/app/app.html': '<h1>Hello, demo</h1>\n',
+  // The marker line is the one Angular's own welcome page carries.
+  'src/app/app.html':
+    '<!-- The content below is only a placeholder and can be replaced. -->\n<h1>Hello, demo</h1>\n',
   'src/app/app.css': '',
-  'src/app/app.spec.ts': "describe('App', () => { it('renders Hello, demo', () => {}); });\n",
+  'src/app/app.spec.ts': "describe('App', () => { it('should render title', () => {}); });\n",
   'src/app/app.config.ts': `import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';

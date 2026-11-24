@@ -310,6 +310,50 @@ ${result.stderr}`,
   );
 
   it(
+    'gives a default Angular project that already has components the Screaming structure, then a feature, the routing and the shell, and it builds and passes its tests',
+    async () => {
+      const project = await createInstalled(
+        'e2e-add-architecture',
+        '--architecture',
+        'angular-default',
+        '--routing',
+        'angular',
+        '--app-shell',
+        'none',
+        '--components',
+        'none',
+        '--icons',
+        'none',
+      );
+      await asProject(project, 'add', 'components', 'recommended');
+      const barrel = await read(project, 'src/app/shared/components/index.ts');
+      await asProject(project, 'add', 'architecture', 'screaming');
+      // The components the project had stay exactly where they were.
+      expect(await read(project, 'src/app/shared/components/index.ts')).toBe(barrel);
+      expect(existsSync(join(project, 'src/app/features/README.md'))).toBe(true);
+      expect(existsSync(join(project, 'src/app/app.html'))).toBe(false);
+      await ng(project, 'build');
+
+      await asProject(project, 'generate', 'feature', 'billing');
+      await asProject(project, 'add', 'routing', 'starter');
+      await asProject(project, 'add', 'app-shell');
+      const config = JSON.parse(await read(project, 'starter-angular.config.json'));
+      expect(config.options).toMatchObject({
+        architecture: 'screaming',
+        components: 'recommended',
+        icons: 'lucide',
+        routing: 'starter',
+        appShell: 'starter',
+      });
+      expect(existsSync(join(project, 'src/app/features/billing/billing.ts'))).toBe(true);
+
+      await ng(project, 'build');
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
     'adds the App Shell, the components, presence and the UI System to an existing project that builds and passes its tests',
     async () => {
       const project = await createInstalled(
