@@ -23,6 +23,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- The project is now called **Starter Angular** (the website says Starter for Angular): the package is
+  `@liriraid/starter-angular` (0.1.0), the binaries are `sa` and `starter-angular` (`as` and `angular-starter`
+  are gone), the selector prefix of the native components is `sa-` (`sa-button`, `SaButton`, `--sa-*`), the
+  environment variables are `SA_*` and a project's configuration file is `starter-angular.config.json`. The
+  README explains the two names and warns that some Linux systems install their own `sa`. The entries below
+  keep the names of their time (ADR-0021 and plan 0018).
+- `as --help` lists the commands as `as <command>`, each with a one-sentence description, paints the
+  `Commands:` and `Options:` headings blue like `ng --help` and ends with where to read more; the headers of
+  the `as list` table (`ID`, `Commands`, `Option`) are blue too. Colors only show on a terminal.
 - The project is now called **angular-starter**: the package is `@liriraid/angular-starter` (0.1.0), the
   binaries are `as` and `angular-starter` (`as-starter` is gone), and the repository links, the README and the
   welcome and docs pages of the generated applications say Angular Starter. The README warns that `as` is the

@@ -4,7 +4,7 @@ __PREFIX__-user-menu {
   min-width: 0;
 }
 
-__PREFIX__-user-menu .um-trigger.as-btn {
+__PREFIX__-user-menu .um-trigger.sa-btn {
   width: 100% !important;
   height: 3rem !important;
   padding: 0.25rem !important;
@@ -16,6 +16,6 @@ __PREFIX__-user-menu .um-trigger.as-btn {
   overflow: hidden !important;
 }
 
-__PREFIX__-user-menu .um-trigger.as-btn:hover {
+__PREFIX__-user-menu .um-trigger.sa-btn:hover {
   background: color-mix(in srgb, var(--app-text-subtle) 8%, transparent) !important;
 }

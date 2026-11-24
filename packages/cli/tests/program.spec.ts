@@ -18,15 +18,15 @@ const COMMANDS = [
   'help',
 ];
 
-describe('as (program)', () => {
+describe('sa (program)', () => {
   it('prints help when called without arguments', async () => {
     const fake = createFakeIo();
     expect(await run([], fake.io)).toBe(0);
     const out = fake.out();
-    expect(out).toContain('Angular Starter CLI');
-    expect(out).toContain('Usage: as [command] [options]');
+    expect(out).toContain('Starter Angular CLI');
+    expect(out).toContain('Usage: sa [command] [options]');
     expect(out).toContain('Commands:');
-    for (const command of COMMANDS) expect(out).toMatch(new RegExp(`^ {2}${command}\\b`, 'm'));
+    for (const command of COMMANDS) expect(out).toMatch(new RegExp(`^ {2}sa ${command}\\b`, 'm'));
     expect(out).toContain('-h, --help');
     expect(out).toContain('-v, --version');
   });
@@ -34,7 +34,7 @@ describe('as (program)', () => {
   it.each([['--help'], ['-h']])('prints help with %s', async (flag) => {
     const fake = createFakeIo();
     expect(await run([flag], fake.io)).toBe(0);
-    expect(fake.out()).toContain('Usage: as [command] [options]');
+    expect(fake.out()).toContain('Usage: sa [command] [options]');
   });
 
   it.each([['--version'], ['-v'], ['version']])(
@@ -43,7 +43,7 @@ describe('as (program)', () => {
       const fake = createFakeIo();
       expect(await run([flag], fake.io)).toBe(0);
       expect(fake.out()).toBe(
-        `angular-starter ${CLI_VERSION}\nAngular CLI ${ANGULAR_CLI_VERSION}\n`,
+        `starter-angular ${CLI_VERSION}\nAngular CLI ${ANGULAR_CLI_VERSION}\n`,
       );
     },
   );
@@ -51,7 +51,7 @@ describe('as (program)', () => {
   it('shows command help', async () => {
     const fake = createFakeIo();
     expect(await run(['list', '--help'], fake.io)).toBe(0);
-    expect(fake.out()).toContain('Usage: as list');
+    expect(fake.out()).toContain('Usage: sa list');
   });
 
   it('exits with code 2 on an unknown command', async () => {
@@ -76,16 +76,16 @@ describe('as (program)', () => {
     await run(['--help'], fake.io);
     const out = fake.out();
     const positions = [
-      'Usage: as [command] [options]',
+      'Usage: sa [command] [options]',
       'Commands:',
-      '  new ',
-      '  init',
-      '  add ',
-      '  generate',
-      '  list',
-      '  config',
-      '  doctor',
-      '  update',
+      '  sa new ',
+      '  sa init',
+      '  sa add ',
+      '  sa generate',
+      '  sa list',
+      '  sa config',
+      '  sa doctor',
+      '  sa update',
       'Options:',
       '-v, --version',
       '-h, --help',
@@ -102,11 +102,39 @@ describe('as (program)', () => {
     await run(['--help'], fake.io);
     const out = fake.out();
     expect(out).not.toContain('Examples:');
-    expect(out).not.toContain('Only `as new` decides');
-    expect(out).not.toMatch(/\bas (new|add|generate) \w/);
+    expect(out).not.toContain('Only `sa new` decides');
     const lines = out.trim().split('\n');
     expect(lines.length).toBeLessThanOrEqual(24);
-    for (const line of lines) expect(line.length, line).toBeLessThanOrEqual(80);
+    for (const line of lines) expect(line.length, line).toBeLessThanOrEqual(120);
+  });
+
+  it('describes each command in a sentence, like ng does', async () => {
+    const fake = createFakeIo();
+    await run(['--help'], fake.io);
+    for (const line of fake
+      .out()
+      .split('\n')
+      .filter((text) => /^ {2}as \w/.test(text))) {
+      expect(line, line).toMatch(/ {2}[A-Z][^.]{30,}\.$/);
+    }
+  });
+
+  it('ends the root help with where to read more', async () => {
+    const fake = createFakeIo();
+    await run(['--help'], fake.io);
+    expect(fake.out().trim().split('\n').at(-1)).toBe(
+      'For more information, see https://github.com/LiriRaid/starter-angular.',
+    );
+  });
+
+  it('paints the headings of the root help when the terminal has colors', async () => {
+    const colored = createFakeIo({ color: true });
+    await run(['--help'], colored.io);
+    expect(colored.out()).toContain('\u001b[36mCommands:\u001b[39m');
+    expect(colored.out()).toContain('\u001b[36mOptions:\u001b[39m');
+    const plain = createFakeIo();
+    await run(['--help'], plain.io);
+    expect(plain.out()).not.toContain('\u001b[');
   });
 
   it('leaves the examples to the help of each command', async () => {
@@ -141,7 +169,7 @@ describe('as (program)', () => {
     expect(out).toContain('(css, tailwind, scss, sass, less)');
     expect(out).toContain('--defaults');
     expect(out).toContain('Examples:');
-    expect(out).toContain('as new Shop --defaults');
+    expect(out).toContain('sa new Shop --defaults');
     expect(out).toContain('Recommended');
   });
 
@@ -149,7 +177,7 @@ describe('as (program)', () => {
     const fake = createFakeIo();
     expect(await run(['add', '--help'], fake.io)).toBe(0);
     const out = fake.out();
-    expect(out).toContain('Usage: as add <capability> [value]');
+    expect(out).toContain('Usage: sa add <capability> [value]');
     for (const capability of [
       'icons',
       'components',
@@ -162,31 +190,31 @@ describe('as (program)', () => {
     }
     expect(out).toContain('--dry-run');
     expect(out).toContain('--no-install');
-    expect(out).toContain('as add routing starter');
-    expect(out).toContain('as add app-shell');
-    expect(out).toContain('as add presence');
-    expect(out).toContain('as add ui-system');
+    expect(out).toContain('sa add routing starter');
+    expect(out).toContain('sa add app-shell');
+    expect(out).toContain('sa add presence');
+    expect(out).toContain('sa add ui-system');
   });
 
   it('documents `generate` with its kinds, flags and examples', async () => {
     const fake = createFakeIo();
     expect(await run(['generate', '--help'], fake.io)).toBe(0);
     const out = fake.out();
-    expect(out).toContain('Usage: as generate');
+    expect(out).toContain('Usage: sa generate');
     expect(out).toMatch(/^ {2}feature /m);
     expect(out).toMatch(/^ {2}component /m);
     expect(out).toContain('--feature <name>');
     expect(out).toContain('--shared');
-    expect(out).toContain('as generate component invoice-card --shared');
+    expect(out).toContain('sa generate component invoice-card --shared');
   });
 
   it('documents `config`', async () => {
     const fake = createFakeIo();
     expect(await run(['config', '--help'], fake.io)).toBe(0);
     const out = fake.out();
-    expect(out).toContain('Usage: as config <list|get> [key]');
+    expect(out).toContain('Usage: sa config <list|get> [key]');
     expect(out).toContain('read-only');
-    expect(out).toContain('as config get architecture');
+    expect(out).toContain('sa config get architecture');
   });
 
   it('lists available and planned options', async () => {
@@ -214,7 +242,7 @@ describe('as (program)', () => {
     expect(await run(['list', 'appShell'], fake.io)).toBe(0);
     const out = fake.out();
     expect(out).toContain('Application shells (appShell)');
-    expect(out).toMatch(/^ {2}starter .* Angular Starter App Shell/m);
+    expect(out).toMatch(/^ {2}starter .* Starter Angular App Shell/m);
     expect(out).toContain('0008-app-shell.md');
     expect(out).not.toMatch(/App Shell \(Recommended\)/);
   });
@@ -243,7 +271,7 @@ describe('as (program)', () => {
     const fake = createFakeIo({ columns: 160 });
     expect(await run(['list', 'uiSystem'], fake.io)).toBe(0);
     expect(fake.out()).toContain('UI Systems (uiSystem)');
-    expect(fake.out()).toMatch(/^ {2}starter .* Angular Starter UI System/m);
+    expect(fake.out()).toMatch(/^ {2}starter .* Starter Angular UI System/m);
   });
 
   it('lists the presence options with the link to their decision', async () => {
@@ -251,7 +279,7 @@ describe('as (program)', () => {
     expect(await run(['list', 'presence'], fake.io)).toBe(0);
     const out = fake.out();
     expect(out).toContain('Presence (presence)');
-    expect(out).toMatch(/^ {2}starter .* Angular Starter Presence/m);
+    expect(out).toMatch(/^ {2}starter .* Starter Angular Presence/m);
     expect(out).toContain('0009-presence-documentation-and-welcome-home.md');
     expect(out).not.toMatch(/Presence \(Recommended\)/);
   });

@@ -1,7 +1,7 @@
 import { CONFIG_SCHEMA_VERSION, type StarterOptions } from './schema.js';
 
 /** Written to the root of every generated project. It never holds secrets. */
-export const PROJECT_CONFIG_FILE = 'angular-starter.config.json';
+export const PROJECT_CONFIG_FILE = 'starter-angular.config.json';
 
 export interface ProjectConfig {
   schemaVersion: typeof CONFIG_SCHEMA_VERSION;

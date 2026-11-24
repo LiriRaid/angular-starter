@@ -26,14 +26,14 @@ const STATUS_ROW = `<div class="um-status-trigger flex items-center justify-betw
   <div class="flex items-center gap-2">
     <span class="um-status-badge shrink-0 w-3.5 h-3.5 rounded-full relative flex items-center justify-center" [attr.data-status]="statusMenu.status()" aria-hidden="true">
       @if (statusMenu.statusIcon(statusMenu.status()); as icon) {
-        <as-icon [name]="icon" size="14" />
+        <sa-icon [name]="icon" size="14" />
       }
     </span>
     <span class="text-caption-1-medium text-(--app-text-color)">Estado</span>
   </div>
   <div class="flex items-center gap-1">
     <span class="text-caption-2-regular text-(--app-text-subtle) truncate max-w-22">{{ statusMenu.statusLabel() }}</span>
-    <as-icon name="ChevronRight" size="13" class="text-(--app-text-subtle) shrink-0" />
+    <sa-icon name="ChevronRight" size="13" class="text-(--app-text-subtle) shrink-0" />
   </div>
 </div>`;
 
@@ -48,12 +48,12 @@ const SUB_PANELS = `<!-- Sub-panels of the status: outside the popover, whose pa
         <button type="button" class="um-sub-option flex items-center gap-2 w-full py-1.75 px-2.5 rounded-[0.4375rem] text-[0.8125rem] font-medium text-(--app-text-color) bg-transparent border-0 cursor-pointer text-left whitespace-nowrap" [class.um-sub-option--active]="statusMenu.hoveredStatus() === option.id" (mouseenter)="statusMenu.onStatusOptionHover(option.id)" (click)="statusMenu.selectStatusDirect(option.id)">
           <span class="um-status-icon shrink-0 w-3.5 h-3.5 rounded-full relative flex items-center justify-center" [attr.data-status]="option.id">
             @if (statusMenu.statusIcon(option.id); as icon) {
-              <as-icon [name]="icon" size="14" />
+              <sa-icon [name]="icon" size="14" />
             }
           </span>
           <span class="flex-1 text-left">{{ option.label }}</span>
           @if (option.hasDuration) {
-            <as-icon name="ChevronRight" size="12" class="text-(--app-text-subtle) shrink-0" />
+            <sa-icon name="ChevronRight" size="12" class="text-(--app-text-subtle) shrink-0" />
           }
         </button>
       }
@@ -84,20 +84,20 @@ export function addPresenceToUserMenuTemplate(html: string): string {
   if (html.includes(STATUS_ROW_MARKER)) return html;
   const eol = eolOf(html);
 
-  const popoverEnd = html.indexOf('</as-popover>');
+  const popoverEnd = html.indexOf('</sa-popover>');
   if (popoverEnd < 0) {
     throw new Error(
-      'Could not find the popover of the user menu (</as-popover>) to put the status sub-panels after.',
+      'Could not find the popover of the user menu (</sa-popover>) to put the status sub-panels after.',
     );
   }
-  const avatars = [...html.matchAll(/<as-avatar\b[^>]*>/g)].filter(
+  const avatars = [...html.matchAll(/<sa-avatar\b[^>]*>/g)].filter(
     ([tag]) => !tag.includes('mode='),
   );
   if (avatars.length === 0) {
-    throw new Error('Could not find the <as-avatar> of the user menu to give the presence dot.');
+    throw new Error('Could not find the <sa-avatar> of the user menu to give the presence dot.');
   }
   const preferences = Math.max(...PREFERENCES_BUTTONS.map((anchor) => html.indexOf(anchor)));
-  const button = preferences < 0 ? -1 : html.lastIndexOf('<as-button', preferences);
+  const button = preferences < 0 ? -1 : html.lastIndexOf('<sa-button', preferences);
   if (button < 0) {
     throw new Error(
       `Could not find the preferences button (${PREFERENCES_BUTTONS[0]}) to put the status row before.`,
@@ -111,7 +111,7 @@ export function addPresenceToUserMenuTemplate(html: string): string {
       .split(eol)
       .map((line, index) => (index === 0 || line === '' ? line : `${indentation}${line}`))
       .join(eol);
-  const end = popoverEnd + '</as-popover>'.length;
+  const end = popoverEnd + '</sa-popover>'.length;
   let edited = `${html.slice(0, end)}${eol}${eol}${withEol(SUB_PANELS, eol)}${html.slice(end)}`;
   edited = `${edited.slice(0, button)}${indent(STATUS_ROW)}${eol}${eol}${indentation}${DIVIDER}${eol}${eol}${indentation}${edited.slice(button)}`;
 
@@ -140,7 +140,7 @@ export function addPresenceToUserMenuClass(source: string): string {
   if (declaration.getProperty('statusMenu')) return source;
   if (!declaration.getProperty('popoverRef')) {
     throw new Error(
-      'The class "UserMenu" has no popoverRef (viewChild(AsPopover)), which the status menu reads.',
+      'The class "UserMenu" has no popoverRef (viewChild(SaPopover)), which the status menu reads.',
     );
   }
   addNamedImports(file, { module: './user-status', names: ['UserStatusMenu'] });

@@ -34,7 +34,7 @@ describe('copyBlueprint', () => {
   }
 
   beforeEach(async () => {
-    root = await mkdtemp(join(tmpdir(), 'as-blueprint-'));
+    root = await mkdtemp(join(tmpdir(), 'sa-blueprint-'));
     source = join(root, 'blueprint');
     target = join(root, 'project');
     await put(source, 'src/app/features/home/home.ts.tpl', "selector: '__PREFIX__-home';\n");

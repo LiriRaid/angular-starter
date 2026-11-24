@@ -51,9 +51,9 @@ export async function addCommand(
   if (capability === undefined || category === undefined) {
     throw new UsageError(
       capability === undefined
-        ? 'Usage: as add <capability> [value]'
+        ? 'Usage: sa add <capability> [value]'
         : `Unknown capability "${capability}".`,
-      `Choose one of: ${Object.keys(ADDABLE).join(', ')}. The stylesheet format, Tailwind CSS, the package manager and the selector prefix are decided by "as new".`,
+      `Choose one of: ${Object.keys(ADDABLE).join(', ')}. The stylesheet format, Tailwind CSS, the package manager and the selector prefix are decided by "sa new".`,
     );
   }
 
@@ -70,7 +70,7 @@ export async function addCommand(
   }
   if (capability === 'rendering' && current === 'starter-ssr') {
     throw new UsageError(
-      `This project already has the Angular Starter SSR; "${choice}" cannot replace it.`,
+      `This project already has the Starter Angular SSR; "${choice}" cannot replace it.`,
     );
   }
 
@@ -125,7 +125,7 @@ function dependentChoices(category: CapabilityCategory, choice: string): Partial
 }
 
 /**
- * What `as add components <value>` leaves in a project: the components it has plus the ones asked
+ * What `sa add components <value>` leaves in a project: the components it has plus the ones asked
  * for (a collection or a comma list of ids), recorded as the collection or custom selection that
  * union equals. Asking for what the project already has stops with that said.
  */
@@ -186,7 +186,7 @@ function chooseValue(capability: string, value: string | undefined): string {
   }
   if (values.length === 1 && values[0]) return values[0];
   throw new UsageError(
-    `Usage: as add ${capability} <value>`,
+    `Usage: sa add ${capability} <value>`,
     values.length > 0 ? `Choose one of: ${values.join(', ')}.` : undefined,
   );
 }

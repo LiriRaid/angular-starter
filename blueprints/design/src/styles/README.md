@@ -14,7 +14,7 @@ every file is named `*-styles.css`.
 Component stylesheets that need to beat a utility class sit in `legacy-overrides`, which comes before
 `utilities`; keep that order when you add layers.
 
-- `theme/theme-styles.css`: the design tokens. The `--as-*` colours that `ThemeService` sets, and the
+- `theme/theme-styles.css`: the design tokens. The `--sa-*` colours that `ThemeService` sets, and the
   `--app-*` tokens the application reads (panels, text, borders, sidebar, status colours). Light values
   are in `:root` and dark ones in `.dark`. Change a colour here, never in a component.
 - `typography/`: the type scale (`text-body-1-bold`, `text-caption-2-regular`, ...) as Tailwind
@@ -28,8 +28,8 @@ The animations are not here: they live in `src/app/shared/animations`.
 
 ## What this project has
 
-The list below is rewritten every time something that adds stylesheets runs (`as add components`,
-`as add app-shell`, `as add presence`); write your own notes outside of it.
+The list below is rewritten every time something that adds stylesheets runs (`sa add components`,
+`sa add app-shell`, `sa add presence`); write your own notes outside of it.
 
 <!-- as:generated -->
 <!-- /as:generated -->

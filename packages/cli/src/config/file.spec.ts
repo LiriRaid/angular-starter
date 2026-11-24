@@ -10,7 +10,7 @@ import { DEFAULT_OPTIONS } from './resolve.js';
 let dir: string;
 
 beforeEach(async () => {
-  dir = await mkdtemp(join(tmpdir(), 'as-config-'));
+  dir = await mkdtemp(join(tmpdir(), 'sa-config-'));
 });
 
 afterEach(async () => {

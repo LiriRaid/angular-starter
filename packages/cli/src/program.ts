@@ -12,56 +12,64 @@ import type { NewFlags } from './commands/new.js';
 import type { ProgramDeps } from './deps.js';
 import { RuntimeError } from './errors.js';
 import { println, type CliIo } from './io.js';
-import { formatRows } from './ui/format.js';
+import { createStyler, formatRows, type Styler } from './ui/format.js';
 import { VERSION_TEXT } from './version.js';
 
 /** The commands of the root help, in order, with the usage each one is listed with. */
 const ROOT_COMMANDS: readonly (readonly [name: string, term: string])[] = [
-  ['new', 'new [name]'],
-  ['init', 'init'],
-  ['add', 'add <capability> [value]'],
-  ['generate', 'generate, g <kind> <name>'],
-  ['list', 'list [category]'],
-  ['info', 'info'],
-  ['config', 'config <list|get> [key]'],
-  ['doctor', 'doctor'],
-  ['update', 'update'],
-  ['version', 'version'],
-  ['help', 'help [command]'],
+  ['new', 'sa new [name]'],
+  ['init', 'sa init'],
+  ['add', 'sa add <capability> [value]'],
+  ['generate', 'sa generate, g <kind> <name>'],
+  ['list', 'sa list [category]'],
+  ['info', 'sa info'],
+  ['config', 'sa config <list|get> [key]'],
+  ['doctor', 'sa doctor'],
+  ['update', 'sa update'],
+  ['version', 'sa version'],
+  ['help', 'sa help [command]'],
 ];
 
+/** Where the help sends to read more, until the project has a site of its own. */
+const HOMEPAGE = 'https://github.com/LiriRaid/starter-angular';
+
 const ONLY_NEW =
-  'Only `as new` decides: stylesheet format, Tailwind CSS, the purpose of the Starter SSR, the layout of the shell, package manager and selector prefix.';
+  'Only `sa new` decides: stylesheet format, Tailwind CSS, the purpose of the Starter SSR, the layout of the shell, package manager and selector prefix.';
 
 export function createProgram(io: CliIo, deps: ProgramDeps): Command {
   const program = new Command();
   program
-    .name('as')
-    .description('Angular Starter CLI')
+    .name('sa')
+    .description('Starter Angular CLI')
     .usage('[command] [options]')
-    .version(VERSION_TEXT, '-v, --version', 'Display versions')
-    .helpOption('-h, --help', 'Display help')
-    .helpCommand('help [command]', 'Display command help')
-    .configureOutput({ writeOut: io.stdout, writeErr: io.stderr })
+    .version(VERSION_TEXT, '-v, --version', 'Shows the CLI and Angular CLI versions.')
+    .helpOption('-h, --help', 'Shows a help message for this command in the console.')
+    .helpCommand('help [command]', 'Shows the help of one command, or the list of commands.')
+    .configureOutput({
+      writeOut: io.stdout,
+      writeErr: io.stderr,
+      getOutHasColors: () => io.color,
+      getErrHasColors: () => io.color,
+    })
     .configureHelp({
       formatHelp: (command, helper) =>
         command.parent
           ? Help.prototype.formatHelp.call(helper, command, helper)
-          : formatRootHelp(command, helper),
+          : formatRootHelp(command, helper, createStyler(io.color)),
     })
     .exitOverride();
 
   registerNewCommand(program, io, deps);
   program
     .command('init')
-    .description('Prepare an Angular project you already have')
-    .option('--force', 'Read the project again and replace its angular-starter.config.json')
+    .description('Prepares an Angular project you already have so the other commands work on it.')
+    .option('--force', 'Read the project again and replace its starter-angular.config.json')
     .option('--dry-run', 'Show what it found without writing anything')
     .addHelpText(
       'after',
       examples([
-        ['as init', 'Record what the project already has'],
-        ['as init --dry-run', 'Only show it'],
+        ['sa init', 'Record what the project already has'],
+        ['sa init --dry-run', 'Only show it'],
       ]),
     )
     .action(async (flags: { force?: boolean; dryRun?: boolean }) => {
@@ -74,7 +82,9 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
 
   program
     .command('list')
-    .description('List the options, with their commands and docs')
+    .description(
+      'Lists every option with the commands that add it, what it is and its documentation.',
+    )
     .argument(
       '[category]',
       'architecture, routing, style, rendering, ssrPurpose, appShell, layout, presence, components, uiSystem, icons or packageManager',
@@ -82,8 +92,8 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
     .addHelpText(
       'after',
       examples([
-        ['as list', 'Every category'],
-        ['as list rendering', 'Only the rendering strategies'],
+        ['sa list', 'Every category'],
+        ['sa list rendering', 'Only the rendering strategies'],
       ]),
     )
     .action((category: string | undefined) => {
@@ -92,25 +102,25 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
 
   program
     .command('info')
-    .description('Display CLI and project information')
+    .description('Outputs the CLI, Angular CLI and Node versions and the options of the project.')
     .action(async () => {
       await infoCommand(io, deps);
     });
 
   program
     .command('config')
-    .description('Read the options recorded in the project')
+    .description('Reads the options recorded in the project configuration file.')
     .usage('<list|get> [key]')
     .argument('[action]', 'list: every option · get <key>: one option')
     .argument('[key]', 'Option to read')
-    // "as config set ..." gets its own explanation instead of a generic usage error.
+    // "sa config set ..." gets its own explanation instead of a generic usage error.
     .allowExcessArguments()
     .addHelpText(
       'after',
-      `\nThe project configuration (angular-starter.config.json) is read-only: ${ONLY_NEW}\n` +
+      `\nThe project configuration (starter-angular.config.json) is read-only: ${ONLY_NEW}\n` +
         examples([
-          ['as config list', 'Every option of the project'],
-          ['as config get architecture', 'One value, ready for a script'],
+          ['sa config list', 'Every option of the project'],
+          ['sa config get architecture', 'One value, ready for a script'],
         ]),
     )
     .action(async (action: string | undefined, key: string | undefined) => {
@@ -119,26 +129,26 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
 
   program
     .command('doctor')
-    .description('Diagnose your environment')
+    .description('Diagnoses your environment and says what is missing to run the commands.')
     .action(async () => {
       await doctorCommand(io, deps);
     });
 
   program
     .command('update')
-    .description('Update a project (not available yet)')
+    .description('Updates the capabilities of a project to a newer version (not available yet).')
     .allowUnknownOption()
     .allowExcessArguments()
     .argument('[args...]')
     .action(() => {
       throw new RuntimeError(
-        '"as update" is not available yet. It is planned for a future release.',
+        '"sa update" is not available yet. It is planned for a future release.',
       );
     });
 
   program
     .command('version')
-    .description('Display the CLI and Angular CLI versions')
+    .description('Outputs the version of the CLI and of the Angular CLI that `sa new` runs.')
     .action(() => {
       println(io.stdout, VERSION_TEXT);
     });
@@ -159,7 +169,7 @@ function examples(rows: readonly (readonly [string, string])[]): string {
 function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): void {
   program
     .command('new')
-    .description('Create a new Angular application')
+    .description('Creates a new Angular application, with the options you pick or the defaults.')
     .argument('[name]', 'Name of the project, also the folder that is created')
     .option('--architecture <id>', `Project architecture (${valuesOf('architecture')})`)
     .option('--routing <id>', `Routing system (${valuesOf('routing')})`)
@@ -190,19 +200,19 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     .addHelpText(
       'after',
       '\nOnly Tailwind CSS, Client-Side Rendering and Lucide Icons are marked (Recommended) and preselected.\n' +
-        'The defaults also use the Screaming Architecture, Angular Starter Routing, the Angular Starter App Shell and the essential components.\n' +
+        'The defaults also use the Screaming Architecture, Starter Angular Routing, the Starter Angular App Shell and the essential components.\n' +
         'In the wizard, press Esc to go back to the previous question; the last one can change any answer.\n' +
-        'Run "as list" to see what each option is and where its documentation lives.\n' +
+        'Run "sa list" to see what each option is and where its documentation lives.\n' +
         examples([
-          ['as new InventorySystem', 'Ask for each option'],
-          ['as new Shop --defaults', 'The default set, no questions'],
-          ['as new Shop --style scss --rendering ssr', 'Pick some options, be asked the rest'],
+          ['sa new InventorySystem', 'Ask for each option'],
+          ['sa new Shop --defaults', 'The default set, no questions'],
+          ['sa new Shop --style scss --rendering ssr', 'Pick some options, be asked the rest'],
           [
-            'as new Shop --defaults --architecture angular-default --routing angular',
+            'sa new Shop --defaults --architecture angular-default --routing angular',
             "Angular's own structure",
           ],
           [
-            'as new Shop --config starter.json --dry-run',
+            'sa new Shop --config starter.json --dry-run',
             'Read options from a file, show the plan',
           ],
         ]),
@@ -219,12 +229,12 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     ['icons', 'Icon library'],
     [
       'components',
-      'Native as- components, tokens and theme; a collection or ids like button,modal',
+      'Native sa- components, tokens and theme; a collection or ids like button,modal',
     ],
-    ['routing', 'Angular Starter Routing (needs the Screaming Architecture)'],
+    ['routing', 'Starter Angular Routing (needs the Screaming Architecture)'],
     [
       'app-shell',
-      'Angular Starter App Shell: sidebar, header and breadcrumb (needs the starter routing)',
+      'Starter Angular App Shell: sidebar, header and breadcrumb (needs the starter routing)',
     ],
     [
       'presence',
@@ -242,7 +252,9 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
   ];
   program
     .command('add')
-    .description('Add a capability to an existing project')
+    .description(
+      'Adds a capability, such as components, routing, an app shell or icons, to a project.',
+    )
     .usage('<capability> [value]')
     .argument('[capability]', Object.keys(ADDABLE).join(', '))
     .argument('[value]', 'What to add; optional when the capability has one option')
@@ -257,13 +269,13 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
       return (
         `\nCapabilities:\n${formatRows(rows).join('\n')}\n\n${ONLY_NEW}\n` +
         examples([
-          ['as add icons lucide', 'Install Lucide Icons'],
-          ['as add routing starter', 'Navigation tree, titles and breadcrumbs'],
-          ['as add app-shell', 'Floating sidebar, header and example pages'],
-          ['as add presence', 'User status in the shell, in memory or over a WebSocket'],
-          ['as add ui-system', 'Components catalog in the UI tab of the design preferences'],
-          ['as add rendering starter-ssr', 'Angular SSR with incremental hydration'],
-          ['as add components all --dry-run', 'See the steps without changing anything'],
+          ['sa add icons lucide', 'Install Lucide Icons'],
+          ['sa add routing starter', 'Navigation tree, titles and breadcrumbs'],
+          ['sa add app-shell', 'Floating sidebar, header and example pages'],
+          ['sa add presence', 'User status in the shell, in memory or over a WebSocket'],
+          ['sa add ui-system', 'Components catalog in the UI tab of the design preferences'],
+          ['sa add rendering starter-ssr', 'Angular SSR with incremental hydration'],
+          ['sa add components all --dry-run', 'See the steps without changing anything'],
         ])
       );
     })
@@ -287,7 +299,7 @@ function registerGenerateCommand(program: Command, io: CliIo): void {
   program
     .command('generate')
     .alias('g')
-    .description('Generate project files that follow the architecture')
+    .description('Generates a feature or a component that follows the architecture of the project.')
     .usage('<kind> <name> [options]')
     .argument('[kind]', GENERATE_KINDS.join(', '))
     .argument('[name]', 'Name in lowercase with hyphens, for example user-profiles')
@@ -302,12 +314,12 @@ function registerGenerateCommand(program: Command, io: CliIo): void {
       'after',
       `\nKinds:\n${formatRows(kinds).join('\n')}\n\nIt uses your selector prefix. Features and the --feature and --shared places need the Screaming Architecture; in any other project a component goes below src/app, or below --path.\n` +
         examples([
-          ['as generate feature billing', 'Create features/billing (Screaming)'],
-          ['as generate component invoice-card', 'Create src/app/invoice-card (any other project)'],
-          ['as generate component invoice-card --path billing/ui', 'Below src/app/billing/ui'],
-          ['as generate component invoice-card --feature billing', 'Inside the feature'],
+          ['sa generate feature billing', 'Create features/billing (Screaming)'],
+          ['sa generate component invoice-card', 'Create src/app/invoice-card (any other project)'],
+          ['sa generate component invoice-card --path billing/ui', 'Below src/app/billing/ui'],
+          ['sa generate component invoice-card --feature billing', 'Inside the feature'],
           [
-            'as generate component invoice-card --shared',
+            'sa generate component invoice-card --shared',
             'Reusable, exported by @shared/components',
           ],
         ]),
@@ -319,7 +331,7 @@ function registerGenerateCommand(program: Command, io: CliIo): void {
 }
 
 /** Only the commands and the options, like `ng --help`; the examples live in the help of each command. */
-function formatRootHelp(program: Command, helper: Help): string {
+function formatRootHelp(program: Command, helper: Help, style: Styler): string {
   const descriptions = new Map(
     helper
       .visibleCommands(program)
@@ -330,15 +342,16 @@ function formatRootHelp(program: Command, helper: Help): string {
     .map((option) => [helper.optionTerm(option), helper.optionDescription(option)] as const);
 
   return [
-    'Angular Starter CLI',
+    'Starter Angular CLI',
     '',
-    'Usage: as [command] [options]',
+    'Usage: sa [command] [options]',
     '',
-    'Commands:',
+    style.cyan('Commands:'),
     ...formatRows(ROOT_COMMANDS.map(([name, term]) => [term, descriptions.get(name) ?? ''])),
     '',
-    'Options:',
+    style.cyan('Options:'),
     ...formatRows(options),
     '',
+    `For more information, see ${HOMEPAGE}.`,
   ].join('\n');
 }

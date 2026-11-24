@@ -5,7 +5,7 @@
         <h2 class="px-3 text-caption-2-semibold tracking-wide text-(--app-text-subtle) uppercase">{{ section.label }}</h2>
         @for (item of section.pages; track item.id) {
           <a class="docs-link text-caption-1-medium flex items-center gap-2 rounded-lg px-3 py-2 text-(--app-text-color)" [routerLink]="['/docs', item.id]" routerLinkActive="docs-link--active" [attr.data-link]="item.id">
-            <as-icon [name]="item.icon" size="16" />
+            <sa-icon [name]="item.icon" size="16" />
             {{ item.title }}
           </a>
         }
@@ -62,14 +62,14 @@
     <footer class="flex items-center justify-between gap-3 border-t border-(--app-border-color) pt-4">
       @if (previous(); as before) {
         <a class="docs-prev text-caption-1-semibold flex items-center gap-1 text-(--app-text-primary) hover:underline" [routerLink]="['/docs', before.id]">
-          <as-icon name="ArrowLeft" size="14" /> {{ before.title }}
+          <sa-icon name="ArrowLeft" size="14" /> {{ before.title }}
         </a>
       } @else {
         <span></span>
       }
       @if (next(); as after) {
         <a class="docs-next text-caption-1-semibold flex items-center gap-1 text-(--app-text-primary) hover:underline" [routerLink]="['/docs', after.id]">
-          {{ after.title }} <as-icon name="ArrowRight" size="14" />
+          {{ after.title }} <sa-icon name="ArrowRight" size="14" />
         </a>
       }
     </footer>

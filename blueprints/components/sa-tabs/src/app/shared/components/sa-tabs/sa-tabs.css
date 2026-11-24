@@ -1,0 +1,277 @@
+sa-tabs {
+  display: block;
+  min-width: 0;
+
+  --sa-tabs-nav-size: clamp(2.875rem, 2.76rem + 0.023vw, 3rem);
+  --sa-tabs-nav-fade: 0.85rem;
+  --sa-tabs-nav-knob: var(--app-overlay-bg);
+  --sa-tabs-icon-size: clamp(0.9375rem, 0.836rem + 0.452vw, 1.125rem);
+  --sa-tabs-mask-fade: calc(var(--sa-tabs-nav-size) + var(--sa-tabs-nav-fade));
+  --sa-tabs-mask-left: linear-gradient(
+    to right,
+    transparent 0,
+    transparent var(--sa-tabs-nav-size),
+    #000 var(--sa-tabs-mask-fade)
+  );
+  --sa-tabs-mask-right: linear-gradient(
+    to left,
+    transparent 0,
+    transparent var(--sa-tabs-nav-size),
+    #000 var(--sa-tabs-mask-fade)
+  );
+  --sa-tabs-mask-both: linear-gradient(
+    to right,
+    transparent 0,
+    transparent var(--sa-tabs-nav-size),
+    #000 var(--sa-tabs-mask-fade),
+    #000 calc(100% - var(--sa-tabs-mask-fade)),
+    transparent calc(100% - var(--sa-tabs-nav-size)),
+    transparent 100%
+  );
+}
+
+sa-tabs .sa-tablist,
+sa-tabs .sa-tablist-content {
+  min-width: 0;
+}
+
+sa-tabs .sa-tablist {
+  position: relative;
+  display: flex;
+  background: transparent;
+}
+
+sa-tabs .sa-tablist-content {
+  flex: 1 1 auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  scroll-padding-inline: var(--sa-tabs-nav-size);
+}
+
+sa-tabs .sa-tablist-content::-webkit-scrollbar {
+  display: none;
+}
+
+sa-tabs .sa-tablist:has(.sa-tablist-prev-button) .sa-tablist-content {
+  -webkit-mask-image: var(--sa-tabs-mask-left);
+  mask-image: var(--sa-tabs-mask-left);
+}
+
+sa-tabs .sa-tablist:has(.sa-tablist-next-button) .sa-tablist-content {
+  -webkit-mask-image: var(--sa-tabs-mask-right);
+  mask-image: var(--sa-tabs-mask-right);
+}
+
+sa-tabs .sa-tablist:has(.sa-tablist-prev-button):has(.sa-tablist-next-button) .sa-tablist-content {
+  -webkit-mask-image: var(--sa-tabs-mask-both);
+  mask-image: var(--sa-tabs-mask-both);
+}
+
+sa-tabs .sa-tablist-tab-list {
+  position: relative;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(max-content, 1fr);
+  width: max-content;
+  min-width: 100%;
+  gap: 0.375rem;
+  padding: 0.25rem 0.25rem 0.75rem;
+}
+
+sa-tabs .sa-tablist-tab-list::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0.5rem;
+  background: color-mix(in srgb, var(--app-text-subtle) 6%, transparent);
+  border-radius: 1rem;
+  z-index: 0;
+  pointer-events: none;
+}
+
+sa-tabs .sa-tablist,
+sa-tabs .sa-tablist-content,
+sa-tabs .sa-tablist-tab-list,
+sa-tabs .sa-tab {
+  border: 0;
+  border-color: transparent;
+}
+
+sa-tabs .sa-tab {
+  margin: 0;
+  position: relative;
+  z-index: 1;
+}
+
+sa-tabs .sa-tablist-active-bar {
+  z-index: 1;
+}
+
+sa-tabs .sa-tab > sa-icon svg,
+sa-tabs .sa-tab > sa-icon i,
+sa-tabs .sa-tab > sa-icon span {
+  width: var(--sa-tabs-icon-size) !important;
+  height: var(--sa-tabs-icon-size) !important;
+}
+
+sa-tabs .sa-tab:hover:not(.sa-tab--active) {
+  background: color-mix(in srgb, var(--sa-primary-color) 10%, transparent);
+  color: var(--app-text-color);
+}
+
+sa-tabs .sa-tab.sa-tab--active {
+  background: color-mix(in srgb, var(--app-panel-bg) 85%, white 15%);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  /* `--app-text-color` (blanco en dark, negro en light), no `--sa-primary-color` — el primary
+     puro como texto se ve opaco/bajo contraste en dark mode. */
+  color: var(--app-text-color);
+}
+
+sa-tabs .sa-tablist-active-bar {
+  position: absolute;
+  bottom: 0.25rem;
+  height: 2px;
+  background: var(--sa-primary-color);
+}
+
+sa-tabs .sa-tablist-nav-button {
+  position: absolute;
+  top: 0;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sa-tabs-nav-size);
+  min-width: var(--sa-tabs-nav-size);
+  height: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--app-text-color);
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+sa-tabs .sa-tablist-prev-button {
+  left: 0;
+}
+
+sa-tabs .sa-tablist-next-button {
+  right: 0;
+}
+
+sa-tabs .sa-tablist-nav-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 2.375rem;
+  height: 2.375rem;
+  border-radius: 50%;
+  background: var(--sa-tabs-nav-knob);
+}
+
+sa-tabs .sa-tablist-nav-button svg {
+  position: relative;
+  z-index: 1;
+}
+
+sa-tabs .sa-tablist-nav-button:hover::before {
+  background: color-mix(in srgb, var(--sa-primary-color) 14%, var(--sa-tabs-nav-knob));
+}
+
+sa-tabs .sa-tablist-nav-button:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--sa-primary-color) 45%, transparent);
+  outline-offset: 0;
+}
+
+sa-tabs .sa-tab:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Ripple al hacer click — mismo tratamiento visual que .sa-btn .sa-ink (button-styles.css),
+   reusando el mismo @keyframes sa-ripple (global, no atado a ningún componente). */
+sa-tabs .sa-tab .sa-ink {
+  display: block;
+  position: absolute;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 100%;
+  transform: scale(0);
+  pointer-events: none;
+  animation: sa-ripple 0.4s linear;
+}
+
+.dark sa-tabs .sa-tab .sa-ink {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* ── Tamaño Compact ───────────────────────────────────────────────────────── */
+sa-tabs.sa-tabs--compact .sa-tab {
+  padding-inline: 10px !important;
+  padding-block: 6px !important;
+}
+
+/* ── Variante Pills ────────────────────────────────────────────────────────── */
+sa-tabs.sa-tabs--pills {
+  --sa-tabs-icon-size: 16px;
+  --sa-tabs-pill-border: color-mix(in srgb, var(--app-text-subtle) 40%, transparent);
+}
+
+sa-tabs.sa-tabs--pills .sa-tablist-tab-list {
+  grid-auto-columns: max-content;
+  min-width: 100%;
+  gap: 8px;
+}
+
+sa-tabs.sa-tabs--pills .sa-tablist-active-bar {
+  background: var(--sa-tab-color, var(--sa-primary-color));
+}
+
+sa-tabs.sa-tabs--pills .sa-tab {
+  border-radius: 999px !important;
+  border: 1px solid var(--sa-tabs-pill-border) !important;
+  padding-inline: 6px !important;
+  padding-block: 4px !important;
+  height: 28px;
+  min-height: 0;
+  color: var(--app-text-subtle);
+}
+
+sa-tabs.sa-tabs--pills .sa-tab.sa-tab--icon-only {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+}
+
+/* `color` cae a `--app-text-color` (no `--sa-primary-color`) cuando el tab no trae un
+   `--sa-tab-color` propio (ej. la pestaña "Todos", sin canal específico) — el border/fondo se
+   quedan con el tinte primary, solo el texto plano necesitaba el cambio por contraste. */
+sa-tabs.sa-tabs--pills .sa-tab:hover {
+  border-color: color-mix(
+    in srgb,
+    var(--sa-tab-color, var(--sa-primary-color)) 50%,
+    transparent
+  ) !important;
+  background: color-mix(in srgb, var(--sa-tab-color, var(--sa-primary-color)) 6%, transparent);
+  color: var(--sa-tab-color, var(--app-text-color));
+}
+
+sa-tabs.sa-tabs--pills .sa-tab.sa-tab--active {
+  border-color: color-mix(
+    in srgb,
+    var(--sa-tab-color, var(--sa-primary-color)) 55%,
+    transparent
+  ) !important;
+  background: color-mix(in srgb, var(--sa-tab-color, var(--sa-primary-color)) 12%, transparent);
+  color: var(--sa-tab-color, var(--app-text-color));
+}
+
+sa-tabs.sa-tabs--pills .sa-tab.sa-tab--active:hover {
+  background: color-mix(in srgb, var(--sa-tab-color, var(--sa-primary-color)) 18%, transparent);
+}

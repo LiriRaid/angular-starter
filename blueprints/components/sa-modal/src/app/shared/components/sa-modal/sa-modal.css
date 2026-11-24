@@ -1,0 +1,168 @@
+sa-modal {
+  display: contents;
+}
+
+/* El panel se monta vía CDK Overlay, no como `<dialog>` con `showModal()` — no vive en el
+   "top layer" del navegador, así que necesita su propio backdrop (no hay `::backdrop`
+   disponible) y su propio z-index para quedar por encima del resto de la página. */
+.sa-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
+  background: var(--app-sidebar-backdrop-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sa-modal-backdrop--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sa-modal {
+  margin: auto;
+  padding: 0;
+  border: none;
+  max-width: none;
+  /* `<dialog>` trae por defecto del navegador `height: fit-content` — al pasar a un <div>
+   * plano (CDK Overlay) esa altura implícita se pierde: con `position: fixed; inset: 0` y
+   * `height` en `auto`, la especificación estira el panel para llenar todo el alto
+   * disponible en vez de ajustarse al contenido. Se fija a mano lo que el navegador daba
+   * gratis con <dialog>. */
+  height: fit-content;
+  max-height: 90%;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  /* cubic-bezier(0.19, 1, 0.22, 1) ("easeOutExpo") jumps almost at once to full speed and only
+   * then brakes: it feels like an abrupt start instead of a smooth entrance. This curve (a softened
+   * "easeOutQuint") keeps a visible acceleration ramp at the start. */
+  transition:
+    opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: var(--app-overlay-bg);
+  border: 1px solid var(--app-border-color);
+  box-shadow: var(--app-overlay-shadow);
+  opacity: 0;
+  transform: scale(0.93);
+}
+
+.sa-modal--visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@starting-style {
+  .sa-modal--visible {
+    opacity: 0;
+    transform: scale(0.93);
+  }
+}
+
+.sa-modal-resize-handle {
+  position: absolute;
+  display: block;
+  cursor: se-resize;
+  width: 12px;
+  height: 12px;
+  right: 1px;
+  bottom: 1px;
+  z-index: 1;
+}
+
+.sa-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  min-width: 0;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--app-border-color);
+}
+
+.sa-modal-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sa-modal-content {
+  overflow-y: auto;
+  flex-grow: 1;
+  padding: 1.25rem;
+}
+
+/* El contenido maneja su propio espaciado: el relleno va en su interior, no en el área que se desplaza. */
+.sa-modal--flush .sa-modal-content {
+  padding: 0;
+}
+
+.sa-modal-footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--app-border-color);
+}
+
+/* variant="preview" — el panel se ajusta al tamaño natural del contenido (ej. una imagen), sin header/padding,
+   sin borde (ni en light ni en dark — solo la sombra marca el borde, igual que el portfolio),
+   con el botón de cerrar flotando encima en vez de en una barra de header aparte. */
+.sa-modal--preview {
+  max-width: calc(100vw - 4rem);
+  max-height: calc(100dvh - 4rem);
+  background: var(--app-panel-muted-bg);
+  border: 0;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55);
+}
+
+.sa-modal--preview .sa-modal-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+}
+
+.sa-modal--preview .sa-modal-content > img {
+  display: block;
+  max-width: min(900px, calc(100vw - 4rem));
+  max-height: calc(100dvh - 4rem);
+  object-fit: contain;
+}
+
+.sa-modal-preview-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+}
+
+/* Botón icono flotando sobre una imagen (cerrar preview, quitar imagen) — fondo oscuro fijo,
+   igual en modo light y dark, nunca blanco. Se usa con sa-button (nunca <button> nativo). */
+.sa-btn.sa-icon-overlay-btn {
+  background: rgba(0, 0, 0, 0.45);
+  border-color: transparent;
+  color: #ffffff;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s ease;
+}
+
+.sa-btn.sa-icon-overlay-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.sa-modal-title-dot {
+  height: 0.625rem;
+  width: 0.625rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+}

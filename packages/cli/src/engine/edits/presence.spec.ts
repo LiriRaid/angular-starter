@@ -19,7 +19,7 @@ beforeAll(async () => {
 describe('presence in the user menu template', () => {
   it('puts the presence dot on both avatars, each with the background of its surface', () => {
     const edited = addPresenceToUserMenuTemplate(html);
-    const avatars = edited.match(/<as-avatar[^>]*>/g) ?? [];
+    const avatars = edited.match(/<sa-avatar[^>]*>/g) ?? [];
     expect(avatars).toHaveLength(2);
     for (const avatar of avatars) {
       expect(avatar).toContain('mode="presence"');
@@ -46,7 +46,7 @@ describe('presence in the user menu template', () => {
 
   it('puts the sub-panels after the popover, where position: fixed is relative to the viewport', () => {
     const edited = addPresenceToUserMenuTemplate(html);
-    const popoverEnd = edited.indexOf('</as-popover>');
+    const popoverEnd = edited.indexOf('</sa-popover>');
     for (const marker of [
       'statusMenu.statusSubPanelPos()',
       'um-sub-panel--duration',
@@ -85,7 +85,7 @@ describe('presence in the user menu template', () => {
   });
 
   it.each([
-    ['</as-popover>', 'the popover'],
+    ['</sa-popover>', 'the popover'],
     ['label="Preferencias de Diseño"', 'the preferences button'],
   ])('names the missing anchor when the template has no %s', (anchor, name) => {
     expect(() => addPresenceToUserMenuTemplate(html.replace(anchor, ''))).toThrow(
@@ -94,7 +94,7 @@ describe('presence in the user menu template', () => {
   });
 
   it('names the avatars it expects', () => {
-    expect(() => addPresenceToUserMenuTemplate('<as-popover></as-popover>')).toThrow(/as-avatar/);
+    expect(() => addPresenceToUserMenuTemplate('<sa-popover></sa-popover>')).toThrow(/sa-avatar/);
   });
 });
 
@@ -120,7 +120,7 @@ describe('presence in the user menu class', () => {
   it('needs the popover reference the status menu reads', () => {
     expect(() =>
       addPresenceToUserMenuClass(
-        source.replace('private readonly popoverRef = viewChild(AsPopover);', ''),
+        source.replace('private readonly popoverRef = viewChild(SaPopover);', ''),
       ),
     ).toThrow(/popoverRef/);
   });

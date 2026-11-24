@@ -231,7 +231,7 @@ describe('runWizard', () => {
     ]);
     expect(asked[0]?.choices).toEqual(['none', 'starter']);
     expect(asked[0]?.names?.[1]).toMatch(
-      /^Angular Starter App Shell +\[ https:\/\/github\.com\/LiriRaid\/\S+0008-app-shell\.md +\]$/,
+      /^Starter Angular App Shell +\[ https:\/\/github\.com\/LiriRaid\/\S+0008-app-shell\.md +\]$/,
     );
     expect(answers).toEqual({
       appShell: 'starter',
@@ -263,7 +263,7 @@ describe('runWizard', () => {
     expect(presence?.choices).toEqual(['none', 'starter']);
     expect(presence?.default).toBeUndefined();
     expect(presence?.names?.[1]).toMatch(
-      /^Angular Starter Presence +\[ https:\/\/github\.com\/LiriRaid\/\S+0009-\S+\.md +\]$/,
+      /^Starter Angular Presence +\[ https:\/\/github\.com\/LiriRaid\/\S+0009-\S+\.md +\]$/,
     );
     expect(answers).toMatchObject({ appShell: 'starter', presence: 'starter' });
   });
@@ -394,7 +394,7 @@ describe('runWizard', () => {
     );
   });
 
-  it('offers the Angular Starter routing only with an architecture that supports it', async () => {
+  it('offers the Starter Angular routing only with an architecture that supports it', async () => {
     const plain = createFakePrompter(['angular-default', 'css', 'csr', 'none']);
     await runWizard({ ...SETTLED }, plain.prompter, NO_ENV, FULL);
     expect(plain.asked.map((question) => question.name)).not.toContain('routing');
@@ -728,7 +728,7 @@ describe('runWizard', () => {
       const names = list?.names ?? [];
       const descriptions = list?.descriptions ?? [];
       const button = list?.choices?.indexOf('button') ?? -1;
-      expect(names[button]).toContain('as-button');
+      expect(names[button]).toContain('sa-button');
       expect(descriptions[button]).toMatch(/Button with severities/);
       expect(descriptions[button]).toContain('button-styles.css');
       expect(descriptions[button]).toMatch(/brings: icon/i);

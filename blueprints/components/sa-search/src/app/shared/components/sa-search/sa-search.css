@@ -1,0 +1,123 @@
+sa-search {
+  --sa-search-height: clamp(2.2rem, 2.08rem + 0.32vw, 2.375rem);
+  --sa-search-radius: clamp(0.7rem, 0.58rem + 0.24vw, 0.875rem);
+}
+
+sa-search.sa-search--input,
+sa-search.sa-search--chat {
+  display: block;
+  width: 100%;
+  max-width: 25rem;
+}
+
+sa-search.sa-search--input.w-full,
+sa-search.sa-search--chat.w-full {
+  max-width: none;
+}
+
+sa-search.sa-search--collapsed {
+  display: inline-flex;
+}
+
+/* Collapsed button */
+
+sa-search .sa-search-btn.sa-btn {
+  border-radius: var(--sa-search-radius);
+  background: var(--app-search-input-bg);
+  border-color: var(--app-search-input-border);
+}
+
+sa-search .sa-search-btn.sa-btn:not(.sa-disabled):hover {
+  background: var(--sa-primary-color);
+  border-color: var(--sa-primary-color);
+}
+
+/* Default mode: sa-input con tokens del search */
+
+/* No override of --app-action-icon-color here: it keeps the usual faint gray (default
+   --app-text-subtle, very close to --app-placeholder-color). It used to be overridden con --app-search-input-prefix (casi negro en claro / casi blanco en oscuro — ese token
+   es para el prefijo "$"/dial-code de OTRO input legado, no para este ícono). Con ese salto de
+   contraste tan grande, al desvanecer el buscador colapsable con opacity el placeholder (ya
+   tenue) se veía esfumarse gradual mientras el ícono se mantenía nítido casi hasta el final y ahí
+   desaparecía de golpe. */
+sa-search sa-input {
+  --app-control-surface-bg: var(--app-search-input-bg);
+  --app-control-surface-border: var(--app-search-input-border);
+  --app-control-surface-text: var(--app-search-input-text);
+}
+
+sa-search sa-input .sa-input-wrapper > .relative > div,
+sa-search sa-input .sa-input-wrapper > .relative > fieldset {
+  min-height: var(--sa-search-height);
+  border-radius: var(--sa-search-radius);
+}
+
+/* Chat mode: contenedor estilo input standalone */
+
+.sa-search-chat-input {
+  padding: 6px 14px 6px 10px;
+  border-radius: var(--sa-search-radius);
+  min-height: var(--sa-search-height);
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: var(--app-search-input-bg);
+  box-shadow: inset 0 0 0 1px var(--app-search-input-border);
+  color: var(--app-search-input-text);
+  transition: box-shadow 0.2s ease;
+}
+
+.sa-search-chat-input:focus-within {
+  box-shadow: inset 0 0 0 2px var(--app-control-focus-ring);
+}
+
+.sa-search-chat-input sa-button {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Campo de texto del modo chat */
+
+.sa-search-chat-field {
+  flex: 1;
+  min-width: 0;
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+  outline: none;
+  appearance: none;
+  padding: 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.25rem;
+  font-family: inherit;
+  color: var(--app-search-input-text);
+  width: 100%;
+  cursor: text;
+}
+
+.sa-search-chat-field:focus,
+.sa-search-chat-field:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.sa-search-chat-field::placeholder {
+  color: var(--app-placeholder-color);
+  opacity: 1;
+}
+
+/* Back button: tamaño real 28x28 vía size="xsmall" (ver .html) — acá solo lo que
+   size="xsmall" no cubre (fondo transparente y quitar el box-shadow por defecto). */
+
+sa-search .sa-search-back-btn.sa-btn {
+  box-shadow: none;
+  background: transparent;
+}
+
+sa-search .sa-search-back-btn.sa-btn :is(.sa-btn__icon, sa-icon, svg),
+sa-search .sa-search-back-btn.sa-btn sa-icon * {
+  color: inherit !important;
+  stroke: currentColor !important;
+}

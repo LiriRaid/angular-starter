@@ -14,6 +14,6 @@ You can expect an acknowledgement of your report; fix timelines will be shared o
 
 ## Scope notes
 
-Angular Starter generates source code that becomes the developer's own application. Vulnerabilities in the generated code, in the CLI, or in the schematics are in scope. Vulnerabilities in Angular, Tailwind CSS or other upstream projects should be reported to those projects.
+Starter Angular generates source code that becomes the developer's own application. Vulnerabilities in the generated code, in the CLI, or in the schematics are in scope. Vulnerabilities in Angular, Tailwind CSS or other upstream projects should be reported to those projects.
 
 Runtime configuration published to end users must always be validated and authorized on the backend; frontend guards alone are not a security boundary.

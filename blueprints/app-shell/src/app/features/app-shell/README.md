@@ -18,7 +18,7 @@ app-shell/
 ```
 
 - The sidebar draws `navigation/navigation.data.ts`. Add a page there and it shows up, with its
-  breadcrumb and title (`as generate feature <name>` does both for you).
+  breadcrumb and title (`sa generate feature <name>` does both for you).
 - `app.ts` provides the layout (`provideLayout`) and `app.routes.ts` loads every page inside the
   `Main` layout route. To show a page without the shell, add a route outside of it that loads `Empty`.
 - The user menu shows an example identity held in the component: replace it with the user of your
@@ -27,7 +27,7 @@ app-shell/
   a page with the tabs Apariencia, Tema, UI and Otros whose changes apply in real time. The logic is
   `core/design-preferences` (ADR-0010); only the floating wide layout is built, the others are shown
   as under construction.
-- `as add presence` adds the status of the user (online, away, busy, invisible) to the user menu and the
+- `sa add presence` adds the status of the user (online, away, busy, invisible) to the user menu and the
   presence dot to its avatars; see `core/presence`.
 - `features/home` is a welcome page (`home.data.ts` holds its cards and links): edit it or replace it
   with your own start page.

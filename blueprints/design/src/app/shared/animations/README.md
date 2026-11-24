@@ -10,7 +10,7 @@
 | `route-transition`, `route-entering`                       | the fade and the 4 px rise of a routed page when it appears                                |
 | `slide-in-out-enter`, `slide-in-out-leave`                 | a block of unknown height that opens and closes (an accordion) when it is added or removed |
 | `slide-in-from-bottom-enter`, `slide-in-from-bottom-leave` | a panel that comes up from the bottom edge                                                 |
-| `as-collapse-grid`, `is-collapsed`                         | a block that is always in the page and collapses to zero height on a transition            |
+| `sa-collapse-grid`, `is-collapsed`                         | a block that is always in the page and collapses to zero height on a transition            |
 
 Use the `-enter` and `-leave` classes with Angular's `animate.enter` and `animate.leave` on content
 that appears and disappears with `@if`:
@@ -22,7 +22,7 @@ that appears and disappears with `@if`:
 }
 ```
 
-For content that is always there, toggle `is-collapsed` on an `as-collapse-grid` wrapper instead:
+For content that is always there, toggle `is-collapsed` on an `sa-collapse-grid` wrapper instead:
 Angular runs `animate.enter` every time the element is mounted, including the first load of the page.
 
 The route fade, the collapse grid and the slide from the bottom switch themselves off for users who

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { AsSelect } from '@shared/components';
+import { SaSelect } from '@shared/components';
 
 export interface LayoutMode {
   readonly id: string;
@@ -26,7 +26,7 @@ export const LAYOUT_MODES: readonly LayoutMode[] = [
 
 @Component({
   selector: '__PREFIX__-appearance-tab',
-  imports: [ReactiveFormsModule, AsSelect],
+  imports: [ReactiveFormsModule, SaSelect],
   templateUrl: './appearance-tab.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

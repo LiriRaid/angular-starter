@@ -40,7 +40,7 @@ function adaptAppConfig(source: string): string {
 }
 
 /**
- * Angular Starter SSR: the default Angular SSR plus incremental hydration, event replay and view
+ * Starter Angular SSR: the default Angular SSR plus incremental hydration, event replay and view
  * transitions, with a section of the home page that hydrates when it scrolls into view.
  */
 export const starterSsrProfile: RenderingProfile = {

@@ -26,7 +26,7 @@ const TAILWIND_STYLES = `/* You can add global styles to this file, and also imp
 let project: string;
 
 beforeEach(async () => {
-  project = await mkdtemp(join(tmpdir(), 'as-design-'));
+  project = await mkdtemp(join(tmpdir(), 'sa-design-'));
   await writeGeneratedWorkspace(project, {
     'angular.json': ANGULAR_JSON,
     'src/styles.css': TAILWIND_STYLES,
@@ -67,9 +67,9 @@ describe('design base', () => {
     await apply();
     const expected: Readonly<Record<string, readonly string[]>> = {
       'src/app/core/theme/README.md': ['ThemeService', 'theme-palettes', 'dark'],
-      'src/app/core/common/icons/README.md': ['as-icons.ts', 'AsIconsSVG', 'lucide-icons.ts'],
+      'src/app/core/common/icons/README.md': ['sa-icons.ts', 'SaIconsSVG', 'lucide-icons.ts'],
       'src/app/shared/animations/README.md': ['animations.css', 'fade-in-out'],
-      'src/app/shared/components/README.md': ['@shared/components', 'as-'],
+      'src/app/shared/components/README.md': ['@shared/components', 'sa-'],
       'src/styles/README.md': ['theme-styles.css', 'typography', 'legacy-overrides'],
     };
     for (const [file, topics] of Object.entries(expected)) {
@@ -127,14 +127,14 @@ describe('design base', () => {
       'src/test-setup.ts',
     ]);
     const setup = await read('src/test-setup.ts');
-    expect(setup).toContain('{ provide: LUCIDE_ICONS, useExisting: AS_LUCIDE_ICONS }');
+    expect(setup).toContain('{ provide: LUCIDE_ICONS, useExisting: SA_LUCIDE_ICONS }');
   });
 
-  it('writes the tokens with the as- prefix and a dark theme, with no business sections', async () => {
+  it('writes the tokens with the sa- prefix and a dark theme, with no business sections', async () => {
     await apply();
     const theme = await read('src/styles/theme/theme-styles.css');
-    expect(theme).toContain('--as-primary-color');
-    expect(theme).toContain('--as-surface-0');
+    expect(theme).toContain('--sa-primary-color');
+    expect(theme).toContain('--sa-surface-0');
     expect(theme).toContain('.dark {');
     expect(theme).toContain('--app-panel-bg');
     expect(theme).not.toMatch(/--omni-|--login-|--app-eco-/);
@@ -144,7 +144,7 @@ describe('design base', () => {
     await apply();
     const config = await read('src/app/app.config.ts');
     expect(config).toContain('provideThemeInitializer()');
-    expect(config).toContain('{ provide: LUCIDE_ICONS, useExisting: AS_LUCIDE_ICONS }');
+    expect(config).toContain('{ provide: LUCIDE_ICONS, useExisting: SA_LUCIDE_ICONS }');
     expect(config).toContain("from '@core/theme/theme.initializer'");
     expect(config).toContain("from '@core/common/icons/lucide-icons.provider'");
     expect(config).toMatch(/import \{ LUCIDE_ICONS \} from '@lucide\/angular'/);
@@ -177,7 +177,7 @@ describe('design base', () => {
 
   it('writes the icon registration in core/common/icons', async () => {
     await apply();
-    for (const file of ['lucide-icons.ts', 'lucide-icons.provider.ts', 'as-icons.ts']) {
+    for (const file of ['lucide-icons.ts', 'lucide-icons.provider.ts', 'sa-icons.ts']) {
       await expect(read(`src/app/core/common/icons/${file}`), file).resolves.toBeTypeOf('string');
     }
     expect(await read('src/app/core/common/icons/lucide-icons.ts')).toContain('Home: LucideHouse');

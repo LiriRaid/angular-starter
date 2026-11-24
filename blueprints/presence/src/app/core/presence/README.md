@@ -65,7 +65,7 @@ protected readonly rows = computed(() => this.live.apply(this.users()));
 ```
 
 ```html
-<as-avatar [label]="row.initials" mode="presence" [presenceStatus]="row.presenceStatus" />
+<sa-avatar [label]="row.initials" mode="presence" [presenceStatus]="row.presenceStatus" />
 ```
 
 ## Sign in and sign out

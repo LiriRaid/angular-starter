@@ -34,7 +34,7 @@ import { ROUTING_PROFILES } from './routing/index.js';
 const PROBE_TIMEOUT_MS = 15_000;
 const WORKSPACE_TIMEOUT_MS = 10 * 60_000;
 const INSTALL_TIMEOUT_MS = 15 * 60_000;
-const INITIAL_COMMIT_MESSAGE = 'chore: initial commit from Angular Starter';
+const INITIAL_COMMIT_MESSAGE = 'chore: initial commit from Starter Angular';
 
 export const validateEnvironment: Stage = {
   id: 'validate-environment',
@@ -43,7 +43,7 @@ export const validateEnvironment: Stage = {
     if (await pathExists(targetDir)) {
       throw new UsageError(
         `"${name}" already exists in ${cwd}.`,
-        'Choose another name or remove the existing folder; Angular Starter never overwrites a project.',
+        'Choose another name or remove the existing folder; Starter Angular never overwrites a project.',
       );
     }
     if (!isSupportedNode(deps.nodeVersion)) {
@@ -109,7 +109,7 @@ export const applyArchitecture: Stage = {
 };
 
 /**
- * The architecture of `as add` (ADR-0019): the same profile as `as new`, but a file of the project that
+ * The architecture of `sa add` (ADR-0019): the same profile as `sa new`, but a file of the project that
  * does not have the shape `ng new` leaves stops it before anything is written, said as a usage error
  * that names the file.
  */
@@ -131,7 +131,7 @@ export const applyArchitectureToProject: Stage = {
 
 export const applyRouting: Stage = {
   id: 'apply-routing',
-  title: 'Adding Angular Starter routing',
+  title: 'Adding Starter Angular routing',
   enabled: ({ options }) => ROUTING_PROFILES[options.routing] !== undefined,
   async run({ name, options, targetDir }) {
     await ROUTING_PROFILES[options.routing]?.apply({ targetDir, name, prefix: options.prefix });
@@ -158,7 +158,7 @@ export const addAngularSsr: Stage = {
 
 export const applyRendering: Stage = {
   id: 'apply-rendering',
-  title: 'Applying Angular Starter SSR',
+  title: 'Applying Starter Angular SSR',
   enabled: ({ options }) => RENDERING_PROFILES[options.rendering] !== undefined,
   async run({ name, options, targetDir }) {
     await RENDERING_PROFILES[options.rendering]?.apply({
@@ -248,7 +248,7 @@ export const addIconLibrary: Stage = {
 
 export const writeStarterConfig: Stage = {
   id: 'write-starter-config',
-  title: 'Writing Angular Starter configuration',
+  title: 'Writing Starter Angular configuration',
   async run({ options, targetDir }) {
     const config = createProjectConfig(options, {
       cli: CLI_VERSION,
@@ -342,7 +342,7 @@ export const verifyProject: Stage = {
   },
 };
 
-/** Every stage of `as new`, in execution order. */
+/** Every stage of `sa new`, in execution order. */
 export const NEW_PROJECT_STAGES: readonly Stage[] = [
   validateEnvironment,
   createWorkspace,

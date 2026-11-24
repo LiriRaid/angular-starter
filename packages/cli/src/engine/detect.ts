@@ -15,8 +15,8 @@ const DEFAULT_PREFIX = 'app';
 const SHARED_COMPONENTS = 'src/app/shared/components';
 
 /**
- * What an existing Angular project already has, as the options `as new` would have recorded for it
- * (ADR-0019). What cannot be told is recorded as the option that adds nothing, so `as add` can still
+ * What an existing Angular project already has, as the options `sa new` would have recorded for it
+ * (ADR-0019). What cannot be told is recorded as the option that adds nothing, so `sa add` can still
  * offer it. It reads files and never changes anything.
  */
 export async function detectProject(root: string): Promise<Detection> {
@@ -129,21 +129,21 @@ function prefixOf(angularJson: string, notes: string[]): string {
       : DEFAULT_PREFIX;
   if (prefix === RESERVED_PREFIX) {
     notes.push(
-      `The prefix "${RESERVED_PREFIX}" is reserved for Angular Starter components; "${DEFAULT_PREFIX}" is recorded instead.`,
+      `The prefix "${RESERVED_PREFIX}" is reserved for Starter Angular components; "${DEFAULT_PREFIX}" is recorded instead.`,
     );
     return DEFAULT_PREFIX;
   }
   return prefix;
 }
 
-/** The ids of the `as-` components that are in `shared/components`. */
+/** The ids of the `sa-` components that are in `shared/components`. */
 async function componentsIn(root: string): Promise<string[]> {
   const entries = await readdir(join(root, SHARED_COMPONENTS), { withFileTypes: true }).catch(
     () => [],
   );
   return entries
-    .filter((entry) => entry.isDirectory() && entry.name.startsWith('as-'))
-    .map((entry) => entry.name.slice('as-'.length));
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith('sa-'))
+    .map((entry) => entry.name.slice('sa-'.length));
 }
 
 /** The closest folder, from `startDir` upwards, that holds an `angular.json`. */

@@ -1,0 +1,95 @@
+sa-checkbox {
+  position: relative;
+  display: inline-flex;
+  user-select: none;
+  vertical-align: bottom;
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.sa-checkbox-input {
+  cursor: pointer;
+  appearance: none;
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  opacity: 0;
+  z-index: 1;
+  outline: 0 none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+}
+
+.sa-checkbox-input:disabled {
+  cursor: default;
+}
+
+.sa-checkbox-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 4px;
+  border: 1px solid var(--app-checkbox-border);
+  background: var(--app-checkbox-bg);
+  width: 1.25rem;
+  height: 1.25rem;
+  transition:
+    background 0.18s ease,
+    color 0.18s ease,
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    outline-color 0.18s ease;
+  outline-color: transparent;
+}
+
+.sa-checkbox-icon {
+  color: var(--sa-surface-0);
+  transition-duration: 0.18s;
+}
+
+.sa-checkbox-icon svg {
+  stroke-width: 4;
+}
+
+sa-checkbox:not(.sa-checkbox-disabled):has(.sa-checkbox-input:hover) .sa-checkbox-box {
+  border-color: var(--app-checkbox-hover-border);
+}
+
+sa-checkbox.sa-checkbox-checked .sa-checkbox-box {
+  border-color: var(--app-checkbox-accent);
+  background: var(--app-checkbox-accent);
+}
+
+sa-checkbox.sa-checkbox-checked:not(.sa-checkbox-disabled):has(.sa-checkbox-input:hover)
+  .sa-checkbox-box {
+  background: var(--app-checkbox-accent);
+  border-color: var(--app-checkbox-accent);
+}
+
+sa-checkbox.sa-checkbox-checked .sa-checkbox-icon {
+  color: var(--sa-surface-0);
+}
+
+sa-checkbox:not(.sa-checkbox-disabled):has(.sa-checkbox-input:focus-visible) .sa-checkbox-box {
+  border-color: var(--app-checkbox-accent);
+  outline: 2px solid color-mix(in srgb, var(--app-checkbox-accent) 28%, transparent);
+  outline-offset: 2px;
+}
+
+sa-checkbox.sa-checkbox-disabled {
+  opacity: 1;
+}
+
+sa-checkbox.sa-checkbox-disabled .sa-checkbox-box {
+  background: var(--app-checkbox-disabled-bg);
+  border-color: var(--app-checkbox-disabled-border);
+  opacity: 0.6;
+}
+
+sa-checkbox.sa-checkbox-disabled .sa-checkbox-icon {
+  color: var(--app-checkbox-disabled-border);
+}

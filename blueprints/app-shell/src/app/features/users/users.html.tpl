@@ -18,7 +18,7 @@
           <tr class="border-b border-(--app-border-color) last:border-b-0">
             <td class="px-4 py-3">
               <div class="flex items-center gap-3">
-                <as-avatar [label]="initials(user.name)" [size]="36" background="var(--app-sidebar-user-avatar-bg)" color="var(--app-sidebar-user-avatar-text)" [alt]="user.name" />
+                <sa-avatar [label]="initials(user.name)" [size]="36" background="var(--app-sidebar-user-avatar-bg)" color="var(--app-sidebar-user-avatar-text)" [alt]="user.name" />
                 <div class="min-w-0">
                   <p class="text-caption-1-semibold text-(--app-text-color)">{{ user.name }}</p>
                   <p class="text-caption-2-regular text-(--app-text-subtle)">{{ user.email }}</p>

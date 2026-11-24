@@ -10,12 +10,12 @@ import { NAV_APP_NAME_TOKEN } from '@core/navigation/navigation.tokens';
 import { SidebarStatus } from '../enums/sidebar-status.enum';
 import { LayoutService } from '../../services/layout.service';
 import { filterNavigationGroups, getFolderRootLink, hasActiveDescendant, isNavigationItemActive, normalizeSidebarUrl } from './sidebar-navigation.utils';
-import { AsIcon, AsRipple, AsSearch, AsTooltip } from '@shared/components';
+import { SaIcon, SaRipple, SaSearch, SaTooltip } from '@shared/components';
 import { UserMenu } from './user-menu/user-menu';
 
 @Component({
   selector: '__PREFIX__-sidebar',
-  imports: [ReactiveFormsModule, AsIcon, AsRipple, AsSearch, AsTooltip, UserMenu],
+  imports: [ReactiveFormsModule, SaIcon, SaRipple, SaSearch, SaTooltip, UserMenu],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

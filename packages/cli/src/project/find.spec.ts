@@ -24,7 +24,7 @@ const OLD_OPTIONS = {
 let root: string;
 
 beforeEach(async () => {
-  root = await mkdtemp(join(tmpdir(), 'as-find-'));
+  root = await mkdtemp(join(tmpdir(), 'sa-find-'));
 });
 
 afterEach(async () => {
@@ -33,7 +33,7 @@ afterEach(async () => {
 
 async function project(options: Record<string, unknown>): Promise<string> {
   await writeFile(
-    join(root, 'angular-starter.config.json'),
+    join(root, 'starter-angular.config.json'),
     JSON.stringify({ schemaVersion: 1, options }),
   );
   await writeFile(join(root, 'package.json'), JSON.stringify({ name: 'shop' }));

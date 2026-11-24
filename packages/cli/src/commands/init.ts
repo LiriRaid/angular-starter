@@ -21,21 +21,21 @@ export interface InitFlags {
 
 /**
  * Adopts an existing Angular project (ADR-0019): reads what it has, shows it and records it in
- * `angular-starter.config.json`, so that `as add` and `as generate` work on it. It changes no code.
+ * `starter-angular.config.json`, so that `sa add` and `sa generate` work on it. It changes no code.
  */
 export async function initCommand(io: CliIo, flags: InitFlags): Promise<void> {
   const root = await findWorkspace(io.cwd);
   if (root === undefined) {
     throw new UsageError(
       `This is not an Angular workspace: angular.json was not found in ${io.cwd} or its parent folders.`,
-      'Run "as init" in the folder of the project. To start a new one, use "as new".',
+      'Run "sa init" in the folder of the project. To start a new one, use "sa new".',
     );
   }
   const file = join(root, PROJECT_CONFIG_FILE);
   if (existsSync(file) && !flags.force) {
     throw new UsageError(
       `${PROJECT_CONFIG_FILE} already exists in ${root}: this project is already set up.`,
-      'Use "as init --force" to read the project again and replace it.',
+      'Use "sa init --force" to read the project again and replace it.',
     );
   }
 
@@ -74,7 +74,7 @@ export async function initCommand(io: CliIo, flags: InitFlags): Promise<void> {
   println(io.stdout, style.green(`${PROJECT_CONFIG_FILE} written.`));
   println(
     io.stdout,
-    'Now "as add", "as generate" and "as config" work in this project. See "as list".',
+    'Now "sa add", "sa generate" and "sa config" work in this project. See "sa list".',
   );
 }
 
@@ -92,7 +92,7 @@ async function readManifest(root: string): Promise<{
 
 /**
  * What detection can only assume (the layout of the shell, the purpose of the Starter SSR) and what is
- * not in the project's files (Git, install) stay as `as new` recorded them when there is a file.
+ * not in the project's files (Git, install) stay as `sa new` recorded them when there is a file.
  */
 async function keepRecorded(file: string, detected: StarterOptions): Promise<StarterOptions> {
   let recorded: Partial<StarterOptions>;

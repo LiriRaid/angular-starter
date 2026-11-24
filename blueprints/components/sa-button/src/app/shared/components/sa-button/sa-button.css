@@ -1,0 +1,122 @@
+@layer components {
+  .sa-button__trailing-icon {
+    margin-left: auto;
+  }
+
+  .sa-button-label--collapsed {
+    opacity: 0;
+    transform: translateX(-6px);
+    max-width: 0;
+    margin: 0;
+    padding: 0;
+    pointer-events: none;
+  }
+
+  .sa-button__badge {
+    min-width: 1.25rem;
+    height: 1.25rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 0.375rem;
+    margin-left: 0.25rem;
+    border-radius: 9999px;
+    background-color: var(--app-primary-button-bg);
+    color: var(--app-primary-button-disabled-text);
+    font-size: var(--font-size-caption-2);
+    font-weight: 800;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .sa-btn:hover .sa-button__badge,
+  .sa-btn:focus-visible .sa-button__badge {
+    background-color: var(--app-primary-button-bg);
+    color: var(--app-primary-button-disabled-text);
+  }
+
+  /* Padding estándar 8×10px para todos los botones con contenido */
+
+  .sa-btn {
+    padding: 0.5rem 0.625rem;
+    border-radius: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+  }
+
+  .sa-btn.sa-btn-r-lg {
+    border-radius: 1rem;
+  }
+  .sa-btn.sa-btn-r-full {
+    border-radius: 9999px;
+  }
+
+  .sa-btn:focus-visible {
+    outline: 2px solid var(--sa-primary-color);
+    outline-offset: 0;
+    box-shadow: none;
+  }
+
+  /* Tamaños estandarizados (height fijo) */
+
+  .sa-btn.sa-btn-xsmall {
+    height: 1.75rem;
+  }
+  .sa-btn.sa-btn-small {
+    height: 2.375rem;
+  }
+  .sa-btn.sa-btn-medium {
+    height: 2.5rem;
+  }
+  .sa-btn.sa-btn-high {
+    height: 2.625rem;
+  }
+  .sa-btn.sa-btn-large {
+    height: 2.75rem;
+  }
+
+  /* Botones de solo ícono → cuadrados, sin padding */
+
+  .sa-btn.sa-btn-icon {
+    padding: 0;
+  }
+
+  .sa-btn.sa-btn-icon.sa-btn-xsmall {
+    width: 1.75rem;
+    min-width: 1.75rem;
+  }
+  .sa-btn.sa-btn-icon.sa-btn-small {
+    width: 2.375rem;
+    min-width: 2.375rem;
+  }
+  .sa-btn.sa-btn-icon.sa-btn-medium {
+    width: 2.5rem;
+    min-width: 2.5rem;
+  }
+  .sa-btn.sa-btn-icon.sa-btn-high {
+    width: 2.625rem;
+    min-width: 2.625rem;
+  }
+  .sa-btn.sa-btn-icon.sa-btn-large {
+    width: 2.75rem;
+    min-width: 2.75rem;
+  }
+
+  /* iconPos 'top'/'bottom' → ícono y label en columna en vez de fila. sa-btn-{size} no se
+   agrega en este caso (ver isStackedIcon en el .ts), así que el alto lo da el propio padding
+   + contenido en vez de un height fijo pensado para una sola línea; el label se centra y
+   puede hacer wrap en vez de truncarse. El !important en el padding vertical es necesario
+   porque consumidores como admin-field-type-option traen `padding: 0 ...` (pensado para la
+   variante horizontal de altura fija) con la misma especificidad — sin esto, esa clase gana
+   y el botón apilado queda sin aire arriba/abajo. */
+  .sa-btn.sa-btn-icon-stacked {
+    flex-direction: column;
+    gap: 0.375rem;
+    text-align: center;
+    white-space: normal;
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+}

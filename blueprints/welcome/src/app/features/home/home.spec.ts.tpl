@@ -34,16 +34,16 @@ describe('Home', () => {
     expect(external?.getAttribute('rel')).toContain('noopener');
   });
 
-  it('sends the documentation and the tutorials to the pages of Angular Starter, not to Angular', () => {
+  it('sends the documentation and the tutorials to the pages of Starter Angular, not to Angular', () => {
     expect(compiled.querySelector('[data-card="starter-docs"] a')?.getAttribute('href')).toBe('/docs');
     expect(compiled.querySelector('[data-card="starter-tutorials"] a')?.getAttribute('href')).toBe('/docs/tutorials');
     const hrefs = Array.from(compiled.querySelectorAll('a')).map((link) => link.getAttribute('href') ?? '');
     expect(hrefs.some((href) => href.includes('angular.dev'))).toBe(false);
   });
 
-  it('links to Angular Starter and to its GitHub repository', () => {
+  it('links to Starter Angular and to its GitHub repository', () => {
     const hrefs = Array.from(compiled.querySelectorAll('a')).map((link) => link.getAttribute('href'));
-    expect(hrefs).toContain('https://github.com/LiriRaid/angular-starter');
+    expect(hrefs).toContain('https://github.com/LiriRaid/starter-angular');
     expect(SOCIAL_LINKS.map((link) => link.id)).toEqual(['github']);
     expect(compiled.querySelector('footer a[aria-label="GitHub"]')).not.toBeNull();
   });

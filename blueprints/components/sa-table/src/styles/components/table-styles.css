@@ -1,0 +1,84 @@
+@layer legacy-overrides {
+  /* ==========================================================================
+     sa-table — skin nativo (antes p-table de PrimeNG con el tema de As).
+     El padding/tipografía/anchos de th/td viven en el HTML (Tailwind + typography).
+     ========================================================================== */
+
+  sa-table {
+    display: block;
+    min-width: 0;
+  }
+
+  sa-table .sa-table {
+    min-width: 0;
+  }
+
+  /* Panel contenedor: borde redondeado + scroll horizontal para una sola línea */
+  sa-table .sa-table-container {
+    overflow-x: auto;
+    overflow-y: hidden;
+    border: 1px solid var(--app-border-color);
+    border-radius: 1rem;
+    background: var(--app-panel-bg);
+    box-shadow: var(--app-surface-shadow-soft);
+  }
+
+  sa-table .sa-table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  /* Cabecera — tinte del borde sobre transparente: igual al override del componente */
+  sa-table .sa-table-head > tr > th {
+    background: color-mix(in srgb, var(--app-border-color) 20%, transparent);
+    border-bottom: 1px solid var(--app-border-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Filas */
+  sa-table .sa-table-body > tr {
+    background: var(--app-panel-bg);
+    transition: background-color 0.2s ease;
+  }
+
+  sa-table .sa-table-body > tr > td {
+    border-bottom: 1px solid color-mix(in srgb, var(--app-border-color) 65%, transparent);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    vertical-align: middle;
+  }
+
+  sa-table .sa-table-body > tr:last-child > td {
+    border-bottom: 0;
+  }
+
+  sa-table .sa-table-body > tr:hover {
+    background: var(--app-accent-soft-bg);
+  }
+
+  sa-table .sa-table-body > tr.sa-table-empty-row:hover {
+    background: var(--app-panel-bg);
+  }
+
+  sa-table .sa-table-body > tr.sa-table-expansion:hover {
+    background: transparent;
+    cursor: default;
+  }
+
+  sa-table .sa-table-body > tr.sa-table-empty-row > td {
+    border-bottom: 0;
+  }
+
+  /* Pie opcional (`footerTemplate`): mismo fondo que las filas y una línea que lo separa del cuerpo */
+  sa-table .sa-table-foot > tr {
+    background: var(--app-panel-bg);
+  }
+
+  sa-table .sa-table-foot > tr > td {
+    border-top: 1px solid color-mix(in srgb, var(--app-border-color) 65%, transparent);
+    vertical-align: middle;
+  }
+}

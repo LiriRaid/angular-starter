@@ -19,5 +19,5 @@
 </div>
 
 @if (alertService.toastActive()) {
-  <as-toast />
+  <sa-toast />
 }

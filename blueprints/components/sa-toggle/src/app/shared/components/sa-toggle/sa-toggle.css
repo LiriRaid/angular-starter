@@ -1,0 +1,76 @@
+sa-toggle {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Switch nativo — mismas dimensiones y colores que traía p-toggleswitch con el preset
+   Aura (track 2.5rem × 1.5rem radio 30px, handle 1rem con inset 0.25rem, slide 0.2s).
+   Los colores del track viven como tokens --app-toggle-* en theme-styles.css (con su
+   variante .dark); el handle reutiliza --app-toggleswitch-handle-bg que ya existía. */
+.sa-toggle {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 2.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 30px;
+  background: var(--app-toggle-track-bg);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s,
+    outline-color 0.2s;
+}
+
+.sa-toggle:not(:disabled):hover {
+  background: var(--app-toggle-track-hover-bg);
+}
+
+.sa-toggle--checked {
+  background: var(--sa-primary-color);
+}
+
+.sa-toggle--checked:not(:disabled):hover {
+  background: var(--sa-primary-hover-color);
+}
+
+.sa-toggle:focus-visible {
+  outline: 1px solid var(--sa-primary-color);
+  outline-offset: 2px;
+}
+
+.sa-toggle:disabled {
+  cursor: default;
+  background: var(--app-toggle-track-disabled-bg);
+  /* El borde mantiene visible la pista apagada y bloqueada sobre cualquier fondo, también en oscuro. */
+  border-color: var(--app-border-color);
+}
+
+.sa-toggle:disabled .sa-toggle-handle {
+  opacity: 0.6;
+}
+
+/* Un toggle encendido pero bloqueado no se atenúa — mantiene un tinte del primario
+   (mismo comportamiento que ya tenía el override sobre p-toggleswitch). */
+.sa-toggle--checked:disabled {
+  opacity: 1;
+  background: var(--app-toggleswitch-disabled-checked-bg);
+}
+
+.sa-toggle-handle {
+  position: absolute;
+  top: 50%;
+  left: 0.25rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: var(--app-toggleswitch-handle-bg);
+  transform: translateY(-50%);
+  transition: left 0.2s;
+}
+
+.sa-toggle--checked .sa-toggle-handle {
+  left: calc(100% - 1rem - 0.25rem);
+}

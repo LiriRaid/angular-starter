@@ -41,10 +41,10 @@ describe('DesignPreferencesService', () => {
     service.set('fontSize', 'large');
     service.set('buttonSize', 'small');
     const style = document.documentElement.style;
-    expect(style.getPropertyValue('--as-ui-radius-scale')).toBe('0.25');
-    expect(style.getPropertyValue('--as-ui-density-scale')).toBe('0.875');
-    expect(style.getPropertyValue('--as-ui-font-scale')).toBe('1.125');
-    expect(style.getPropertyValue('--as-ui-button-scale')).toBe('0.9');
+    expect(style.getPropertyValue('--sa-ui-radius-scale')).toBe('0.25');
+    expect(style.getPropertyValue('--sa-ui-density-scale')).toBe('0.875');
+    expect(style.getPropertyValue('--sa-ui-font-scale')).toBe('1.125');
+    expect(style.getPropertyValue('--sa-ui-button-scale')).toBe('0.9');
     expect(service.hasChanges()).toBe(true);
   });
 
@@ -73,7 +73,7 @@ describe('DesignPreferencesService', () => {
     service.initialize();
     expect(service.preferences().density).toBe('wide');
     expect(service.preferences().showBreadcrumb).toBe(false);
-    expect(document.documentElement.style.getPropertyValue('--as-ui-density-scale')).toBe('1.125');
+    expect(document.documentElement.style.getPropertyValue('--sa-ui-density-scale')).toBe('1.125');
   });
 
   it('ignores a saved entry that is not valid', () => {
@@ -105,6 +105,6 @@ describe('DesignPreferencesService', () => {
     expect(theme.setMode).toHaveBeenCalledWith('light');
     expect(theme.applyColor).toHaveBeenCalled();
     expect(theme.applySurface).toHaveBeenCalled();
-    expect(document.documentElement.style.getPropertyValue('--as-ui-radius-scale')).toBe('1');
+    expect(document.documentElement.style.getPropertyValue('--sa-ui-radius-scale')).toBe('1');
   });
 });

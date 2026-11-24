@@ -73,25 +73,25 @@ describe('addNativeOverlayListeners / removeNativeOverlayListeners', () => {
 });
 
 describe('resolveOverlayTriggerElement', () => {
-  it('devuelve el propio elemento si ya tiene la clase as-btn', () => {
+  it('devuelve el propio elemento si ya tiene la clase sa-btn', () => {
     const el = document.createElement('button');
-    el.className = 'as-btn';
+    el.className = 'sa-btn';
     const event = { currentTarget: el } as unknown as MouseEvent;
 
     expect(resolveOverlayTriggerElement(event)).toBe(el);
   });
 
-  it('busca un descendiente .as-btn si el propio elemento no la tiene', () => {
-    const wrapper = document.createElement('as-button');
+  it('busca un descendiente .sa-btn si el propio elemento no la tiene', () => {
+    const wrapper = document.createElement('sa-button');
     const inner = document.createElement('button');
-    inner.className = 'as-btn';
+    inner.className = 'sa-btn';
     wrapper.appendChild(inner);
     const event = { currentTarget: wrapper } as unknown as MouseEvent;
 
     expect(resolveOverlayTriggerElement(event)).toBe(inner);
   });
 
-  it('devuelve el propio elemento si no hay .as-btn en ningun lado', () => {
+  it('devuelve el propio elemento si no hay .sa-btn en ningun lado', () => {
     const wrapper = document.createElement('div');
     const event = { currentTarget: wrapper } as unknown as MouseEvent;
 

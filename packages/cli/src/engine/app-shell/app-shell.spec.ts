@@ -16,7 +16,7 @@ const SHELL = 'src/app/features/app-shell';
 let project: string;
 
 beforeEach(async () => {
-  project = await mkdtemp(join(tmpdir(), 'as-shell-'));
+  project = await mkdtemp(join(tmpdir(), 'sa-shell-'));
   await writeGeneratedWorkspace(project);
   await screamingProfile.apply({ targetDir: project, name: 'demo', prefix: 'app' });
   await starterRoutingProfile.apply({ targetDir: project, name: 'demo', prefix: 'app' });
@@ -117,14 +117,14 @@ describe('App Shell profile', () => {
         await expect(read(`${CORE}/${file}`), file).resolves.toBeTypeOf('string');
       }
       await expect(read('src/styles/features/design-preferences-styles.css')).resolves.toContain(
-        '--as-ui-radius-scale',
+        '--sa-ui-radius-scale',
       );
     });
 
-    it('shows the four tabs of the demo with as-tabs, and the reset and save buttons', async () => {
+    it('shows the four tabs of the demo with sa-tabs, and the reset and save buttons', async () => {
       await apply();
       const html = await read(`${PAGE}/preference-design.html`);
-      expect(html).toContain('<as-tabs');
+      expect(html).toContain('<sa-tabs');
       expect(html).toContain('Restablecer');
       expect(html).toContain('Guardar cambios');
       const ts = await read(`${PAGE}/preference-design.ts`);
@@ -135,7 +135,7 @@ describe('App Shell profile', () => {
       expect(await read(`${PAGE}/tabs/appearance-tab.html`)).toContain('En construcción');
       // The width of the transparent sidebar is the project's own select, not a native one.
       const appearance = await read(`${PAGE}/tabs/appearance-tab.html`);
-      expect(appearance).toContain('<as-select');
+      expect(appearance).toContain('<sa-select');
       expect(appearance).not.toContain('<select');
     });
 
@@ -144,10 +144,10 @@ describe('App Shell profile', () => {
       const service = await read(`${CORE}/design-preferences.service.ts`);
       expect(service).toContain('localStorage');
       for (const token of [
-        '--as-ui-radius-scale',
-        '--as-ui-button-scale',
-        '--as-ui-density-scale',
-        '--as-ui-font-scale',
+        '--sa-ui-radius-scale',
+        '--sa-ui-button-scale',
+        '--sa-ui-density-scale',
+        '--sa-ui-font-scale',
       ]) {
         expect(service).toContain(token);
       }
@@ -173,8 +173,8 @@ describe('App Shell profile', () => {
       await apply();
       const css = await read('src/styles/features/design-preferences-styles.css');
       const layered = css.slice(css.indexOf('@layer legacy-overrides {'));
-      expect(layered).toContain(':root .as-btn.as-btn-medium');
-      expect(css.slice(0, css.indexOf('@layer legacy-overrides {'))).not.toContain('.as-btn');
+      expect(layered).toContain(':root .sa-btn.sa-btn-medium');
+      expect(css.slice(0, css.indexOf('@layer legacy-overrides {'))).not.toContain('.sa-btn');
     });
 
     it('keeps only the layout in Apariencia: colours and light or dark live in Tema (ADR-0011)', async () => {
@@ -202,7 +202,7 @@ describe('App Shell profile', () => {
       expect(controls).toContain('CheckCircle');
       // A ring of the panel colour, then one of the primary colour.
       expect(controls).toContain('--app-panel-bg');
-      expect(controls).toContain('--as-primary-color');
+      expect(controls).toContain('--sa-primary-color');
     });
 
     it('leaves a marker in the UI tab where the UI System puts its catalog', async () => {
@@ -253,15 +253,15 @@ describe('App Shell profile', () => {
     await apply();
     const expected = componentsOfIds(SHELL_COMPONENTS).map((component) => component.id);
     for (const id of expected) {
-      await expect(read(`src/app/shared/components/as-${id}/as-${id}.ts`), id).resolves.toBeTypeOf(
+      await expect(read(`src/app/shared/components/sa-${id}/sa-${id}.ts`), id).resolves.toBeTypeOf(
         'string',
       );
     }
-    await expect(read('src/app/shared/components/as-table/as-table.ts')).rejects.toThrow();
+    await expect(read('src/app/shared/components/sa-table/sa-table.ts')).rejects.toThrow();
     const barrel = await read('src/app/shared/components/index.ts');
-    expect(barrel).toContain('AsSearch');
-    expect(barrel).toContain('AsThemeColorPicker');
-    expect(barrel).not.toContain('AsTable');
+    expect(barrel).toContain('SaSearch');
+    expect(barrel).toContain('SaThemeColorPicker');
+    expect(barrel).not.toContain('SaTable');
   });
 
   it('only imports components that the shell brings', async () => {
@@ -363,7 +363,7 @@ describe('App Shell profile', () => {
     await mkdir(join(project, 'src/app/features/dashboard'), { recursive: true });
     await writeFile(join(project, 'src/app/features/dashboard/dashboard.ts'), 'export {};');
     await expect(apply()).rejects.toThrow(/overwrite/);
-    await expect(read('src/app/shared/components/as-search/as-search.ts')).rejects.toThrow();
+    await expect(read('src/app/shared/components/sa-search/sa-search.ts')).rejects.toThrow();
   });
 
   it('keeps the layer rules: the shell imports core and shared, never another feature', async () => {
@@ -403,20 +403,20 @@ describe('App Shell profile', () => {
   describe('welcome home', () => {
     const HOME = 'src/app/features/home';
 
-    it('replaces the neutral home with a welcome page: logo, name, cards, Angular Starter and GitHub', async () => {
+    it('replaces the neutral home with a welcome page: logo, name, cards, Starter Angular and GitHub', async () => {
       await apply('Inventory System');
       const html = await read(`${HOME}/home.html`);
       expect(html).toContain('<svg');
       expect(html).toContain('{{ projectName() }}');
       expect(html).toContain('@for (card of cards');
-      expect(html).toContain('Angular Starter');
+      expect(html).toContain('Starter Angular');
       expect(html).toContain('socialLinks');
       const ts = await read(`${HOME}/home.ts`);
       expect(ts).toContain("selector: 'app-home'");
       expect(ts).toContain("signal('Inventory System')");
       const data = await read(`${HOME}/home.data.ts`);
       expect(data).toContain('WELCOME_CARDS');
-      expect(data).toContain('https://github.com/LiriRaid/angular-starter');
+      expect(data).toContain('https://github.com/LiriRaid/starter-angular');
       expect(data).not.toMatch(/twitter|linkedin|facebook|instagram/i);
       expect(await read(`${HOME}/home.spec.ts`)).toContain('Inventory System');
     });
@@ -434,7 +434,7 @@ describe('App Shell profile', () => {
       expect(data).not.toContain('/presence');
     });
 
-    it('sends the documentation and tutorials cards to the pages of Angular Starter, not to Angular', async () => {
+    it('sends the documentation and tutorials cards to the pages of Starter Angular, not to Angular', async () => {
       await apply();
       const data = await read(`${HOME}/home.data.ts`);
       expect(data).not.toContain('angular.dev');
@@ -447,7 +447,7 @@ describe('App Shell profile', () => {
     describe('documentation', () => {
       const DOCS = 'src/app/features/docs';
 
-      it('brings the documentation of Angular Starter with its pages, its tutorials and its README', async () => {
+      it('brings the documentation of Starter Angular with its pages, its tutorials and its README', async () => {
         await apply('Inventory System');
         for (const file of [
           'docs.ts',
@@ -469,7 +469,7 @@ describe('App Shell profile', () => {
         ]) {
           expect(data, page).toContain(`id: '${page}'`);
         }
-        expect(data).toContain('angular-starter');
+        expect(data).toContain('starter-angular');
         expect(data).not.toContain('angular.dev');
         expect(await read(`${DOCS}/docs.ts`)).toContain("selector: 'app-docs'");
       });

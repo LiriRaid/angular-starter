@@ -77,7 +77,7 @@ describe('buildNgAddSsrCommand', () => {
   });
 
   async function projectDir(withLocalCli: boolean, withManifest = true): Promise<string> {
-    const dir = await mkdtemp(join(tmpdir(), 'as-ng-add-'));
+    const dir = await mkdtemp(join(tmpdir(), 'sa-ng-add-'));
     projects.push(dir);
     if (withLocalCli) {
       await mkdir(join(dir, 'node_modules', '@angular', 'cli', 'bin'), { recursive: true });

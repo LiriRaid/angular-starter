@@ -1,7 +1,7 @@
 @layer legacy-overrides {
   /* ─── Footer: botón de preferencias ──────────────────────────────────────── */
 
-  __PREFIX__-sidebar .sidebar-footer-settings.as-btn {
+  __PREFIX__-sidebar .sidebar-footer-settings.sa-btn {
     width: 100%;
     justify-content: flex-start;
     border-radius: 0.75rem;
@@ -13,26 +13,26 @@
       filter 0.2s ease !important;
   }
 
-  __PREFIX__-sidebar .sidebar-footer-settings.as-btn:hover {
+  __PREFIX__-sidebar .sidebar-footer-settings.sa-btn:hover {
     background: var(--app-sidebar-footer-settings-hover-bg) !important;
     color: var(--app-sidebar-footer-settings-hover-text) !important;
     transform: scale(1.02);
   }
 
-  __PREFIX__-sidebar .sidebar-footer-settings.as-btn:active,
-  __PREFIX__-sidebar .sidebar-menu-item--parent.as-btn:active {
+  __PREFIX__-sidebar .sidebar-footer-settings.sa-btn:active,
+  __PREFIX__-sidebar .sidebar-menu-item--parent.sa-btn:active {
     transform: scale(0.99);
   }
 
-  __PREFIX__-sidebar .sidebar-footer-settings.as-btn:hover .as-btn__label,
-  __PREFIX__-sidebar .sidebar-footer-settings.as-btn:hover .as-btn__icon--left,
-  __PREFIX__-sidebar .sidebar-footer-settings.as-btn:hover .as-btn__icon--right {
+  __PREFIX__-sidebar .sidebar-footer-settings.sa-btn:hover .sa-btn__label,
+  __PREFIX__-sidebar .sidebar-footer-settings.sa-btn:hover .sa-btn__icon--left,
+  __PREFIX__-sidebar .sidebar-footer-settings.sa-btn:hover .sa-btn__icon--right {
     color: var(--app-sidebar-footer-settings-hover-text) !important;
   }
 
   /* ─── Items de menú ───────────────────────────────────────────────────────── */
 
-  __PREFIX__-sidebar .sidebar-menu-item.as-btn {
+  __PREFIX__-sidebar .sidebar-menu-item.sa-btn {
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -54,7 +54,7 @@
       filter 0.2s ease !important;
   }
 
-  __PREFIX__-sidebar .sidebar-menu-item.as-btn .as-btn__content {
+  __PREFIX__-sidebar .sidebar-menu-item.sa-btn .sa-btn__content {
     display: flex !important;
     align-items: center !important;
     flex: 1;
@@ -74,55 +74,55 @@
     text-align: left !important;
   }
 
-  __PREFIX__-sidebar .sidebar-menu-item--collapsed.as-btn .as-btn__content {
+  __PREFIX__-sidebar .sidebar-menu-item--collapsed.sa-btn .sa-btn__content {
     justify-content: center !important;
     gap: 0 !important;
   }
 
-  __PREFIX__-sidebar .sidebar-menu-item--parent.as-btn:hover {
+  __PREFIX__-sidebar .sidebar-menu-item--parent.sa-btn:hover {
     background: var(--app-sidebar-hover-bg) !important;
     transform: scale(1.02);
   }
 
-  __PREFIX__-sidebar .sidebar-menu-item--child.as-btn {
+  __PREFIX__-sidebar .sidebar-menu-item--child.sa-btn {
     height: 38px;
   }
 
-  __PREFIX__-sidebar .as-btn.level-1 {
+  __PREFIX__-sidebar .sa-btn.level-1 {
     width: calc(100% - 1.25rem) !important;
     margin-left: 1.25rem;
     padding-left: 0.5rem !important;
   }
 
-  __PREFIX__-sidebar .as-btn.level-2 {
+  __PREFIX__-sidebar .sa-btn.level-2 {
     width: calc(100% - 2.25rem) !important;
     margin-left: 2.25rem;
     padding-left: 0.5rem !important;
   }
 
-  __PREFIX__-sidebar .sidebar-link--active.as-btn {
+  __PREFIX__-sidebar .sidebar-link--active.sa-btn {
     border-right: 4px solid var(--app-sidebar-active-border) !important;
   }
 
-  __PREFIX__-sidebar .sidebar-link--active:not(.sidebar-menu-item--child).as-btn {
+  __PREFIX__-sidebar .sidebar-link--active:not(.sidebar-menu-item--child).sa-btn {
     background: linear-gradient(
       90deg,
-      color-mix(in srgb, var(--as-primary-color) 20%, transparent) 0%,
+      color-mix(in srgb, var(--sa-primary-color) 20%, transparent) 0%,
       transparent 80%
     ) !important;
     color: var(--app-sidebar-active-text) !important;
   }
 
-  __PREFIX__-sidebar .sidebar-link--active.sidebar-menu-item--child.as-btn {
+  __PREFIX__-sidebar .sidebar-link--active.sidebar-menu-item--child.sa-btn {
     color: var(--app-sidebar-active-text) !important;
   }
 
-  __PREFIX__-sidebar .sidebar-menu-item--child.as-btn:focus-visible {
+  __PREFIX__-sidebar .sidebar-menu-item--child.sa-btn:focus-visible {
     outline-offset: -2px;
   }
 
-  __PREFIX__-sidebar .as-btn.level-1::after,
-  __PREFIX__-sidebar .as-btn.level-2::after {
+  __PREFIX__-sidebar .sa-btn.level-1::after,
+  __PREFIX__-sidebar .sa-btn.level-2::after {
     content: '';
     position: absolute;
     top: 0;
@@ -213,7 +213,7 @@
   __PREFIX__-sidebar .brand-text,
   __PREFIX__-sidebar .brand-name,
   __PREFIX__-sidebar .sidebar-btn-label,
-  __PREFIX__-sidebar .sidebar-footer-settings .as-btn__label {
+  __PREFIX__-sidebar .sidebar-footer-settings .sa-btn__label {
     white-space: nowrap;
     overflow: hidden;
     max-width: 100%;

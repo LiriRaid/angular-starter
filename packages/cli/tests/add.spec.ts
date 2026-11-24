@@ -11,7 +11,7 @@ import { SSR_APP_CONFIG, createStarterProject } from './helpers/starter-project.
 let cwd: string;
 
 beforeEach(async () => {
-  cwd = await mkdtemp(join(tmpdir(), 'as-add-'));
+  cwd = await mkdtemp(join(tmpdir(), 'sa-add-'));
 });
 
 afterEach(async () => {
@@ -32,13 +32,13 @@ async function add(project: string, args: string[], runnerOptions: FakeRunnerOpt
 }
 
 const readConfig = async (project: string) =>
-  JSON.parse(await readFile(join(project, 'angular-starter.config.json'), 'utf8')).options;
+  JSON.parse(await readFile(join(project, 'starter-angular.config.json'), 'utf8')).options;
 
-describe('as add', () => {
-  it('needs a project created by Angular Starter', async () => {
+describe('sa add', () => {
+  it('needs a project created by Starter Angular', async () => {
     const result = await add(cwd, ['icons', 'lucide']);
     expect(result.code).toBe(2);
-    expect(result.err).toContain('angular-starter.config.json');
+    expect(result.err).toContain('starter-angular.config.json');
   });
 
   it('names the capabilities it can add when asked for another one', async () => {
@@ -60,11 +60,11 @@ describe('as add', () => {
     }
   });
 
-  it('says what only `as new` can decide', async () => {
+  it('says what only `sa new` can decide', async () => {
     const project = await createStarterProject(cwd);
     const result = await add(project, ['style', 'scss']);
     expect(result.code).toBe(2);
-    expect(result.err).toContain('as new');
+    expect(result.err).toContain('sa new');
   });
 
   describe('icons', () => {
@@ -153,10 +153,10 @@ describe('as add', () => {
       expect(await exists(join(project, 'src/app/features/app-shell/layout/main/main.ts'))).toBe(
         true,
       );
-      expect(await exists(join(project, 'src/app/shared/components/as-search/as-search.ts'))).toBe(
+      expect(await exists(join(project, 'src/app/shared/components/sa-search/sa-search.ts'))).toBe(
         true,
       );
-      expect(await exists(join(project, 'src/app/shared/components/as-table'))).toBe(false);
+      expect(await exists(join(project, 'src/app/shared/components/sa-table'))).toBe(false);
       const options = await readConfig(project);
       expect(options).toMatchObject({ appShell: 'starter', components: 'none', icons: 'lucide' });
       expect(await readFile(join(project, 'src/app/app.ts'), 'utf8')).toContain('provideLayout(');
@@ -193,7 +193,7 @@ describe('as add', () => {
       const before = await readFile(main, 'utf8');
       const result = await add(project, ['components', 'all']);
       expect(result.code, result.err).toBe(0);
-      expect(await exists(join(project, 'src/app/shared/components/as-table/as-table.ts'))).toBe(
+      expect(await exists(join(project, 'src/app/shared/components/sa-table/sa-table.ts'))).toBe(
         true,
       );
       expect(await readFile(main, 'utf8')).toBe(before);
@@ -250,7 +250,7 @@ describe('as add', () => {
 
     it('works on a project whose configuration was written before presence existed', async () => {
       const project = await createStarterProject(cwd);
-      const file = join(project, 'angular-starter.config.json');
+      const file = join(project, 'starter-angular.config.json');
       const config = JSON.parse(await readFile(file, 'utf8'));
       delete config.options.presence;
       await writeFile(file, JSON.stringify(config));
@@ -377,12 +377,12 @@ describe('as add', () => {
       expect(await exists(join(project, 'src/app/shared'))).toBe(false);
       const result = await add(project, ['components', 'button']);
       expect(result.code, result.err).toBe(0);
-      expect(await exists(join(project, 'src/app/shared/components/as-button/as-button.ts'))).toBe(
+      expect(await exists(join(project, 'src/app/shared/components/sa-button/sa-button.ts'))).toBe(
         true,
       );
       expect(await exists(join(project, 'src/app/core/theme/theme.service.ts'))).toBe(true);
       expect(await readFile(join(project, 'src/app/shared/components/index.ts'), 'utf8')).toContain(
-        "as-button/as-button'",
+        "sa-button/sa-button'",
       );
       const tsconfig = await readFile(join(project, 'tsconfig.json'), 'utf8');
       expect(tsconfig).toContain('"@shared/*"');
@@ -403,7 +403,7 @@ describe('as add', () => {
       expect(result.code, result.err).toBe(0);
       const barrel = await readFile(join(project, 'src/app/shared/components/index.ts'), 'utf8');
       expect(barrel).toContain("export { Mine } from './mine/mine';");
-      expect(barrel).toContain("as-button/as-button'");
+      expect(barrel).toContain("sa-button/sa-button'");
     });
 
     it('keeps the aliases the project already has', async () => {
@@ -453,11 +453,11 @@ describe('as add', () => {
       expect(result.code, result.err).toBe(0);
       for (const id of ['modal', 'toggle', 'button', 'icon']) {
         expect(
-          await exists(join(project, `src/app/shared/components/as-${id}/as-${id}.ts`)),
+          await exists(join(project, `src/app/shared/components/sa-${id}/sa-${id}.ts`)),
           id,
         ).toBe(true);
       }
-      expect(await exists(join(project, 'src/app/shared/components/as-table/as-table.ts'))).toBe(
+      expect(await exists(join(project, 'src/app/shared/components/sa-table/sa-table.ts'))).toBe(
         false,
       );
       const config = await readConfig(project);
@@ -473,7 +473,7 @@ describe('as add', () => {
       expect(config.components).toBe('custom');
       expect(config.componentList).toHaveLength(17);
       expect(config.componentList).toContain('table');
-      expect(await exists(join(project, 'src/app/shared/components/as-table/as-table.ts'))).toBe(
+      expect(await exists(join(project, 'src/app/shared/components/sa-table/sa-table.ts'))).toBe(
         true,
       );
     });
@@ -516,7 +516,7 @@ describe('as add', () => {
 
     it('works on a project whose configuration was written before the UI System existed', async () => {
       const project = await createStarterProject(cwd);
-      const file = join(project, 'angular-starter.config.json');
+      const file = join(project, 'starter-angular.config.json');
       const config = JSON.parse(await readFile(file, 'utf8'));
       for (const key of ['uiSystem', 'layout', 'ssrPurpose']) delete config.options[key];
       await writeFile(file, JSON.stringify(config));
@@ -592,7 +592,7 @@ describe('as add', () => {
         },
       });
       expect(result.code, result.err).toBe(0);
-      expect(result.out).toContain('✓ Applying Angular Starter SSR');
+      expect(result.out).toContain('✓ Applying Starter Angular SSR');
       expect(await readFile(join(project, 'src/app/app.config.ts'), 'utf8')).toContain(
         'withIncrementalHydration()',
       );
@@ -630,11 +630,11 @@ describe('as add', () => {
         expect(result.out).toContain(`✓ ${title}`);
       }
       expect(await exists(join(project, 'src/styles/theme/theme-styles.css'))).toBe(true);
-      expect(await exists(join(project, 'src/app/shared/components/as-button/as-button.ts'))).toBe(
+      expect(await exists(join(project, 'src/app/shared/components/sa-button/sa-button.ts'))).toBe(
         true,
       );
       expect(await readFile(join(project, 'src/app/shared/components/index.ts'), 'utf8')).toContain(
-        'AsButton',
+        'SaButton',
       );
       expect(await readFile(join(project, 'src/app/app.config.ts'), 'utf8')).toContain(
         'provideThemeInitializer()',
@@ -684,7 +684,7 @@ describe('as add', () => {
   });
 });
 
-describe('as add components when tsconfig.json extends another file', () => {
+describe('sa add components when tsconfig.json extends another file', () => {
   const PLAIN = [
     '--architecture',
     'angular-default',

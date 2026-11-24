@@ -10,7 +10,7 @@
         <span class="text-caption-1-semibold text-(--app-text-color)">{{ toggle.label }}</span>
         <span class="text-caption-2-regular text-(--app-text-subtle)">{{ toggle.hint }}</span>
       </div>
-      <as-toggle [checked]="toggle.value()" (changed)="toggle.setValue($event)" [ariaLabel]="toggle.label" />
+      <sa-toggle [checked]="toggle.value()" (changed)="toggle.setValue($event)" [ariaLabel]="toggle.label" />
     </div>
   }
 </div>
