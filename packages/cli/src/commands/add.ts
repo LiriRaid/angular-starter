@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import { CAPABILITIES, defaultOption, type CapabilityCategory } from '../config/capabilities.js';
 import {
   ALL_COMPONENT_IDS,
@@ -13,6 +14,7 @@ import {
   addAngularSsr,
   addIconLibrary,
   applyAppShell,
+  applyArchitectureToProject,
   applyComponents,
   applyDesign,
   applyPresence,
@@ -24,6 +26,7 @@ import {
   writeStarterConfig,
 } from '../engine/stages.js';
 import { UsageError } from '../errors.js';
+import { pathExists } from '../engine/fs.js';
 import { println, type CliIo } from '../io.js';
 import { findProject } from '../project/find.js';
 import { ADDABLE, NOT_ADDABLE, addableValues } from './addable.js';
@@ -50,7 +53,7 @@ export async function addCommand(
       capability === undefined
         ? 'Usage: as add <capability> [value]'
         : `Unknown capability "${capability}".`,
-      `Choose one of: ${Object.keys(ADDABLE).join(', ')}. The architecture, the stylesheet format, Tailwind CSS, the package manager and the selector prefix are decided by "as new".`,
+      `Choose one of: ${Object.keys(ADDABLE).join(', ')}. The stylesheet format, Tailwind CSS, the package manager and the selector prefix are decided by "as new".`,
     );
   }
 
@@ -70,6 +73,8 @@ export async function addCommand(
       `This project already has the Angular Starter SSR; "${choice}" cannot replace it.`,
     );
   }
+
+  if (category === 'architecture') await requireNoArchitectureFolders(project.root);
 
   const label = CAPABILITIES[category].find((option) => option.id === choice);
   // The components and the shell draw their icons with Lucide, so adding them adds it too.
@@ -156,6 +161,18 @@ function componentsAddition(
   return normalizeComponents([...has, ...requested]);
 }
 
+/** The folders of the architecture belong to the developer when they exist: nothing is written over them. */
+async function requireNoArchitectureFolders(root: string): Promise<void> {
+  for (const folder of ['src/app/core', 'src/app/features', 'src/app/shared']) {
+    if (await pathExists(join(root, folder))) {
+      throw new UsageError(
+        `${folder} already exists, and the architecture would write into it.`,
+        'The architecture is applied to a project that still is what "ng new" generates; nothing was changed.',
+      );
+    }
+  }
+}
+
 function chooseValue(capability: string, value: string | undefined): string {
   const values = addableValues(capability);
   if (value !== undefined) {
@@ -182,6 +199,8 @@ function stagesFor(
   before: StarterOptions,
 ): Stage[] {
   switch (category) {
+    case 'architecture':
+      return [applyArchitectureToProject, writeStarterConfig];
     case 'icons':
       return [addIconLibrary, writeStarterConfig, installDependencies];
     case 'routing':

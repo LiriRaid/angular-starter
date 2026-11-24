@@ -107,6 +107,27 @@ export const applyArchitecture: Stage = {
   },
 };
 
+/**
+ * The architecture of `as add` (ADR-0019): the same profile as `as new`, but a file of the project that
+ * does not have the shape `ng new` leaves stops it before anything is written, said as a usage error
+ * that names the file.
+ */
+export const applyArchitectureToProject: Stage = {
+  id: 'apply-architecture',
+  title: 'Applying architecture profile',
+  async run(context) {
+    try {
+      await applyArchitecture.run(context);
+    } catch (error) {
+      if (!(error instanceof RuntimeError)) throw error;
+      throw new UsageError(
+        `${error.message}`,
+        'The architecture is applied only to a project that is still what "ng new" generates; this one has changes in that file, so nothing was written.',
+      );
+    }
+  },
+};
+
 export const applyRouting: Stage = {
   id: 'apply-routing',
   title: 'Adding Angular Starter routing',

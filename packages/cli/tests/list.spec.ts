@@ -34,6 +34,10 @@ describe('as list: the command of each option', () => {
     expect(await list('packageManager')).toContain('New: as new --package-manager pnpm');
   });
 
+  it('says how to give a project an architecture', async () => {
+    expect(await list('architecture')).toContain('Add: as add architecture screaming');
+  });
+
   it('gives no command to an option that is only planned', async () => {
     const out = await list('architecture');
     const planned = out.slice(out.indexOf('modular'));

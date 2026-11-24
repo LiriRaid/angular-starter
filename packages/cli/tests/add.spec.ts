@@ -54,6 +54,7 @@ describe('as add', () => {
       'presence',
       'ui-system',
       'rendering',
+      'architecture',
     ]) {
       expect(result.err).toContain(name);
     }
@@ -61,7 +62,7 @@ describe('as add', () => {
 
   it('says what only `as new` can decide', async () => {
     const project = await createStarterProject(cwd);
-    const result = await add(project, ['architecture', 'screaming']);
+    const result = await add(project, ['style', 'scss']);
     expect(result.code).toBe(2);
     expect(result.err).toContain('as new');
   });
@@ -288,6 +289,72 @@ describe('as add', () => {
       expect(result.code).toBe(0);
       expect(result.out).toContain('Adding presence');
       expect(await exists(join(project, 'src/app/core/presence'))).toBe(false);
+    });
+  });
+
+  describe('architecture', () => {
+    const PLAIN = [
+      '--architecture',
+      'angular-default',
+      '--routing',
+      'angular',
+      '--components',
+      'none',
+      '--app-shell',
+      'none',
+      '--icons',
+      'none',
+    ];
+
+    it('gives a project that is still what ng new generates the Screaming Architecture', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      const result = await add(project, ['architecture', 'screaming']);
+      expect(result.code, result.err).toBe(0);
+      expect(await exists(join(project, 'src/app/features/home/home.ts'))).toBe(true);
+      expect(await exists(join(project, 'src/app/shared/components/index.ts'))).toBe(true);
+      expect(await readFile(join(project, 'tsconfig.json'), 'utf8')).toContain('"@features/*"');
+      expect((await readConfig(project)).architecture).toBe('screaming');
+    });
+
+    it('refuses a project that already has it', async () => {
+      const project = await createStarterProject(cwd);
+      const result = await add(project, ['architecture', 'screaming']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('already');
+    });
+
+    it('refuses a project that has folders of its own where the architecture goes, and writes nothing', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      await mkdir(join(project, 'src/app/features/billing'), { recursive: true });
+      const result = await add(project, ['architecture', 'screaming']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('src/app/features');
+      expect(await exists(join(project, 'src/app/features/home'))).toBe(false);
+      expect((await readConfig(project)).architecture).toBe('angular-default');
+    });
+
+    it('refuses a project whose root component was changed and says which file', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      await writeFile(join(project, 'src/app/app.ts'), 'export const notAComponent = 1;\n');
+      const result = await add(project, ['architecture', 'screaming']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('src/app/app.ts');
+      expect(await exists(join(project, 'src/app/features'))).toBe(false);
+    });
+
+    it('refuses an architecture that is only planned', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      const result = await add(project, ['architecture', 'hexagonal']);
+      expect(result.code).toBe(2);
+      expect(result.err).toContain('hexagonal');
+    });
+
+    it('shows the steps with --dry-run and changes nothing', async () => {
+      const project = await createStarterProject(cwd, PLAIN);
+      const result = await add(project, ['architecture', 'screaming', '--dry-run']);
+      expect(result.code).toBe(0);
+      expect(result.out).toContain('Dry run');
+      expect(await exists(join(project, 'src/app/features'))).toBe(false);
     });
   });
 
