@@ -95,7 +95,7 @@ async function readManifest(root: string): Promise<{
  * not in the project's files (Git, install) stay as `as new` recorded them when there is a file.
  */
 async function keepRecorded(file: string, detected: StarterOptions): Promise<StarterOptions> {
-  let recorded: Partial<StarterOptions> = {};
+  let recorded: Partial<StarterOptions>;
   try {
     recorded =
       (JSON.parse(await readFile(file, 'utf8')) as { options?: Partial<StarterOptions> }).options ??
