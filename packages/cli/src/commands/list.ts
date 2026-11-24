@@ -89,7 +89,8 @@ export function listCommand(io: CliIo, category?: string): void {
   const style = createStyler(io.color);
   const selected = selectCategories(category);
   const tables = selected.map((name) => ({ name, rows: rowsOf(name) }));
-  const rows = tables.flatMap((table) => table.rows);
+  // The widths come from every category, so `as list style` and `as list` draw the same columns.
+  const rows = CATEGORIES.flatMap(rowsOf);
   const idWidth = Math.max('ID'.length, ...rows.map((row) => row.id.length));
   const commandWidth = Math.max(
     'Commands'.length,
@@ -111,7 +112,7 @@ export function listCommand(io: CliIo, category?: string): void {
   tables.forEach(({ name, rows: tableRows }, index) => {
     if (index > 0) println(io.stdout);
     println(io.stdout, style.bold(`${TITLES[name]} (${name})`));
-    line('ID', 'Commands', 'Option', style.dim);
+    line('ID', 'Commands', narrow ? '' : 'Option', style.dim);
     for (const row of tableRows) {
       const details = (at: number): string[] => [
         ...wrapText(row.description, width - at),
