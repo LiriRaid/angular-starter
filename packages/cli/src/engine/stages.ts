@@ -23,7 +23,9 @@ import { presenceProfile } from './presence/presence.js';
 import { uiSystemProfile } from './ui-system/ui-system.js';
 import { buildNgAddSsrCommand, buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
+import { EditShapeError } from './edits/planned.js';
 import { pathExists } from './fs.js';
+import { applySharedFoundation } from './shared-foundation.js';
 import { refusalOf } from './process.js';
 import type { GenerationContext, Stage } from './pipeline.js';
 import { RENDERING_PROFILES } from './rendering/index.js';
@@ -106,6 +108,27 @@ export const applyArchitecture: Stage = {
   },
 };
 
+/**
+ * The architecture of `as add` (ADR-0019): the same profile as `as new`, but a file of the project that
+ * does not have the shape `ng new` leaves stops it before anything is written, said as a usage error
+ * that names the file.
+ */
+export const applyArchitectureToProject: Stage = {
+  id: 'apply-architecture',
+  title: 'Applying architecture profile',
+  async run(context) {
+    try {
+      await applyArchitecture.run(context);
+    } catch (error) {
+      if (!(error instanceof EditShapeError)) throw error;
+      throw new UsageError(
+        `${error.message}`,
+        'The architecture is applied only to a project that is still what "ng new" generates; this one has changes in that file, so nothing was written.',
+      );
+    }
+  },
+};
+
 export const applyRouting: Stage = {
   id: 'apply-routing',
   title: 'Adding Angular Starter routing',
@@ -144,6 +167,17 @@ export const applyRendering: Stage = {
       prefix: options.prefix,
       architecture: options.architecture,
     });
+  },
+};
+
+export const applySharedFolders: Stage = {
+  id: 'apply-shared-folders',
+  title: 'Preparing shared and core for the components',
+  // A project with an architecture of the starter has them already.
+  enabled: ({ options }) =>
+    ARCHITECTURE_PROFILES[options.architecture] === undefined && options.components !== 'none',
+  async run({ targetDir }) {
+    await applySharedFoundation(targetDir);
   },
 };
 
@@ -315,6 +349,7 @@ export const NEW_PROJECT_STAGES: readonly Stage[] = [
   applyArchitecture,
   applyRouting,
   applyRendering,
+  applySharedFolders,
   applyDesign,
   applyComponents,
   applyAppShell,

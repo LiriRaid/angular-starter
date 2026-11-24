@@ -5,7 +5,7 @@ import { findProject } from '../project/find.js';
 import { formatRows } from '../ui/format.js';
 
 const READ_ONLY_HINT =
-  'The options that shape a project (architecture, stylesheet format, package manager, prefix) are decided by "as new"; "as add" applies the ones that can be added later.';
+  'The options that shape a project (stylesheet format, package manager, prefix) are decided by "as new"; "as add" applies the ones that can be added later.';
 
 /** `as config list|get <key>`: reads the options recorded in `angular-starter.config.json`. */
 export async function configCommand(

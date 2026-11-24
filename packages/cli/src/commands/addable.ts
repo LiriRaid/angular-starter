@@ -14,6 +14,7 @@ export const ADDABLE: Readonly<Record<string, Extract<CapabilityCategory, keyof 
     presence: 'presence',
     'ui-system': 'uiSystem',
     rendering: 'rendering',
+    architecture: 'architecture',
   };
 
 /** Options that are "off" in a project and that adding a capability can turn on. */
@@ -25,6 +26,7 @@ export const NOT_ADDABLE: Readonly<Record<string, readonly string[]>> = {
   presence: ['none'],
   'ui-system': ['none'],
   rendering: ['csr'],
+  architecture: ['angular-default'],
 };
 
 /** The values of a capability that can be added, from the registry. */

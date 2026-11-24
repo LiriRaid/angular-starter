@@ -1,5 +1,6 @@
 import { CAPABILITIES, CATEGORIES, type CapabilityCategory } from '../config/capabilities.js';
 import { UsageError } from '../errors.js';
+import { ADDABLE, addableValues } from './addable.js';
 import { println, type CliIo } from '../io.js';
 import { createStyler } from '../ui/format.js';
 
@@ -18,6 +19,29 @@ const TITLES: Record<CapabilityCategory, string> = {
   packageManager: 'Package managers',
 };
 
+/** The flag of `as new` that sets each category. */
+const NEW_FLAGS: Record<CapabilityCategory, string> = {
+  architecture: '--architecture',
+  routing: '--routing',
+  style: '--style',
+  rendering: '--rendering',
+  ssrPurpose: '--ssr-purpose',
+  appShell: '--app-shell',
+  layout: '--layout',
+  presence: '--presence',
+  components: '--components',
+  uiSystem: '--ui-system',
+  icons: '--icons',
+  packageManager: '--package-manager',
+};
+
+/** The word `as add` takes for a category, when a project can add it. */
+const ADD_WORD = new Map(Object.entries(ADDABLE).map(([word, category]) => [category, word]));
+
+/** The kebab-case spelling of a category: `app-shell` for `appShell`. */
+const kebab = (name: string): string =>
+  name.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
+
 export function listCommand(io: CliIo, category?: string): void {
   const style = createStyler(io.color);
   const selected = selectCategories(category);
@@ -32,13 +56,20 @@ export function listCommand(io: CliIo, category?: string): void {
       println(io.stdout, `  ${option.id.padEnd(idWidth)}  ${option.label}${badge}`);
       println(io.stdout, style.dim(`${margin}${option.description}`));
       if (option.docs) println(io.stdout, style.dim(`${margin}${option.docs}`));
+      if (option.available) {
+        const word = ADD_WORD.get(name);
+        if (word && addableValues(word).includes(option.id)) {
+          println(io.stdout, style.dim(`${margin}Add: as add ${word} ${option.id}`));
+        }
+        println(io.stdout, style.dim(`${margin}New: as new ${NEW_FLAGS[name]} ${option.id}`));
+      }
     }
   });
 }
 
 function selectCategories(category: string | undefined): CapabilityCategory[] {
   if (category === undefined) return CATEGORIES;
-  const match = CATEGORIES.find((name) => name === category);
+  const match = CATEGORIES.find((name) => name === category || kebab(name) === category);
   if (!match) {
     throw new UsageError(
       `Unknown category "${category}". Choose one of: ${CATEGORIES.join(', ')}.`,

@@ -3,6 +3,7 @@ import { basename, dirname, join } from 'node:path';
 import { PROJECT_CONFIG_FILE } from '../config/project-config.js';
 import { formatIssues } from '../config/issues.js';
 import { optionsSchema, type StarterOptions } from '../config/schema.js';
+import { findWorkspace } from '../engine/detect.js';
 import { UsageError } from '../errors.js';
 
 /** A project created by Angular Starter, found through its configuration file. */
@@ -29,9 +30,12 @@ export async function findProject(startDir: string): Promise<StarterProject> {
     if (parent === directory) break;
     directory = parent;
   }
+  const workspace = await findWorkspace(startDir);
   throw new UsageError(
     `This is not an Angular Starter project: ${PROJECT_CONFIG_FILE} was not found in ${startDir} or its parent folders.`,
-    'Run the command inside a project created with "as new".',
+    workspace === undefined
+      ? 'Run the command inside a project created with "as new", or in an Angular project after "as init".'
+      : `This is an Angular project (${workspace}): run "as init" in it first.`,
   );
 }
 

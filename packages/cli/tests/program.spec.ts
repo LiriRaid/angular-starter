@@ -94,7 +94,7 @@ describe('as (program)', () => {
     expect(out).toContain('as new InventorySystem');
     expect(out).toContain('as add icons lucide');
     expect(out).toContain('as generate feature billing');
-    expect(out).toMatch(/Only `as new` decides:.*architecture.*stylesheet.*package manager/s);
+    expect(out).toMatch(/Only `as new` decides:.*stylesheet.*package manager/s);
     expect(out).toContain('as <command> --help');
   });
 
