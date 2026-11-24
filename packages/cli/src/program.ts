@@ -13,44 +13,21 @@ import type { ProgramDeps } from './deps.js';
 import { RuntimeError } from './errors.js';
 import { println, type CliIo } from './io.js';
 import { formatRows } from './ui/format.js';
-import { CLI_VERSION } from './version.js';
+import { VERSION_TEXT } from './version.js';
 
-/** What the root help says about each command, grouped by what it is for. */
-const HELP_SECTIONS: readonly {
-  title: string;
-  commands: readonly (readonly [string, string])[];
-}[] = [
-  { title: 'Create a project', commands: [['new', 'new [name]']] },
-  {
-    title: 'Change an existing project (run it inside the project folder)',
-    commands: [
-      ['init', 'init'],
-      ['add', 'add <capability> [value]'],
-      ['generate', 'generate, g <kind> <name>'],
-    ],
-  },
-  {
-    title: 'Inspect',
-    commands: [
-      ['list', 'list [category]'],
-      ['info', 'info'],
-      ['config', 'config <list|get> [key]'],
-      ['doctor', 'doctor'],
-      ['version', 'version'],
-      ['help', 'help [command]'],
-    ],
-  },
-  { title: 'Planned', commands: [['update', 'update']] },
-];
-
-const ROOT_EXAMPLES: readonly (readonly [string, string])[] = [
-  ['as new InventorySystem', 'Create a project; choose each option in the wizard'],
-  ['as new Shop --defaults --no-git', 'The default set, no questions'],
-  ['as init', 'Set up a project you already have'],
-  ['as add icons lucide', 'Add Lucide Icons to a project you already have'],
-  ['as add routing starter', 'Add the navigation tree, titles and breadcrumbs'],
-  ['as generate feature billing', 'A feature with its routes, ready to build on'],
-  ['as list rendering', 'See what each rendering strategy is'],
+/** The commands of the root help, in order, with the usage each one is listed with. */
+const ROOT_COMMANDS: readonly (readonly [name: string, term: string])[] = [
+  ['new', 'new [name]'],
+  ['init', 'init'],
+  ['add', 'add <capability> [value]'],
+  ['generate', 'generate, g <kind> <name>'],
+  ['list', 'list [category]'],
+  ['info', 'info'],
+  ['config', 'config <list|get> [key]'],
+  ['doctor', 'doctor'],
+  ['update', 'update'],
+  ['version', 'version'],
+  ['help', 'help [command]'],
 ];
 
 const ONLY_NEW =
@@ -62,7 +39,7 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
     .name('as')
     .description('Angular Starter CLI')
     .usage('[command] [options]')
-    .version(CLI_VERSION, '-v, --version', 'Display version')
+    .version(VERSION_TEXT, '-v, --version', 'Display versions')
     .helpOption('-h, --help', 'Display help')
     .helpCommand('help [command]', 'Display command help')
     .configureOutput({ writeOut: io.stdout, writeErr: io.stderr })
@@ -77,7 +54,7 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
   registerNewCommand(program, io, deps);
   program
     .command('init')
-    .description('Set up an Angular project you already have, so the commands work on it')
+    .description('Prepare an Angular project you already have')
     .option('--force', 'Read the project again and replace its angular-starter.config.json')
     .option('--dry-run', 'Show what it found without writing anything')
     .addHelpText(
@@ -97,7 +74,7 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
 
   program
     .command('list')
-    .description('List available options with what each one is and its documentation')
+    .description('List the options, with their commands and docs')
     .argument(
       '[category]',
       'architecture, routing, style, rendering, ssrPurpose, appShell, layout, presence, components, uiSystem, icons or packageManager',
@@ -149,7 +126,7 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
 
   program
     .command('update')
-    .description('Update supported starter capabilities (not available yet)')
+    .description('Update a project (not available yet)')
     .allowUnknownOption()
     .allowExcessArguments()
     .argument('[args...]')
@@ -161,9 +138,9 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
 
   program
     .command('version')
-    .description('Display CLI version')
+    .description('Display the CLI and Angular CLI versions')
     .action(() => {
-      println(io.stdout, CLI_VERSION);
+      println(io.stdout, VERSION_TEXT);
     });
 
   return program;
@@ -341,6 +318,7 @@ function registerGenerateCommand(program: Command, io: CliIo): void {
     });
 }
 
+/** Only the commands and the options, like `ng --help`; the examples live in the help of each command. */
 function formatRootHelp(program: Command, helper: Help): string {
   const descriptions = new Map(
     helper
@@ -351,24 +329,16 @@ function formatRootHelp(program: Command, helper: Help): string {
     .visibleOptions(program)
     .map((option) => [helper.optionTerm(option), helper.optionDescription(option)] as const);
 
-  const sections = HELP_SECTIONS.flatMap(({ title, commands }) => [
-    title,
-    ...formatRows(commands.map(([name, term]) => [term, descriptions.get(name) ?? ''] as const)),
-    '',
-  ]);
-
   return [
     'Angular Starter CLI',
     '',
     'Usage: as [command] [options]',
     '',
-    ...sections,
+    'Commands:',
+    ...formatRows(ROOT_COMMANDS.map(([name, term]) => [term, descriptions.get(name) ?? ''])),
+    '',
     'Options:',
     ...formatRows(options),
-    ...examples(ROOT_EXAMPLES).trimEnd().split('\n'),
-    '',
-    ONLY_NEW,
-    'Run "as <command> --help" for details on a command.',
     '',
   ].join('\n');
 }
