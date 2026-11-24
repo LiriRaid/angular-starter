@@ -178,11 +178,9 @@ describe('capability registry', () => {
       'custom',
     ]);
     const custom = CAPABILITIES.components.find((option) => option.id === 'custom');
-    expect(custom?.requires).toEqual({
-      architecture: ['screaming'],
-      tailwind: true,
-      icons: ['lucide'],
-    });
+    // A project of any architecture can have the components; only the wizard offers them with Screaming.
+    expect(custom?.requires).toEqual({ tailwind: true, icons: ['lucide'] });
+    expect(custom?.offeredWith).toEqual({ architecture: ['screaming'] });
     expect(custom?.docs).toContain('0011-components-picker');
     expect(custom?.recommended).toBeUndefined();
     expect(custom?.default).toBeUndefined();
@@ -343,7 +341,7 @@ describe('unmetRequirements', () => {
         tailwind: false,
         icons: 'none',
       }),
-    ).toEqual(['the architecture: screaming', 'the icons: lucide', 'Tailwind CSS']);
+    ).toEqual(['the icons: lucide', 'Tailwind CSS']);
     expect(
       unmetRequirements(components!, {
         architecture: 'screaming',

@@ -2,6 +2,13 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { RuntimeError } from '../../errors.js';
 
+/** A project file that is missing or does not have the shape an edit expects. */
+export class EditShapeError extends RuntimeError {
+  constructor(file: string, reason: string) {
+    super(`Could not adapt ${file}: ${reason}`);
+  }
+}
+
 /** The new text of a project file, computed and not written yet. */
 export interface PlannedEdit {
   path: string;
@@ -23,7 +30,7 @@ export async function planEdit(
     return { path, text: edit(await readFile(path, 'utf8')) };
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
-    throw new RuntimeError(`Could not adapt ${file}: ${reason}`);
+    throw new EditShapeError(file, reason);
   }
 }
 

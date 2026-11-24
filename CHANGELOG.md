@@ -6,7 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Added
+
+- `as init` sets up an Angular project that `as new` did not make: it reads what the project has
+  (architecture, routing, stylesheet format, Tailwind CSS, rendering, shell, presence, components, icons,
+  package manager, prefix), shows it and writes `angular-starter.config.json` without touching code, so
+  `as add`, `as generate` and `as config` work on it (ADR-0019 and plan 0016).
+- `as add architecture screaming` gives the Screaming Architecture to a project that is still what
+  `ng new` generates, and stops before writing when it has folders or changes of its own.
+- `as generate component <name>` works in a project that is not Screaming, like `ng generate component`:
+  `src/app/<name>/`, or below `--path <folder>`.
+- `as list` shows the command of each option (`Add: as add ...`, `New: as new --...`) and takes
+  `app-shell`, `ui-system`, `ssr-purpose` and `package-manager` as category names.
+
 ### Changed
+
+- The native components no longer need the Screaming Architecture: `as add components` and
+  `as new --components` work with any, creating `src/app/shared` and `src/app/core` and the `@shared` and
+  `@core` aliases when the project has none. The wizard still offers them with the Screaming Architecture.
 
 - `as --version`, `as list` and every help start in about 0.5 s instead of 2.1 s: `ts-morph` and
   `execa` load when `new`, `add` or `generate` need them (ADR-0018).
