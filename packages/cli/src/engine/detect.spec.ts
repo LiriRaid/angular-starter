@@ -14,7 +14,7 @@ afterEach(async () => {
 
 /** A project folder with the given files (path to text); the ones `ng new` always has are added. */
 async function project(files: Record<string, string> = {}): Promise<string> {
-  const root = await mkdtemp(join(tmpdir(), 'as-detect-'));
+  const root = await mkdtemp(join(tmpdir(), 'sa-detect-'));
   roots.push(root);
   const all: Record<string, string> = {
     'angular.json': JSON.stringify({ projects: { demo: { prefix: 'app' } } }),
@@ -160,10 +160,10 @@ describe('detectProject', () => {
     });
   });
 
-  it('turns the as- components in shared into a collection, or a custom selection', async () => {
+  it('turns the sa- components in shared into a collection, or a custom selection', async () => {
     const custom = await project({
-      'src/app/shared/components/as-button/as-button.ts': '',
-      'src/app/shared/components/as-modal/as-modal.ts': '',
+      'src/app/shared/components/sa-button/sa-button.ts': '',
+      'src/app/shared/components/sa-modal/sa-modal.ts': '',
     });
     expect((await detectProject(custom)).options).toMatchObject({
       components: 'custom',
@@ -171,7 +171,7 @@ describe('detectProject', () => {
     });
 
     const files = Object.fromEntries(
-      ESSENTIAL_COMPONENT_IDS.map((id) => [`src/app/shared/components/as-${id}/as-${id}.ts`, '']),
+      ESSENTIAL_COMPONENT_IDS.map((id) => [`src/app/shared/components/sa-${id}/sa-${id}.ts`, '']),
     );
     expect((await detectProject(await project(files))).options.components).toBe('recommended');
   });
@@ -183,15 +183,15 @@ describe('detectProject', () => {
     expect((await detectProject(acme)).options.prefix).toBe('acme');
 
     const reserved = await project({
-      'angular.json': JSON.stringify({ projects: { demo: { prefix: 'as' } } }),
+      'angular.json': JSON.stringify({ projects: { demo: { prefix: 'sa' } } }),
     });
     const { options, notes } = await detectProject(reserved);
     expect(options.prefix).toBe('app');
-    expect(notes.join('\n')).toContain('"as" is reserved');
+    expect(notes.join('\n')).toContain('"sa" is reserved');
   });
 
   it('refuses a folder that is not an Angular workspace', async () => {
-    const root = await mkdtemp(join(tmpdir(), 'as-detect-'));
+    const root = await mkdtemp(join(tmpdir(), 'sa-detect-'));
     roots.push(root);
     await expect(detectProject(root)).rejects.toThrow('angular.json');
   });

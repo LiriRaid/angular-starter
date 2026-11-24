@@ -1,12 +1,12 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AsIcon } from '@shared/components';
+import { SaIcon } from '@shared/components';
 import { SOCIAL_LINKS, STARTER_LINKS, WELCOME_CARDS } from './home.data';
 
 /** The welcome page of a new project, like the one of a new Angular application. Edit it or replace it. */
 @Component({
   selector: '__PREFIX__-home',
-  imports: [AsIcon, RouterLink],
+  imports: [SaIcon, RouterLink],
   templateUrl: './home.html',
   styleUrl: './home.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

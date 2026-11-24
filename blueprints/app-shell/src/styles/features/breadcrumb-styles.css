@@ -77,14 +77,14 @@
     font-weight: 600;
     background: var(
       --app-breadcrumb-current-bg,
-      color-mix(in srgb, var(--as-primary-color) 10%, transparent)
+      color-mix(in srgb, var(--sa-primary-color) 10%, transparent)
     );
     padding: 0.3125rem 0.625rem;
     border-radius: 9999px;
     border: 1px solid
       var(
         --app-breadcrumb-current-border,
-        color-mix(in srgb, var(--as-primary-color) 18%, transparent)
+        color-mix(in srgb, var(--sa-primary-color) 18%, transparent)
       );
   }
 

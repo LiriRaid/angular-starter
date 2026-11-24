@@ -31,11 +31,11 @@ const GETTING_STARTED: DocPage = {
   id: 'getting-started',
   title: 'Getting started',
   icon: 'Play',
-  summary: 'What Angular Starter generated for __PROJECT_NAME__ and how to work with it.',
+  summary: 'What Starter Angular generated for __PROJECT_NAME__ and how to work with it.',
   blocks: [
     {
       kind: 'text',
-      text: 'This is a regular Angular application. Angular Starter generated it and is not a dependency of it: nothing here talks to the CLI at runtime, and the official Angular CLI keeps working as usual.',
+      text: 'This is a regular Angular application. Starter Angular generated it and is not a dependency of it: nothing here talks to the CLI at runtime, and the official Angular CLI keeps working as usual.',
     },
     { kind: 'heading', text: 'Run it' },
     {
@@ -52,7 +52,7 @@ const GETTING_STARTED: DocPage = {
       kind: 'list',
       items: [
         'src/app/core: what the whole application needs once (theme, icons, design preferences).',
-        'src/app/shared: what several features reuse (the as- components, services, utilities).',
+        'src/app/shared: what several features reuse (the sa- components, services, utilities).',
         'src/app/features: one folder per business capability, each with its own routes. The app shell, the home and the example pages live here.',
       ],
     },
@@ -66,7 +66,7 @@ const GETTING_STARTED: DocPage = {
       items: [
         'Follow the tutorials to add a page, use a component and change the theme.',
         'Every piece has a README next to it: src/app/core/theme/README.md, src/app/shared/components/README.md and src/app/features/app-shell/README.md.',
-        'The decisions behind Angular Starter are in its repository: github.com/LiriRaid/angular-starter/tree/main/docs.',
+        'The decisions behind Starter Angular are in its repository: github.com/LiriRaid/starter-angular/tree/main/docs.',
       ],
     },
   ],
@@ -108,7 +108,7 @@ const COMPONENTS: DocPage = {
   id: 'components',
   title: 'Native components',
   icon: 'Sparkles',
-  summary: 'The as- components: buttons, fields, tabs, popovers, tooltips and more.',
+  summary: 'The sa- components: buttons, fields, tabs, popovers, tooltips and more.',
   blocks: [
     {
       kind: 'text',
@@ -117,18 +117,18 @@ const COMPONENTS: DocPage = {
     {
       kind: 'code',
       language: 'ts',
-      code: "import { AsButton, AsInput } from '@shared/components';\n\n@Component({\n  imports: [AsButton, AsInput],\n  template: `\n    <as-input label=\"Name\" [formControl]=\"name\" />\n    <as-button label=\"Save\" icon=\"Check\" (onClick)=\"save()\" />\n  `,\n})\nexport class Profile {}",
+      code: "import { SaButton, SaInput } from '@shared/components';\n\n@Component({\n  imports: [SaButton, SaInput],\n  template: `\n    <sa-input label=\"Name\" [formControl]=\"name\" />\n    <sa-button label=\"Save\" icon=\"Check\" (onClick)=\"save()\" />\n  `,\n})\nexport class Profile {}",
     },
     { kind: 'heading', text: 'The three modes of a field' },
     {
       kind: 'text',
-      text: 'as-input, as-textarea and as-select take variant="on" (the label sits on the border), "in" (inside, above the text) or "over" (above the field).',
+      text: 'sa-input, sa-textarea and sa-select take variant="on" (the label sits on the border), "in" (inside, above the text) or "over" (above the field).',
     },
     { kind: 'heading', text: 'Add more' },
     {
       kind: 'code',
       language: 'bash',
-      code: 'as add components',
+      code: 'sa add components',
     },
     {
       kind: 'note',
@@ -180,7 +180,7 @@ const TUTORIALS: DocPage = {
         {
           title: 'Generate the feature',
           text: 'It creates the folder with its routes and adds the page to the navigation tree.',
-          code: 'as generate feature products',
+          code: 'sa generate feature products',
         },
         {
           title: 'Open it',
@@ -189,7 +189,7 @@ const TUTORIALS: DocPage = {
         },
         {
           title: 'Build the page',
-          text: 'Edit src/app/features/products/products.html. Use the as- components and the tokens so the page follows the theme.',
+          text: 'Edit src/app/features/products/products.html. Use the sa- components and the tokens so the page follows the theme.',
         },
       ],
     },
@@ -200,12 +200,12 @@ const TUTORIALS: DocPage = {
         {
           title: 'Import it',
           text: 'Add it to the imports of your component.',
-          code: "import { AsButton } from '@shared/components';",
+          code: "import { SaButton } from '@shared/components';",
         },
         {
           title: 'Use it in the template',
           text: 'Change variant, size or icon and watch the result.',
-          code: '<as-button label="Create" icon="Plus" variant="outlined" />',
+          code: '<sa-button label="Create" icon="Plus" variant="outlined" />',
         },
         {
           title: 'See every variant',

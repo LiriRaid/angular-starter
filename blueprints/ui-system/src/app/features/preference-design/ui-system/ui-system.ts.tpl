@@ -2,9 +2,9 @@ import { NgComponentOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, type Signal, type Type, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { AsAvatar, AsButton, AsCheckbox, AsDivider, AsDrawer, AsIcon, AsInput, AsModal, AsPopover, AsSelect, AsSkeleton, AsTabs, AsTextarea, AsToggle, AsTooltip, type AsTab } from '@shared/components';
+import { SaAvatar, SaButton, SaCheckbox, SaDivider, SaDrawer, SaIcon, SaInput, SaModal, SaPopover, SaSelect, SaSkeleton, SaTabs, SaTextarea, SaToggle, SaTooltip, type SaTab } from '@shared/components';
 import { AlertService } from '@shared/services';
-import type { ToastPosition } from '@shared/components/as-toast/as-toast.types';
+import type { ToastPosition } from '@shared/components/sa-toast/sa-toast.types';
 import { ACTIONS, UI_COMPONENTS, codeOfVariant, groupsOf, type UiComponentEntry, type UiOption, type UiVariant } from './ui-system.catalog';
 import { inputsOf, type UiProps } from './ui-system.code';
 
@@ -41,14 +41,14 @@ const entryOf = (id: string): UiComponentEntry => {
 };
 
 /**
- * El UI System (ADR-0010, ADR-0012): el catálogo de los componentes `as-` instalados, cada uno con todas
+ * El UI System (ADR-0010, ADR-0012): el catálogo de los componentes `sa-` instalados, cada uno con todas
  * sus variantes a la vista, el código de la que se elige y los tokens de la pestaña UI que lo cambian.
  * Las variantes son solo de este catálogo: los tokens (radio, tamaño de botones, densidad, tamaño de
  * fuente) siguen cambiando por variables CSS y todas las vistas previas los siguen.
  */
 @Component({
   selector: '__PREFIX__-ui-system',
-  imports: [NgComponentOutlet, ReactiveFormsModule, AsButton, AsCheckbox, AsDrawer, AsInput, AsModal, AsSelect, AsTabs, AsToggle, AsTooltip],
+  imports: [NgComponentOutlet, ReactiveFormsModule, SaButton, SaCheckbox, SaDrawer, SaInput, SaModal, SaSelect, SaTabs, SaToggle, SaTooltip],
   templateUrl: './ui-system.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -58,7 +58,7 @@ export class UiSystem {
   readonly components = UI_COMPONENTS;
   readonly groupsOf = groupsOf;
   /** El componente que pinta, tal cual, las variantes de cada tarjeta (el resto tiene su propia plantilla). */
-  readonly outlets: Readonly<Record<string, Type<unknown>>> = { icon: AsIcon, button: AsButton, input: AsInput, textarea: AsTextarea, select: AsSelect, toggle: AsToggle, avatar: AsAvatar, skeleton: AsSkeleton, divider: AsDivider, popover: AsPopover };
+  readonly outlets: Readonly<Record<string, Type<unknown>>> = { icon: SaIcon, button: SaButton, input: SaInput, textarea: SaTextarea, select: SaSelect, toggle: SaToggle, avatar: SaAvatar, skeleton: SaSkeleton, divider: SaDivider, popover: SaPopover };
 
   /** Lo que se escribe en el buscador. */
   readonly query = signal('');
@@ -84,22 +84,22 @@ export class UiSystem {
   // Datos de las vistas previas.
   readonly modalOpen = signal(false);
   readonly drawerOpen = signal(false);
-  readonly tabs: readonly AsTab[] = [
+  readonly tabs: readonly SaTab[] = [
     { id: 'one', label: 'Uno' },
     { id: 'two', label: 'Dos' },
     { id: 'three', label: 'Tres' },
   ];
-  readonly iconTabs: readonly AsTab[] = [
+  readonly iconTabs: readonly SaTab[] = [
     { id: 'one', label: 'Uno', icon: 'Home' },
     { id: 'two', label: 'Dos', icon: 'Search' },
     { id: 'three', label: 'Tres', icon: 'Settings' },
   ];
-  readonly countTabs: readonly AsTab[] = [
+  readonly countTabs: readonly SaTab[] = [
     { id: 'one', label: 'Todos', count: 12 },
     { id: 'two', label: 'Pendientes', count: 3, countTone: 'danger' },
     { id: 'three', label: 'Cerrados' },
   ];
-  readonly manyIconTabs: readonly AsTab[] = [
+  readonly manyIconTabs: readonly SaTab[] = [
     { id: 'one', label: 'Uno', icon: 'Home' },
     { id: 'two', label: 'Dos', icon: 'Search' },
     { id: 'three', label: 'Tres', icon: 'Users' },
@@ -109,7 +109,7 @@ export class UiSystem {
     { id: 'seven', label: 'Siete', icon: 'FileText' },
     { id: 'eight', label: 'Ocho', icon: 'Settings' },
   ];
-  readonly manyCountTabs: readonly AsTab[] = [
+  readonly manyCountTabs: readonly SaTab[] = [
     { id: 'one', label: 'Todos', count: 128 },
     { id: 'two', label: 'Pendientes', count: 12, countTone: 'danger' },
     { id: 'three', label: 'En curso', count: 24 },
@@ -300,7 +300,7 @@ export class UiSystem {
   }
 
   /** Las pestañas de la variante: las de siempre, con iconos, con contador, o muchas para que no quepan. */
-  tabsOf(item: UiVariant): readonly AsTab[] {
+  tabsOf(item: UiVariant): readonly SaTab[] {
     switch (item.props['[tabs]']) {
       case 'iconTabs':
         return this.iconTabs;

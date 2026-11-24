@@ -18,13 +18,13 @@ const directories = async (folder: string): Promise<string[]> =>
 
 async function componentLines(targetDir: string): Promise<string[]> {
   const found = (await directories(join(targetDir, COMPONENTS_FOLDER)))
-    .filter((name) => name.startsWith('as-'))
+    .filter((name) => name.startsWith('sa-'))
     .sort();
   if (found.length === 0) {
-    return ['No components have been generated yet. Add them with `as add components`.'];
+    return ['No components have been generated yet. Add them with `sa add components`.'];
   }
   return found.map((name) => {
-    const description = COMPONENT_DESCRIPTIONS[name.slice('as-'.length)];
+    const description = COMPONENT_DESCRIPTIONS[name.slice('sa-'.length)];
     return `- \`${name}\`${description === undefined ? '' : `: ${description}`}`;
   });
 }

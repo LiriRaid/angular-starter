@@ -10,7 +10,7 @@ let cwd: string;
 let project: string;
 
 beforeEach(async () => {
-  cwd = await mkdtemp(join(tmpdir(), 'as-generate-'));
+  cwd = await mkdtemp(join(tmpdir(), 'sa-generate-'));
   project = await createStarterProject(cwd, ['--icons', 'none']);
 });
 
@@ -31,7 +31,7 @@ async function generate(args: string[], folder = project) {
   return { code, out: fake.out(), err: fake.err() };
 }
 
-describe('as generate feature', () => {
+describe('sa generate feature', () => {
   it('creates the feature folder with its component, routes and spec', async () => {
     const result = await generate(['feature', 'billing']);
     expect(result.code, result.err).toBe(0);
@@ -63,7 +63,7 @@ describe('as generate feature', () => {
     expect(routes).toContain("path: 'home'");
   });
 
-  it('adds the feature to the navigation tree with the Angular Starter routing', async () => {
+  it('adds the feature to the navigation tree with the Starter Angular routing', async () => {
     await generate(['feature', 'user-profiles']);
     const tree = await read('src/app/features/app-shell/navigation/navigation.data.ts');
     expect(tree).toContain("id: 'user-profiles'");
@@ -99,7 +99,7 @@ describe('as generate feature', () => {
   });
 
   it('works without the navigation tree when the project has the default Angular routing', async () => {
-    const other = await mkdtemp(join(tmpdir(), 'as-generate-angular-'));
+    const other = await mkdtemp(join(tmpdir(), 'sa-generate-angular-'));
     try {
       const folder = await createStarterProject(other, ['--routing', 'angular']);
       const result = await generate(['feature', 'billing'], folder);
@@ -114,7 +114,7 @@ describe('as generate feature', () => {
   });
 
   it('uses the selector prefix of the project', async () => {
-    const prefixed = await mkdtemp(join(tmpdir(), 'as-generate-prefix-'));
+    const prefixed = await mkdtemp(join(tmpdir(), 'sa-generate-prefix-'));
     try {
       const folder = await createStarterProject(prefixed, ['--prefix', 'acme']);
       const result = await generate(['feature', 'billing'], folder);
@@ -151,7 +151,7 @@ describe('as generate feature', () => {
   });
 
   it('needs the Screaming architecture', async () => {
-    const plain = await mkdtemp(join(tmpdir(), 'as-generate-plain-'));
+    const plain = await mkdtemp(join(tmpdir(), 'sa-generate-plain-'));
     try {
       const folder = await createStarterProject(plain, ['--architecture', 'angular-default']);
       const result = await generate(['feature', 'billing'], folder);
@@ -171,7 +171,7 @@ describe('as generate feature', () => {
   });
 });
 
-describe('as generate component', () => {
+describe('sa generate component', () => {
   it('creates a component inside a feature', async () => {
     await generate(['feature', 'billing']);
     const result = await generate(['component', 'invoice-card', '--feature', 'billing']);
@@ -214,7 +214,7 @@ describe('as generate component', () => {
   });
 });
 
-describe('as generate', () => {
+describe('sa generate', () => {
   it('names the kinds it can generate', async () => {
     const result = await generate(['service', 'billing']);
     expect(result.code).toBe(2);
@@ -223,19 +223,19 @@ describe('as generate', () => {
     expect(result.err).toContain('component');
   });
 
-  it('needs a project created by Angular Starter', async () => {
+  it('needs a project created by Starter Angular', async () => {
     const result = await generate(['feature', 'billing'], cwd);
     expect(result.code).toBe(2);
-    expect(result.err).toContain('angular-starter.config.json');
+    expect(result.err).toContain('starter-angular.config.json');
   });
 });
 
-describe('as generate component in a project that is not Screaming', () => {
+describe('sa generate component in a project that is not Screaming', () => {
   let plain: string;
   let folder: string;
 
   beforeEach(async () => {
-    plain = await mkdtemp(join(tmpdir(), 'as-generate-plain-'));
+    plain = await mkdtemp(join(tmpdir(), 'sa-generate-plain-'));
     folder = await createStarterProject(plain, ['--architecture', 'angular-default']);
   });
 
@@ -303,9 +303,9 @@ describe('as generate component in a project that is not Screaming', () => {
   });
 });
 
-describe('as generate component --path with dot segments', () => {
+describe('sa generate component --path with dot segments', () => {
   it('drops them, so the same folder has one spelling', async () => {
-    const plain = await mkdtemp(join(tmpdir(), 'as-generate-dot-'));
+    const plain = await mkdtemp(join(tmpdir(), 'sa-generate-dot-'));
     try {
       const folder = await createStarterProject(plain, ['--architecture', 'angular-default']);
       const result = await generate(

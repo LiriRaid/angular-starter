@@ -19,7 +19,7 @@ export interface UiSystemProject {
 }
 
 /**
- * The UI System (ADR-0010, ADR-0012): the catalog of the installed `as-` components, with every variant of
+ * The UI System (ADR-0010, ADR-0012): the catalog of the installed `sa-` components, with every variant of
  * each one in a live preview, the code of the variant that is chosen and the tokens that change it, inside the UI tab of the design preferences page. The
  * page of the application shell and a component collection must be there already: the UI tab is edited
  * in place, so a tab the developer rewrote stops the stage before anything is written.

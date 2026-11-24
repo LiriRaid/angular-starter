@@ -11,7 +11,7 @@ import { screamingProfile } from './screaming.js';
 let project: string;
 
 beforeEach(async () => {
-  project = await mkdtemp(join(tmpdir(), 'as-screaming-'));
+  project = await mkdtemp(join(tmpdir(), 'sa-screaming-'));
   await writeGeneratedWorkspace(project);
 });
 

@@ -1,0 +1,48 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  width: 100%;
+}
+
+.sa-select-over {
+  transition: padding-top 150ms ease;
+}
+
+.sa-select-over-float {
+  padding-top: 1rem;
+}
+
+.sa-select-label {
+  line-height: 1.25;
+  overflow: visible;
+}
+
+.sa-select-error {
+  padding-left: 1.25rem;
+  color: var(--app-error-color);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.sa-select-field.sa-select-field--disabled .sa-select-field-label {
+  color: var(--app-control-disabled-text);
+  opacity: 1;
+}
+
+input.sa-select-field-label:read-only {
+  cursor: pointer;
+}
+
+.sa-select-clear-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--app-action-icon-color);
+  cursor: pointer;
+}

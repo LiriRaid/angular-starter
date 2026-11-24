@@ -1,0 +1,70 @@
+sa-popover {
+  display: contents;
+}
+
+.sa-popover--actions {
+  min-width: 11rem;
+}
+
+.sa-popover-actions {
+  display: flex;
+  min-width: 11rem;
+  max-height: 21.5rem;
+  flex-direction: column;
+  overflow: auto;
+  border-radius: inherit;
+  background-color: var(--app-overlay-bg);
+}
+
+.sa-popover-actions > sa-button {
+  display: block;
+  width: 100%;
+}
+
+.sa-popover-option.sa-btn {
+  width: 100%;
+  min-height: 2.75rem;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-align: left;
+}
+
+.sa-popover-option.sa-btn:not(:disabled):hover,
+.sa-popover-option.sa-btn:not(:disabled):active,
+.sa-popover-option.sa-btn:not(:disabled):focus,
+.sa-popover-option.sa-btn:not(:disabled):focus-visible {
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.sa-popover-option.sa-btn .sa-btn__label {
+  min-width: 0;
+  flex: 1 1 auto;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.sa-popover-option.sa-btn .sa-btn__icon,
+.sa-popover-option.sa-btn sa-icon {
+  flex-shrink: 0;
+}
+
+.sa-popover-divider {
+  border: none;
+  border-top: 1px solid var(--app-border-color);
+  margin: 0;
+}
+
+.sa-popover-option.sa-btn.sa-popover-btn--danger {
+  color: var(--color-red-500);
+}
+
+.sa-popover-option.sa-btn.sa-popover-btn--danger:not(:disabled):hover,
+.sa-popover-option.sa-btn.sa-popover-btn--danger:not(:disabled):active {
+  background: var(--color-red-500) !important;
+  color: white;
+}

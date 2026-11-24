@@ -40,8 +40,8 @@ export const LAYOUTS = [
 ] as const;
 export const UI_SYSTEMS = ['none', 'starter'] as const;
 
-/** Prefix reserved for the components distributed by Angular Starter. */
-export const RESERVED_PREFIX = 'as';
+/** Prefix reserved for the components distributed by Starter Angular. */
+export const RESERVED_PREFIX = 'sa';
 
 const prefixSchema = z
   .string()
@@ -50,7 +50,7 @@ const prefixSchema = z
     'Use lowercase letters, numbers and hyphens, starting with a letter.',
   )
   .refine((value) => value !== RESERVED_PREFIX, {
-    message: `The prefix "${RESERVED_PREFIX}" is reserved for Angular Starter components.`,
+    message: `The prefix "${RESERVED_PREFIX}" is reserved for Starter Angular components.`,
   });
 
 export const optionsSchema = z.strictObject({
@@ -76,7 +76,7 @@ export const optionsSchema = z.strictObject({
 
 export type StarterOptions = z.infer<typeof optionsSchema>;
 
-/** Shape of the file accepted by `--config` and written to `angular-starter.config.json`. */
+/** Shape of the file accepted by `--config` and written to `starter-angular.config.json`. */
 export const configFileSchema = z.strictObject({
   $schema: z.string().optional(),
   schemaVersion: z.literal(CONFIG_SCHEMA_VERSION).optional(),

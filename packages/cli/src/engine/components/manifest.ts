@@ -2,14 +2,14 @@ import { ESSENTIAL_COMPONENT_IDS, EXTRA_COMPONENT_IDS } from '../../config/compo
 
 /** One file of a component and what the `@shared/components` barrel exports from it. */
 export interface ComponentExport {
-  /** Path below `shared/components`, without extension (`as-button/as-button`). */
+  /** Path below `shared/components`, without extension (`sa-button/sa-button`). */
   from: string;
   /** Names to export; `type X` exports a type. */
   names: readonly string[];
 }
 
 export interface ComponentDefinition {
-  /** The id without the `as-` prefix; its blueprint is `blueprints/components/as-<id>`. */
+  /** The id without the `sa-` prefix; its blueprint is `blueprints/components/sa-<id>`. */
   id: string;
   /** Components it imports, by id. They are always generated with it. */
   uses: readonly string[];
@@ -29,80 +29,80 @@ const component = (
   options: {
     extra?: readonly ComponentExport[];
     styles?: readonly string[];
-    /** The file that exports `exports`, when it is not `as-<id>.ts`. */
+    /** The file that exports `exports`, when it is not `sa-<id>.ts`. */
     main?: string;
   } = {},
 ): ComponentDefinition => ({
   id,
   uses,
   exports: [
-    { from: `as-${id}/${options.main ?? `as-${id}`}`, names: exports },
+    { from: `sa-${id}/${options.main ?? `sa-${id}`}`, names: exports },
     ...(options.extra ?? []),
   ],
   styles: options.styles ?? [],
 });
 
-/** The generic components of the reference application, renamed from `omniinbox-*` to `as-*`. */
+/** The generic components of the reference application, renamed from `omniinbox-*` to `sa-*`. */
 export const COMPONENTS: readonly ComponentDefinition[] = [
-  component('icon', [], ['AsIcon']),
-  component('button', ['icon'], ['AsButton', 'type ButtonSeverity'], {
-    extra: [{ from: 'as-button/as-ripple', names: ['AsRipple'] }],
+  component('icon', [], ['SaIcon']),
+  component('button', ['icon'], ['SaButton', 'type ButtonSeverity'], {
+    extra: [{ from: 'sa-button/sa-ripple', names: ['SaRipple'] }],
     styles: ['button-styles'],
   }),
-  component('input', ['button', 'icon', 'select'], ['AsInput'], { styles: ['input-styles'] }),
-  component('textarea', ['icon', 'input'], ['AsTextarea']),
-  component('checkbox', ['icon'], ['AsCheckbox']),
-  component('toggle', [], ['AsToggle']),
-  component('select', ['avatar', 'icon', 'input'], ['AsSelect'], { styles: ['select-styles'] }),
-  component('avatar', ['icon'], ['AsAvatar'], { styles: ['presence-indicator-styles'] }),
+  component('input', ['button', 'icon', 'select'], ['SaInput'], { styles: ['input-styles'] }),
+  component('textarea', ['icon', 'input'], ['SaTextarea']),
+  component('checkbox', ['icon'], ['SaCheckbox']),
+  component('toggle', [], ['SaToggle']),
+  component('select', ['avatar', 'icon', 'input'], ['SaSelect'], { styles: ['select-styles'] }),
+  component('avatar', ['icon'], ['SaAvatar'], { styles: ['presence-indicator-styles'] }),
   component(
     'divider',
     [],
-    ['AsDivider', 'type AsDividerLayout', 'type AsDividerType', 'type AsDividerAlign'],
+    ['SaDivider', 'type SaDividerLayout', 'type SaDividerType', 'type SaDividerAlign'],
   ),
-  component('skeleton', [], ['AsSkeleton']),
-  component('tooltip', [], ['AsTooltip', 'type AsTooltipPosition'], {
-    main: 'as-tooltip.directive',
+  component('skeleton', [], ['SaSkeleton']),
+  component('tooltip', [], ['SaTooltip', 'type SaTooltipPosition'], {
+    main: 'sa-tooltip.directive',
     styles: ['tooltip-styles'],
   }),
-  component('modal', ['button', 'icon'], ['AsModal']),
-  component('drawer', ['icon'], ['AsDrawer', 'type AsDrawerPosition']),
-  component('toast', ['button'], ['AsToast'], { styles: ['toast-styles'] }),
+  component('modal', ['button', 'icon'], ['SaModal']),
+  component('drawer', ['icon'], ['SaDrawer', 'type SaDrawerPosition']),
+  component('toast', ['button'], ['SaToast'], { styles: ['toast-styles'] }),
   component(
     'tabs',
     ['avatar', 'button', 'icon', 'tooltip'],
-    ['AsTabs', 'type AsTab', 'type AsTabAvatar'],
+    ['SaTabs', 'type SaTab', 'type SaTabAvatar'],
   ),
   component(
     'popover',
     ['button', 'tooltip'],
-    ['AsPopover', 'type AsPopoverActionItem', 'type SubPanelAnchor'],
+    ['SaPopover', 'type SaPopoverActionItem', 'type SubPanelAnchor'],
     { styles: ['popover-styles'] },
   ),
   // What the "all" collection adds to the recommended one.
   component(
     'table',
     ['checkbox', 'icon', 'select', 'skeleton'],
-    ['AsTable', 'type AsTableColumn', 'type AsTableAlign', 'type AsTablePageEvent'],
+    ['SaTable', 'type SaTableColumn', 'type SaTableAlign', 'type SaTablePageEvent'],
     { styles: ['table-styles'] },
   ),
-  component('search', ['button', 'input'], ['AsSearch']),
-  component('datepicker', ['button', 'icon', 'input', 'popover', 'select'], ['AsDatepicker']),
-  component('section-nav', ['icon'], ['AsSectionNav', 'type AsSectionNavItem']),
-  component('selectable-item', ['icon'], ['AsSelectableItem']),
-  component('reorder-list', [], ['AsReorderList']),
-  component('preview', ['button', 'icon', 'modal'], ['AsPreview']),
-  component('media-preview', ['button', 'modal'], ['AsMediaPreview', 'type MediaPreviewKind']),
-  component('theme-color-picker', ['popover', 'tooltip'], ['AsThemeColorPicker']),
+  component('search', ['button', 'input'], ['SaSearch']),
+  component('datepicker', ['button', 'icon', 'input', 'popover', 'select'], ['SaDatepicker']),
+  component('section-nav', ['icon'], ['SaSectionNav', 'type SaSectionNavItem']),
+  component('selectable-item', ['icon'], ['SaSelectableItem']),
+  component('reorder-list', [], ['SaReorderList']),
+  component('preview', ['button', 'icon', 'modal'], ['SaPreview']),
+  component('media-preview', ['button', 'modal'], ['SaMediaPreview', 'type MediaPreviewKind']),
+  component('theme-color-picker', ['popover', 'tooltip'], ['SaThemeColorPicker']),
   component(
     'weekly-schedule',
     ['button', 'toggle'],
     [
-      'AsWeeklySchedule',
+      'SaWeeklySchedule',
       'computeWeeklyHours',
       'parseSchedule',
-      'type AsScheduleDay',
-      'type AsWeeklySchedulePreset',
+      'type SaScheduleDay',
+      'type SaWeeklySchedulePreset',
     ],
   ),
 ];

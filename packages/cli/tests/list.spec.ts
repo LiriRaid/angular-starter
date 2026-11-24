@@ -18,34 +18,34 @@ function optionLine(out: string, id: string, label: string): string | undefined 
     .find((line) => new RegExp(`^ {2}${id}( |$)`).test(line) && line.includes(label));
 }
 
-describe('as list: the command of each option', () => {
-  it('puts the command to add an option and the one to ask for it in as new on their own lines', async () => {
+describe('sa list: the command of each option', () => {
+  it('puts the command to add an option and the one to ask for it in sa new on their own lines', async () => {
     const out = await wide('components');
-    expect(out).toMatch(/^ {2}recommended +as add components recommended +/m);
-    expect(out).toMatch(/^ +as new --components recommended( |$)/m);
-    expect(out).toMatch(/^ {2}all +as add components all( |$)/m);
+    expect(out).toMatch(/^ {2}recommended +sa add components recommended +/m);
+    expect(out).toMatch(/^ +sa new --components recommended( |$)/m);
+    expect(out).toMatch(/^ {2}all +sa add components all( |$)/m);
   });
 
   it('shows no add command for what a project that does not use the capability already is', async () => {
     const out = await wide('components');
-    expect(out).not.toContain('as add components none');
-    expect(out).toMatch(/as new --components none/);
+    expect(out).not.toContain('sa add components none');
+    expect(out).toMatch(/sa new --components none/);
   });
 
-  it('shows only the new command for what as add cannot change', async () => {
+  it('shows only the new command for what sa add cannot change', async () => {
     const out = await wide('style');
-    expect(out).toContain('as new --style scss');
-    expect(out).not.toContain('as add style');
+    expect(out).toContain('sa new --style scss');
+    expect(out).not.toContain('sa add style');
   });
 
   it('writes the flags of the categories that have a compound name', async () => {
-    expect(await wide('uiSystem')).toContain('as new --ui-system starter');
-    expect(await wide('appShell')).toContain('as add app-shell starter');
-    expect(await wide('packageManager')).toContain('as new --package-manager pnpm');
+    expect(await wide('uiSystem')).toContain('sa new --ui-system starter');
+    expect(await wide('appShell')).toContain('sa add app-shell starter');
+    expect(await wide('packageManager')).toContain('sa new --package-manager pnpm');
   });
 
   it('says how to give a project an architecture', async () => {
-    expect(await wide('architecture')).toContain('as add architecture screaming');
+    expect(await wide('architecture')).toContain('sa add architecture screaming');
   });
 
   it('gives no command to an option that is only planned, and marks it', async () => {
@@ -53,12 +53,12 @@ describe('as list: the command of each option', () => {
     const line = optionLine(out, 'modular', 'Modular Architecture');
     expect(line).toBeDefined();
     expect(line).toContain('(planned)');
-    expect(out).not.toContain('as new --architecture modular');
+    expect(out).not.toContain('sa new --architecture modular');
   });
 
   it('keeps no Add: or New: labels: the table carries the commands', async () => {
     const out = await wide();
-    expect(out).not.toMatch(/\b(Add|New): as /);
+    expect(out).not.toMatch(/\b(Add|New): sa /);
   });
 
   it('accepts a kebab-case name of the category', async () => {
@@ -79,7 +79,7 @@ describe('as list: the command of each option', () => {
   });
 });
 
-describe('as list: one table for the whole listing', () => {
+describe('sa list: one table for the whole listing', () => {
   it('paints the headers of the columns when the terminal has colors', async () => {
     const fake = createFakeIo({ columns: 160, color: true });
     expect(await run(['list', 'rendering'], fake.io)).toBe(0);
@@ -97,8 +97,8 @@ describe('as list: one table for the whole listing', () => {
     const out = await wide();
     const starts = out
       .split('\n')
-      .filter((line) => /^ {2}(\S+ +)?as (add|new) /.test(line))
-      .map((line) => line.indexOf('as '));
+      .filter((line) => /^ {2}(\S+ +)?sa (add|new) /.test(line))
+      .map((line) => line.indexOf('sa '));
     expect(starts.length).toBeGreaterThan(20);
     expect(new Set(starts).size).toBe(1);
   });
@@ -123,8 +123,8 @@ describe('as list: one table for the whole listing', () => {
     expect(new Set(headers.map((line) => line.indexOf('Commands'))).size).toBe(1);
     expect(new Set(headers.map((line) => line.indexOf('Option'))).size).toBe(1);
     const commandColumn = headers[0]?.indexOf('Commands');
-    const firstCommand = out.split('\n').find((line) => /^ {2}(\S+ +)?as (add|new) /.test(line));
-    expect(firstCommand?.indexOf('as ')).toBe(commandColumn);
+    const firstCommand = out.split('\n').find((line) => /^ {2}(\S+ +)?sa (add|new) /.test(line));
+    expect(firstCommand?.indexOf('sa ')).toBe(commandColumn);
   });
 
   it('wraps the description in the third column, under the name, with the link last', async () => {
@@ -140,7 +140,7 @@ describe('as list: one table for the whole listing', () => {
     expect(
       next
         .slice(0, column)
-        .replace(/as (add|new) .*/, '')
+        .replace(/sa (add|new) .*/, '')
         .trim(),
     ).toBe('');
     if (scss?.docs) expect(out).toContain(scss.docs);
@@ -163,7 +163,7 @@ describe('as list: one table for the whole listing', () => {
   it('puts the description on a line below the row when the terminal is narrow', async () => {
     const out = await list(64, 'style');
     const scss = CAPABILITIES.style.find((option) => option.id === 'scss');
-    const row = out.split('\n').find((line) => line.includes('as new --style scss'));
+    const row = out.split('\n').find((line) => line.includes('sa new --style scss'));
     expect(row).toBeDefined();
     expect(row).not.toContain(scss?.label ?? '?');
     expect(row).not.toContain(scss?.description.slice(0, 20) ?? '?');
@@ -182,8 +182,8 @@ describe('as list: one table for the whole listing', () => {
     const out = await list(64);
     const starts = out
       .split('\n')
-      .filter((line) => /^ {2}(\S+ +)?as (add|new) /.test(line))
-      .map((line) => line.indexOf('as '));
+      .filter((line) => /^ {2}(\S+ +)?sa (add|new) /.test(line))
+      .map((line) => line.indexOf('sa '));
     expect(new Set(starts).size).toBe(1);
   });
 });

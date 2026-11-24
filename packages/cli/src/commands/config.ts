@@ -5,9 +5,9 @@ import { findProject } from '../project/find.js';
 import { formatRows } from '../ui/format.js';
 
 const READ_ONLY_HINT =
-  'The options that shape a project (stylesheet format, package manager, prefix) are decided by "as new"; "as add" applies the ones that can be added later.';
+  'The options that shape a project (stylesheet format, package manager, prefix) are decided by "sa new"; "sa add" applies the ones that can be added later.';
 
-/** `as config list|get <key>`: reads the options recorded in `angular-starter.config.json`. */
+/** `sa config list|get <key>`: reads the options recorded in `starter-angular.config.json`. */
 export async function configCommand(
   io: CliIo,
   action: string | undefined,
@@ -16,8 +16,8 @@ export async function configCommand(
   if (action !== 'list' && action !== 'get') {
     throw new UsageError(
       action === undefined
-        ? 'Usage: as config <list|get> [key]'
-        : `"as config ${action}" does not exist: ${PROJECT_CONFIG_FILE} is read-only.`,
+        ? 'Usage: sa config <list|get> [key]'
+        : `"sa config ${action}" does not exist: ${PROJECT_CONFIG_FILE} is read-only.`,
       READ_ONLY_HINT,
     );
   }
@@ -30,7 +30,7 @@ export async function configCommand(
     return;
   }
 
-  if (key === undefined) throw new UsageError('Usage: as config get <key>');
+  if (key === undefined) throw new UsageError('Usage: sa config get <key>');
   if (!Object.hasOwn(options, key)) {
     throw new UsageError(
       `Unknown option "${key}". Choose one of: ${Object.keys(options).join(', ')}.`,

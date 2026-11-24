@@ -10,7 +10,7 @@ import { starterRoutingProfile } from './starter.js';
 let project: string;
 
 beforeEach(async () => {
-  project = await mkdtemp(join(tmpdir(), 'as-routing-'));
+  project = await mkdtemp(join(tmpdir(), 'sa-routing-'));
   await writeGeneratedWorkspace(project);
 });
 
@@ -22,7 +22,7 @@ const read = (file: string): Promise<string> => readFile(join(project, file), 'u
 const apply = (name = 'demo') =>
   starterRoutingProfile.apply({ targetDir: project, name, prefix: 'app' });
 
-describe('Angular Starter Routing profile', () => {
+describe('Starter Angular Routing profile', () => {
   it('is registered for the starter routing', () => {
     expect(ROUTING_PROFILES['starter']).toBe(starterRoutingProfile);
   });

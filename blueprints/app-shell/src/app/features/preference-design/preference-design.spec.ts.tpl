@@ -23,7 +23,7 @@ describe('PreferenceDesign', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('h1')?.textContent).toContain('Preferencias de Diseño');
     expect(fixture.componentInstance.tabs.map((tab) => tab.label)).toEqual(['Apariencia', 'Tema', 'UI', 'Otros']);
-    expect(compiled.querySelector('as-tabs')).not.toBeNull();
+    expect(compiled.querySelector('sa-tabs')).not.toBeNull();
   });
 
   it('starts on the appearance tab: the floating wide layout is the only one that can be chosen', async () => {
@@ -44,7 +44,7 @@ describe('PreferenceDesign', () => {
     const sharp = Array.from(compiled.querySelectorAll('button')).find((button) => button.textContent?.trim() === 'Recto');
     sharp?.click();
     expect(service.preferences().radius).toBe('sharp');
-    expect(document.documentElement.style.getPropertyValue('--as-ui-radius-scale')).toBe('0.25');
+    expect(document.documentElement.style.getPropertyValue('--sa-ui-radius-scale')).toBe('0.25');
   });
 
   it('turns the breadcrumb off from the other tab', async () => {

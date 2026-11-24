@@ -1,7 +1,9 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { PROJECT_CONFIG_FILE } from '../src/config/project-config.js';
+import { RESERVED_PREFIX } from '../src/config/schema.js';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const read = (path: string): string => readFileSync(join(root, path), 'utf8');
@@ -15,9 +17,14 @@ interface Manifest {
   repository: { url: string };
 }
 
-/** The previous name, written in pieces so this spec does not match itself. */
-const OLD_SLUG = ['as', 'starter'].join('-');
-const OLD_NAME = ['AS', 'Starter'].join(' ');
+/** The previous names, written in pieces so this spec does not match itself. */
+const OLD_NAMES = [
+  ['as', 'starter'].join('-'),
+  ['AS', 'Starter'].join(' '),
+  ['angular', 'starter'].join('-'),
+  ['Angular', 'Starter'].join(' '),
+  ['ANGULAR', 'STARTER'].join('_'),
+];
 
 function filesBelow(folder: string): string[] {
   return readdirSync(join(root, folder)).flatMap((entry) => {
@@ -27,53 +34,94 @@ function filesBelow(folder: string): string[] {
   });
 }
 
+/** What ships or is read today; the history (ADR, plans, CHANGELOG) keeps the names of its time. */
+function currentFiles(): string[] {
+  return [
+    'README.md',
+    'CONTRIBUTING.md',
+    'SECURITY.md',
+    'package.json',
+    'packages/cli/package.json',
+    ...filesBelow('blueprints'),
+    ...filesBelow('packages/cli/src'),
+    ...filesBelow('packages/cli/tests').filter((file) => !file.endsWith('naming.spec.ts')),
+  ];
+}
+
 describe('the name of the project', () => {
   const manifest = JSON.parse(read('packages/cli/package.json')) as Manifest;
 
   it('publishes the CLI under the author scope, never as Angular itself', () => {
-    expect(manifest.name).toBe('@liriraid/angular-starter');
+    expect(manifest.name).toBe('@liriraid/starter-angular');
   });
 
   it('is still 0.x: 1.0 waits for the author', () => {
     expect(manifest.version).toBe('0.1.0');
   });
 
-  it('installs `as` and the full name `angular-starter`, and no other binary', () => {
-    expect(manifest.bin).toEqual({ as: 'dist/bin.js', 'angular-starter': 'dist/bin.js' });
+  it('installs `sa` and the full name `starter-angular`, and no other binary', () => {
+    expect(manifest.bin).toEqual({ sa: 'dist/bin.js', 'starter-angular': 'dist/bin.js' });
   });
 
-  it('points the repository, the home page and the issues to angular-starter', () => {
-    expect(manifest.repository.url).toBe('git+https://github.com/LiriRaid/angular-starter.git');
-    expect(manifest.homepage).toBe('https://github.com/LiriRaid/angular-starter#readme');
-    expect(manifest.bugs?.url).toBe('https://github.com/LiriRaid/angular-starter/issues');
+  it('points the repository, the home page and the issues to starter-angular', () => {
+    expect(manifest.repository.url).toBe('git+https://github.com/LiriRaid/starter-angular.git');
+    expect(manifest.homepage).toBe('https://github.com/LiriRaid/starter-angular#readme');
+    expect(manifest.bugs?.url).toBe('https://github.com/LiriRaid/starter-angular/issues');
   });
 
-  it('names the root workspace angular-starter', () => {
-    expect((JSON.parse(read('package.json')) as { name: string }).name).toBe('angular-starter');
+  it('names the root workspace starter-angular', () => {
+    expect((JSON.parse(read('package.json')) as { name: string }).name).toBe('starter-angular');
   });
 
-  it('leaves no trace of the old name in what ships or is read today', () => {
-    const files = [
-      'README.md',
-      'CONTRIBUTING.md',
-      'SECURITY.md',
-      'package.json',
-      'packages/cli/package.json',
-      ...filesBelow('blueprints'),
-      ...filesBelow('packages/cli/src'),
-      ...filesBelow('packages/cli/tests').filter((file) => !file.endsWith('naming.spec.ts')),
-    ];
-    const offenders = files.filter((file) => {
+  it('names the file of the configuration of a project after the project', () => {
+    expect(PROJECT_CONFIG_FILE).toBe('starter-angular.config.json');
+  });
+
+  it('leaves no trace of the previous names in what ships or is read today', () => {
+    const offenders = currentFiles().filter((file) => {
       const text = read(file);
-      return text.includes(OLD_SLUG) || text.includes(OLD_NAME);
+      return OLD_NAMES.some((name) => text.includes(name));
     });
-    expect(offenders.map((file) => relative('.', file))).toEqual([]);
+    expect(offenders).toEqual([]);
   });
 
-  it('tells in the README that it is not affiliated with Google, and about the system `as`', () => {
+  it('tells in the README that it is not affiliated with Google, and about the system `sa`', () => {
     const readme = read('README.md');
     expect(readme).toMatch(/not affiliated with(,| or)? .*Google/i);
-    expect(readme).toContain('GNU assembler');
-    expect(readme).toContain('angular-starter');
+    expect(readme).toMatch(/process accounting/i);
+    expect(readme).toContain('starter-angular');
+  });
+
+  it('explains in the README why the web calls it Starter for Angular', () => {
+    const readme = read('README.md');
+    expect(readme).toContain('Starter for Angular');
+    expect(readme).toMatch(/Starter Angular/);
+  });
+});
+
+describe('the prefix of what is generated', () => {
+  it('reserves sa as the prefix of the components of the starter', () => {
+    expect(RESERVED_PREFIX).toBe('sa');
+  });
+
+  it('leaves no as- prefix in the blueprints or in the CLI: selectors, classes, tokens and files', () => {
+    const dashed = /(?<![A-Za-z0-9])-{0,2}as-[a-z]/;
+    const pascal = /(?<![A-Za-z0-9])As[A-Z]/;
+    // The directives, in the camelCase of the template and in the lowercase the DOM gives the attribute.
+    const directive = /(?<![A-Za-z0-9])as(Tooltip|Ripple|tooltip|ripple)\b/;
+    const offenders = currentFiles().filter((file) => {
+      if (file.endsWith('.spec.ts') && file.includes('tests')) return false;
+      const name = file.split(/[\\/]/).pop() ?? '';
+      const folders = file.split(/[\\/]/);
+      if (folders.some((part) => /^as-/.test(part)) || /^as-/.test(name)) return true;
+      const text = read(file);
+      return dashed.test(text) || pascal.test(text) || directive.test(text);
+    });
+    expect(offenders).toEqual([]);
+  });
+
+  it('writes the environment variables of the project with the SA_ prefix', () => {
+    const offenders = currentFiles().filter((file) => /(?<![A-Z_])AS_[A-Z]/.test(read(file)));
+    expect(offenders).toEqual([]);
   });
 });

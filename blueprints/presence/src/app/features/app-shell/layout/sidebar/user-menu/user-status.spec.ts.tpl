@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { PresenceService } from '@core/presence/presence.service';
 import { PRESENCE_TRANSPORT, type PresenceTransport } from '@core/presence/presence.transport';
 import type { PresenceChange } from '@core/presence/presence.types';
-import type { AsPopover } from '@shared/components';
+import type { SaPopover } from '@shared/components';
 
 import { UserStatusMenu } from './user-status';
 
@@ -29,7 +29,7 @@ describe('UserStatusMenu', () => {
         anchorCalls.push(anchor);
         return { top: 10, left: 20 };
       },
-    } as unknown as AsPopover;
+    } as unknown as SaPopover;
     menu = TestBed.runInInjectionContext(() => new UserStatusMenu(() => popover, () => open()));
     TestBed.tick();
   });

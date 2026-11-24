@@ -8,25 +8,25 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 /**
  * Runs the compiled CLI against the real Angular CLI (needs network and a prior `pnpm build`).
- * Opt in with AS_E2E=1.
+ * Opt in with SA_E2E=1.
  *
  * Every project that is installed costs minutes, so there are few of them and each covers a family
  * of the options (ADR-0016); the other combinations are covered by the unit specs of the engine.
  * The projects install with pnpm: its store makes every install after the first a matter of links.
  */
-const enabled = process.env['AS_E2E'] === '1';
+const enabled = process.env['SA_E2E'] === '1';
 const bin = fileURLToPath(new URL('../dist/bin.js', import.meta.url));
 const TIMEOUT_MS = 5 * 60_000;
 const INSTALL_TIMEOUT_MS = 15 * 60_000;
 const CLEANUP_TIMEOUT_MS = 10 * 60_000;
 const CHILD_ENV = { CI: '1' };
 
-describe.skipIf(!enabled)('as new (end to end, real Angular CLI)', () => {
+describe.skipIf(!enabled)('sa new (end to end, real Angular CLI)', () => {
   let cwd: string;
 
   beforeAll(async () => {
     expect(existsSync(bin), 'Run "pnpm build" first: dist/bin.js is missing.').toBe(true);
-    cwd = await mkdtemp(join(tmpdir(), 'as-e2e-'));
+    cwd = await mkdtemp(join(tmpdir(), 'sa-e2e-'));
   });
 
   // Deleting two installed projects (node_modules) takes longer than the default hook timeout.
@@ -75,7 +75,7 @@ ${result.stderr}`,
     });
     expect(
       result.exitCode,
-      `as ${args.join(' ')}
+      `sa ${args.join(' ')}
 ${result.stdout}
 ${result.stderr}`,
     ).toBe(0);
@@ -104,7 +104,7 @@ ${result.stderr}`,
     'creates a CSS + Tailwind application with the default options',
     async () => {
       const project = await create('e2e-tailwind');
-      expect(existsSync(join(project, 'angular-starter.config.json'))).toBe(true);
+      expect(existsSync(join(project, 'starter-angular.config.json'))).toBe(true);
       expect(existsSync(join(project, 'src', 'main.ts'))).toBe(true);
       const manifest = await read(project, 'package.json');
       expect(manifest).toContain('tailwindcss');
@@ -120,7 +120,7 @@ ${result.stderr}`,
       const project = await create('e2e-scss', '--style', 'scss', '--prefix', 'acme');
       expect(existsSync(join(project, 'src', 'styles.scss'))).toBe(true);
       expect(await read(project, 'package.json')).not.toContain('tailwindcss');
-      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      const config = JSON.parse(await read(project, 'starter-angular.config.json'));
       expect(config.options).toMatchObject({ style: 'scss', tailwind: false, prefix: 'acme' });
       expect(await read(project, 'angular.json')).toContain('"prefix": "acme"');
     },
@@ -137,7 +137,7 @@ ${result.stderr}`,
   );
 
   it(
-    'creates a Screaming project with the Angular Starter routing and the default Angular SSR that builds',
+    'creates a Screaming project with the Starter Angular routing and the default Angular SSR that builds',
     async () => {
       const project = await createInstalled(
         'e2e-routing-ssr',
@@ -164,7 +164,7 @@ ${result.stderr}`,
       expect(await read(project, 'src/app/app.config.ts')).toContain(
         `provideNavigation(APP_NAVIGATION, { appName: 'e2e-routing-ssr' })`,
       );
-      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      const config = JSON.parse(await read(project, 'starter-angular.config.json'));
       expect(config.options).toMatchObject({ architecture: 'screaming', routing: 'starter' });
 
       await ng(project, 'build');
@@ -193,14 +193,14 @@ ${result.stderr}`,
       await asProject(project, 'add', 'rendering', 'starter-ssr');
       await asProject(project, 'add', 'components', 'recommended');
 
-      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      const config = JSON.parse(await read(project, 'starter-angular.config.json'));
       expect(config.options).toMatchObject({
         routing: 'starter',
         icons: 'lucide',
         rendering: 'starter-ssr',
         components: 'recommended',
       });
-      expect(existsSync(join(project, 'src/app/shared/components/as-button/as-button.ts'))).toBe(
+      expect(existsSync(join(project, 'src/app/shared/components/sa-button/sa-button.ts'))).toBe(
         true,
       );
       expect(await read(project, 'src/styles.css')).toContain('button-styles.css');
@@ -230,8 +230,8 @@ ${result.stderr}`,
         'src/test-setup.ts',
         'src/app/core/theme/theme.service.ts',
         'src/app/core/common/icons/lucide-icons.ts',
-        'src/app/shared/components/as-button/as-button.ts',
-        'src/app/shared/components/as-modal/as-modal.ts',
+        'src/app/shared/components/sa-button/sa-button.ts',
+        'src/app/shared/components/sa-modal/sa-modal.ts',
         'src/app/shared/utils/slugify.ts',
       ]) {
         expect(existsSync(join(project, file)), file).toBe(true);
@@ -289,10 +289,10 @@ ${result.stderr}`,
       expect(await read(project, 'package.json')).toContain('@angular/cdk');
       expect(await read(project, 'src/styles.css')).toContain('table-styles.css');
       for (const file of [
-        'src/app/shared/components/as-table/as-table.ts',
-        'src/app/shared/components/as-datepicker/as-datepicker.ts',
-        'src/app/shared/components/as-theme-color-picker/as-theme-color-picker.ts',
-        'src/app/shared/components/as-weekly-schedule/as-weekly-schedule.ts',
+        'src/app/shared/components/sa-table/sa-table.ts',
+        'src/app/shared/components/sa-datepicker/sa-datepicker.ts',
+        'src/app/shared/components/sa-theme-color-picker/sa-theme-color-picker.ts',
+        'src/app/shared/components/sa-weekly-schedule/sa-weekly-schedule.ts',
         'src/app/features/home/home-details/home-details.ts',
         'src/main.server.ts',
       ]) {
@@ -327,7 +327,7 @@ ${result.stderr}`,
       await asProject(project, 'add', 'presence');
       await asProject(project, 'add', 'ui-system');
 
-      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      const config = JSON.parse(await read(project, 'starter-angular.config.json'));
       expect(config.options).toMatchObject({
         appShell: 'starter',
         icons: 'lucide',
@@ -337,7 +337,7 @@ ${result.stderr}`,
       });
       const routes = await read(project, 'src/app/app.routes.ts');
       expect(routes.indexOf("path: 'billing'")).toBeGreaterThan(routes.indexOf('children: ['));
-      expect(existsSync(join(project, 'src/app/shared/components/as-table/as-table.ts'))).toBe(
+      expect(existsSync(join(project, 'src/app/shared/components/sa-table/sa-table.ts'))).toBe(
         true,
       );
       expect(
@@ -387,7 +387,7 @@ ${result.stderr}`,
       expect(await read(project, 'src/app/features/preference-design/tabs/ui-tab.html')).toContain(
         '<app-ui-system />',
       );
-      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      const config = JSON.parse(await read(project, 'starter-angular.config.json'));
       expect(config.options).toMatchObject({
         presence: 'starter',
         uiSystem: 'starter',
@@ -404,7 +404,7 @@ ${result.stderr}`,
     'creates the default Angular structure as plain Angular: no Lucide, no shell, no layout',
     async () => {
       const project = await createInstalled('e2e-plain', '--architecture', 'angular-default');
-      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      const config = JSON.parse(await read(project, 'starter-angular.config.json'));
       expect(config.options).toMatchObject({
         icons: 'none',
         appShell: 'none',
@@ -422,7 +422,7 @@ ${result.stderr}`,
   );
 
   it(
-    'sets up a default Angular project that as new did not make, and adds components and a component to it',
+    'sets up a default Angular project that sa new did not make, and adds components and a component to it',
     async () => {
       const project = await createInstalled(
         'e2e-adopt',
@@ -438,13 +438,13 @@ ${result.stderr}`,
         'none',
       );
       // From here on the project is one the CLI knows nothing about.
-      await rm(join(project, 'angular-starter.config.json'));
+      await rm(join(project, 'starter-angular.config.json'));
 
       await asProject(project, 'init');
       await asProject(project, 'add', 'components', 'button,modal');
       await asProject(project, 'generate', 'component', 'invoice-card', '--path', 'billing');
 
-      expect(existsSync(join(project, 'src/app/shared/components/as-modal/as-modal.ts'))).toBe(
+      expect(existsSync(join(project, 'src/app/shared/components/sa-modal/sa-modal.ts'))).toBe(
         true,
       );
       expect(existsSync(join(project, 'src/app/billing/invoice-card/invoice-card.ts'))).toBe(true);
@@ -473,14 +473,14 @@ ${result.stderr}`,
         '--icons',
         'none',
       );
-      await rm(join(project, 'angular-starter.config.json'));
+      await rm(join(project, 'starter-angular.config.json'));
 
       await asProject(project, 'init');
       await asProject(project, 'add', 'architecture', 'screaming');
 
       expect(existsSync(join(project, 'src/app/features/home/home.ts'))).toBe(true);
       expect(await read(project, 'tsconfig.json')).toContain('"@features/*"');
-      const config = JSON.parse(await read(project, 'angular-starter.config.json'));
+      const config = JSON.parse(await read(project, 'starter-angular.config.json'));
       expect(config.options.architecture).toBe('screaming');
     },
     TIMEOUT_MS,

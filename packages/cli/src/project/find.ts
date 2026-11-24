@@ -6,9 +6,9 @@ import { optionsSchema, type StarterOptions } from '../config/schema.js';
 import { findWorkspace } from '../engine/detect.js';
 import { UsageError } from '../errors.js';
 
-/** A project created by Angular Starter, found through its configuration file. */
+/** A project created by Starter Angular, found through its configuration file. */
 export interface StarterProject {
-  /** The folder that holds `angular-starter.config.json`. */
+  /** The folder that holds `starter-angular.config.json`. */
   root: string;
   /** The package name of the project, which the generated code uses as its application name. */
   name: string;
@@ -16,7 +16,7 @@ export interface StarterProject {
 }
 
 /**
- * Walks up from `startDir` to the closest `angular-starter.config.json`, so the commands that work
+ * Walks up from `startDir` to the closest `starter-angular.config.json`, so the commands that work
  * on a project run from any of its folders.
  */
 export async function findProject(startDir: string): Promise<StarterProject> {
@@ -32,10 +32,10 @@ export async function findProject(startDir: string): Promise<StarterProject> {
   }
   const workspace = await findWorkspace(startDir);
   throw new UsageError(
-    `This is not an Angular Starter project: ${PROJECT_CONFIG_FILE} was not found in ${startDir} or its parent folders.`,
+    `This is not an Starter Angular project: ${PROJECT_CONFIG_FILE} was not found in ${startDir} or its parent folders.`,
     workspace === undefined
-      ? 'Run the command inside a project created with "as new", or in an Angular project after "as init".'
-      : `This is an Angular project (${workspace}): run "as init" in it first.`,
+      ? 'Run the command inside a project created with "sa new", or in an Angular project after "sa init".'
+      : `This is an Angular project (${workspace}): run "sa init" in it first.`,
   );
 }
 

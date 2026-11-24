@@ -1,15 +1,15 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { AsToast } from '@shared/components';
+import { SaToast } from '@shared/components';
 import { AlertService } from '@shared/services';
 
 @Component({
-  imports: [RouterOutlet, AsToast],
+  imports: [RouterOutlet, SaToast],
   selector: '__PREFIX__-empty',
   template: `
     <router-outlet />
     @if (alertService.toastActive()) {
-      <as-toast />
+      <sa-toast />
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,

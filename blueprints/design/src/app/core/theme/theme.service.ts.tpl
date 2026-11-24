@@ -82,18 +82,18 @@ export class ThemeService {
    *  color = 500, hover = 600, active = 700, the same in light and dark. */
   private applyPrimaryPaletteVars(palette: Record<string, string>): void {
     for (const [shade, value] of Object.entries(palette)) {
-      this.rootElement.style.setProperty(`--as-primary-${shade}`, value);
+      this.rootElement.style.setProperty(`--sa-primary-${shade}`, value);
     }
 
-    this.rootElement.style.setProperty('--as-primary-color', palette['500']);
-    this.rootElement.style.setProperty('--as-primary-hover-color', palette['600']);
-    this.rootElement.style.setProperty('--as-primary-active-color', palette['700']);
+    this.rootElement.style.setProperty('--sa-primary-color', palette['500']);
+    this.rootElement.style.setProperty('--sa-primary-hover-color', palette['600']);
+    this.rootElement.style.setProperty('--sa-primary-active-color', palette['700']);
   }
 
   /** Sets the 50-950 ramp of the chosen surface palette. */
   private applySurfacePaletteVars(palette: Record<string, string>): void {
     for (const [shade, value] of Object.entries(palette)) {
-      this.rootElement.style.setProperty(`--as-surface-${shade}`, value);
+      this.rootElement.style.setProperty(`--sa-surface-${shade}`, value);
     }
 
     this.updatePrimaryContrastColor();
@@ -103,6 +103,6 @@ export class ThemeService {
    *  of the chosen surface palette in dark. */
   private updatePrimaryContrastColor(): void {
     const contrast = this.mode() === 'dark' ? (getSurfaceColor(this.surfaceColorKey()).palette['900'] ?? '#171717') : '#ffffff';
-    this.rootElement.style.setProperty('--as-primary-contrast-color', contrast);
+    this.rootElement.style.setProperty('--sa-primary-contrast-color', contrast);
   }
 }

@@ -8,7 +8,7 @@
     @for (metric of metrics; track metric.label) {
       <article class="flex items-center gap-3 rounded-xl border border-(--app-border-color) p-4">
         <span class="flex size-11 shrink-0 items-center justify-center rounded-lg bg-(--app-badge-soft-bg) text-(--app-badge-soft-text)">
-          <as-icon [name]="metric.icon" size="22" />
+          <sa-icon [name]="metric.icon" size="22" />
         </span>
         <div class="min-w-0">
           <p class="text-body-1-bold text-(--app-text-color)">{{ metric.value }}</p>
@@ -24,7 +24,7 @@
     <ul class="flex flex-col divide-y divide-(--app-border-color)">
       @for (item of activity; track item.title) {
         <li class="flex items-center gap-3 py-3">
-          <as-icon class="text-(--app-text-subtle)" [name]="item.icon" size="18" />
+          <sa-icon class="text-(--app-text-subtle)" [name]="item.icon" size="18" />
           <div class="min-w-0 flex-1">
             <p class="text-caption-1-semibold text-(--app-text-color)">{{ item.title }}</p>
             <p class="text-caption-2-regular text-(--app-text-subtle)">{{ item.detail }}</p>

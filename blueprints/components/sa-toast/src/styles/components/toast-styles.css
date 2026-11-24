@@ -1,0 +1,149 @@
+@layer legacy-overrides {
+  /* ── Toast color system ─────────────────────────────────────────────────── */
+
+  /* Palette vars per type */
+  .sa-toast-item--success {
+    --_p: var(--color-green-500);
+    --_p50: var(--color-green-50);
+    --_p200: var(--color-green-200);
+    --_p600: var(--color-green-600);
+    --_p700: var(--color-green-700);
+  }
+  .sa-toast-item--error {
+    --_p: var(--color-red-500);
+    --_p50: var(--color-red-50);
+    --_p200: var(--color-red-200);
+    --_p600: var(--color-red-600);
+    --_p700: var(--color-red-700);
+  }
+  .sa-toast-item--warn {
+    --_p: var(--color-yellow-500);
+    --_p50: var(--color-yellow-50);
+    --_p200: var(--color-yellow-200);
+    --_p600: var(--color-yellow-600);
+    --_p700: var(--color-yellow-700);
+  }
+  .sa-toast-item--info {
+    --_p: var(--color-blue-500);
+    --_p50: var(--color-blue-50);
+    --_p200: var(--color-blue-200);
+    --_p600: var(--color-blue-600);
+    --_p700: var(--color-blue-700);
+  }
+
+  :is(.sa-toast-item--success, .sa-toast-item--error, .sa-toast-item--warn, .sa-toast-item--info) {
+    --_toast-bg: color-mix(in srgb, var(--_p50) 95%, transparent);
+    --_toast-border: var(--_p200);
+    --_toast-color: var(--_p600);
+  }
+
+  .dark
+    :is(
+      .sa-toast-item--success,
+      .sa-toast-item--error,
+      .sa-toast-item--warn,
+      .sa-toast-item--info
+    ) {
+    --_toast-bg: color-mix(in srgb, var(--_p) 16%, transparent);
+    --_toast-border: color-mix(in srgb, var(--_p700) 36%, transparent);
+    --_toast-color: var(--_p);
+    backdrop-filter: blur(10px);
+  }
+
+  .sa-toast-item--secondary {
+    --_toast-bg: var(--sa-surface-100);
+    --_toast-border: var(--sa-surface-200);
+    --_toast-color: var(--sa-surface-600);
+  }
+  .sa-toast-item--contrast {
+    --_toast-bg: var(--sa-surface-900);
+    --_toast-border: var(--sa-surface-700);
+    --_toast-color: var(--sa-surface-50);
+  }
+  .dark .sa-toast-item--secondary {
+    --_toast-bg: var(--sa-surface-800);
+    --_toast-border: var(--sa-surface-700);
+    --_toast-color: var(--sa-surface-300);
+  }
+  .dark .sa-toast-item--contrast {
+    --_toast-bg: var(--sa-surface-0);
+    --_toast-border: var(--sa-surface-100);
+    --_toast-color: var(--sa-surface-950);
+  }
+
+  /* ── Actions ────────────────────────────────────────────────────────────── */
+
+  .sa-toast-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    padding: 0 1rem 1rem;
+  }
+
+  /* ── Progress bar ───────────────────────────────────────────────────────── */
+
+  .sa-toast-progress {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background-color: currentColor;
+    transform-origin: left;
+    animation: sa-toast-progress var(--toast-duration, 4000ms) linear forwards;
+    opacity: 0.9;
+  }
+  @keyframes sa-toast-progress {
+    to {
+      transform: scaleX(0);
+    }
+  }
+
+  /* ── Responsive ─────────────────────────────────────────────────────────── */
+
+  @media (max-width: 480px) {
+    .sa-toast-wrapper {
+      width: calc(100vw - 1.5rem);
+    }
+    .sa-toast-main {
+      padding: 0.9rem;
+    }
+    .sa-toast-actions {
+      padding: 0 0.9rem 0.9rem;
+    }
+  }
+}
+
+/* ── Close button ───────────────────────────────────────────────────────── */
+/* El botón nativo no puede tomar estas medidas desde `legacy-overrides`:
+   sus estilos base no están en una capa CSS. */
+.sa-toast-main .sa-toast-close-button.sa-btn {
+  width: 1.75rem;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  min-height: 1.75rem;
+  padding: 0;
+  align-self: start;
+  border-radius: 9999px;
+  color: currentColor;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  opacity: 0.8;
+}
+
+.sa-toast-main .sa-toast-close-button.sa-btn:not(:disabled):hover {
+  color: currentColor;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+  border-color: transparent;
+  opacity: 1;
+}
+
+.sa-toast-main .sa-toast-close-button.sa-btn .sa-btn__icon,
+.sa-toast-main .sa-toast-close-button.sa-btn sa-icon,
+.sa-toast-main .sa-toast-close-button.sa-btn svg {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  color: currentColor;
+}

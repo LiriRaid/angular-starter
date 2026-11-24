@@ -35,6 +35,6 @@ function reportError(error: unknown, io: CliIo): number {
   }
   const message = error instanceof Error ? error.message : String(error);
   println(io.stderr, `error: unexpected failure: ${message}`);
-  if (io.env['AS_DEBUG'] && error instanceof Error && error.stack) println(io.stderr, error.stack);
+  if (io.env['SA_DEBUG'] && error instanceof Error && error.stack) println(io.stderr, error.stack);
   return 1;
 }

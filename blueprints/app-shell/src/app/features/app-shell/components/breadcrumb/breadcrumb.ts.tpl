@@ -5,12 +5,12 @@ import { BreadcrumbItem } from '@core/navigation/breadcrumb.types';
 import { DropdownCoordinatorService } from '../../services/dropdown-coordinator.service';
 import { LayoutService } from '../../services/layout.service';
 import { SidebarStatus } from '../../layout/enums/sidebar-status.enum';
-import { AsIcon } from '@shared/components';
+import { SaIcon } from '@shared/components';
 
 @Component({
   selector: '__PREFIX__-breadcrumb',
   standalone: true,
-  imports: [AsIcon],
+  imports: [SaIcon],
   templateUrl: './breadcrumb.html',
   styleUrls: ['./breadcrumb.css'],
   changeDetection: ChangeDetectionStrategy.OnPush,

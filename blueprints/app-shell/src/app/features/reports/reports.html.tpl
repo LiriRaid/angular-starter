@@ -8,7 +8,7 @@
     @for (report of reports; track report.name) {
       <article class="flex flex-col gap-3 rounded-xl border border-(--app-border-color) p-4">
         <span class="flex size-10 items-center justify-center rounded-lg bg-(--app-badge-soft-bg) text-(--app-badge-soft-text)">
-          <as-icon name="FileText" size="20" />
+          <sa-icon name="FileText" size="20" />
         </span>
         <div>
           <h2 class="text-body-2-bold text-(--app-text-color)">{{ report.name }}</h2>

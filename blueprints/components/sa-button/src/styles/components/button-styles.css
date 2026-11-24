@@ -1,0 +1,537 @@
+/* ── Base nativa de .sa-btn ─────────────────────────────────────────────────
+   Estilos base del botón, en una capa de baja prioridad (@layer legacy-overrides,
+   ver styles.css) para que pierdan contra cualquier CSS sin capa (los overrides
+   de abajo, admin-styles, etc.), como corresponde a una base reemplazable.
+   Solo incluye las severidades usadas (primary/secondary/success/danger). */
+@layer legacy-overrides {
+  .sa-btn {
+    display: inline-flex;
+    cursor: pointer;
+    user-select: none;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    color: var(--sa-primary-contrast-color);
+    background: var(--sa-primary-color);
+    border: 1px solid var(--sa-primary-color);
+    padding: 0.5rem 0.75rem;
+    font-size: 1rem;
+    font-family: inherit;
+    font-feature-settings: inherit;
+    transition:
+      background 0.2s,
+      color 0.2s,
+      border-color 0.2s,
+      outline-color 0.2s,
+      box-shadow 0.2s;
+    outline-color: transparent;
+    gap: 0.5rem;
+  }
+
+  .sa-btn:not(:disabled):hover {
+    background: var(--sa-primary-hover-color);
+    border: 1px solid var(--sa-primary-hover-color);
+    color: var(--sa-primary-contrast-color);
+  }
+
+  .sa-btn:not(:disabled):active {
+    background: var(--sa-primary-active-color);
+    border: 1px solid var(--sa-primary-active-color);
+    color: var(--sa-primary-contrast-color);
+  }
+
+  .sa-btn:disabled {
+    cursor: default;
+  }
+
+  .sa-btn:disabled,
+  .sa-btn.sa-disabled {
+    opacity: 0.6;
+  }
+
+  .sa-btn.sa-disabled {
+    pointer-events: none;
+  }
+
+  .sa-btn__label {
+    font-weight: 500;
+  }
+
+  .sa-btn-raised {
+    box-shadow:
+      0 3px 1px -2px rgba(0, 0, 0, 0.2),
+      0 2px 2px 0 rgba(0, 0, 0, 0.14),
+      0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  }
+
+  /* ── Filled por severidad ── */
+  .sa-btn-secondary {
+    background: var(--sa-surface-100);
+    border-color: var(--sa-surface-100);
+    color: var(--sa-surface-600);
+  }
+  .sa-btn-secondary:not(:disabled):hover {
+    background: var(--sa-surface-200);
+    border-color: var(--sa-surface-200);
+    color: var(--sa-surface-700);
+  }
+  .sa-btn-secondary:not(:disabled):active {
+    background: var(--sa-surface-300);
+    border-color: var(--sa-surface-300);
+    color: var(--sa-surface-800);
+  }
+
+  .sa-btn-success {
+    background: var(--color-green-500);
+    border-color: var(--color-green-500);
+    color: #ffffff;
+  }
+  .sa-btn-success:not(:disabled):hover {
+    background: var(--color-green-600);
+    border-color: var(--color-green-600);
+    color: #ffffff;
+  }
+  .sa-btn-success:not(:disabled):active {
+    background: var(--color-green-700);
+    border-color: var(--color-green-700);
+    color: #ffffff;
+  }
+
+  .sa-btn-danger {
+    background: var(--color-red-500);
+    border-color: var(--color-red-500);
+    color: #ffffff;
+  }
+  .sa-btn-danger:not(:disabled):hover {
+    background: var(--color-red-600);
+    border-color: var(--color-red-600);
+    color: #ffffff;
+  }
+  .sa-btn-danger:not(:disabled):active {
+    background: var(--color-red-700);
+    border-color: var(--color-red-700);
+    color: #ffffff;
+  }
+
+  /* ── Outlined ── */
+  .sa-btn-outlined {
+    background: transparent;
+    border-color: var(--sa-primary-200);
+    color: var(--sa-primary-color);
+  }
+  .sa-btn-outlined:not(:disabled):hover {
+    background: var(--sa-primary-50);
+    border-color: var(--sa-primary-200);
+    color: var(--sa-primary-color);
+  }
+  .sa-btn-outlined:not(:disabled):active {
+    background: var(--sa-primary-100);
+    border-color: var(--sa-primary-200);
+    color: var(--sa-primary-color);
+  }
+  .sa-btn-outlined.sa-btn-secondary {
+    border-color: var(--sa-surface-200);
+    color: var(--sa-surface-500);
+  }
+  .sa-btn-outlined.sa-btn-secondary:not(:disabled):hover {
+    background: var(--sa-surface-50);
+    color: var(--sa-surface-500);
+  }
+  .sa-btn-outlined.sa-btn-secondary:not(:disabled):active {
+    background: var(--sa-surface-100);
+    color: var(--sa-surface-500);
+  }
+  .sa-btn-outlined.sa-btn-success {
+    border-color: var(--color-green-200);
+    color: var(--color-green-500);
+  }
+  .sa-btn-outlined.sa-btn-success:not(:disabled):hover {
+    background: var(--color-green-50);
+    color: var(--color-green-500);
+  }
+  .sa-btn-outlined.sa-btn-success:not(:disabled):active {
+    background: var(--color-green-100);
+    color: var(--color-green-500);
+  }
+  .sa-btn-outlined.sa-btn-danger {
+    border-color: var(--color-red-200);
+    color: var(--color-red-500);
+  }
+  .sa-btn-outlined.sa-btn-danger:not(:disabled):hover {
+    background: var(--color-red-50);
+    color: var(--color-red-500);
+  }
+  .sa-btn-outlined.sa-btn-danger:not(:disabled):active {
+    background: var(--color-red-100);
+    color: var(--color-red-500);
+  }
+
+  /* ── Dashed ── variante "ghost" para hints/placeholders (ej. "Sin conexiones · Agregar
+     la primera"): en modo claro queda transparente (se lee "blanco" sobre el panel claro);
+     en modo oscuro un fondo transparente se pierde contra la tarjeta, así que ahí lleva un
+     relleno sólido (--app-panel-muted-bg) para mantener el mismo contraste. No es un
+     modificador de Outlined (evita heredar su fondo sólido al hover) — es su propia
+     variante, exclusiva vía `variant="dashed"`. */
+  .sa-btn-dashed {
+    background: transparent;
+    border-style: dashed;
+    border-color: var(--app-border-color);
+    color: var(--app-text-subtle);
+  }
+  .dark .sa-btn-dashed {
+    background: var(--app-panel-muted-bg);
+  }
+  /* :hover/:active van con !important — .sa-btn:hover/:active (arriba) usan
+     `border: 1px solid ...` y `background: ...` en shorthand con la misma especificidad,
+     y no queremos depender de que el orden final del bundle respete el orden del
+     archivo fuente para ganarles. */
+  .sa-btn-dashed:not(:disabled):hover {
+    background: transparent !important;
+    border-style: dashed !important;
+    border-color: var(--sa-primary-color) !important;
+    color: var(--sa-primary-color) !important;
+  }
+  .sa-btn-dashed:not(:disabled):active {
+    background: transparent !important;
+    border-style: dashed !important;
+    border-color: var(--sa-primary-color) !important;
+    color: var(--sa-primary-color) !important;
+  }
+  .dark .sa-btn-dashed:not(:disabled):hover {
+    background: var(--app-panel-muted-bg) !important;
+  }
+  .dark .sa-btn-dashed:not(:disabled):active {
+    background: var(--app-panel-muted-bg) !important;
+  }
+
+  /* ── Text ── */
+  /* En reposo NO hay fondo — el primary puro como texto plano se ve opaco/bajo contraste en dark
+     mode, mismo criterio que ya usa `.sa-btn-outlined` (`--app-outline-button-text`, blanco en
+     dark/negro en light). En hover/active SÍ hay un fondo con tinte primary (abajo) — ahí el
+     primary como texto es válido, por eso esos dos estados no cambian. */
+  .sa-btn-text {
+    background: transparent;
+    border-color: transparent;
+    color: var(--app-outline-button-text);
+  }
+  .sa-btn-text:not(:disabled):hover {
+    background: var(--sa-primary-50);
+    border-color: transparent;
+    color: var(--sa-primary-color);
+  }
+  .sa-btn-text:not(:disabled):active {
+    background: var(--sa-primary-100);
+    border-color: transparent;
+    color: var(--sa-primary-color);
+  }
+  .sa-btn-text.sa-btn-secondary {
+    color: var(--sa-surface-500);
+  }
+  .sa-btn-text.sa-btn-secondary:not(:disabled):hover {
+    background: var(--sa-surface-50);
+    color: var(--sa-surface-500);
+  }
+  .sa-btn-text.sa-btn-secondary:not(:disabled):active {
+    background: var(--sa-surface-100);
+    color: var(--sa-surface-500);
+  }
+  .sa-btn-text.sa-btn-success {
+    color: var(--color-green-500);
+  }
+  .sa-btn-text.sa-btn-success:not(:disabled):hover {
+    background: var(--color-green-50);
+    color: var(--color-green-500);
+  }
+  .sa-btn-text.sa-btn-success:not(:disabled):active {
+    background: var(--color-green-100);
+    color: var(--color-green-500);
+  }
+  .sa-btn-text.sa-btn-danger {
+    color: var(--color-red-500);
+  }
+  .sa-btn-text.sa-btn-danger:not(:disabled):hover {
+    background: var(--color-red-50);
+    color: var(--color-red-500);
+  }
+  .sa-btn-text.sa-btn-danger:not(:disabled):active {
+    background: var(--color-red-100);
+    color: var(--color-red-500);
+  }
+
+  /* ── Variantes dark (mismos valores que resolvía Aura con darkModeSelector .dark) ── */
+  .dark .sa-btn-secondary {
+    background: var(--sa-surface-800);
+    border-color: var(--sa-surface-800);
+    color: var(--sa-surface-300);
+  }
+  .dark .sa-btn-secondary:not(:disabled):hover {
+    background: var(--sa-surface-700);
+    border-color: var(--sa-surface-700);
+    color: var(--sa-surface-200);
+  }
+  .dark .sa-btn-secondary:not(:disabled):active {
+    background: var(--sa-surface-600);
+    border-color: var(--sa-surface-600);
+    color: var(--sa-surface-100);
+  }
+
+  .dark .sa-btn-success {
+    background: var(--color-green-400);
+    border-color: var(--color-green-400);
+    color: var(--color-green-950);
+  }
+  .dark .sa-btn-success:not(:disabled):hover {
+    background: var(--color-green-300);
+    border-color: var(--color-green-300);
+    color: var(--color-green-950);
+  }
+  .dark .sa-btn-success:not(:disabled):active {
+    background: var(--color-green-200);
+    border-color: var(--color-green-200);
+    color: var(--color-green-950);
+  }
+
+  .dark .sa-btn-danger {
+    background: var(--color-red-400);
+    border-color: var(--color-red-400);
+    color: var(--color-red-950);
+  }
+  .dark .sa-btn-danger:not(:disabled):hover {
+    background: var(--color-red-300);
+    border-color: var(--color-red-300);
+    color: var(--color-red-950);
+  }
+  .dark .sa-btn-danger:not(:disabled):active {
+    background: var(--color-red-200);
+    border-color: var(--color-red-200);
+    color: var(--color-red-950);
+  }
+
+  .dark .sa-btn-outlined {
+    border-color: var(--sa-primary-700);
+    color: var(--sa-primary-color);
+  }
+  .dark .sa-btn-outlined:not(:disabled):hover {
+    background: color-mix(in srgb, var(--sa-primary-color), transparent 96%);
+    color: var(--sa-primary-color);
+  }
+  .dark .sa-btn-outlined:not(:disabled):active {
+    background: color-mix(in srgb, var(--sa-primary-color), transparent 84%);
+    color: var(--sa-primary-color);
+  }
+  .dark .sa-btn-outlined.sa-btn-secondary {
+    border-color: var(--sa-surface-700);
+    color: var(--sa-surface-400);
+  }
+  .dark .sa-btn-outlined.sa-btn-secondary:not(:disabled):hover {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--sa-surface-400);
+  }
+  .dark .sa-btn-outlined.sa-btn-secondary:not(:disabled):active {
+    background: rgba(255, 255, 255, 0.16);
+    color: var(--sa-surface-400);
+  }
+  .dark .sa-btn-outlined.sa-btn-success {
+    border-color: var(--color-green-700);
+    color: var(--color-green-400);
+  }
+  .dark .sa-btn-outlined.sa-btn-success:not(:disabled):hover {
+    background: color-mix(in srgb, var(--color-green-400), transparent 96%);
+    color: var(--color-green-400);
+  }
+  .dark .sa-btn-outlined.sa-btn-success:not(:disabled):active {
+    background: color-mix(in srgb, var(--color-green-400), transparent 84%);
+    color: var(--color-green-400);
+  }
+  .dark .sa-btn-outlined.sa-btn-danger {
+    border-color: var(--color-red-700);
+    color: var(--color-red-400);
+  }
+  .dark .sa-btn-outlined.sa-btn-danger:not(:disabled):hover {
+    background: color-mix(in srgb, var(--color-red-400), transparent 96%);
+    color: var(--color-red-400);
+  }
+  .dark .sa-btn-outlined.sa-btn-danger:not(:disabled):active {
+    background: color-mix(in srgb, var(--color-red-400), transparent 84%);
+    color: var(--color-red-400);
+  }
+
+  .dark .sa-btn-text:not(:disabled):hover {
+    background: color-mix(in srgb, var(--sa-primary-color), transparent 96%);
+  }
+  .dark .sa-btn-text:not(:disabled):active {
+    background: color-mix(in srgb, var(--sa-primary-color), transparent 84%);
+  }
+  .dark .sa-btn-text.sa-btn-secondary {
+    color: var(--sa-surface-400);
+  }
+  .dark .sa-btn-text.sa-btn-secondary:not(:disabled):hover {
+    background: var(--sa-surface-800);
+    color: var(--sa-surface-400);
+  }
+  .dark .sa-btn-text.sa-btn-secondary:not(:disabled):active {
+    background: var(--sa-surface-700);
+    color: var(--sa-surface-400);
+  }
+  .dark .sa-btn-text.sa-btn-success {
+    color: var(--color-green-400);
+  }
+  .dark .sa-btn-text.sa-btn-success:not(:disabled):hover {
+    background: color-mix(in srgb, var(--color-green-400), transparent 96%);
+    color: var(--color-green-400);
+  }
+  .dark .sa-btn-text.sa-btn-success:not(:disabled):active {
+    background: color-mix(in srgb, var(--color-green-400), transparent 84%);
+    color: var(--color-green-400);
+  }
+  .dark .sa-btn-text.sa-btn-danger {
+    color: var(--color-red-400);
+  }
+  .dark .sa-btn-text.sa-btn-danger:not(:disabled):hover {
+    background: color-mix(in srgb, var(--color-red-400), transparent 96%);
+    color: var(--color-red-400);
+  }
+  .dark .sa-btn-text.sa-btn-danger:not(:disabled):active {
+    background: color-mix(in srgb, var(--color-red-400), transparent 84%);
+    color: var(--color-red-400);
+  }
+
+  /* ── Ripple nativo (réplica de pRipple: círculo que se expande y desvanece) ── */
+  .sa-btn .sa-ink {
+    display: block;
+    position: absolute;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 100%;
+    transform: scale(0);
+    pointer-events: none;
+    animation: sa-ripple 0.4s linear;
+  }
+
+  .dark .sa-btn .sa-ink {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  @keyframes sa-ripple {
+    100% {
+      opacity: 0;
+      transform: scale(2.5);
+    }
+  }
+}
+
+/* Overrides globales de sa-btn (fuera de @layer para ganar a la base de arriba) */
+
+/* Filled: texto e iconos blancos */
+.sa-btn:not(.sa-btn-outlined):not(.sa-btn-text):not(.sa-btn-link):not(.sa-btn-plain):not(
+    .sa-btn-dashed
+  ) {
+  color: var(--sa-surface-0);
+}
+
+.sa-btn:not(.sa-btn-outlined):not(.sa-btn-text):not(.sa-btn-link):not(.sa-btn-plain):not(
+    .sa-btn-dashed
+  ):not(:disabled):hover {
+  color: var(--sa-surface-0);
+}
+
+/* Text: sin fondo en reposo, así que el primary puro como texto se ve opaco/bajo contraste en
+   dark mode — sigue el modo (gris en reposo, blanco en hover con un fondo sutil con tinte
+   primary que lo sostiene), mismo criterio que Outlined arriba. No toca las severidades con
+   color propio (secondary/success/danger, @layer legacy-overrides más arriba) — esas sí deben
+   seguir su color. Reemplaza cualquier override de color puesto a mano en una feature/componente
+   para este mismo caso — no hace falta, ya lo resuelve acá.
+   Las exclusiones van en `:where()` (especificidad cero) a propósito: un `:not()` normal encadenado
+   3 veces le gana en especificidad a una sola clase de estado tipo `.algo--active` de una feature
+   (ej. la pestaña "Responder" seleccionada en el composer) aunque esa clase se declare después —
+   con `:where()` esta regla se queda en el mismo peso que `.sa-btn.sa-btn-text` a secas, y
+   cualquier `--active`/`--selected` de una feature (declarado después en el build) puede pisarla
+   sin pelear con la especificidad. */
+.sa-btn.sa-btn-text:where(:not(.sa-btn-secondary):not(.sa-btn-success):not(.sa-btn-danger)) {
+  color: var(--app-text-subtle);
+}
+
+.sa-btn.sa-btn-text:where(:not(.sa-btn-secondary):not(.sa-btn-success):not(.sa-btn-danger)):not(
+    :disabled
+  ):hover {
+  color: var(--app-text-color);
+  background: color-mix(in srgb, var(--sa-primary-color) 8%, transparent);
+}
+
+.sa-btn.sa-btn-text:where(:not(.sa-btn-secondary):not(.sa-btn-success):not(.sa-btn-danger)):not(
+    :disabled
+  ):active {
+  color: var(--app-text-color);
+  background: color-mix(in srgb, var(--sa-primary-color) 12%, transparent);
+}
+
+/* Seleccionado (`[selected]="true"`, ver sa-button.ts) — ej. la pestaña "Responder" vs
+   "Nota interna" actualmente elegida, un ícono de formato con el toggle prendido. Un estado que
+   el CONSUMIDOR decide y mantiene, a diferencia de `:hover`/`:active` (CSS, transitorios). En
+   variant="text" el texto/ícono queda en `--app-text-color` (blanco en dark) — igual que en
+   hover, NUNCA gris estando seleccionado — sin que cada feature tenga que repetir esta regla a
+   mano. El fondo que distingue una opción de otra (ej. tinte primary vs ámbar) lo sigue poniendo
+   el consumidor (3 clases acá le gana de forma determinística a la regla de arriba, que solo
+   tiene 2 gracias al `:where()`, así que no hace falta nada más para que esto gane). */
+.sa-btn.sa-btn-selected.sa-btn-text {
+  color: var(--app-text-color);
+}
+
+/* Outlined: texto e iconos siguen el modo */
+.sa-btn.sa-btn-outlined {
+  color: var(--app-outline-button-text);
+  background: var(--app-outline-button-bg);
+  border-color: var(--app-outline-button-border);
+}
+
+.sa-btn.sa-btn-outlined:not(:disabled):hover {
+  color: var(--app-outline-button-hover-text);
+  background: var(--app-outline-button-hover-bg);
+  border-color: var(--app-outline-button-hover-bg);
+}
+
+.sa-btn.sa-btn-outlined:disabled {
+  color: var(--app-outline-button-disabled-text);
+  background: var(--app-outline-button-disabled-bg);
+}
+
+/* Danger (ej. eliminar): en reposo sigue igual que cualquier outline; solo el hover se pinta de rojo fijo (no el accent dinámico de la paleta del tema). */
+.sa-btn.sa-btn-outlined.sa-btn-danger:not(:disabled):hover {
+  color: var(--sa-surface-0);
+  background: var(--color-red-600);
+  border-color: var(--color-red-600);
+}
+
+/* Outlined icon-only + severity secondary (ej. chevrons de colapsar tarjetas): SIN borde — en
+   reposo el ícono es gris tenue, sin fondo ni borde; al hacer hover se oscurece hacia el color
+   de texto normal y aparece un fondo gris sutil detrás. */
+.sa-btn.sa-btn-outlined.sa-btn-secondary.sa-btn-icon {
+  color: var(--app-text-muted);
+  background: transparent;
+  border-color: transparent;
+}
+
+.sa-btn.sa-btn-outlined.sa-btn-secondary.sa-btn-icon:not(:disabled):hover {
+  color: var(--app-text-color);
+  background: var(--app-surface-bg);
+  border-color: transparent;
+}
+
+.sa-btn:focus-visible {
+  outline: 2px solid var(--app-control-focus-ring);
+  outline-offset: 0;
+  box-shadow: none;
+}
+
+/* Chevron de un sa-btn usado como disparador de un panel/dropdown (ver
+   sa-select-dropdown-icon) — mismo criterio: rota 180° en vez de cambiar de ícono
+   (ChevronDown -> ChevronUp) cuando el botón queda `aria-expanded="true"`. Vive acá (global,
+   fuera del CSS scoped del consumidor) porque el ícono real vive dentro de un componente hijo
+   (sa-icon dentro de sa-btn) al que un CSS scoped no puede alcanzar. */
+.sa-btn-trigger-chevron {
+  transition: transform 150ms ease;
+}
+
+.sa-btn[aria-expanded='true'] .sa-btn-trigger-chevron {
+  transform: rotate(180deg);
+}

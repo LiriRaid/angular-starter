@@ -24,8 +24,8 @@ function pick<T extends string>(
 }
 
 /**
- * The defaults for everything that was not given: Screaming, Angular Starter Routing, Tailwind CSS,
- * Client-Side Rendering, Lucide, the Angular Starter App Shell with its floating layout and the
+ * The defaults for everything that was not given: Screaming, Starter Angular Routing, Tailwind CSS,
+ * Client-Side Rendering, Lucide, the Starter Angular App Shell with its floating layout and the
  * essential components. Each one is derived from what was already chosen so a default never
  * conflicts with a choice: with SCSS there is no Tailwind CSS, no shell and no component collection,
  * without the Screaming Architecture the project is Angular's own (no routing, shell, Lucide or

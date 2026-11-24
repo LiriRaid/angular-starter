@@ -195,7 +195,7 @@ describe('capability registry', () => {
     expect(availableIds('presence')).toEqual(['none', 'starter']);
     const starter = CAPABILITIES.presence.find((option) => option.id === 'starter');
     expect(starter?.docs).toBe(
-      'https://github.com/LiriRaid/angular-starter/blob/main/docs/adr/0009-presence-documentation-and-welcome-home.md',
+      'https://github.com/LiriRaid/starter-angular/blob/main/docs/adr/0009-presence-documentation-and-welcome-home.md',
     );
     expect(starter?.recommended).toBeUndefined();
     expect(starter?.default).toBeUndefined();
@@ -214,12 +214,12 @@ describe('capability registry', () => {
     expect(defaultOption('presence', { appShell: 'starter' })).toBeUndefined();
   });
 
-  it('offers the application shell like any other option: none or the Angular Starter App Shell', () => {
+  it('offers the application shell like any other option: none or the Starter Angular App Shell', () => {
     expect(availableIds('appShell')).toEqual(['none', 'starter']);
     const starter = CAPABILITIES.appShell.find((option) => option.id === 'starter');
-    expect(starter?.label).toBe('Angular Starter App Shell');
+    expect(starter?.label).toBe('Starter Angular App Shell');
     expect(starter?.docs).toBe(
-      'https://github.com/LiriRaid/angular-starter/blob/main/docs/adr/0008-app-shell.md',
+      'https://github.com/LiriRaid/starter-angular/blob/main/docs/adr/0008-app-shell.md',
     );
     expect(starter?.default).toBe(true);
     expect(starter?.recommended).toBeUndefined();
@@ -234,7 +234,7 @@ describe('capability registry', () => {
 
   it('documents the Screaming Architecture with the ADR of this project, not an article', () => {
     expect(CAPABILITIES.architecture.find((option) => option.id === 'screaming')?.docs).toBe(
-      'https://github.com/LiriRaid/angular-starter/blob/main/docs/adr/0002-screaming-architecture-profile.md',
+      'https://github.com/LiriRaid/starter-angular/blob/main/docs/adr/0002-screaming-architecture-profile.md',
     );
   });
 

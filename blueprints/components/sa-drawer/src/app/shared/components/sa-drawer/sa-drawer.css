@@ -1,0 +1,216 @@
+.sa-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1040;
+  background: var(--app-sidebar-backdrop-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.sa-drawer-backdrop--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sa-drawer {
+  inset: auto;
+  margin: 0;
+  padding: 0;
+  border: none;
+  max-width: none;
+  max-height: none;
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  z-index: 1050;
+  background: var(--app-panel-bg);
+  color: var(--app-text-color);
+  box-shadow: var(--app-overlay-shadow);
+  transition:
+    transform 0.3s cubic-bezier(0.32, 0.72, 0, 1),
+    display 0.3s allow-discrete;
+}
+
+.sa-drawer-content {
+  overflow-y: auto;
+  flex-grow: 1;
+  /* Sin esto un contenido alto empuja el pie fuera del panel en vez de hacer scroll aquí. */
+  min-height: 0;
+  padding: 1.25rem;
+}
+
+/* Pie fijo (acciones de guardar/cancelar): no scrollea con el contenido y desaparece si el consumidor no proyecta nada. */
+.sa-drawer-footer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--app-border-color);
+}
+
+.sa-drawer-footer:empty {
+  display: none;
+}
+
+.sa-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--app-border-color);
+}
+
+.sa-drawer-header-content {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.sa-drawer--compact .sa-drawer-header {
+  padding: 1rem 0.75rem;
+}
+
+.sa-drawer--compact .sa-drawer-content {
+  padding: 1rem;
+}
+
+.sa-drawer--compact .sa-drawer-footer {
+  padding: 0.75rem;
+}
+
+/* El contenido maneja su propio espaciado: el cuerpo no le pone padding. */
+.sa-drawer--flush .sa-drawer-content {
+  padding: 0;
+}
+
+.sa-drawer-close-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 2rem;
+  height: 2rem;
+  border: none;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--app-text-subtle);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.sa-drawer-close-button:hover {
+  background: var(--app-sidebar-hover-bg);
+}
+
+.sa-drawer-close-button:focus-visible {
+  outline: 2px solid var(--sa-primary-color);
+  outline-offset: 0;
+}
+
+/* ── Posiciones ─────────────────────────────────────────────────────────── */
+
+.sa-drawer-left {
+  top: 0;
+  left: 0;
+  width: min(100vw, var(--sa-drawer-width, 20rem));
+  height: 100%;
+  border-inline-end: 1px solid var(--app-border-color);
+  transform: translate3d(-100%, 0, 0);
+}
+
+.sa-drawer-left[open] {
+  transform: translate3d(0, 0, 0);
+}
+
+@starting-style {
+  .sa-drawer-left[open] {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+.sa-drawer-right {
+  top: 0;
+  right: 0;
+  width: min(100vw, var(--sa-drawer-width, 20rem));
+  height: 100%;
+  border-inline-start: 1px solid var(--app-border-color);
+  transform: translate3d(100%, 0, 0);
+}
+
+.sa-drawer-right[open] {
+  transform: translate3d(0, 0, 0);
+}
+
+@starting-style {
+  .sa-drawer-right[open] {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+.sa-drawer-top {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 10rem;
+  border-block-end: 1px solid var(--app-border-color);
+  transform: translate3d(0, -100%, 0);
+}
+
+.sa-drawer-top[open] {
+  transform: translate3d(0, 0, 0);
+}
+
+@starting-style {
+  .sa-drawer-top[open] {
+    transform: translate3d(0, -100%, 0);
+  }
+}
+
+.sa-drawer-bottom {
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 10rem;
+  border-block-start: 1px solid var(--app-border-color);
+  transform: translate3d(0, 100%, 0);
+}
+
+.sa-drawer-bottom[open] {
+  transform: translate3d(0, 0, 0);
+}
+
+@starting-style {
+  .sa-drawer-bottom[open] {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+.sa-drawer-full {
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 0.3s,
+    transform 0.3s,
+    overlay 0.3s allow-discrete,
+    display 0.3s allow-discrete;
+}
+
+.sa-drawer-full:not([open]) {
+  opacity: 0;
+  transform: scale(0.93);
+}
+
+@starting-style {
+  .sa-drawer-full[open] {
+    opacity: 0;
+    transform: scale(0.93);
+  }
+}

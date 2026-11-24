@@ -21,7 +21,7 @@ const HEALTHY = {
   'npm view @angular/cli dist-tags.latest': ANGULAR_CLI_VERSION,
 };
 
-describe('as doctor', () => {
+describe('sa doctor', () => {
   it('reports a healthy environment', async () => {
     const fake = createFakeIo();
     const code = await run(['doctor'], fake.io, {

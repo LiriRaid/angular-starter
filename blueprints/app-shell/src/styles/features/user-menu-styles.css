@@ -28,7 +28,7 @@
     pointer-events: none;
   }
 
-  .um-status-item.as-btn {
+  .um-status-item.sa-btn {
     width: 100%;
     justify-content: flex-start;
     gap: 0.625rem;
@@ -37,11 +37,11 @@
     color: var(--app-text-color);
   }
 
-  .um-status-item .as-btn__label {
+  .um-status-item .sa-btn__label {
     color: var(--app-text-color);
   }
 
-  .um-status-item.as-btn:not(:disabled):hover {
+  .um-status-item.sa-btn:not(:disabled):hover {
     background: var(--app-sidebar-hover-bg);
   }
 }

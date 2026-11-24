@@ -101,7 +101,7 @@ const LINE_THEME = {
   },
 };
 
-/** Prompts rendered by `@inquirer/prompts`, loaded lazily so `as --help` stays fast. */
+/** Prompts rendered by `@inquirer/prompts`, loaded lazily so `sa --help` stays fast. */
 export function createInquirerPrompter(streams: TerminalStreams = {}): Prompter {
   const terminal = streams.input ?? process.stdin;
 

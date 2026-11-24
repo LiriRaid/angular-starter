@@ -19,7 +19,7 @@ export const appConfig: ApplicationConfig = {
 `;
 
 /**
- * A project as `as new` leaves it (with the fake Angular CLI), for the tests of the commands that
+ * A project as `sa new` leaves it (with the fake Angular CLI), for the tests of the commands that
  * work on an existing project. Returns its folder.
  */
 export async function createStarterProject(

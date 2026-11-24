@@ -3,11 +3,11 @@
   <ul class="flex flex-col gap-3">
     <li class="flex items-center justify-between gap-3">
       <span class="text-caption-1-medium text-(--app-text-color)">Email notifications</span>
-      <as-toggle [checked]="email()" (changed)="email.set($event)" ariaLabel="Email notifications" />
+      <sa-toggle [checked]="email()" (changed)="email.set($event)" ariaLabel="Email notifications" />
     </li>
     <li class="flex items-center justify-between gap-3">
       <span class="text-caption-1-medium text-(--app-text-color)">Weekly summary</span>
-      <as-toggle [checked]="weeklySummary()" (changed)="weeklySummary.set($event)" ariaLabel="Weekly summary" />
+      <sa-toggle [checked]="weeklySummary()" (changed)="weeklySummary.set($event)" ariaLabel="Weekly summary" />
     </li>
   </ul>
 </section>

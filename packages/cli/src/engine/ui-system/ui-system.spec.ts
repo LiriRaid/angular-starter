@@ -19,7 +19,7 @@ const SYSTEM = `${PAGE}/ui-system`;
 let project: string;
 
 beforeEach(async () => {
-  project = await mkdtemp(join(tmpdir(), 'as-ui-system-'));
+  project = await mkdtemp(join(tmpdir(), 'sa-ui-system-'));
   await writeGeneratedWorkspace(project);
   const base = { targetDir: project, name: 'demo', prefix: 'app' };
   await screamingProfile.apply(base);

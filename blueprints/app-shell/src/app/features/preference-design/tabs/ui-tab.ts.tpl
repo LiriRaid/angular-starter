@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 
 import { DesignPreferencesService, type UiButtonSize, type UiDensity, type UiFontSize, type UiRadius } from '@core/design-preferences/design-preferences.service';
-import { AsButton, AsToggle } from '@shared/components';
+import { SaButton, SaToggle } from '@shared/components';
 
 export interface OptionGroup {
   readonly id: string;
@@ -18,7 +18,7 @@ export interface OptionGroup {
  */
 @Component({
   selector: '__PREFIX__-ui-tab',
-  imports: [AsButton, AsToggle],
+  imports: [SaButton, SaToggle],
   templateUrl: './ui-tab.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -29,7 +29,7 @@ export class UiTab {
     {
       id: 'buttonSize',
       label: 'Tamaño de botones',
-      hint: 'Alto de los botones as-button',
+      hint: 'Alto de los botones sa-button',
       options: [
         { value: 'small', label: 'Pequeño' },
         { value: 'medium', label: 'Mediano' },

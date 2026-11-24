@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { AsToggle } from '@shared/components';
+import { SaToggle } from '@shared/components';
 
 /** Sección de ejemplo con datos de muestra. */
 @Component({
   selector: '__PREFIX__-settings-notifications',
-  imports: [AsToggle],
+  imports: [SaToggle],
   templateUrl: './settings-notifications.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

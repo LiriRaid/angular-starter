@@ -19,7 +19,7 @@ const TITLES: Record<CapabilityCategory, string> = {
   packageManager: 'Package managers',
 };
 
-/** The flag of `as new` that sets each category. */
+/** The flag of `sa new` that sets each category. */
 const NEW_FLAGS: Record<CapabilityCategory, string> = {
   architecture: '--architecture',
   routing: '--routing',
@@ -35,7 +35,7 @@ const NEW_FLAGS: Record<CapabilityCategory, string> = {
   packageManager: '--package-manager',
 };
 
-/** The word `as add` takes for a category, when a project can add it. */
+/** The word `sa add` takes for a category, when a project can add it. */
 const ADD_WORD = new Map(Object.entries(ADDABLE).map(([word, category]) => [category, word]));
 
 /** The kebab-case spelling of a category: `app-shell` for `appShell`. */
@@ -51,7 +51,7 @@ const GAP = 2;
 
 interface Row {
   id: string;
-  /** `as add ...` when a project can add the option, then `as new --...`; none when it is planned. */
+  /** `sa add ...` when a project can add the option, then `sa new --...`; none when it is planned. */
   commands: string[];
   name: string;
   description: string;
@@ -65,9 +65,9 @@ function rowsOf(name: CapabilityCategory): Row[] {
     const commands = option.available
       ? [
           ...(word && addableValues(word).includes(option.id)
-            ? [`as add ${word} ${option.id}`]
+            ? [`sa add ${word} ${option.id}`]
             : []),
-          `as new ${NEW_FLAGS[name]} ${option.id}`,
+          `sa new ${NEW_FLAGS[name]} ${option.id}`,
         ]
       : [];
     return {
@@ -89,7 +89,7 @@ export function listCommand(io: CliIo, category?: string): void {
   const style = createStyler(io.color);
   const selected = selectCategories(category);
   const tables = selected.map((name) => ({ name, rows: rowsOf(name) }));
-  // The widths come from every category, so `as list style` and `as list` draw the same columns.
+  // The widths come from every category, so `sa list style` and `sa list` draw the same columns.
   const rows = CATEGORIES.flatMap(rowsOf);
   const idWidth = Math.max('ID'.length, ...rows.map((row) => row.id.length));
   const commandWidth = Math.max(

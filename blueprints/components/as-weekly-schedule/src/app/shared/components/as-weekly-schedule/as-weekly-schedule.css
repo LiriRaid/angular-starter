@@ -1,9 +1,0 @@
-.as-weekly-schedule-time-input {
-  background: var(--app-panel-bg);
-  color: var(--app-text-color);
-}
-
-.as-weekly-schedule-time-input:focus-visible {
-  outline: 0;
-  border-color: var(--as-primary-color);
-}

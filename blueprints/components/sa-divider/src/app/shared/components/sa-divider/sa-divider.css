@@ -1,0 +1,96 @@
+.sa-divider-horizontal {
+  display: flex;
+  width: 100%;
+  position: relative;
+  align-items: center;
+  margin: 1rem 0;
+  padding: 0 1rem;
+}
+
+.sa-divider-horizontal::before {
+  position: absolute;
+  display: block;
+  inset-block-start: 50%;
+  inset-inline-start: 0;
+  width: 100%;
+  content: '';
+  border-block-start: 1px solid var(--app-border-color);
+}
+
+.sa-divider-horizontal .sa-divider-content {
+  padding: 0 0.5rem;
+}
+
+.sa-divider-vertical {
+  min-height: 100%;
+  display: flex;
+  position: relative;
+  justify-content: center;
+  margin: 0 1rem;
+  padding: 0.5rem 0;
+}
+
+.sa-divider-vertical::before {
+  position: absolute;
+  display: block;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  height: 100%;
+  content: '';
+  border-inline-start: 1px solid var(--app-border-color);
+}
+
+.sa-divider-vertical .sa-divider-content {
+  padding: 0.5rem 0;
+}
+
+.sa-divider-content {
+  z-index: 1;
+  background: var(--app-panel-bg);
+  color: var(--app-text-color);
+}
+
+.sa-divider-dashed.sa-divider-horizontal::before {
+  border-block-start-style: dashed;
+}
+
+.sa-divider-dashed.sa-divider-vertical::before {
+  border-inline-start-style: dashed;
+}
+
+.sa-divider-dotted.sa-divider-horizontal::before {
+  border-block-start-style: dotted;
+}
+
+.sa-divider-dotted.sa-divider-vertical::before {
+  border-inline-start-style: dotted;
+}
+
+.sa-divider-horizontal.sa-divider-left {
+  justify-content: flex-start;
+}
+
+.sa-divider-horizontal.sa-divider-center {
+  justify-content: center;
+}
+
+.sa-divider-horizontal.sa-divider-right {
+  justify-content: flex-end;
+}
+
+.sa-divider-vertical.sa-divider-top {
+  align-items: flex-start;
+}
+
+.sa-divider-vertical.sa-divider-center {
+  align-items: center;
+}
+
+.sa-divider-vertical.sa-divider-bottom {
+  align-items: flex-end;
+}
+
+.sa-divider-left:dir(rtl),
+.sa-divider-right:dir(rtl) {
+  flex-direction: row-reverse;
+}

@@ -117,7 +117,7 @@ const BUTTON_SEVERITIES = ['primary', 'secondary', 'success', 'info', 'warn', 'h
 
 /** El código de la contraseña con su ojo: el estado lo lleva quien usa el campo, igual que el login de la aplicación de referencia. */
 function passwordCode(mode: string): string {
-  return `<as-input
+  return `<sa-input
   label="Contraseña"
   variant="${mode}"
   [type]="visible() ? 'text' : 'password'"
@@ -157,10 +157,10 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
   {
     id: 'icon',
     label: 'Icono',
-    selector: 'as-icon',
+    selector: 'sa-icon',
     description: 'Un icono de Lucide por su nombre; hereda el color del texto.',
     affects: ['Tamaño de fuente'],
-    code: `<as-icon name="Palette" size="24" />`,
+    code: `<sa-icon name="Palette" size="24" />`,
     variants: [
       ...[16, 24, 32, 48].map((size) => named(`size-${size}`, `${size}`, 'Tamaños', { name: 'Palette', size })),
       ...[
@@ -176,13 +176,13 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
   {
     id: 'button',
     label: 'Botón',
-    selector: 'as-button',
+    selector: 'sa-button',
     description: 'Acción principal, secundaria o de contorno, con icono, tamaños y estados.',
     affects: ['Tamaño de botones', 'Radio de bordes', 'Tamaño de fuente'],
     // `outlined` y `text` son la forma corta de `variant`; el resto son clases, nombres accesibles o atributos del enlace.
     notShown: ['outlined', 'text', 'type', 'target', 'rel', 'ariaControls', 'ariaExpanded', 'ariaPressed', 'styleClass', 'labelClass', 'badgeClass', 'iconExtraClass', 'trailingIconExtraClass', 'loadingIcon'],
-    code: `<as-button label="Guardar" icon="Check" size="medium" (onClick)="save()" />
-<as-button label="Cancelar" variant="outlined" />`,
+    code: `<sa-button label="Guardar" icon="Check" size="medium" (onClick)="save()" />
+<sa-button label="Cancelar" variant="outlined" />`,
     variants: [
       ...BUTTON_SIZES.map((size) => named(`size-${size}`, size, 'Tamaños', { label: size, size })),
       ...BUTTON_SEVERITIES.map((severity) => named(`severity-${severity}`, severity, 'Severidades', { label: severity, severity })),
@@ -212,12 +212,12 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
   {
     id: 'input',
     label: 'Campo de texto',
-    selector: 'as-input',
+    selector: 'sa-input',
     description: 'Un campo con etiqueta flotante, validación y tipos (texto, número, teléfono con banderas, precio, contraseña con ojo, etiquetas), en sus tres modos.',
     affects: ['Densidad', 'Tamaño de fuente'],
     // `showErrorMessage` solo cambia con un control inválido; el `id` lo pone quien lo usa.
     notShown: ['inputId', 'showErrorMessage'],
-    code: `<as-input label="Nombre" placeholder="Escribe aquí" [formControl]="name" />`,
+    code: `<sa-input label="Nombre" placeholder="Escribe aquí" [formControl]="name" />`,
     previewClass: 'w-64',
     variants: [
       ...MODES.map((mode) => named(`mode-${mode}`, `variant="${mode}"`, 'Modos', { label: 'Nombre', variant: mode })),
@@ -244,11 +244,11 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
   {
     id: 'textarea',
     label: 'Área de texto',
-    selector: 'as-textarea',
+    selector: 'sa-textarea',
     description: 'Un campo de varias líneas que crece con el contenido, en sus tres modos.',
     affects: ['Densidad', 'Tamaño de fuente'],
     notShown: ['inputId', 'showErrorMessage'],
-    code: `<as-textarea label="Comentario" [rows]="2" [formControl]="comment" />`,
+    code: `<sa-textarea label="Comentario" [rows]="2" [formControl]="comment" />`,
     previewClass: 'w-64',
     variants: [
       ...MODES.map((mode) => named(`mode-${mode}`, `variant="${mode}"`, 'Modos', { label: 'Comentario', variant: mode, rows: 2 })),
@@ -273,27 +273,27 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
   {
     id: 'checkbox',
     label: 'Casilla',
-    selector: 'as-checkbox',
+    selector: 'sa-checkbox',
     description: 'Una casilla de verificación que funciona con formularios.',
     affects: ['Tamaño de fuente'],
     // El `id` y la etiqueta externa dependen de quien la usa.
     notShown: ['inputId', 'ariaLabelledBy'],
-    code: `<as-checkbox ariaLabel="Acepto los términos" [formControl]="accepted" />`,
+    code: `<sa-checkbox ariaLabel="Acepto los términos" [formControl]="accepted" />`,
     variants: [
-      variant('unchecked', 'Estados', { ariaLabel: 'Sin marcar' }, { code: `<as-checkbox ariaLabel="Sin marcar" [formControl]="accepted" />` }),
-      variant('checked', 'Estados', { ariaLabel: 'Marcada', checked: true }, { code: `accepted = new FormControl(true);\n\n<as-checkbox ariaLabel="Marcada" [formControl]="accepted" />` }),
-      variant('indeterminate', 'Estados', { ariaLabel: 'Indeterminada', indeterminate: true }, { code: `<as-checkbox ariaLabel="Indeterminada" [indeterminate]="true" [formControl]="accepted" />` }),
-      variant('disabled', 'Estados', { ariaLabel: 'Deshabilitada', disabled: true }, { code: `accepted = new FormControl({ value: false, disabled: true });\n\n<as-checkbox ariaLabel="Deshabilitada" [formControl]="accepted" />` }),
-      variant('disabled-checked', 'Estados', { ariaLabel: 'Deshabilitada y marcada', checked: true, disabled: true }, { code: `accepted = new FormControl({ value: true, disabled: true });\n\n<as-checkbox ariaLabel="Deshabilitada y marcada" [formControl]="accepted" />` }),
+      variant('unchecked', 'Estados', { ariaLabel: 'Sin marcar' }, { code: `<sa-checkbox ariaLabel="Sin marcar" [formControl]="accepted" />` }),
+      variant('checked', 'Estados', { ariaLabel: 'Marcada', checked: true }, { code: `accepted = new FormControl(true);\n\n<sa-checkbox ariaLabel="Marcada" [formControl]="accepted" />` }),
+      variant('indeterminate', 'Estados', { ariaLabel: 'Indeterminada', indeterminate: true }, { code: `<sa-checkbox ariaLabel="Indeterminada" [indeterminate]="true" [formControl]="accepted" />` }),
+      variant('disabled', 'Estados', { ariaLabel: 'Deshabilitada', disabled: true }, { code: `accepted = new FormControl({ value: false, disabled: true });\n\n<sa-checkbox ariaLabel="Deshabilitada" [formControl]="accepted" />` }),
+      variant('disabled-checked', 'Estados', { ariaLabel: 'Deshabilitada y marcada', checked: true, disabled: true }, { code: `accepted = new FormControl({ value: true, disabled: true });\n\n<sa-checkbox ariaLabel="Deshabilitada y marcada" [formControl]="accepted" />` }),
     ],
   },
   {
     id: 'toggle',
     label: 'Interruptor',
-    selector: 'as-toggle',
+    selector: 'sa-toggle',
     description: 'Un interruptor de encendido y apagado.',
     affects: ['Tamaño de fuente'],
-    code: `<as-toggle [checked]="enabled()" (changed)="enabled.set($event)" ariaLabel="Activar" />`,
+    code: `<sa-toggle [checked]="enabled()" (changed)="enabled.set($event)" ariaLabel="Activar" />`,
     variants: [
       variant('off', 'Estados', { checked: false, ariaLabel: 'Apagado' }),
       variant('on', 'Estados', { checked: true, ariaLabel: 'Encendido' }),
@@ -304,12 +304,12 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
   {
     id: 'select',
     label: 'Selector',
-    selector: 'as-select',
+    selector: 'sa-select',
     description: 'Una lista desplegable con búsqueda, selección múltiple y opciones con icono, color o avatar, en sus tres modos.',
     affects: ['Radio de bordes', 'Densidad', 'Tamaño de fuente'],
     // El `id`, el mensaje de error y la clase del panel dependen de quien lo usa.
     notShown: ['inputId', 'showErrorMessage', 'panelStyleClass'],
-    code: `<as-select label="Plan" [options]="plans" optionLabel="label" optionValue="value" [formControl]="plan" />`,
+    code: `<sa-select label="Plan" [options]="plans" optionLabel="label" optionValue="value" [formControl]="plan" />`,
     previewClass: 'w-64',
     variants: (() => {
       const plans = { options: asRef('plans', PLANS), optionLabel: 'label', optionValue: 'value' };
@@ -346,12 +346,12 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
   {
     id: 'avatar',
     label: 'Avatar',
-    selector: 'as-avatar',
+    selector: 'sa-avatar',
     description: 'Una imagen o las iniciales de una persona, circular o con esquinas redondeadas, con su estado de presencia.',
     affects: [],
     // El texto alternativo y el icono y el fondo del punto de presencia salen del estado.
     notShown: ['alt', 'dotIconSize', 'dotBackground'],
-    code: `<as-avatar label="AB" [size]="40" />`,
+    code: `<sa-avatar label="AB" [size]="40" />`,
     variants: [
       named('shape-circle', 'shape="circle"', 'Forma', { label: 'AB', size: 40 }),
       named('shape-rounded', 'shape="rounded"', 'Forma', { label: 'AB', size: 40, shape: 'rounded' }),
@@ -369,10 +369,10 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
   {
     id: 'divider',
     label: 'Separador',
-    selector: 'as-divider',
+    selector: 'sa-divider',
     description: 'Una línea horizontal o vertical, sólida, punteada o de puntos, con texto opcional.',
     affects: [],
-    code: `<as-divider />`,
+    code: `<sa-divider />`,
     variants: [
       ...(['solid', 'dashed', 'dotted'] as const).map((type) => named(`horizontal-${type}`, `${type}`, 'Horizontal', { layout: 'horizontal', type }, { boxClass: 'w-48' })),
       ...(['solid', 'dashed', 'dotted'] as const).flatMap((type) =>
@@ -385,12 +385,12 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
   {
     id: 'skeleton',
     label: 'Esqueleto',
-    selector: 'as-skeleton',
+    selector: 'sa-skeleton',
     description: 'El marcador de un contenido que todavía se está cargando.',
     affects: [],
     // Las clases de texto de cada zona y el interruptor `loading` (con él apagado se ve el contenido) no tienen vista propia.
     notShown: ['valueClass', 'metaClass', 'titleClass', 'subtitleClass', 'loading'],
-    code: `<as-skeleton layout="line" [lines]="2" />`,
+    code: `<sa-skeleton layout="line" [lines]="2" />`,
     variants: [
       named('layout-line', 'layout="line"', 'Estructuras', { layout: 'line', lines: 3 }, { boxClass: 'w-56' }),
       named('layout-stat', 'layout="stat"', 'Estructuras', { layout: 'stat' }, { boxClass: 'w-40' }),
@@ -417,30 +417,30 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
   {
     id: 'tooltip',
     label: 'Tooltip',
-    selector: '[asTooltip]',
-    tag: 'as-button',
+    selector: '[saTooltip]',
+    tag: 'sa-button',
     description: 'Un texto flotante que aparece al pasar el cursor por cualquier elemento: sobre todo el botón (host) o solo sobre su texto.',
     affects: ['Radio de bordes', 'Tamaño de fuente'],
-    code: `<as-button label="Ayuda" asTooltip="Texto de ayuda" tooltipPosition="top" />`,
+    code: `<sa-button label="Ayuda" saTooltip="Texto de ayuda" tooltipPosition="top" />`,
     variants: [...(['host', 'text'] as const).flatMap((anchor) =>
       (['top', 'bottom', 'left', 'right'] as const).map((position) =>
         anchor === 'host'
-          ? named(`host-${position}`, `host · ${position}`, 'En todo el botón (host)', { label: 'Ayuda', variant: 'outlined', asTooltip: 'Texto de ayuda', tooltipPosition: position })
-          : named(`text-${position}`, `texto · ${position}`, 'Solo en el texto del botón', { variant: 'outlined', tooltipPosition: position }, { text: 'Ayuda', code: `<as-button variant="outlined">\n  <span asTooltip="Texto de ayuda" tooltipPosition="${position}">Ayuda</span>\n</as-button>` }),
+          ? named(`host-${position}`, `host · ${position}`, 'En todo el botón (host)', { label: 'Ayuda', variant: 'outlined', saTooltip: 'Texto de ayuda', tooltipPosition: position })
+          : named(`text-${position}`, `texto · ${position}`, 'Solo en el texto del botón', { variant: 'outlined', tooltipPosition: position }, { text: 'Ayuda', code: `<sa-button variant="outlined">\n  <span saTooltip="Texto de ayuda" tooltipPosition="${position}">Ayuda</span>\n</sa-button>` }),
       ),
     ),
-      named('host-delay', 'showDelay 300', 'Con retraso', { label: 'Ayuda', variant: 'outlined', asTooltip: 'Texto de ayuda', tooltipPosition: 'top', showDelay: 300 }),
+      named('host-delay', 'showDelay 300', 'Con retraso', { label: 'Ayuda', variant: 'outlined', saTooltip: 'Texto de ayuda', tooltipPosition: 'top', showDelay: 300 }),
     ],
   },
   {
     id: 'modal',
     label: 'Modal',
-    selector: 'as-modal',
+    selector: 'sa-modal',
     description: 'Un diálogo sobre toda la página, con título, pie y cierre con Escape o al hacer clic fuera. El contenido pone su propio relleno, así la barra de desplazamiento queda en el borde.',
     affects: ['Densidad', 'Tamaño de fuente'],
     // La clase del consumidor.
     notShown: ['styleClass'],
-    code: `<as-modal [(visible)]="open" title="Título" flush>\n  <div class="p-5">Contenido</div>\n</as-modal>`,
+    code: `<sa-modal [(visible)]="open" title="Título" flush>\n  <div class="p-5">Contenido</div>\n</sa-modal>`,
     baseProps: { '[(visible)]': 'open', title: 'Título', flush: true },
     variants: [
       named('width-24', 'width="24rem"', 'Tamaño', { width: '24rem' }),
@@ -462,12 +462,12 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
   {
     id: 'drawer',
     label: 'Panel lateral',
-    selector: 'as-drawer',
+    selector: 'sa-drawer',
     description: 'Un panel que entra por un lado y se pinta sobre toda la página, con cabecera, contenido y pie. El contenido pone su propio relleno, así la barra de desplazamiento queda en el borde.',
     affects: ['Tamaño de fuente'],
     // Las plantillas de la cabecera y del ícono de cierre, y la clase del consumidor.
     notShown: ['headerTemplate', 'closeIconTemplate', 'styleClass'],
-    code: `<as-drawer [(visible)]="open" position="right" flush>\n  <div class="p-5">Contenido</div>\n</as-drawer>`,
+    code: `<sa-drawer [(visible)]="open" position="right" flush>\n  <div class="p-5">Contenido</div>\n</sa-drawer>`,
     baseProps: { '[(visible)]': 'open', ariaLabel: 'Panel de ejemplo', flush: true },
     variants: [
       ...(['left', 'right', 'top', 'bottom', 'full'] as const).map((position) => named(position, position, 'Posición', { position })),
@@ -484,12 +484,12 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       { id: 'closeIcon', label: 'Icono de cierre propio', prop: 'closeIcon', on: 'ChevronRight' },
       { id: 'closeLabel', label: 'Nombre del cierre propio', prop: 'closeLabel', on: 'Volver' },
     ],
-    content: (zones) => ['<h3 drawer-header>Título</h3>', `<div class="p-5">${previewContent(zones)}</div>`, ...(zones.has('footer') ? ['<as-button drawer-footer label="Guardar" />'] : [])].join('\n'),
+    content: (zones) => ['<h3 drawer-header>Título</h3>', `<div class="p-5">${previewContent(zones)}</div>`, ...(zones.has('footer') ? ['<sa-button drawer-footer label="Guardar" />'] : [])].join('\n'),
   },
   {
     id: 'toast',
     label: 'Toast',
-    selector: 'as-toast',
+    selector: 'sa-toast',
     description: 'Avisos breves de cada tipo y en cada posición; se muestran con AlertService y se alojan en el layout.',
     affects: ['Tamaño de fuente'],
     language: 'ts',
@@ -510,12 +510,12 @@ this.alerts.showSuccess('Guardado', 'Los cambios se guardaron.');`,
   {
     id: 'tabs',
     label: 'Pestañas',
-    selector: 'as-tabs',
+    selector: 'sa-tabs',
     description: 'Pestañas con desplazamiento y flechas cuando no caben, en dos estilos y dos tamaños, con iconos y contadores.',
     affects: ['Tamaño de fuente'],
     // El nombre accesible y la clase del texto de cada pestaña.
     notShown: ['ariaLabel', 'tabLabelClass'],
-    code: `<as-tabs [tabs]="tabs" [(active)]="active" ariaLabel="Secciones" />`,
+    code: `<sa-tabs [tabs]="tabs" [(active)]="active" ariaLabel="Secciones" />`,
     // Cada ejemplo lleva su propia pestaña activa (ver `ownActive` en `ui-system.ts`): elegir una no cambia las demás.
     variants: [
       named('default', 'variant="default"', 'Estilos', { variant: 'default', '[tabs]': 'tabs', '[(active)]': 'active' }, { boxClass: 'w-72' }),
@@ -535,12 +535,12 @@ this.alerts.showSuccess('Guardado', 'Los cambios se guardaron.');`,
   {
     id: 'popover',
     label: 'Popover',
-    selector: 'as-popover',
+    selector: 'sa-popover',
     description: 'Un panel anclado a un botón, en cada posición, tamaño y estilo, que se cierra al hacer clic fuera.',
     affects: ['Radio de bordes', 'Tamaño de fuente'],
     // Las clases del consumidor y el nombre accesible del botón.
     notShown: ['triggerStyleClass', 'triggerActiveClass', 'triggerAriaLabel', 'optionStyleClass', 'triggerTooltipStyleClass', 'popoverStyleClass'],
-    code: `<as-popover triggerIcon="Ellipsis">Contenido del popover</as-popover>`,
+    code: `<sa-popover triggerIcon="Ellipsis">Contenido del popover</sa-popover>`,
     variants: [
       ...(['top', 'bottom', 'left', 'right'] as const).map((position) => named(position, position, 'Posición', { position, triggerIcon: 'Ellipsis' }, { text: 'Contenido del popover' })),
       ...(['small', 'medium', 'high'] as const).map((size) => named(`size-${size}`, `triggerSize="${size}"`, 'Disparador', { triggerSize: size, triggerIcon: 'Ellipsis' }, { text: 'Contenido del popover' })),
