@@ -74,7 +74,7 @@ explicitly, then installs dependencies and creates the initial Git commit. Inter
 non-interactive runs (`--defaults`, flags, `--config <file>`) produce the same validated
 configuration, which is saved in `angular-starter.config.json` inside the new project.
 
-`as --help` groups the commands by what they do and `as <command> --help` shows their flags and examples:
+`as --help` lists the commands and the options, like `ng --help`; `as <command> --help` shows the flags and examples of each one:
 
 | Command                            | What it does                                                                              |
 | ---------------------------------- | ----------------------------------------------------------------------------------------- |
@@ -83,6 +83,8 @@ configuration, which is saved in `angular-starter.config.json` inside the new pr
 | `generate` (`g`) `<kind> <name>`   | Create a `feature` (folder, lazy route, navigation entry) or a `component`                |
 | `list`, `info`, `config`, `doctor` | See what each option is, the project's options and the environment                        |
 | `update`                           | Planned                                                                                   |
+
+`as version` (or `-v`) prints the version of the CLI and the one of the Angular CLI that `as new` runs (the tested one, not the latest on npm). `as list` prints one table: the id of each option, the commands that add it and ask for it (`as add ...`, `as new --...`, none while it is planned) and its name, description and documentation.
 
 Only `as new` decides the architecture, the stylesheet format, Tailwind CSS, the package manager and
 the selector prefix. Only options that can really be generated are offered; `as list` shows what each
