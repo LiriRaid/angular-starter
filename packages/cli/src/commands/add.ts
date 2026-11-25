@@ -1,4 +1,9 @@
-import { CAPABILITIES, defaultOption, type CapabilityCategory } from '../config/capabilities.js';
+import {
+  CAPABILITIES,
+  defaultOption,
+  unmetRequirements,
+  type CapabilityCategory,
+} from '../config/capabilities.js';
 import {
   ALL_COMPONENT_IDS,
   ESSENTIAL_COMPONENT_IDS,
@@ -28,7 +33,7 @@ import { UsageError } from '../errors.js';
 import { println, type CliIo } from '../io.js';
 import { describeComponent } from '../wizard/wizard.js';
 import { findProject } from '../project/find.js';
-import { ADDABLE, NOT_ADDABLE, addableValues } from './addable.js';
+import { ADDABLE, NOT_ADDABLE, addableValues, prerequisitesOf, type AddStep } from './addable.js';
 import { createStyler } from '../ui/format.js';
 
 export { ADDABLE, addableValues };
@@ -45,6 +50,8 @@ export async function addCommand(
   capability: string | undefined,
   given: string | undefined,
   flags: AddFlags,
+  /** True when another `sa add` runs this one to bring what it needs: it asks nothing more. */
+  chained = false,
 ): Promise<void> {
   const category = capability === undefined ? undefined : ADDABLE[capability];
   if (capability === undefined || category === undefined) {
@@ -77,6 +84,22 @@ export async function addCommand(
   }
 
   const label = CAPABILITIES[category].find((option) => option.id === choice);
+
+  // What the option needs and the project lacks is added first, in order, once the developer agrees.
+  const missing = prerequisitesOf(category, choice, project.options);
+  if (missing.length > 0) {
+    const mainValue = value ?? choice;
+    await addWithPrerequisites(io, deps, {
+      capability,
+      value: mainValue,
+      label: label?.label ?? choice,
+      missing,
+      flags,
+      chained,
+    });
+    return;
+  }
+
   // The components and the shell draw their icons with Lucide, so adding them adds it too.
   const implied =
     category === 'components' || category === 'appShell' ? label?.requires?.icons?.[0] : undefined;
@@ -124,6 +147,7 @@ export async function addCommand(
   if (category === 'icons' && project.options.components === 'none') {
     println(io.stdout, 'To draw an icon, add the sa-icon component: sa add components icon.');
   }
+  if (chained) return;
   // The structure alone is the architecture; the routing and the shell are asked, not assumed.
   if (category === 'architecture' && io.interactive && project.options.appShell === 'none') {
     const more = await deps.prompter.confirm({
@@ -133,9 +157,117 @@ export async function addCommand(
     });
     if (more) {
       println(io.stdout);
-      await addCommand(io, deps, 'routing', 'starter', { ...flags, install: false });
+      await addCommand(io, deps, 'routing', 'starter', { ...flags, install: false }, true);
       await addCommand(io, deps, 'app-shell', undefined, flags);
     }
+  } else {
+    await offerUiSystem(io, deps, category, flags);
+  }
+}
+
+/** Does this capability run an install after its steps? */
+const installs = (capability: string): boolean =>
+  capability === 'components' || capability === 'app-shell' || capability === 'icons';
+
+interface Pending {
+  capability: string;
+  value: string;
+  label: string;
+  missing: AddStep[];
+  flags: AddFlags;
+  chained: boolean;
+}
+
+/**
+ * The capability needs others the project does not have (the registry says which). In a terminal it says
+ * what and asks once; then it adds them in order and the capability itself, installing only at the last
+ * step that installs. A dry run only lists the chain, and outside a terminal the command stops and names
+ * the commands to run.
+ */
+async function addWithPrerequisites(
+  io: CliIo,
+  deps: ProgramDeps,
+  { capability, value, label, missing, flags, chained }: Pending,
+): Promise<void> {
+  const commands = missing.map((step) => `sa add ${step.capability} ${step.value}`);
+  const names = missing.map((step) => {
+    const category = ADDABLE[step.capability];
+    const option = category && CAPABILITIES[category].find((entry) => entry.id === step.value);
+    return option?.label ?? step.capability;
+  });
+  if (flags.dryRun) {
+    const style = createStyler(io.color);
+    println(io.stdout, style.bold('Dry run: nothing was changed. It would add, in this order:'));
+    for (const command of [...commands, `sa add ${capability} ${value}`]) {
+      println(io.stdout, `  ${command}`);
+    }
+    return;
+  }
+  if (!io.interactive || chained) {
+    throw new UsageError(
+      `${label} needs ${names.join(', ')}, which this project does not have.`,
+      `Add them first: ${commands.join(', ')}. In a terminal, "sa add ${capability}" asks and adds them for you.`,
+    );
+  }
+  const yes = await deps.prompter.confirm({
+    name: 'prerequisites',
+    message: `${label} needs ${names.join(', ')}, which this project does not have. Add ${missing.length === 1 ? 'it' : 'them'} first?`,
+    default: true,
+  });
+  if (!yes) {
+    println(io.stdout, 'Nothing was changed.');
+    return;
+  }
+  const steps = [...missing, { capability, value }];
+  for (const [index, step] of steps.entries()) {
+    const later = steps.slice(index + 1).some((next) => installs(next.capability));
+    const install = flags.install !== false && !(installs(step.capability) && later);
+    const last = index === steps.length - 1;
+    await addCommand(
+      io,
+      deps,
+      step.capability,
+      step.value,
+      { ...flags, install },
+      !last || chained,
+    );
+  }
+}
+
+/** The UI System is the catalog of the components in the design preferences: offered when it can be added. */
+async function offerUiSystem(
+  io: CliIo,
+  deps: ProgramDeps,
+  category: CapabilityCategory,
+  flags: AddFlags,
+): Promise<void> {
+  if (category !== 'appShell' && category !== 'components') return;
+  const fresh = await findProject(io.cwd);
+  const option = CAPABILITIES.uiSystem.find((candidate) => candidate.id === 'starter');
+  if (
+    fresh.options.uiSystem !== 'none' ||
+    !option ||
+    unmetRequirements(option, fresh.options).length > 0 ||
+    prerequisitesOf('uiSystem', 'starter', fresh.options).length > 0
+  ) {
+    return;
+  }
+  if (!io.interactive) {
+    println(
+      io.stdout,
+      'Next: "sa add ui-system" adds the catalog of your components to the design preferences.',
+    );
+    return;
+  }
+  const yes = await deps.prompter.confirm({
+    name: 'ui-system',
+    message:
+      'Add the UI System, the catalog of all your components in the UI tab of the design preferences?',
+    default: true,
+  });
+  if (yes) {
+    println(io.stdout);
+    await addCommand(io, deps, 'ui-system', undefined, flags, true);
   }
 }
 
@@ -216,6 +348,7 @@ async function askValue(
 ): Promise<string | undefined> {
   if (capability === 'components') return askComponents(deps, options);
   if (capability === 'rendering') return askRendering(deps, options);
+  if (capability === 'architecture') return askArchitecture(deps, options);
   return undefined;
 }
 
@@ -236,6 +369,27 @@ async function askComponents(deps: ProgramDeps, options: StarterOptions): Promis
   });
   if (ticked.length === 0) throw new UsageError('No component was ticked: nothing to add.');
   return ticked.join(',');
+}
+
+/** The architectures a project can take, the ones still planned listed but not selectable. */
+async function askArchitecture(
+  deps: ProgramDeps,
+  options: StarterOptions,
+): Promise<string | undefined> {
+  // A project that has one already gets the usual "already in this project" answer.
+  if (options.architecture !== 'angular-default') return undefined;
+  return deps.prompter.select({
+    name: 'architecture',
+    message: 'Which architecture do you want to add?',
+    choices: CAPABILITIES.architecture
+      .filter((option) => !NOT_ADDABLE['architecture']?.includes(option.id))
+      .map((option) => ({
+        value: option.id,
+        name: option.label,
+        description: option.description,
+        ...(option.available ? {} : { disabled: 'planned' }),
+      })),
+  });
 }
 
 /** Default Angular SSR or the Starter SSR, each with what it is. */

@@ -29,6 +29,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Changed
 
+- `sa add` works from what the project has: in a terminal `sa add architecture` lists the architectures
+  (the planned ones not selectable); a capability that needs others (the shell needs the routing, the UI
+  System needs the shell and the components) says which, asks once and adds them in order, or stops and
+  names the commands outside a terminal; after the shell or the components it offers the UI System, the
+  catalog of the components in the UI tab. The name the generated code shows for the project is its folder,
+  as typed, and no longer the lowercase package name (ADR-0023 and plan 0020).
 - `sa add architecture screaming` now adds the structure to a project at any point: the folders and READMEs
   that are missing and the `@core`, `@features` and `@shared` aliases, without overwriting or moving
   anything, so it works after the components (before, `core` and `shared` stopped it). It adapts `app.ts`,
