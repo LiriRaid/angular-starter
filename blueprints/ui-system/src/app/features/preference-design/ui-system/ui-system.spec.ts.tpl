@@ -148,16 +148,17 @@ describe('UiSystem', () => {
     // uis:begin(input)
     it('shows the modes and the types of the text field', async () => {
       const { card } = await render();
-      expect(idsOf('input')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over', 'type-text', 'type-number', 'type-tel', 'type-price', 'type-tags']));
+      expect(idsOf('input')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over', 'type-text', 'type-number', 'type-tel', 'type-price', 'type-tags', 'required', 'readonly', 'icon-left', 'icon-right']));
       expect(card('input').querySelectorAll('sa-input').length).toBe(entryOf('input').variants.length);
     });
     // uis:end
 
     it('covers the options of the rest of the components', () => {
-      expect(idsOf('select')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over', 'multiple-on', 'clearable-on', 'icon-only'])); // uis(select)
-      expect(idsOf('textarea')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over'])); // uis(textarea)
+      expect(idsOf('select')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over', 'multiple', 'clearable', 'icon-only'])); // uis(select)
+      expect(idsOf('textarea')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over', 'required', 'readonly'])); // uis(textarea)
       expect(idsOf('tabs')).toEqual(expect.arrayContaining(['default', 'pills', 'compact', 'default-icons', 'pills-icons', 'compact-icons', 'fit-icons', 'fit-counts', 'overflow-icons', 'overflow-counts'])); // uis(tabs)
-      expect(idsOf('avatar')).toEqual(expect.arrayContaining(['shape-circle', 'shape-rounded'])); // uis(avatar)
+      expect(idsOf('avatar')).toEqual(expect.arrayContaining(['shape-circle', 'shape-rounded', 'size-24', 'size-40', 'size-80'])); // uis(avatar)
+      expect(idsOf('icon')).toEqual(expect.arrayContaining(['filled', 'fill-color'])); // uis(icon)
       expect(idsOf('divider')).toEqual(expect.arrayContaining(['horizontal-solid', 'horizontal-dashed', 'horizontal-dotted', 'vertical-solid'])); // uis(divider)
       expect(idsOf('skeleton')).toEqual(expect.arrayContaining(['layout-line', 'layout-stat', 'layout-row', 'layout-circles'])); // uis(skeleton)
       expect(idsOf('tooltip')).toEqual(['host-top', 'host-bottom', 'host-left', 'host-right', 'text-top', 'text-bottom', 'text-left', 'text-right', 'host-delay']); // uis(tooltip)
@@ -222,20 +223,77 @@ describe('UiSystem', () => {
   });
 
   describe('the modes of the field', () => {
-    // uis:begin(input)
-    it('shows required in each mode, with its own name', async () => {
-      const { card } = await render();
-      for (const mode of ['on', 'in', 'over']) {
-        const figure = card('input').querySelector(`[data-variant="required-${mode}"]`) as HTMLElement;
-        expect(figure, mode).not.toBeNull();
-        expect(figure.querySelector('[data-chip]')?.textContent).toContain(`required variant="${mode}"`);
+    const FIELDS = [
+      { id: 'input', tag: 'sa-input', hostClass: 'sa-input' }, // uis(input)
+      { id: 'textarea', tag: 'sa-textarea', hostClass: 'sa-textarea' }, // uis(textarea)
+      { id: 'select', tag: 'sa-select', hostClass: 'sa-select' }, // uis(select)
+    ];
+
+    it('is a setting of the whole card: the variants do not multiply by mode', () => {
+      for (const { id } of FIELDS) {
+        expect(entryOf(id).modes, id).toEqual(['on', 'in', 'over']);
+        const perMode = idsOf(id).filter((variantId) => /-(on|in|over)$/.test(variantId));
+        expect(perMode, id).toEqual(['mode-on', 'mode-in', 'mode-over']);
       }
+    });
+
+    it('gives each of those cards a selector of the mode, with the first mode chosen', async () => {
+      const { card } = await render();
+      for (const { id } of FIELDS) {
+        const chips = Array.from(card(id).querySelectorAll('[data-mode-chip]')) as HTMLElement[];
+        expect(chips.map((chip) => chip.textContent?.trim()), id).toEqual(['on', 'in', 'over']);
+        expect(chips.map((chip) => chip.getAttribute('aria-pressed')), id).toEqual(['true', 'false', 'false']);
+      }
+    });
+
+    it('gives no selector of the mode to a component that has no modes', async () => {
+      const { card } = await render();
+      expect(card('button').querySelector('[data-mode-chip]')).toBeNull();
+    });
+
+    it('shows every variant in the mode that is chosen, and keeps the three modes side by side', async () => {
+      const { fixture, component, card } = await render();
+      for (const { id, tag, hostClass } of FIELDS) {
+        component.setMode(entryOf(id), 'over');
+        await fixture.whenStable();
+        // Cada campo marca el modo `over` con una clase de su caja; `on` e `in` solo se distinguen por dónde va la etiqueta.
+        const isOver = (variantId: string) => card(id).querySelector(`[data-variant="${variantId}"] ${tag} [class*="${hostClass}-over"]`) !== null;
+        expect(isOver('required'), id).toBe(true);
+        expect(isOver('mode-on'), `${id} on`).toBe(false);
+        expect(isOver('mode-in'), `${id} in`).toBe(false);
+        expect(isOver('mode-over'), `${id} over`).toBe(true);
+      }
+    });
+
+    // uis:begin(select)
+    it('changes the mode by clicking its chip', async () => {
+      const { fixture, card } = await render();
+      const chips = () => Array.from(card('select').querySelectorAll('[data-mode-chip]')) as HTMLButtonElement[];
+      chips()[1].click();
+      await fixture.whenStable();
+      expect(chips().map((chip) => chip.getAttribute('aria-pressed'))).toEqual(['false', 'true', 'false']);
+      expect(card('select').querySelector('[data-variant="required"] sa-select .sa-select-in')).not.toBeNull();
+    });
+    // uis:end
+
+    // uis:begin(textarea)
+    it('writes the mode in the code only when it is not the one the component has', async () => {
+      const { component } = await render();
+      const entry = entryOf('textarea');
+      component.choose(entry, entry.variants.find((variant) => variant.id === 'required')!);
+      expect(component.codeOf(entry)).not.toContain('variant=');
+      component.setMode(entry, 'in');
+      expect(component.codeOf(entry)).toContain('variant="in"');
+      expect(component.allCodeOf(entry)).toContain('variant="in"');
+      component.setMode(entry, 'on');
+      expect(component.codeOf(entry)).not.toContain('variant=');
     });
     // uis:end
 
     // uis:begin(input)
-    it('lets the password be shown and hidden with the eye', async () => {
-      const { fixture, card } = await render();
+    it('lets the password be shown and hidden with the eye, in the mode that is chosen', async () => {
+      const { fixture, component, card } = await render();
+      const input = entryOf('input');
       const figure = () => card('input').querySelector('[data-variant="type-password"]') as HTMLElement;
       expect(figure().querySelector('input')?.getAttribute('type')).toBe('password');
       expect(figure().querySelector('svg.lucide-eye')).not.toBeNull();
@@ -244,16 +302,14 @@ describe('UiSystem', () => {
       await fixture.whenStable();
       expect(figure().querySelector('input')?.getAttribute('type')).toBe('text');
       expect(figure().querySelector('svg.lucide-eye-off')).not.toBeNull();
+
+      component.setMode(input, 'in');
+      await fixture.whenStable();
+      expect(figure().querySelector('sa-input .sa-input-in')).not.toBeNull();
+      component.choose(input, input.variants.find((variant) => variant.id === 'type-password')!);
+      expect(component.codeOf(input)).toContain('variant="in"');
     });
     // uis:end
-
-    it('gives every mode the options that apply to it', () => {
-      for (const mode of ['on', 'in', 'over']) {
-        expect(idsOf('input')).toEqual(expect.arrayContaining([`required-${mode}`, `readonly-${mode}`, `icon-left-${mode}`, `icon-right-${mode}`])); // uis(input)
-        expect(idsOf('textarea')).toEqual(expect.arrayContaining([`required-${mode}`, `readonly-${mode}`, `icon-${mode}`])); // uis(textarea)
-        expect(idsOf('select')).toEqual(expect.arrayContaining([`required-${mode}`, `clearable-${mode}`, `multiple-${mode}`])); // uis(select)
-      }
-    });
   });
 
   // uis:begin(tabs)
@@ -320,12 +376,14 @@ describe('UiSystem', () => {
 
   // uis:begin(select)
   describe('the readonly select', () => {
-    it('shows a chosen value in each mode, so the readonly look can be judged', async () => {
-      const { card } = await render();
-      for (const mode of ['on', 'in', 'over']) {
-        const field = card('select').querySelector(`[data-variant="readonly-${mode}"] input`) as HTMLInputElement;
-        expect(field.value, mode).toBe('Pro');
-      }
+    it('shows a chosen value, in the mode that is chosen, so the readonly look can be judged', async () => {
+      const { fixture, component, card } = await render();
+      const field = () => card('select').querySelector('[data-variant="readonly"] input') as HTMLInputElement;
+      expect(field().value).toBe('Pro');
+      component.setMode(entryOf('select'), 'over');
+      await fixture.whenStable();
+      expect(field().value).toBe('Pro');
+      expect(card('select').querySelector('[data-variant="readonly"] sa-select .sa-select-over')).not.toBeNull();
     });
   });
   // uis:end

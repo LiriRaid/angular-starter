@@ -8,6 +8,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- In the UI System the mode (`on`, `in`, `over`) of `sa-input`, `sa-textarea` and `sa-select` is a setting of
+  the card (ADR-0025 and plan 0022): a row of chips picks it, every variant is shown in that mode, and the code
+  carries `variant` only when it is not the default. The options of a field are no longer repeated for each mode.
+- `sa-icon` has `filled` and `fillColor` to fill the inside of an icon, with a group `Relleno` in the catalog.
+- `sa-button` has its eight severities (`primary`, `secondary`, `success`, `info`, `warn`, `help`, `danger`,
+  `contrast`), each a block of custom properties; `outlined` and `text` by severity use the colour of the severity.
+
+### Fixed
+
+- In dark, the `success` and `danger` buttons darken on hover like in light, and `text` by severity no longer
+  paints a solid block. The colour of a severity wins over the primary colour in every variant and state.
+- The letters of `sa-avatar` grow with its size (Tailwind classes by size, a `calc` when the size is in CSS).
+
 - The UI System is built from the components the project has (ADR-0024 and plan 0021). `sa add ui-system`
   describes in its catalog the components that are in `shared/components`, not a fixed list of 16: a project
   with a few components gets a catalog of those few that compiles, and the one with the shell and the

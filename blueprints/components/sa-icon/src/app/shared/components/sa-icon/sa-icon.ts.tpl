@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, booleanAttribute, computed, inject, input } from '@angular/core';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { SA_LUCIDE_ICONS } from '@core/common/icons/lucide-icons.provider';
 import { SaIconsSVG } from '@core/common/icons/sa-icons';
@@ -25,7 +25,7 @@ import { SaIconsSVG } from '@core/common/icons/sa-icons';
         <span role="img" [attr.aria-label]="name()" [class]="maskedImageClass()" [style.width]="fontSize()" [style.height]="fontSize()" [style.--icon-url]="'url(' + svgUrl + ')'"></span>
       }
     } @else if (lucideName(); as lucideName) {
-      <svg [lucideIcon]="lucideName" [class]="iconClass()" [size]="pixelSize()"></svg>
+      <svg [lucideIcon]="lucideName" [class]="iconClass()" [style.fill]="resolvedFill()" [size]="pixelSize()"></svg>
     } @else {
       <span [class]="iconClass()" [style.fontSize]="fontSize()">
         {{ name() }}
@@ -99,6 +99,10 @@ export class SaIcon {
   readonly color = input<string | undefined>(undefined);
   readonly spin = input<boolean>(false);
   readonly extraClass = input<string>('');
+  /** Fills the inside of the icon with the colour of its stroke (a solid star, a solid heart). Lucide icons only: a registered SVG file is not filled. */
+  readonly filled = input(false, { transform: booleanAttribute });
+  /** Fills the inside with a colour of its own, apart from the stroke (`color`). Wins over `filled`. Lucide icons only. */
+  readonly fillColor = input<string | undefined>(undefined);
 
   readonly svgEntry = computed(() => {
     const key = this.name();
@@ -138,6 +142,9 @@ export class SaIcon {
     const extra = (this.extraClass() ?? '').trim();
     return [base, extra].filter(Boolean).join(' ');
   });
+
+  /** The CSS `fill` of a Lucide icon: its own colour, the colour of the stroke, or none (a plain outline). */
+  readonly resolvedFill = computed(() => this.fillColor() || (this.filled() ? 'currentColor' : null));
 
   readonly resolvedColor = computed(() => {
     if (this.color()) return this.color()!;
