@@ -337,6 +337,7 @@ ${result.stderr}`,
       await asProject(project, 'generate', 'feature', 'billing');
       await asProject(project, 'add', 'routing', 'starter');
       await asProject(project, 'add', 'app-shell');
+      await asProject(project, 'add', 'ui-system');
       const config = JSON.parse(await read(project, 'starter-angular.config.json'));
       expect(config.options).toMatchObject({
         architecture: 'screaming',
@@ -344,6 +345,7 @@ ${result.stderr}`,
         icons: 'lucide',
         routing: 'starter',
         appShell: 'starter',
+        uiSystem: 'starter',
       });
       expect(existsSync(join(project, 'src/app/features/billing/billing.ts'))).toBe(true);
 

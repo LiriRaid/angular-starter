@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -131,7 +131,7 @@ describe('sa add', () => {
       const project = await createStarterProject(cwd, ['--architecture', 'angular-default']);
       const result = await add(project, ['routing', 'starter']);
       expect(result.code).toBe(2);
-      expect(result.err).toContain('requires the architecture: screaming');
+      expect(result.err).toContain('sa add architecture screaming');
     });
 
     it('refuses to add it twice', async () => {
@@ -177,7 +177,7 @@ describe('sa add', () => {
       const project = await createStarterProject(cwd, [...PLAIN, '--routing', 'angular']);
       const result = await add(project, ['app-shell', 'starter']);
       expect(result.code).toBe(2);
-      expect(result.err).toContain('requires the routing: starter');
+      expect(result.err).toContain('sa add routing starter');
     });
 
     it('works on a project that already has the components, without adding the design twice', async () => {
@@ -268,7 +268,7 @@ describe('sa add', () => {
       const project = await createStarterProject(cwd, ['--app-shell', 'none']);
       const result = await add(project, ['presence']);
       expect(result.code).toBe(2);
-      expect(result.err).toContain('requires the app shell: starter');
+      expect(result.err).toContain('sa add app-shell starter');
     });
 
     it('refuses to add it twice', async () => {
@@ -670,13 +670,13 @@ describe('sa add', () => {
       const noShell = await createStarterProject(cwd, ['--app-shell', 'none']);
       const withoutShell = await add(noShell, ['ui-system']);
       expect(withoutShell.code).toBe(2);
-      expect(withoutShell.err).toContain('requires the app shell: starter');
+      expect(withoutShell.err).toContain('sa add app-shell starter');
 
       await mkdir(join(cwd, 'other'));
       const noComponents = await createStarterProject(join(cwd, 'other'), ['--components', 'none']);
       const withoutComponents = await add(noComponents, ['ui-system']);
       expect(withoutComponents.code).toBe(2);
-      expect(withoutComponents.err).toContain('the components: recommended, all');
+      expect(withoutComponents.err).toContain('sa add components recommended');
     });
 
     it('refuses to add it twice', async () => {
@@ -1014,5 +1014,132 @@ describe('sa add with no value, in a terminal', () => {
     const result = await ask(project, ['icons'], []);
     expect(result.code, result.err).toBe(0);
     expect(result.asked).toEqual([]);
+  });
+});
+
+describe('sa add: what a capability needs and what it offers next', () => {
+  const PLAIN = [
+    '--architecture',
+    'angular-default',
+    '--routing',
+    'angular',
+    '--components',
+    'none',
+    '--app-shell',
+    'none',
+    '--icons',
+    'none',
+  ];
+
+  async function ask(project: string, args: string[], answers: unknown[]) {
+    const fake = createFakeIo({ cwd: project, interactive: true });
+    const runner = createFakeRunner();
+    const { prompter, asked } = createFakePrompter(answers);
+    const code = await run(['add', ...args], fake.io, { run: runner.run, prompter });
+    return { code, out: fake.out(), err: fake.err(), asked };
+  }
+
+  it('lists the architectures in a terminal, the planned ones not selectable', async () => {
+    const project = await createStarterProject(cwd, PLAIN);
+    const result = await ask(project, ['architecture'], ['screaming', false]);
+    expect(result.code, result.err).toBe(0);
+    const [question] = result.asked;
+    expect(question?.kind).toBe('select');
+    expect(question?.choices).toContain('screaming');
+    expect(question?.choices).toContain('modular');
+    expect(question?.choices).not.toContain('angular-default');
+    expect(question?.disabled?.['screaming']).toBeUndefined();
+    expect(question?.disabled?.['modular']).toBeDefined();
+    expect((await readConfig(project)).architecture).toBe('screaming');
+  });
+
+  it('does not ask which architecture when the project already has one', async () => {
+    const project = await createStarterProject(cwd);
+    const result = await ask(project, ['architecture'], []);
+    expect(result.code).toBe(2);
+    expect(result.err).toContain('already');
+    expect(result.asked).toEqual([]);
+  });
+
+  it('asks to add what the UI System needs, says what, and adds it in order', async () => {
+    const project = await createStarterProject(cwd, PLAIN);
+    const result = await ask(project, ['ui-system'], [true]);
+    expect(result.code, result.err).toBe(0);
+    expect(result.asked).toHaveLength(1);
+    expect(result.asked[0]?.kind).toBe('confirm');
+    expect(result.asked[0]?.message).toMatch(/architecture/i);
+    expect(await readConfig(project)).toMatchObject({
+      architecture: 'screaming',
+      routing: 'starter',
+      appShell: 'starter',
+      components: 'recommended',
+      uiSystem: 'starter',
+    });
+  });
+
+  it('changes nothing when the developer says no to what it needs', async () => {
+    const project = await createStarterProject(cwd, PLAIN);
+    const result = await ask(project, ['ui-system'], [false]);
+    expect(result.code, result.err).toBe(0);
+    expect(await readConfig(project)).toMatchObject({
+      architecture: 'angular-default',
+      uiSystem: 'none',
+    });
+  });
+
+  it('stops outside a terminal and names the commands to run first', async () => {
+    const project = await createStarterProject(cwd, PLAIN);
+    const result = await add(project, ['ui-system']);
+    expect(result.code).toBe(2);
+    expect(result.err).toContain('sa add architecture screaming');
+    expect(result.err).toContain('sa add app-shell');
+  });
+
+  it('shows the whole chain in a dry run and changes nothing', async () => {
+    const project = await createStarterProject(cwd, PLAIN);
+    const result = await add(project, ['ui-system', '--dry-run']);
+    expect(result.code, result.err).toBe(0);
+    expect(result.out).toContain('architecture');
+    expect(result.out).toContain('app-shell');
+    expect((await readConfig(project)).architecture).toBe('angular-default');
+  });
+
+  it('offers the UI System after the components when the project has the shell', async () => {
+    const project = await createStarterProject(cwd, ['--components', 'none']);
+    const result = await ask(project, ['components', 'recommended'], [true]);
+    expect(result.code, result.err).toBe(0);
+    expect(result.asked[0]?.kind).toBe('confirm');
+    expect((await readConfig(project)).uiSystem).toBe('starter');
+  });
+
+  it('offers the UI System after the app shell when the project has the components', async () => {
+    const project = await createStarterProject(cwd, ['--app-shell', 'none']);
+    const accepted = await ask(project, ['app-shell'], [false]);
+    expect(accepted.code, accepted.err).toBe(0);
+    expect(accepted.asked[0]?.kind).toBe('confirm');
+    expect((await readConfig(project)).uiSystem).toBe('none');
+  });
+
+  it('only suggests the UI System outside a terminal', async () => {
+    const project = await createStarterProject(cwd, ['--app-shell', 'none']);
+    const result = await add(project, ['app-shell']);
+    expect(result.code, result.err).toBe(0);
+    expect(result.out).toContain('sa add ui-system');
+  });
+
+  it('names the project after its folder, as typed, and not after the package', async () => {
+    const created = await createStarterProject(cwd, PLAIN);
+    const project = join(cwd, 'MyShopApp');
+    await rename(created, project);
+    const manifest = JSON.parse(await readFile(join(project, 'package.json'), 'utf8'));
+    await writeFile(
+      join(project, 'package.json'),
+      JSON.stringify({ ...manifest, name: 'my-shop-app' }),
+    );
+    expect((await add(project, ['architecture', 'screaming'])).code).toBe(0);
+    expect((await add(project, ['routing', 'starter'])).code).toBe(0);
+    const config = await readFile(join(project, 'src/app/app.config.ts'), 'utf8');
+    expect(config).toContain("appName: 'MyShopApp'");
+    expect(config).not.toContain('my-shop-app');
   });
 });
