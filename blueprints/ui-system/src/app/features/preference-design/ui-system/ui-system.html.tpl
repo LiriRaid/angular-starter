@@ -31,6 +31,14 @@
       <div class="sa-collapse-grid" data-preview [class.is-collapsed]="!isShown(entry.id)" [attr.inert]="isShown(entry.id) ? null : ''">
         <div class="flex flex-col gap-3">
           <div class="flex flex-col gap-4 rounded-lg border border-dashed border-(--app-border-color) bg-(--app-panel-muted-bg) p-4">
+            @if (entry.modes; as modes) {
+              <div class="flex flex-wrap items-center gap-2" role="group" aria-label="Modo">
+                <h5 class="text-caption-2-semibold text-(--app-text-subtle)">Modo <code>variant</code></h5>
+                @for (mode of modes; track mode) {
+                  <button type="button" data-mode-chip class="rounded-full border bg-(--app-control-surface-bg) px-2 py-0.5 text-caption-2-semibold transition-colors" [class]="modeOf(entry) === mode ? 'border-(--app-badge-soft-text) text-(--app-badge-soft-text)' : 'border-(--app-border-color) text-(--app-text-subtle) hover:text-(--app-text-color)'" [attr.aria-pressed]="modeOf(entry) === mode" (click)="setMode(entry, mode)">{{ mode }}</button>
+                }
+              </div>
+            }
             @if (entry.noPreview) {
               <p class="text-caption-2-regular text-(--app-text-subtle)">Este componente todavía no tiene vista previa en el catálogo: aquí están su selector y cómo se usa.</p>
             } @else {
@@ -45,9 +53,9 @@
                             <!-- uis:begin(input) -->
                             @case ('input') {
                               @if (item.inputs['type'] === 'password') {
-                                <sa-input [label]="$any(item.inputs['label'])" [variant]="$any(item.inputs['variant'] ?? 'on')" [type]="isPasswordShown(item) ? 'text' : 'password'" [lucideIcon]="isPasswordShown(item) ? 'EyeOff' : 'Eye'" iconPosition="right" [iconClickable]="true" (iconClick)="togglePassword(item)" />
+                                <sa-input [label]="$any(item.inputs['label'])" [variant]="$any(previewOf(entry, item)['variant'] ?? 'on')" [type]="isPasswordShown(item) ? 'text' : 'password'" [lucideIcon]="isPasswordShown(item) ? 'EyeOff' : 'Eye'" iconPosition="right" [iconClickable]="true" (iconClick)="togglePassword(item)" />
                               } @else {
-                                <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: item.inputs" />
+                                <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: previewOf(entry, item)" />
                               }
                             }
                             <!-- uis:end -->
@@ -68,9 +76,9 @@
                             <!-- uis:begin(select) -->
                             @case ('select') {
                               @if (readonlySelects[item.id]; as control) {
-                                <sa-select [formControl]="control" [label]="$any(item.inputs['label'])" [variant]="$any(item.inputs['variant'])" [options]="$any(item.inputs['options'])" optionLabel="label" optionValue="value" [readonlyInput]="true" />
+                                <sa-select [formControl]="control" [label]="$any(item.inputs['label'])" [variant]="$any(previewOf(entry, item)['variant'])" [options]="$any(item.inputs['options'])" optionLabel="label" optionValue="value" [readonlyInput]="true" />
                               } @else {
-                                <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: item.inputs" />
+                                <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: previewOf(entry, item)" />
                               }
                             }
                             <!-- uis:end -->
@@ -100,7 +108,7 @@
                             }
                             <!-- uis:end -->
                             @default {
-                              <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: item.inputs; content: contentOf(entry, item)" />
+                              <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: previewOf(entry, item); content: contentOf(entry, item)" />
                             }
                           }
                         </div>

@@ -21,8 +21,8 @@ export interface UiVariant {
   readonly text?: string;
   /** Clases de la caja que envuelve la vista previa de esta variante. */
   readonly boxClass?: string;
-  /** Código escrito a mano para lo que no es una etiqueta (un toast se muestra desde el código). */
-  readonly code?: string;
+  /** Código escrito a mano para lo que no es una etiqueta (un toast se muestra desde el código); si depende de las propiedades (el modo), una función de ellas. */
+  readonly code?: string | ((props: UiProps) => string);
 }
 
 /** Un interruptor del catálogo que cambia el modal o el panel que se abre (y su código). */
@@ -54,6 +54,11 @@ export interface UiComponentEntry {
   /** Propiedades que llevan todas las variantes en el código (el `[(visible)]` de un modal). */
   readonly baseProps?: UiProps;
   readonly options?: readonly UiOption[];
+  /**
+   * Los modos del componente (`variant`), como ajuste general de la tarjeta: todas las variantes que no fijan el suyo se ven en el modo
+   * elegido. El primero es el que el componente tiene por defecto y no se escribe en el código.
+   */
+  readonly modes?: readonly string[];
   /** Las entradas del componente que el catálogo no muestra a propósito (plantillas, clases, nombres accesibles). */
   readonly notShown?: readonly string[];
   /** Verdadero cuando el componente aún no tiene vista previa en el catálogo: la tarjeta da su selector y cómo se usa. */
@@ -118,10 +123,10 @@ const BUTTON_SIZES = ['xsmall', 'small', 'medium', 'high', 'large'] as const;
 const BUTTON_SEVERITIES = ['primary', 'secondary', 'success', 'info', 'warn', 'help', 'danger', 'contrast'] as const;
 
 /** El código de la contraseña con su ojo: el estado lo lleva quien usa el campo, igual que el login de la aplicación de referencia. */
-function passwordCode(mode: string): string {
+function passwordCode(props: UiProps): string {
+  const mode = props['variant'];
   return `<sa-input
-  label="Contraseña"
-  variant="${mode}"
+  label="Contraseña"${typeof mode === 'string' ? `\n  variant="${mode}"` : ''}
   [type]="visible() ? 'text' : 'password'"
   [lucideIcon]="visible() ? 'EyeOff' : 'Eye'"
   iconPosition="right"
@@ -129,24 +134,6 @@ function passwordCode(mode: string): string {
   (iconClick)="visible.set(!visible())"
 />`;
 }
-
-/** Lo que un campo de texto hace en cada uno de sus tres modos. */
-const inputModes = (): UiVariant[] =>
-  MODES.flatMap((mode) => {
-    const group = `Modo variant="${mode}"`;
-    const base = { label: 'Nombre', variant: mode };
-    return [
-      named(`required-${mode}`, `required variant="${mode}"`, group, { ...base, required: true }),
-      named(`readonly-${mode}`, `readonlyInput variant="${mode}"`, group, { ...base, value: 'Solo lectura', readonlyInput: true }),
-      named(`icon-left-${mode}`, `icono a la izquierda variant="${mode}"`, group, { label: 'Buscar', variant: mode, lucideIcon: 'Search' }),
-      named(`icon-right-${mode}`, `icono a la derecha variant="${mode}"`, group, { label: 'Buscar', variant: mode, lucideIcon: 'Search', iconPosition: 'right' }),
-      named(`stepper-${mode}`, `showStepper variant="${mode}"`, group, { label: 'Cantidad', variant: mode, type: 'number', showStepper: true, min: 0, max: 10 }),
-      named(`price-${mode}`, `price variant="${mode}"`, group, { label: 'Precio', variant: mode, type: 'price' }),
-      named(`tags-${mode}`, `isTagInput variant="${mode}"`, group, { label: 'Etiquetas', variant: mode, isTagInput: true }),
-      named(`phone-picker-${mode}`, `phoneCountryPicker variant="${mode}"`, group, { label: 'Teléfono', variant: mode, type: 'tel', phoneCountryPicker: true }),
-      named(`password-${mode}`, `password variant="${mode}"`, group, { label: 'Contraseña', variant: mode, type: 'password', lucideIcon: 'Eye', iconPosition: 'right', iconClickable: true }, { code: passwordCode(mode) }),
-    ];
-  });
 
 const previewContent = (zones: ReadonlySet<string>): string => (zones.has('long') ? 'Contenido largo que se desplaza…' : 'Contenido');
 
@@ -172,6 +159,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
         ['color-green', '#10b981'],
         ['color-indigo', '#6366f1'],
       ].map(([id, color]) => variant(id, 'Colores', { name: 'Star', size: 24, color })),
+      variant('filled', 'Relleno', { name: 'Star', size: 24, color: '#f59e0b', filled: true }),
+      named('fill-color', 'fillColor', 'Relleno', { name: 'Star', size: 24, color: '#b45309', fillColor: '#fde68a' }),
       variant('spin', 'Animado', { name: 'Loader', size: 24, spin: true }),
       named('extra-class', 'extraClass', 'Animado', { name: 'Bell', size: 24, extraClass: 'opacity-40' }),
       ...['Check', 'Search', 'User', 'Bell'].map((name) => named(`name-${name.toLowerCase()}`, name, 'Nombres', { name, size: 24 })),
@@ -223,6 +212,7 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
     selector: 'sa-input',
     description: 'Un campo con etiqueta flotante, validación y tipos (texto, número, teléfono con banderas, precio, contraseña con ojo, etiquetas), en sus tres modos.',
     affects: ['Densidad', 'Tamaño de fuente'],
+    modes: MODES,
     // `showErrorMessage` solo cambia con un control inválido; el `id` lo pone quien lo usa.
     notShown: ['inputId', 'showErrorMessage'],
     code: `<sa-input label="Nombre" placeholder="Escribe aquí" [formControl]="name" />`,
@@ -231,13 +221,18 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       ...MODES.map((mode) => named(`mode-${mode}`, `variant="${mode}"`, 'Modos', { label: 'Nombre', variant: mode })),
       named('type-text', 'text', 'Tipos', { label: 'Texto', type: 'text' }),
       named('type-email', 'email', 'Tipos', { label: 'Correo', type: 'email' }),
-      named('type-password', 'password', 'Tipos', { label: 'Contraseña', type: 'password', lucideIcon: 'Eye', iconPosition: 'right', iconClickable: true }, { code: passwordCode('on') }),
+      named('type-password', 'password', 'Tipos', { label: 'Contraseña', type: 'password', lucideIcon: 'Eye', iconPosition: 'right', iconClickable: true }, { code: passwordCode }),
       named('type-number', 'number', 'Tipos', { label: 'Cantidad', type: 'number' }),
       named('type-tel', 'tel', 'Tipos', { label: 'Teléfono', type: 'tel' }),
       named('type-price', 'price', 'Tipos', { label: 'Precio', type: 'price' }),
       named('type-url', 'url', 'Tipos', { label: 'Sitio web', type: 'url' }),
       named('type-tags', 'isTagInput', 'Tipos', { label: 'Etiquetas', isTagInput: true }),
-      ...inputModes(),
+      named('required', 'required', 'Opciones del campo', { label: 'Nombre', required: true }),
+      named('readonly', 'readonlyInput', 'Opciones del campo', { label: 'Nombre', value: 'Solo lectura', readonlyInput: true }),
+      named('icon-left', 'icono a la izquierda', 'Opciones del campo', { label: 'Buscar', lucideIcon: 'Search' }),
+      named('icon-right', 'icono a la derecha', 'Opciones del campo', { label: 'Buscar', lucideIcon: 'Search', iconPosition: 'right' }),
+      named('stepper', 'showStepper', 'Opciones del campo', { label: 'Cantidad', type: 'number', showStepper: true, min: 0, max: 10 }),
+      named('phone-picker', 'phoneCountryPicker', 'Opciones del campo', { label: 'Teléfono', type: 'tel', phoneCountryPicker: true }),
       named('placeholder', 'placeholder', 'Otras propiedades', { label: 'Nombre', placeholder: 'Escribe tu nombre' }),
       named('value', 'value', 'Otras propiedades', { label: 'Nombre', value: 'Ana Pérez' }),
       named('autocomplete', 'autocomplete', 'Otras propiedades', { label: 'Correo', type: 'email', autocomplete: 'email' }),
@@ -257,22 +252,17 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
     selector: 'sa-textarea',
     description: 'Un campo de varias líneas que crece con el contenido, en sus tres modos.',
     affects: ['Densidad', 'Tamaño de fuente'],
+    modes: MODES,
     notShown: ['inputId', 'showErrorMessage'],
     code: `<sa-textarea label="Comentario" [rows]="2" [formControl]="comment" />`,
     previewClass: 'w-64',
     variants: [
       ...MODES.map((mode) => named(`mode-${mode}`, `variant="${mode}"`, 'Modos', { label: 'Comentario', variant: mode, rows: 2 })),
-      ...MODES.flatMap((mode) => {
-        const group = `Modo variant="${mode}"`;
-        const base = { label: 'Comentario', variant: mode, rows: 2 };
-        return [
-          named(`required-${mode}`, `required variant="${mode}"`, group, { ...base, required: true }),
-          named(`readonly-${mode}`, `readonlyInput variant="${mode}"`, group, { ...base, value: 'Solo lectura', readonlyInput: true }),
-          named(`icon-${mode}`, `icono a la izquierda variant="${mode}"`, group, { ...base, lucideIcon: 'Edit' }),
-          named(`icon-right-${mode}`, `icono a la derecha variant="${mode}"`, group, { ...base, lucideIcon: 'Edit', iconPosition: 'right' }),
-          named(`rows-${mode}`, `rows 4 variant="${mode}"`, group, { label: 'Comentario', variant: mode, rows: 4 }),
-        ];
-      }),
+      named('required', 'required', 'Opciones del campo', { label: 'Comentario', rows: 2, required: true }),
+      named('readonly', 'readonlyInput', 'Opciones del campo', { label: 'Comentario', rows: 2, value: 'Solo lectura', readonlyInput: true }),
+      named('icon', 'icono a la izquierda', 'Opciones del campo', { label: 'Comentario', rows: 2, lucideIcon: 'Edit' }),
+      named('icon-right', 'icono a la derecha', 'Opciones del campo', { label: 'Comentario', rows: 2, lucideIcon: 'Edit', iconPosition: 'right' }),
+      named('rows', 'rows 4', 'Opciones del campo', { label: 'Comentario', rows: 4 }),
       named('fixed', 'autoResize apagado', 'Otras propiedades', { label: 'Comentario', rows: 3, autoResize: false }),
       named('placeholder', 'placeholder', 'Otras propiedades', { label: 'Comentario', rows: 2, placeholder: 'Escribe un comentario' }),
       named('value', 'value', 'Otras propiedades', { label: 'Comentario', rows: 2, value: 'Un texto ya escrito' }),
@@ -323,6 +313,7 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
     selector: 'sa-select',
     description: 'Una lista desplegable con búsqueda, selección múltiple y opciones con icono, color o avatar, en sus tres modos.',
     affects: ['Radio de bordes', 'Densidad', 'Tamaño de fuente'],
+    modes: MODES,
     // El `id`, el mensaje de error y la clase del panel dependen de quien lo usa.
     notShown: ['inputId', 'showErrorMessage', 'panelStyleClass'],
     code: `<sa-select label="Plan" [options]="plans" optionLabel="label" optionValue="value" [formControl]="plan" />`,
@@ -333,20 +324,14 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       const agents = { options: asRef('agents', AGENTS), optionLabel: 'label', optionValue: 'value', optionAvatar: 'initials', optionAvatarLabel: 'initials', optionPresence: 'presence' };
       return [
         ...MODES.map((mode) => named(`mode-${mode}`, `variant="${mode}"`, 'Modos', { label: 'Plan', variant: mode, ...plans })),
-        ...MODES.flatMap((mode) => {
-          const group = `Modo variant="${mode}"`;
-          const base = { label: 'Plan', variant: mode, ...plans };
-          return [
-            named(`required-${mode}`, `required variant="${mode}"`, group, { ...base, required: true }),
-            named(`clearable-${mode}`, `showClear variant="${mode}"`, group, { ...base, showClear: true }),
-            named(`multiple-${mode}`, `multiselect variant="${mode}"`, group, { ...base, multiselect: true }),
-            named(`plain-${mode}`, `searchable apagado variant="${mode}"`, group, { ...base, searchable: false }),
-            named(`icon-${mode}`, `icono a la izquierda variant="${mode}"`, group, { ...base, lucideIcon: 'Search' }),
-            named(`icon-right-${mode}`, `icono a la derecha variant="${mode}"`, group, { ...base, lucideIcon: 'Search', iconPosition: 'right' }),
-            // El valor lo lleva el control (`[formControl]`), como en un formulario real: sin él un selector de solo lectura se vería vacío.
-            named(`readonly-${mode}`, `readonlyInput variant="${mode}"`, group, { ...base, readonlyInput: true, '[formControl]': 'plan' }),
-          ];
-        }),
+        named('required', 'required', 'Opciones del campo', { label: 'Plan', required: true, ...plans }),
+        named('clearable', 'showClear', 'Opciones del campo', { label: 'Plan', showClear: true, ...plans }),
+        named('multiple', 'multiselect', 'Opciones del campo', { label: 'Plan', multiselect: true, ...plans }),
+        named('plain', 'searchable apagado', 'Opciones del campo', { label: 'Plan', searchable: false, ...plans }),
+        named('icon', 'icono a la izquierda', 'Opciones del campo', { label: 'Plan', lucideIcon: 'Search', ...plans }),
+        named('icon-right', 'icono a la derecha', 'Opciones del campo', { label: 'Plan', lucideIcon: 'Search', iconPosition: 'right', ...plans }),
+        // El valor lo lleva el control (`[formControl]`), como en un formulario real: sin él un selector de solo lectura se vería vacío.
+        named('readonly', 'readonlyInput', 'Opciones del campo', { label: 'Plan', readonlyInput: true, '[formControl]': 'plan', ...plans }),
         named('placeholder', 'placeholder', 'Otras propiedades', { placeholder: 'Elige un plan', ...plans }),
         named('interaction-disabled', 'interactionDisabled', 'Otras propiedades', { label: 'Plan', interactionDisabled: true, ...plans }),
         named('shape-dot', 'optionShape="dot"', 'Opciones con color', { label: 'Estado', optionShape: 'dot', ...statuses }),
@@ -375,10 +360,10 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       named('shape-rounded', 'shape="rounded"', 'Forma', { label: 'AB', size: 40, shape: 'rounded' }),
       named('image', 'imageUrl', 'Forma', { label: 'AB', size: 40, imageUrl: AVATAR_IMAGE }),
       named('image-rounded', 'imageUrl rounded', 'Forma', { label: 'AB', size: 40, imageUrl: AVATAR_IMAGE, shape: 'rounded' }),
-      ...[24, 32, 40, 56].map((size) => named(`size-${size}`, `${size}`, 'Tamaños', { label: 'AB', size })),
+      ...[24, 32, 40, 56, 80].map((size) => named(`size-${size}`, `${size}`, 'Tamaños', { label: 'AB', size })),
       named('css-size', 'cssSize', 'Tamaños', { label: 'AB', cssSize: '3.5rem' }),
       named('color', 'background', 'Colores', { label: 'CD', size: 40, background: '#6366f1' }),
-      named('text-color', 'color y textClass', 'Colores', { label: 'CD', size: 40, background: '#fde68a', color: '#78350f', textClass: 'text-caption-2-bold' }),
+      named('text-color', 'color y textClass', 'Colores', { label: 'CD', size: 40, background: '#fde68a', color: '#78350f', textClass: 'tracking-widest' }),
       ...['online', 'away', 'busy', 'invisible'].map((status) => named(`presence-${status}`, status, 'Presencia', { label: 'EF', size: 40, mode: 'presence', presenceStatus: status })),
       ...['online', 'busy'].map((status) => named(`presence-rounded-${status}`, `${status} rounded`, 'Presencia', { label: 'EF', size: 40, shape: 'rounded', mode: 'presence', presenceStatus: status })),
       named('presence-dot-size', 'dotSize', 'Presencia', { label: 'EF', size: 56, mode: 'presence', presenceStatus: 'online', dotSize: '1rem' }),
@@ -739,9 +724,10 @@ export function groupsOf(entry: UiComponentEntry): readonly { readonly name: str
 
 /** El código de una variante: el escrito a mano o la etiqueta que sale de sus propiedades. */
 export function codeOfVariant(entry: UiComponentEntry, item: UiVariant, extra: UiProps = {}, zones: ReadonlySet<string> = new Set()): string {
-  if (item.code) return item.code;
+  const props = { ...entry.baseProps, ...item.props, ...extra };
+  if (item.code) return typeof item.code === 'function' ? item.code(props) : item.code;
   const content = entry.content ? entry.content(zones) : (item.text ?? '');
-  return snippet(entry.tag ?? entry.selector, { ...entry.baseProps, ...item.props, ...extra }, content);
+  return snippet(entry.tag ?? entry.selector, props, content);
 }
 
 export { PLANS, STATUSES, AGENTS, ACTIONS };
