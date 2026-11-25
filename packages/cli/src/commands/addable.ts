@@ -47,7 +47,32 @@ export interface AddStep {
 }
 
 /** The requirements of an option that adding a capability can satisfy. */
-const PREREQUISITE_KEYS = ['architecture', 'routing', 'appShell', 'components'] as const;
+const PREREQUISITE_KEYS = ['architecture', 'routing', 'appShell'] as const;
+
+/**
+ * What an option needs that the developer chooses and `sa add` never adds on their behalf: which
+ * components the project gets is their decision (a collection or their own selection), so the chain
+ * stops and names the command instead of picking a collection for them.
+ */
+const CHOSEN_KEYS = ['components'] as const;
+
+/** The requirements of `option` that the developer must settle first, as the `sa add` word that does. */
+export function unchosenOf(
+  category: CapabilityCategory,
+  id: string,
+  options: StarterOptions,
+): AddStep[] {
+  const option = CAPABILITIES[category].find((candidate) => candidate.id === id);
+  const steps: AddStep[] = [];
+  for (const key of CHOSEN_KEYS) {
+    const accepted = option?.requires?.[key] as readonly string[] | undefined;
+    const capability = ADD_WORD.get(key);
+    if (accepted && capability !== undefined && !accepted.includes(options[key])) {
+      steps.push({ capability, value: '' });
+    }
+  }
+  return steps;
+}
 
 /**
  * What `option` needs that the project does not have and that `sa add` can bring, in the order to add

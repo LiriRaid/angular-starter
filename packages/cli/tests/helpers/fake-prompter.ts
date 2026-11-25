@@ -79,6 +79,11 @@ export function createFakePrompter(answers: unknown[]): {
         names: question.choices.map((choice) => choice.name),
         descriptions: question.choices.map((choice) => choice.description),
         checked: question.choices.filter((choice) => choice.checked).map((choice) => choice.value),
+        disabled: Object.fromEntries(
+          question.choices.flatMap((choice) =>
+            choice.disabled === undefined ? [] : [[choice.value, choice.disabled]],
+          ),
+        ),
         canGoBack: question.canGoBack ?? false,
       }) as T[],
     confirm: async (question) =>

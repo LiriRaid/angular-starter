@@ -61,6 +61,28 @@ describe('createInquirerPrompter', () => {
     );
   });
 
+  it('passes the disabled choices of a checkbox on, so inquirer blocks them', async () => {
+    prompts.checkbox.mockResolvedValue([]);
+    await createInquirerPrompter().checkbox({
+      name: 'components',
+      message: 'Which components?',
+      choices: [
+        { value: 'button', name: 'sa-button', checked: true, disabled: '(already in the project)' },
+        { value: 'modal', name: 'sa-modal' },
+      ],
+    });
+
+    const { choices } = prompts.checkbox.mock.calls[0]?.[0] as {
+      choices: { value: string; checked: boolean; disabled?: string }[];
+    };
+    expect(choices[0]).toMatchObject({
+      value: 'button',
+      checked: true,
+      disabled: '(already in the project)',
+    });
+    expect(choices[1]?.disabled).toBeUndefined();
+  });
+
   it('maps choices and the default for select', async () => {
     prompts.select.mockResolvedValue('scss');
     const answer = await createInquirerPrompter().select({

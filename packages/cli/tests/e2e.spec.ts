@@ -97,6 +97,22 @@ ${result.stderr}`,
     ).toBe(0);
   }
 
+  /** Builds the application for production and fails on any budget warning, which the build prints without failing. */
+  async function buildWithinBudgets(project: string) {
+    const npm = existsSync(join(project, 'package-lock.json'));
+    const result = await execa(
+      npm ? 'npx' : 'pnpm',
+      npm ? ['--no-install', 'ng', 'build'] : ['exec', 'ng', 'build'],
+      { cwd: project, reject: false, env: CHILD_ENV, extendEnv: true },
+    );
+    const output = `${result.stdout}
+${result.stderr}`;
+    expect(result.exitCode, output).toBe(0);
+    expect(output, 'the build exceeded a budget').not.toMatch(
+      /exceeded maximum budget|bundle initial exceeded/i,
+    );
+  }
+
   const read = (project: string, file: string): Promise<string> =>
     readFile(join(project, file), 'utf8');
 
@@ -440,7 +456,7 @@ ${result.stderr}`,
         layout: 'floating-wide',
       });
 
-      await ng(project, 'build');
+      await buildWithinBudgets(project);
       await ng(project, 'test', '--watch=false');
     },
     INSTALL_TIMEOUT_MS,
@@ -504,6 +520,82 @@ ${result.stderr}`,
   );
 
   it(
+    'takes a default Angular project to the UI System with a few components, and completes its catalog when more arrive',
+    async () => {
+      const project = await createInstalled(
+        'e2e-catalog',
+        '--architecture',
+        'angular-default',
+        '--routing',
+        'angular',
+        '--app-shell',
+        'none',
+        '--components',
+        'none',
+        '--icons',
+        'none',
+      );
+      const catalog = () =>
+        read(project, 'src/app/features/preference-design/ui-system/ui-system.catalog.ts');
+      const readme = () => read(project, 'README.md');
+      // The README that the real ng new wrote is already the project's.
+      expect(await readme()).not.toContain('This project was generated using [Angular CLI]');
+      expect(await readme()).toContain('Angular default structure');
+
+      // The UI System needs components: with none it refuses and says what to run.
+      const refused = await execa('node', [bin, 'add', 'ui-system'], {
+        cwd: project,
+        reject: false,
+        env: CHILD_ENV,
+        extendEnv: true,
+      });
+      expect(refused.exitCode).toBe(2);
+      expect(refused.stderr).toContain('sa add components');
+
+      await asProject(project, 'add', 'components', 'button,modal,tabs');
+      await asProject(project, 'add', 'architecture', 'screaming');
+      await asProject(project, 'add', 'routing', 'starter');
+      await asProject(project, 'add', 'app-shell');
+      await asProject(project, 'add', 'ui-system');
+
+      const first = await catalog();
+      expect(first).toContain("id: 'modal'");
+      expect(first).toContain("id: 'tabs'");
+      // The shell brings its own search and colour picker, and the catalog shows what is installed.
+      expect(first).toContain("id: 'search'");
+      expect(first).toContain("id: 'theme-color-picker'");
+      expect(first).not.toContain("id: 'table'");
+      expect(first).not.toContain("id: 'datepicker'");
+      expect(await readme()).not.toContain('This project was generated using [Angular CLI]');
+      expect(await readme()).toContain('Starter Angular UI System');
+      await buildWithinBudgets(project);
+
+      // More components: the CLI says the catalog can be completed, and completes it on request.
+      const more = await execa('node', [bin, 'add', 'components', 'table,datepicker'], {
+        cwd: project,
+        reject: false,
+        env: CHILD_ENV,
+        extendEnv: true,
+      });
+      expect(
+        more.exitCode,
+        `${more.stdout}
+${more.stderr}`,
+      ).toBe(0);
+      expect(more.stdout).toContain('Next: "sa add ui-system"');
+      expect(await catalog()).not.toContain("id: 'table'");
+      await asProject(project, 'add', 'ui-system');
+      const second = await catalog();
+      expect(second).toContain("id: 'table'");
+      expect(second).toContain("id: 'datepicker'");
+
+      await buildWithinBudgets(project);
+      await ng(project, 'test', '--watch=false');
+    },
+    INSTALL_TIMEOUT_MS,
+  );
+
+  it(
     'gives the Screaming Architecture to a project that is still what ng new generates',
     async () => {
       const project = await create(
@@ -524,7 +616,7 @@ ${result.stderr}`,
       await asProject(project, 'init');
       await asProject(project, 'add', 'architecture', 'screaming');
 
-      expect(existsSync(join(project, 'src/app/features/home/home.ts'))).toBe(true);
+      expect(existsSync(join(project, 'src/app/features/README.md'))).toBe(true);
       expect(await read(project, 'tsconfig.json')).toContain('"@features/*"');
       const config = JSON.parse(await read(project, 'starter-angular.config.json'));
       expect(config.options.architecture).toBe('screaming');
