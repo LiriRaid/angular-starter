@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ANGULAR_CLI_VERSION } from '../src/compat.js';
 import { run } from '../src/main.js';
@@ -74,7 +74,7 @@ describe('sa init', () => {
     await init(root);
     const project = await findProject(root);
     expect(project.options.architecture).toBe('angular-default');
-    expect(project.name).toBe('shop');
+    expect(project.name).toBe(basename(root));
   });
 
   it('shows what it assumed', async () => {

@@ -2,7 +2,7 @@ import { CAPABILITIES, CATEGORIES, type CapabilityCategory } from '../config/cap
 import { ALL_COMPONENT_IDS, ESSENTIAL_COMPONENT_IDS } from '../config/components.js';
 import { COMPONENT_DESCRIPTIONS } from '../engine/components/descriptions.js';
 import { UsageError } from '../errors.js';
-import { ADDABLE, addableValues } from './addable.js';
+import { ADD_WORD, addableValues } from './addable.js';
 import { println, type CliIo } from '../io.js';
 import { createStyler, wrapText } from '../ui/format.js';
 
@@ -36,9 +36,6 @@ const NEW_FLAGS: Record<CapabilityCategory, string> = {
   icons: '--icons',
   packageManager: '--package-manager',
 };
-
-/** The word `sa add` takes for a category, when a project can add it. */
-const ADD_WORD = new Map(Object.entries(ADDABLE).map(([word, category]) => [category, word]));
 
 /** The kebab-case spelling of a category: `app-shell` for `appShell`. */
 const kebab = (name: string): string =>

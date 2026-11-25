@@ -10,7 +10,7 @@ import { UsageError } from '../errors.js';
 export interface StarterProject {
   /** The folder that holds `starter-angular.config.json`. */
   root: string;
-  /** The package name of the project, which the generated code uses as its application name. */
+  /** The folder of the project, which is the name its developer typed and the generated code shows as its application name. */
   name: string;
   options: StarterOptions;
 }
@@ -71,11 +71,5 @@ async function parseProject(root: string, text: string): Promise<StarterProject>
   );
   if (!options.success) throw invalid(`\n${formatIssues(options.error)}`);
 
-  const manifest = await readFile(join(root, 'package.json'), 'utf8').catch(() => '{}');
-  const name = (JSON.parse(manifest) as { name?: unknown }).name;
-  return {
-    root,
-    name: typeof name === 'string' && name !== '' ? name : basename(root),
-    options: options.data,
-  };
+  return { root, name: basename(root), options: options.data };
 }
