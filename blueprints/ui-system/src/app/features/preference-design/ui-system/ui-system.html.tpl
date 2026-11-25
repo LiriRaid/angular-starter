@@ -31,60 +31,85 @@
       <div class="sa-collapse-grid" data-preview [class.is-collapsed]="!isShown(entry.id)" [attr.inert]="isShown(entry.id) ? null : ''">
         <div class="flex flex-col gap-3">
           <div class="flex flex-col gap-4 rounded-lg border border-dashed border-(--app-border-color) bg-(--app-panel-muted-bg) p-4">
-            @for (group of groupsOf(entry); track group.name) {
-              <section class="flex flex-col gap-2" [attr.aria-label]="group.name">
-                <h5 class="text-caption-2-semibold text-(--app-text-subtle)">{{ group.name }}</h5>
-                <div class="flex flex-wrap items-end gap-x-5 gap-y-4">
-                  @for (item of group.variants; track item.id) {
-                    <figure class="m-0 flex flex-col items-start gap-1.5" [attr.data-variant]="item.id">
-                      <div [class]="item.boxClass ?? entry.previewClass ?? ''">
-                        @switch (entry.id) {
-                          @case ('input') {
-                            @if (item.inputs['type'] === 'password') {
-                              <sa-input [label]="$any(item.inputs['label'])" [variant]="$any(item.inputs['variant'] ?? 'on')" [type]="isPasswordShown(item) ? 'text' : 'password'" [lucideIcon]="isPasswordShown(item) ? 'EyeOff' : 'Eye'" iconPosition="right" [iconClickable]="true" (iconClick)="togglePassword(item)" />
-                            } @else {
-                              <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: item.inputs" />
+            @if (entry.noPreview) {
+              <p class="text-caption-2-regular text-(--app-text-subtle)">Este componente todavía no tiene vista previa en el catálogo: aquí están su selector y cómo se usa.</p>
+            } @else {
+              @for (group of groupsOf(entry); track group.name) {
+                <section class="flex flex-col gap-2" [attr.aria-label]="group.name">
+                  <h5 class="text-caption-2-semibold text-(--app-text-subtle)">{{ group.name }}</h5>
+                  <div class="flex flex-wrap items-end gap-x-5 gap-y-4">
+                    @for (item of group.variants; track item.id) {
+                      <figure class="m-0 flex flex-col items-start gap-1.5" [attr.data-variant]="item.id">
+                        <div [class]="item.boxClass ?? entry.previewClass ?? ''">
+                          @switch (entry.id) {
+                            <!-- uis:begin(input) -->
+                            @case ('input') {
+                              @if (item.inputs['type'] === 'password') {
+                                <sa-input [label]="$any(item.inputs['label'])" [variant]="$any(item.inputs['variant'] ?? 'on')" [type]="isPasswordShown(item) ? 'text' : 'password'" [lucideIcon]="isPasswordShown(item) ? 'EyeOff' : 'Eye'" iconPosition="right" [iconClickable]="true" (iconClick)="togglePassword(item)" />
+                              } @else {
+                                <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: item.inputs" />
+                              }
+                            }
+                            <!-- uis:end -->
+                            <!-- uis:begin(checkbox) -->
+                            @case ('checkbox') {
+                              <sa-checkbox [formControl]="checkboxes[item.id]" [ariaLabel]="$any(item.inputs['ariaLabel'])" [indeterminate]="item.inputs['indeterminate'] === true" />
+                            }
+                            <!-- uis:end -->
+                            <!-- uis:begin(tooltip) -->
+                            @case ('tooltip') {
+                              @if (item.text) {
+                                <sa-button variant="outlined"><span saTooltip="Texto de ayuda" [tooltipPosition]="$any(item.inputs['tooltipPosition'])">{{ item.text }}</span></sa-button>
+                              } @else {
+                                <sa-button [label]="$any(item.inputs['label'])" variant="outlined" saTooltip="Texto de ayuda" [tooltipPosition]="$any(item.inputs['tooltipPosition'])" [showDelay]="$any(item.inputs['showDelay'] ?? 0)" />
+                              }
+                            }
+                            <!-- uis:end -->
+                            <!-- uis:begin(select) -->
+                            @case ('select') {
+                              @if (readonlySelects[item.id]; as control) {
+                                <sa-select [formControl]="control" [label]="$any(item.inputs['label'])" [variant]="$any(item.inputs['variant'])" [options]="$any(item.inputs['options'])" optionLabel="label" optionValue="value" [readonlyInput]="true" />
+                              } @else {
+                                <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: item.inputs" />
+                              }
+                            }
+                            <!-- uis:end -->
+                            <!-- uis:begin(tabs) -->
+                            @case ('tabs') {
+                              <sa-tabs [tabs]="tabsOf(item)" [active]="activeOf(item)" (activeChange)="setActive(item, $event)" [variant]="$any(item.inputs['variant'] ?? 'default')" [size]="$any(item.inputs['size'] ?? 'default')" ariaLabel="Pestañas de ejemplo" />
+                            }
+                            <!-- uis:end -->
+                            <!-- uis:begin(modal) -->
+                            @case ('modal') {
+                              <sa-button label="Abrir" variant="outlined" size="small" (onClick)="openOverlay(entry, item)" />
+                            }
+                            <!-- uis:end -->
+                            <!-- uis:begin(drawer) -->
+                            @case ('drawer') {
+                              <sa-button label="Abrir" variant="outlined" size="small" (onClick)="openOverlay(entry, item)" />
+                            }
+                            <!-- uis:end -->
+                            <!-- uis:begin(toast) -->
+                            @case ('toast') {
+                              <sa-button label="Mostrar" variant="outlined" size="small" (onClick)="showToast(item)" />
+                            }
+                            <!-- uis:end -->
+                            <!-- uis:begin(search) -->
+                            @case ('search') {
+                              <sa-search [control]="searchControl" [mode]="$any(item.inputs['mode'] ?? 'input')" [placeholder]="$any(item.inputs['placeholder'] ?? 'Buscar...')" />
+                            }
+                            <!-- uis:end -->
+                            @default {
+                              <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: item.inputs; content: contentOf(entry, item)" />
                             }
                           }
-                          @case ('checkbox') {
-                            <sa-checkbox [formControl]="checkboxes[item.id]" [ariaLabel]="$any(item.inputs['ariaLabel'])" [indeterminate]="item.inputs['indeterminate'] === true" />
-                          }
-                          @case ('tooltip') {
-                            @if (item.text) {
-                              <sa-button variant="outlined"><span saTooltip="Texto de ayuda" [tooltipPosition]="$any(item.inputs['tooltipPosition'])">{{ item.text }}</span></sa-button>
-                            } @else {
-                              <sa-button [label]="$any(item.inputs['label'])" variant="outlined" saTooltip="Texto de ayuda" [tooltipPosition]="$any(item.inputs['tooltipPosition'])" [showDelay]="$any(item.inputs['showDelay'] ?? 0)" />
-                            }
-                          }
-                          @case ('select') {
-                            @if (readonlySelects[item.id]; as control) {
-                              <sa-select [formControl]="control" [label]="$any(item.inputs['label'])" [variant]="$any(item.inputs['variant'])" [options]="$any(item.inputs['options'])" optionLabel="label" optionValue="value" [readonlyInput]="true" />
-                            } @else {
-                              <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: item.inputs" />
-                            }
-                          }
-                          @case ('tabs') {
-                            <sa-tabs [tabs]="tabsOf(item)" [active]="activeOf(item)" (activeChange)="setActive(item, $event)" [variant]="$any(item.inputs['variant'] ?? 'default')" [size]="$any(item.inputs['size'] ?? 'default')" ariaLabel="Pestañas de ejemplo" />
-                          }
-                          @case ('modal') {
-                            <sa-button label="Abrir" variant="outlined" size="small" (onClick)="openOverlay(entry, item)" />
-                          }
-                          @case ('drawer') {
-                            <sa-button label="Abrir" variant="outlined" size="small" (onClick)="openOverlay(entry, item)" />
-                          }
-                          @case ('toast') {
-                            <sa-button label="Mostrar" variant="outlined" size="small" (onClick)="showToast(item)" />
-                          }
-                          @default {
-                            <ng-container *ngComponentOutlet="outlets[entry.id]; inputs: item.inputs; content: contentOf(entry, item)" />
-                          }
-                        }
-                      </div>
-                      <button type="button" data-chip class="rounded-full border bg-(--app-control-surface-bg) px-2 py-0.5 text-caption-2-semibold transition-colors" [class]="isSelected(entry, item) ? 'border-(--app-badge-soft-text) text-(--app-badge-soft-text)' : 'border-(--app-border-color) text-(--app-text-subtle) hover:text-(--app-text-color)'" [attr.aria-pressed]="isSelected(entry, item)" (click)="choose(entry, item)">{{ item.label }}</button>
-                    </figure>
-                  }
-                </div>
-              </section>
+                        </div>
+                        <button type="button" data-chip class="rounded-full border bg-(--app-control-surface-bg) px-2 py-0.5 text-caption-2-semibold transition-colors" [class]="isSelected(entry, item) ? 'border-(--app-badge-soft-text) text-(--app-badge-soft-text)' : 'border-(--app-border-color) text-(--app-text-subtle) hover:text-(--app-text-color)'" [attr.aria-pressed]="isSelected(entry, item)" (click)="choose(entry, item)">{{ item.label }}</button>
+                      </figure>
+                    }
+                  </div>
+                </section>
+              }
             }
 
             @if (entry.options; as options) {
@@ -98,7 +123,9 @@
               </div>
             }
 
+            <!-- uis:begin(modal|drawer) -->
             @switch (entry.id) {
+              <!-- uis:begin(modal) -->
               @case ('modal') {
                 <sa-modal [visible]="modalOpen()" (visibleChange)="modalOpen.set($event)" title="Título" [flush]="modalInputs().flush ?? false" [titleIcon]="modalInputs().titleIcon ?? null" [titleDotColor]="modalInputs().titleDotColor ?? null" [width]="modalInputs().width ?? '34rem'" [variant]="modalInputs().variant ?? 'default'" [showFooter]="modalInputs().showFooter ?? false" [closable]="modalInputs().closable ?? true" [dismissableMask]="modalInputs().dismissableMask ?? true" [draggable]="modalInputs().draggable ?? true">
                   <div class="flex flex-col gap-2 p-5 text-caption-1-regular text-(--app-text-color)">
@@ -117,6 +144,8 @@
                   }
                 </sa-modal>
               }
+              <!-- uis:end -->
+              <!-- uis:begin(drawer) -->
               @case ('drawer') {
                 <sa-drawer [visible]="drawerOpen()" (visibleChange)="drawerOpen.set($event)" ariaLabel="Panel de ejemplo" [position]="drawerInputs().position ?? 'left'" [width]="drawerInputs().width ?? null" [closable]="drawerInputs().closable ?? true" [dismissible]="drawerInputs().dismissible ?? true" [closeOnEscape]="drawerInputs().closeOnEscape ?? true" [density]="drawerInputs().density ?? 'comfortable'" [flush]="drawerInputs().flush ?? false" [closeIcon]="drawerInputs().closeIcon ?? 'X'" [closeLabel]="drawerInputs().closeLabel ?? 'Cerrar'">
                   <h3 drawer-header class="text-body-2-bold text-(--app-text-color)">Título del panel</h3>
@@ -136,7 +165,9 @@
                   }
                 </sa-drawer>
               }
+              <!-- uis:end -->
             }
+            <!-- uis:end -->
           </div>
 
           <div class="flex flex-col gap-2">

@@ -62,7 +62,7 @@ function componentRows(): Row[] {
   return ALL_COMPONENT_IDS.map((id) => ({
     id,
     commands: [`sa add components ${id}`],
-    name: `sa-${id}${ESSENTIAL_COMPONENT_IDS.includes(id) ? ' (essential)' : ''}`,
+    name: `sa-${id}${ESSENTIAL_COMPONENT_IDS.includes(id) ? ' (recommended)' : ''}`,
     description: COMPONENT_DESCRIPTIONS[id] ?? id,
   }));
 }

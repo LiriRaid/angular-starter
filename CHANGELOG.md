@@ -8,27 +8,60 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
-- In a terminal, `sa add components` with no value opens a checklist of the components the project does
-  not have yet, with the essential ones ticked, and `sa add rendering` with no value opens a selector
+- The UI System is built from the components the project has (ADR-0024 and plan 0021). `sa add ui-system`
+  describes in its catalog the components that are in `shared/components`, not a fixed list of 16: a project
+  with a few components gets a catalog of those few that compiles, and the one with the shell and the
+  recommended collection shows its 18 (the shell brings `sa-search` and `sa-theme-color-picker`, which the
+  catalog did not describe). Every one of the 26 components has an entry: 18 with a live preview and, for
+  `table`, `datepicker`, `section-nav`, `selectable-item`, `reorder-list`, `preview`, `media-preview` and
+  `weekly-schedule`, a card with the selector, what it is and how it is used.
+- The UI System accepts a custom selection of components and refuses a project that has none, saying to run
+  `sa add components` first, even in a terminal. It brings `sa-button` and `sa-toggle` (it draws its own
+  interface with them) when they are missing and says so.
+- When more components arrive, `sa add components` offers to complete the catalog (in a terminal a question
+  that is yes by default; outside one a `Next:` line), and `sa add ui-system` in a project that has the UI
+  System completes it. The catalog is generated again only when its files are as the CLI left them; if you
+  edited one, nothing is written and the warning names the files and the components that are missing.
+- The README of a project describes it: `sa new` and every `sa add` replace the README that `ng new` writes
+  with a Starter Angular one, with a block between `<!-- sa:project -->` and `<!-- /sa:project -->` that
+  lists what the project has (architecture, routing, styles, rendering, shell, presence, components, UI
+  System, icons) and its commands in the syntax of its package manager. Only that block is rewritten when it
+  is there, and a README you wrote is never touched.
+- `README.md` and `docs/README.md` describe the CLI as it is today: the commands, `sa add` completing what a
+  capability needs, the lists, the architecture that only adds structure, the UI System and the README that
+  follows the project.
+- In a terminal, `sa add components` with no value opens a checklist of the components, with the ones
+  the project has blocked and the recommended ones marked (ADR-0024), and `sa add rendering` with no value opens a selector
   (Angular SSR or the Starter SSR). Outside a terminal they still ask for the value, now listing the ids.
 - `sa list components` lists the 26 components one by one (id, `sa add components <id>`, name and
-  description, the essential ones marked) after the collections, and `sa --help` has a `Lists:` section
+  description, the recommended ones marked) after the collections, and `sa --help` has a `Lists:` section
   with every `sa list <category>`. The help of `add` and `generate` point to the lists and to each other.
-- `as init` sets up an Angular project that `as new` did not make: it reads what the project has
+- `sa init` sets up an Angular project that `sa new` did not make: it reads what the project has
   (architecture, routing, stylesheet format, Tailwind CSS, rendering, shell, presence, components, icons,
-  package manager, prefix), shows it and writes `angular-starter.config.json` without touching code, so
-  `as add`, `as generate` and `as config` work on it (ADR-0019 and plan 0016).
-- `as add architecture screaming` gives the Screaming Architecture to a project that is still what
+  package manager, prefix), shows it and writes `starter-angular.config.json` without touching code, so
+  `sa add`, `sa generate` and `sa config` work on it (ADR-0019 and plan 0016).
+- `sa add architecture screaming` gives the Screaming Architecture to a project that is still what
   `ng new` generates, and stops before writing when it has folders or changes of its own.
-- `as generate component <name>` works in a project that is not Screaming, like `ng generate component`:
+- `sa generate component <name>` works in a project that is not Screaming, like `ng generate component`:
   `src/app/<name>/`, or below `--path <folder>`.
-- `as list` shows the command of each option (`Add: as add ...`, `New: as new --...`) and takes
+- `sa list` shows the command of each option (`Add: sa add ...`, `New: sa new --...`) and takes
   `app-shell`, `ui-system`, `ssr-purpose` and `package-manager` as category names.
-- `as version` (and `-v`, `--version`) prints the version of the CLI and the version of the Angular CLI
-  that `as new` runs, not the latest one on npm.
+- `sa version` (and `-v`, `--version`) prints the version of the CLI and the version of the Angular CLI
+  that `sa new` runs, not the latest one on npm.
 
 ### Changed
 
+- The checklist of `sa add components` lists the 26 components: the ones the project has come ticked and
+  blocked with `(already in the project)` (the real checkbox ignored `disabled` and now gets it), counted by
+  the folders of `shared/components` so it includes what the shell brought, and the recommended ones carry
+  `(recommended)`. `sa list components` marks them the same way instead of `(essential)`.
+- `sa add ui-system` no longer adds the recommended collection on its own when the project has no components:
+  which components a project gets is yours to choose (ADR-0024).
+- The budget of the initial bundle goes from the 500 kB (warning) and 1 MB (error) of `ng new` to 1 MB and
+  2 MB when the design base is added (with the first collection or the shell), only while angular.json still
+  has the values of Angular. `sa-tabs.css` went from 5.4 kB to 3.6 kB, under the 4 kB budget of each component
+  stylesheet, with no visual change: its rules are nested under the host and its layout is in the classes of
+  the template.
 - `sa add` works from what the project has: in a terminal `sa add architecture` lists the architectures
   (the planned ones not selectable); a capability that needs others (the shell needs the routing, the UI
   System needs the shell and the components) says which, asks once and adds them in order, or stops and

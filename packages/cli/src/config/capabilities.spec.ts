@@ -153,12 +153,12 @@ describe('capability registry', () => {
     expect(starter?.requires).toEqual({
       architecture: ['screaming'],
       appShell: ['starter'],
-      components: ['recommended', 'all'],
+      components: ['recommended', 'all', 'custom'],
       tailwind: true,
     });
     expect(starter?.default).toBeUndefined();
     expect(unmetRequirements(starter!, { appShell: 'starter', components: 'none' })).toEqual([
-      'the components: recommended, all',
+      'the components: recommended, all, custom',
     ]);
   });
 

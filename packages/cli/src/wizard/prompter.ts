@@ -183,6 +183,8 @@ export function createInquirerPrompter(streams: TerminalStreams = {}): Prompter 
               name: choice.name,
               description: choice.description,
               checked: choice.checked ?? false,
+              // Without it a choice that is listed as taken could still be toggled.
+              disabled: choice.disabled,
             })),
             pageSize: 14,
             ...(question.canGoBack ? { theme: LIST_THEME } : {}),

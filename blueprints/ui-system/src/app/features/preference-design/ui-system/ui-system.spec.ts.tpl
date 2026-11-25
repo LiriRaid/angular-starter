@@ -1,7 +1,22 @@
 import { TestBed } from '@angular/core/testing';
 import { reflectComponentType, type Type } from '@angular/core';
-import { SaAvatar, SaButton, SaCheckbox, SaDivider, SaDrawer, SaIcon, SaInput, SaModal, SaPopover, SaSelect, SaSkeleton, SaTabs, SaTextarea, SaToggle } from '@shared/components';
-import { AlertService } from '@shared/services';
+import {
+  SaAvatar, // uis(avatar)
+  SaButton,
+  SaCheckbox, // uis(checkbox)
+  SaDivider, // uis(divider)
+  SaDrawer, // uis(drawer)
+  SaIcon, // uis(icon)
+  SaInput, // uis(input)
+  SaModal, // uis(modal)
+  SaPopover, // uis(popover)
+  SaSelect, // uis(select)
+  SaSkeleton, // uis(skeleton)
+  SaTabs, // uis(tabs)
+  SaTextarea, // uis(textarea)
+  SaToggle,
+} from '@shared/components';
+import { AlertService } from '@shared/services'; // uis(toast)
 import { UI_COMPONENTS, type UiComponentEntry } from './ui-system.catalog';
 import { UiSystem } from './ui-system';
 
@@ -46,16 +61,22 @@ describe('UiSystem', () => {
   it('says which tokens change a component', async () => {
     const { card } = await render();
     expect(card('button').textContent).toContain('Tamaño de botones');
-    expect(card('toast').textContent).toContain('Tamaño de fuente');
-    expect(card('avatar').textContent).toContain('ningún token');
+    expect(card('toast').textContent).toContain('Tamaño de fuente'); // uis(toast)
+    expect(card('avatar').textContent).toContain('ningún token'); // uis(avatar)
   });
 
   it('filters the catalog by what is typed', async () => {
     const { fixture, component, root } = await render();
-    component.query.set('modal');
+    component.query.set('sa-button');
     await fixture.whenStable();
-    const cards = root.querySelectorAll('article[data-component]');
-    expect(Array.from(cards).map((card) => card.getAttribute('data-component'))).toEqual(['modal']);
+    const cards = Array.from(root.querySelectorAll('article[data-component]'));
+    expect(cards.map((card) => card.getAttribute('data-component'))).toContain('button');
+    expect(cards.length).toBeLessThan(UI_COMPONENTS.length);
+
+    component.query.set('zzz-no-component');
+    await fixture.whenStable();
+    expect(root.querySelectorAll('article[data-component]')).toHaveLength(0);
+    expect(root.textContent).toContain('Ningún componente coincide');
   });
 
   it('collapses the preview of a component with the accordion animation and expands it again', async () => {
@@ -93,7 +114,7 @@ describe('UiSystem', () => {
 
   describe('variants', () => {
     it('gives every component more than one variant to look at', () => {
-      for (const entry of UI_COMPONENTS) {
+      for (const entry of UI_COMPONENTS.filter((candidate) => !candidate.noPreview)) {
         expect(entry.variants.length, entry.id).toBeGreaterThan(1);
         expect(new Set(entry.variants.map((variant) => variant.id)).size, entry.id).toBe(entry.variants.length);
       }
@@ -124,29 +145,31 @@ describe('UiSystem', () => {
       }
     });
 
+    // uis:begin(input)
     it('shows the modes and the types of the text field', async () => {
       const { card } = await render();
       expect(idsOf('input')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over', 'type-text', 'type-number', 'type-tel', 'type-price', 'type-tags']));
       expect(card('input').querySelectorAll('sa-input').length).toBe(entryOf('input').variants.length);
     });
+    // uis:end
 
     it('covers the options of the rest of the components', () => {
-      expect(idsOf('select')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over', 'multiple-on', 'clearable-on', 'icon-only']));
-      expect(idsOf('textarea')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over']));
-      expect(idsOf('tabs')).toEqual(expect.arrayContaining(['default', 'pills', 'compact', 'default-icons', 'pills-icons', 'compact-icons', 'fit-icons', 'fit-counts', 'overflow-icons', 'overflow-counts']));
-      expect(idsOf('avatar')).toEqual(expect.arrayContaining(['shape-circle', 'shape-rounded']));
-      expect(idsOf('divider')).toEqual(expect.arrayContaining(['horizontal-solid', 'horizontal-dashed', 'horizontal-dotted', 'vertical-solid']));
-      expect(idsOf('skeleton')).toEqual(expect.arrayContaining(['layout-line', 'layout-stat', 'layout-row', 'layout-circles']));
-      expect(idsOf('tooltip')).toEqual(['host-top', 'host-bottom', 'host-left', 'host-right', 'text-top', 'text-bottom', 'text-left', 'text-right', 'host-delay']);
-      expect(idsOf('popover')).toEqual(expect.arrayContaining(['top', 'bottom', 'left', 'right', 'actions']));
-      expect(idsOf('toggle')).toEqual(expect.arrayContaining(['off', 'on', 'disabled-off', 'disabled-on']));
-      expect(idsOf('checkbox')).toEqual(expect.arrayContaining(['unchecked', 'checked', 'indeterminate', 'disabled']));
-      expect(idsOf('toast')).toEqual(expect.arrayContaining(['success', 'info', 'warning', 'error', 'secondary', 'contrast', 'loading', 'position-top-center']));
+      expect(idsOf('select')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over', 'multiple-on', 'clearable-on', 'icon-only'])); // uis(select)
+      expect(idsOf('textarea')).toEqual(expect.arrayContaining(['mode-in', 'mode-on', 'mode-over'])); // uis(textarea)
+      expect(idsOf('tabs')).toEqual(expect.arrayContaining(['default', 'pills', 'compact', 'default-icons', 'pills-icons', 'compact-icons', 'fit-icons', 'fit-counts', 'overflow-icons', 'overflow-counts'])); // uis(tabs)
+      expect(idsOf('avatar')).toEqual(expect.arrayContaining(['shape-circle', 'shape-rounded'])); // uis(avatar)
+      expect(idsOf('divider')).toEqual(expect.arrayContaining(['horizontal-solid', 'horizontal-dashed', 'horizontal-dotted', 'vertical-solid'])); // uis(divider)
+      expect(idsOf('skeleton')).toEqual(expect.arrayContaining(['layout-line', 'layout-stat', 'layout-row', 'layout-circles'])); // uis(skeleton)
+      expect(idsOf('tooltip')).toEqual(['host-top', 'host-bottom', 'host-left', 'host-right', 'text-top', 'text-bottom', 'text-left', 'text-right', 'host-delay']); // uis(tooltip)
+      expect(idsOf('popover')).toEqual(expect.arrayContaining(['top', 'bottom', 'left', 'right', 'actions'])); // uis(popover)
+      expect(idsOf('toggle')).toEqual(expect.arrayContaining(['off', 'on', 'disabled-off', 'disabled-on'])); // uis(toggle)
+      expect(idsOf('checkbox')).toEqual(expect.arrayContaining(['unchecked', 'checked', 'indeterminate', 'disabled'])); // uis(checkbox)
+      expect(idsOf('toast')).toEqual(expect.arrayContaining(['success', 'info', 'warning', 'error', 'secondary', 'contrast', 'loading', 'position-top-center'])); // uis(toast)
     });
 
-    it('renders a preview for every variant of every component', async () => {
+    it('renders a preview for every variant of every component that has one', async () => {
       const { card } = await render();
-      for (const entry of UI_COMPONENTS) {
+      for (const entry of UI_COMPONENTS.filter((candidate) => !candidate.noPreview)) {
         for (const variant of entry.variants) {
           expect(card(entry.id).querySelector(`[data-variant="${variant.id}"]`), `${entry.id}/${variant.id}`).not.toBeNull();
         }
@@ -154,8 +177,35 @@ describe('UiSystem', () => {
     });
   });
 
+  describe('the components with no preview yet', () => {
+    it('show their selector and how they are used, and no preview', async () => {
+      const { card } = await render();
+      for (const entry of UI_COMPONENTS.filter((candidate) => candidate.noPreview)) {
+        expect(card(entry.id).textContent, entry.id).toContain(entry.selector);
+        expect(card(entry.id).textContent, entry.id).toContain('todavía no tiene vista previa');
+        expect(card(entry.id).querySelector('[data-variant]'), entry.id).toBeNull();
+        expect(card(entry.id).querySelector('[data-selected-code]')?.textContent, entry.id).toContain(entry.selector);
+      }
+    });
+  });
+
   describe('the properties of the components', () => {
-    const CLASSES: Record<string, Type<unknown>> = { icon: SaIcon, button: SaButton, input: SaInput, textarea: SaTextarea, checkbox: SaCheckbox, toggle: SaToggle, select: SaSelect, avatar: SaAvatar, divider: SaDivider, skeleton: SaSkeleton, modal: SaModal, drawer: SaDrawer, tabs: SaTabs, popover: SaPopover };
+    const CLASSES: Record<string, Type<unknown>> = {
+      icon: SaIcon, // uis(icon)
+      button: SaButton,
+      input: SaInput, // uis(input)
+      textarea: SaTextarea, // uis(textarea)
+      checkbox: SaCheckbox, // uis(checkbox)
+      toggle: SaToggle,
+      select: SaSelect, // uis(select)
+      avatar: SaAvatar, // uis(avatar)
+      divider: SaDivider, // uis(divider)
+      skeleton: SaSkeleton, // uis(skeleton)
+      modal: SaModal, // uis(modal)
+      drawer: SaDrawer, // uis(drawer)
+      tabs: SaTabs, // uis(tabs)
+      popover: SaPopover, // uis(popover)
+    };
 
     it('shows every input of every component, or says why it does not', () => {
       for (const [id, type] of Object.entries(CLASSES)) {
@@ -172,6 +222,7 @@ describe('UiSystem', () => {
   });
 
   describe('the modes of the field', () => {
+    // uis:begin(input)
     it('shows required in each mode, with its own name', async () => {
       const { card } = await render();
       for (const mode of ['on', 'in', 'over']) {
@@ -180,7 +231,9 @@ describe('UiSystem', () => {
         expect(figure.querySelector('[data-chip]')?.textContent).toContain(`required variant="${mode}"`);
       }
     });
+    // uis:end
 
+    // uis:begin(input)
     it('lets the password be shown and hidden with the eye', async () => {
       const { fixture, card } = await render();
       const figure = () => card('input').querySelector('[data-variant="type-password"]') as HTMLElement;
@@ -192,16 +245,18 @@ describe('UiSystem', () => {
       expect(figure().querySelector('input')?.getAttribute('type')).toBe('text');
       expect(figure().querySelector('svg.lucide-eye-off')).not.toBeNull();
     });
+    // uis:end
 
     it('gives every mode the options that apply to it', () => {
       for (const mode of ['on', 'in', 'over']) {
-        expect(idsOf('input')).toEqual(expect.arrayContaining([`required-${mode}`, `readonly-${mode}`, `icon-left-${mode}`, `icon-right-${mode}`]));
-        expect(idsOf('textarea')).toEqual(expect.arrayContaining([`required-${mode}`, `readonly-${mode}`, `icon-${mode}`]));
-        expect(idsOf('select')).toEqual(expect.arrayContaining([`required-${mode}`, `clearable-${mode}`, `multiple-${mode}`]));
+        expect(idsOf('input')).toEqual(expect.arrayContaining([`required-${mode}`, `readonly-${mode}`, `icon-left-${mode}`, `icon-right-${mode}`])); // uis(input)
+        expect(idsOf('textarea')).toEqual(expect.arrayContaining([`required-${mode}`, `readonly-${mode}`, `icon-${mode}`])); // uis(textarea)
+        expect(idsOf('select')).toEqual(expect.arrayContaining([`required-${mode}`, `clearable-${mode}`, `multiple-${mode}`])); // uis(select)
       }
     });
   });
 
+  // uis:begin(tabs)
   describe('tabs', () => {
     it('keep each example independent: choosing a tab in one does not change the others', async () => {
       const { fixture, card } = await render();
@@ -226,7 +281,9 @@ describe('UiSystem', () => {
       expect('sharedGroups' in entryOf('tabs')).toBe(false);
     });
   });
+  // uis:end
 
+  // uis:begin(tooltip)
   describe('the tooltip', () => {
     it('is shown on the whole button and on its text, in each position', async () => {
       const { card } = await render();
@@ -240,6 +297,7 @@ describe('UiSystem', () => {
       }
     });
   });
+  // uis:end
 
   describe('the chips', () => {
     it('paint the variant names and the tokens with the dark surface of the fields, in both themes', async () => {
@@ -260,6 +318,7 @@ describe('UiSystem', () => {
     });
   });
 
+  // uis:begin(select)
   describe('the readonly select', () => {
     it('shows a chosen value in each mode, so the readonly look can be judged', async () => {
       const { card } = await render();
@@ -269,7 +328,9 @@ describe('UiSystem', () => {
       }
     });
   });
+  // uis:end
 
+  // uis:begin(skeleton)
   describe('the skeleton', () => {
     it('gives every variant a box of its own, so one does not overlap the next', () => {
       for (const variant of entryOf('skeleton').variants) {
@@ -277,6 +338,7 @@ describe('UiSystem', () => {
       }
     });
   });
+  // uis:end
 
   describe('code', () => {
     it('follows the variant that is chosen', async () => {
@@ -296,6 +358,7 @@ describe('UiSystem', () => {
       expect(code()).not.toContain('xsmall');
     });
 
+    // uis:begin(avatar)
     it('is chosen by clicking the chip of a variant', async () => {
       const { fixture, card } = await render();
       (card('avatar').querySelector('[data-variant="shape-rounded"] [data-chip]') as HTMLButtonElement).click();
@@ -303,7 +366,9 @@ describe('UiSystem', () => {
       expect(card('avatar').querySelector('[data-selected-code]')?.textContent).toContain('shape="rounded"');
       expect(card('avatar').querySelector('[data-variant="shape-rounded"] [data-chip]')?.getAttribute('aria-pressed')).toBe('true');
     });
+    // uis:end
 
+    // uis:begin(tooltip)
     it('lists the code of every variant of a component', async () => {
       const { component } = await render();
       const all = component.allCodeOf(entryOf('tooltip'));
@@ -311,16 +376,21 @@ describe('UiSystem', () => {
         expect(all).toContain(`tooltipPosition="${position}"`);
       }
     });
+    // uis:end
 
+    // uis:begin(toast)
     it('shows the toast with the method of the chosen type', async () => {
       const { component } = await render();
       const toast = entryOf('toast');
       component.choose(toast, toast.variants.find((variant) => variant.id === 'error')!);
       expect(component.codeOf(toast)).toContain('showError(');
     });
+    // uis:end
   });
 
+  // uis:begin(drawer|modal)
   describe('overlays', () => {
+    // uis:begin(drawer)
     it('opens the drawer over the whole page, in each position', async () => {
       const { fixture, component } = await render();
       const drawer = entryOf('drawer');
@@ -337,7 +407,9 @@ describe('UiSystem', () => {
         await fixture.whenStable();
       }
     });
+    // uis:end
 
+    // uis:begin(drawer)
     it('shows the drawer with its header, its content and its footer', async () => {
       const { fixture, component } = await render();
       const drawer = entryOf('drawer');
@@ -354,7 +426,9 @@ describe('UiSystem', () => {
       expect(component.codeOf(drawer)).toContain('flush');
       expect(component.codeOf(drawer)).toContain('class="p-5"');
     });
+    // uis:end
 
+    // uis:begin(drawer)
     it('applies the options to the drawer and to its code', async () => {
       const { fixture, component } = await render();
       const drawer = entryOf('drawer');
@@ -368,7 +442,9 @@ describe('UiSystem', () => {
       expect(overlay().querySelector('.sa-drawer-close-button')).toBeNull();
       expect(component.codeOf(drawer)).toContain('[closable]="false"');
     });
+    // uis:end
 
+    // uis:begin(modal)
     it('opens the modal over the page with its title, its footer and its options', async () => {
       const { fixture, component } = await render();
       const modal = entryOf('modal');
@@ -386,6 +462,8 @@ describe('UiSystem', () => {
       expect(component.codeOf(modal)).toContain('flush');
       expect(component.codeOf(modal)).toContain('class="p-5"');
     });
+    // uis:end
+    // uis:begin(modal)
     it('lets the modal be fixed with the draggable switch, and writes it in the code', async () => {
       const { fixture, component } = await render();
       const modal = entryOf('modal');
@@ -408,9 +486,13 @@ describe('UiSystem', () => {
       press(overlay().querySelector('.sa-modal-header') as HTMLElement);
       expect((overlay().querySelector('.sa-modal') as HTMLElement).style.position).toBe('');
     });
+    // uis:end
   });
+  // uis:end
 
+  // uis:begin(drawer|modal)
   describe('overlay sizes', () => {
+    // uis:begin(modal)
     it('gives the modal the width and the shape of the chosen variant', async () => {
       const { fixture, component } = await render();
       const modal = entryOf('modal');
@@ -422,7 +504,9 @@ describe('UiSystem', () => {
       await fixture.whenStable();
       expect(overlay().querySelector('.sa-modal')?.classList.contains('sa-modal--preview')).toBe(true);
     });
+    // uis:end
 
+    // uis:begin(drawer)
     it('gives the drawer the width of the chosen variant', async () => {
       const { fixture, component } = await render();
       const drawer = entryOf('drawer');
@@ -430,8 +514,11 @@ describe('UiSystem', () => {
       await fixture.whenStable();
       expect((overlay().querySelector('dialog.sa-drawer') as HTMLElement).style.getPropertyValue('--sa-drawer-width')).toBe('45rem');
     });
+    // uis:end
   });
+  // uis:end
 
+  // uis:begin(toast)
   describe('toast', () => {
     it('shows a toast of the chosen type through the alert service', async () => {
       const { component } = await render();
@@ -461,4 +548,5 @@ describe('UiSystem', () => {
       expect(error).toHaveBeenCalledWith('T', 'M', undefined, undefined, 'bottom-right');
     });
   });
+  // uis:end
 });

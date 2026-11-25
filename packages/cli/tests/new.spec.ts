@@ -122,6 +122,21 @@ describe('sa new (non-interactive)', () => {
     });
   });
 
+  it('describes the project in its README, in place of the one ng new writes, and tells the developer how to keep it', async () => {
+    const fake = createFakeIo({ cwd });
+    const code = await run(['new', 'my-app', '--defaults', '--no-install', '--no-git'], fake.io, {
+      run: createFakeRunner().run,
+    });
+    expect(code, fake.err()).toBe(0);
+    const readme = await readFile(join(cwd, 'my-app', 'README.md'), 'utf8');
+    expect(readme.startsWith('# my-app\n')).toBe(true);
+    expect(readme).not.toContain('This project was generated using [Angular CLI]');
+    expect(readme).toContain('<!-- sa:project -->');
+    expect(readme).toContain('Screaming Architecture');
+    expect(readme).toContain('npm start');
+    expect(readme).toContain('sa add <capability>');
+  });
+
   it('applies the Screaming Architecture profile between creating the workspace and installing', async () => {
     const fake = createFakeIo({ cwd });
     const runner = createFakeRunner();

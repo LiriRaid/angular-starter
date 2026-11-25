@@ -23,6 +23,8 @@ export interface CopyBlueprintOptions {
   variables: BlueprintVariables;
   /** Project files (forward slashes) that may be replaced; any other collision is an error. */
   overwrite?: readonly string[];
+  /** Rewrites the text of each template before its placeholders are filled, for a blueprint that is generated for a subset of its parts. */
+  transform?: (text: string, file: string) => string;
 }
 
 /**
@@ -55,7 +57,7 @@ export async function listBlueprintFiles(directory: string): Promise<string[]> {
  * when any destination already exists and is not in `overwrite`.
  */
 export async function copyBlueprint(options: CopyBlueprintOptions): Promise<string[]> {
-  const { source, target, variables, overwrite = [] } = options;
+  const { source, target, variables, overwrite = [], transform } = options;
   const files = (await listBlueprintFiles(source)).map((file) => ({
     from: file,
     to: file.endsWith(TEMPLATE_SUFFIX) ? file.slice(0, -TEMPLATE_SUFFIX.length) : file,
@@ -72,7 +74,8 @@ export async function copyBlueprint(options: CopyBlueprintOptions): Promise<stri
   }
 
   for (const { from, to } of files) {
-    const content = renderTemplate(await readFile(join(source, from), 'utf8'), variables);
+    const text = await readFile(join(source, from), 'utf8');
+    const content = renderTemplate(transform ? transform(text, to) : text, variables);
     await mkdir(dirname(join(target, to)), { recursive: true });
     await writeFile(join(target, to), content);
   }

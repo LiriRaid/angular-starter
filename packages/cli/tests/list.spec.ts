@@ -206,13 +206,14 @@ describe('sa list components: the components one by one', () => {
     expect(new Set(starts).size).toBe(1);
   });
 
-  it('names each one sa-<id> and marks the essential ones', async () => {
+  it('names each one sa-<id> and marks the recommended ones, as the checklist of sa add does', async () => {
     const out = await wide('components');
     for (const id of ALL_COMPONENT_IDS) {
       const line = out.split('\n').find((text) => new RegExp(`^ {2}${id} +sa add`).test(text));
       expect(line, id).toBeDefined();
       expect(line, id).toContain(`sa-${id}`);
-      expect(line?.includes('(essential)'), id).toBe(ESSENTIAL_COMPONENT_IDS.includes(id));
+      expect(line?.includes('(recommended)'), id).toBe(ESSENTIAL_COMPONENT_IDS.includes(id));
+      expect(line?.includes('(essential)'), id).toBe(false);
     }
   });
 

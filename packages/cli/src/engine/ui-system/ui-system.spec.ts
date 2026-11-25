@@ -7,7 +7,8 @@ import { appShellProfile } from '../app-shell/app-shell.js';
 import { screamingProfile } from '../architectures/screaming.js';
 import { BLUEPRINTS_ROOT, listBlueprintFiles } from '../blueprint.js';
 import { componentsProfile } from '../components/components.js';
-import { RECOMMENDED_COMPONENTS, componentsOfIds } from '../components/manifest.js';
+import { installedComponentIds } from '../components/installed.js';
+import { COMPONENTS, RECOMMENDED_COMPONENTS, componentsOfIds } from '../components/manifest.js';
 import { designProfile } from '../design/design.js';
 import { starterRoutingProfile } from '../routing/starter.js';
 import { UI_SYSTEM_MARKER, uiSystemProfile } from './ui-system.js';
@@ -101,15 +102,18 @@ describe('UI System profile (ADR-0010)', () => {
     expect(await read(`${PAGE}/tabs/ui-tab.html`)).toContain('<shop-ui-system />');
   });
 
-  it('only previews components that the essential collection brings', async () => {
+  it('only imports components that the project has', async () => {
+    await apply();
+    const installed = await installedComponentIds(project);
     const allowed = new Set(
-      componentsOfIds(RECOMMENDED_COMPONENTS).flatMap((component) =>
+      COMPONENTS.filter((component) => installed.includes(component.id)).flatMap((component) =>
         component.exports.flatMap(({ names }) => names.map((name) => name.replace(/^type /, ''))),
       ),
     );
     for (const file of await listBlueprintFiles(UI_SYSTEM_BLUEPRINT)) {
-      if (!file.endsWith('.ts.tpl')) continue;
-      const text = await readFile(join(UI_SYSTEM_BLUEPRINT, file), 'utf8');
+      const generated = file.replace(/\.tpl$/, '');
+      if (!generated.endsWith('.ts')) continue;
+      const text = await read(generated);
       for (const [, names] of text.matchAll(
         /import \{([^}]*)\} from '@shared\/(?:components|services)'/g,
       )) {
@@ -117,7 +121,9 @@ describe('UI System profile (ADR-0010)', () => {
           .split(',')
           .map((entry) => entry.trim().replace(/^type /, ''))) {
           if (name)
-            expect(allowed.has(name) || name === 'AlertService', `${file}: ${name}`).toBe(true);
+            expect(allowed.has(name) || name === 'AlertService', `${generated}: ${name}`).toBe(
+              true,
+            );
         }
       }
     }
@@ -164,5 +170,152 @@ describe('UI System profile (ADR-0010)', () => {
         `${SYSTEM}/ui-system.code.ts`,
       ]),
     );
+  });
+});
+
+/** The catalog is built from the components the project has (ADR-0024). */
+describe('UI System catalog by installed components', () => {
+  const catalogIds = async (): Promise<string[]> =>
+    [...(await read(`${SYSTEM}/ui-system.catalog.ts`)).matchAll(/^ {4}id: '([a-z-]+)',$/gm)].map(
+      (match) => match[1] ?? '',
+    );
+
+  /** A project with the shell and these components (the shell brings its own). */
+  async function build(set: 'recommended' | 'all' | readonly string[]): Promise<void> {
+    await rm(project, { recursive: true, force: true });
+    project = await mkdtemp(join(tmpdir(), 'sa-ui-system-'));
+    await writeGeneratedWorkspace(project);
+    const base = { targetDir: project, name: 'demo', prefix: 'app' };
+    await screamingProfile.apply(base);
+    await starterRoutingProfile.apply(base);
+    await designProfile.apply(base);
+    await componentsProfile.apply({ ...base, set });
+    await appShellProfile.apply(base);
+  }
+
+  it('shows every component the project has, the two of the shell included', async () => {
+    await apply();
+    const ids = await catalogIds();
+    expect([...ids].sort()).toEqual(await installedComponentIds(project));
+    expect(ids).toEqual(expect.arrayContaining(['search', 'theme-color-picker']));
+    expect(ids).toHaveLength(18);
+  });
+
+  it('shows only the components the project has when it chose a few', async () => {
+    await build(['modal']);
+    await apply();
+    const installed = await installedComponentIds(project);
+    expect([...(await catalogIds())].sort()).toEqual(installed);
+    expect(installed).not.toContain('table');
+    const code = await read(`${SYSTEM}/ui-system.ts`);
+    expect(code).toContain('SaModal');
+    expect(code).not.toContain('SaTable');
+    expect(await read(`${SYSTEM}/ui-system.catalog.ts`)).not.toContain("id: 'datepicker'");
+  });
+
+  it('shows the 26 components of the collection "all", the ones with no preview as usage cards', async () => {
+    await build('all');
+    await apply();
+    const ids = await catalogIds();
+    expect(ids).toHaveLength(26);
+    const catalog = await read(`${SYSTEM}/ui-system.catalog.ts`);
+    expect(catalog.match(/noPreview: true/g)).toHaveLength(8);
+    expect(await read(`${SYSTEM}/ui-system.html`)).toContain('entry.noPreview');
+  });
+
+  it('brings sa-button and sa-toggle, which it draws its own interface with, when they are missing', async () => {
+    await build(['modal']);
+    const shared = join(project, 'src/app/shared/components');
+    await rm(join(shared, 'sa-toggle'), { recursive: true });
+    await apply();
+    await expect(read('src/app/shared/components/sa-toggle/sa-toggle.ts')).resolves.toBeTypeOf(
+      'string',
+    );
+    expect(await read('src/app/shared/components/index.ts')).toContain('SaToggle');
+  });
+
+  describe('completing the catalog when more components arrive', () => {
+    const catalog = (): Promise<string> => read(`${SYSTEM}/ui-system.catalog.ts`);
+
+    it('says what the catalog lacks of what the project has', async () => {
+      await build(['modal']);
+      await apply();
+      expect(await uiSystemProfile.missingEntries(project)).toEqual([]);
+      await componentsProfile.apply({
+        targetDir: project,
+        name: 'demo',
+        prefix: 'app',
+        set: ['table', 'datepicker'],
+      });
+      // What they import comes with them, so more than the two asked for is missing.
+      expect(await uiSystemProfile.missingEntries(project)).toEqual(
+        expect.arrayContaining(['datepicker', 'table']),
+      );
+    });
+
+    it('regenerates the catalog when it is as the CLI left it, and then equals a fresh one', async () => {
+      await build(['modal']);
+      await apply();
+      await componentsProfile.apply({
+        targetDir: project,
+        name: 'demo',
+        prefix: 'app',
+        set: ['table'],
+      });
+      const report = await uiSystemProfile.update({
+        targetDir: project,
+        name: 'demo',
+        prefix: 'app',
+      });
+      expect(report).toMatchObject({ status: 'updated', added: expect.arrayContaining(['table']) });
+      const updated = await catalog();
+      expect(updated).toContain("id: 'table'");
+
+      const files = await listBlueprintFiles(UI_SYSTEM_BLUEPRINT);
+      const afterUpdate = await Promise.all(
+        files.map((file) => read(`${SYSTEM}/${file.replace(/^.*\//, '').replace(/\.tpl$/, '')}`)),
+      );
+      // A fresh application of the UI System to a project that has the same components gives the same files.
+      await build(['modal', 'table']);
+      await apply();
+      const fresh = await Promise.all(
+        files.map((file) => read(`${SYSTEM}/${file.replace(/^.*\//, '').replace(/\.tpl$/, '')}`)),
+      );
+      expect(afterUpdate).toEqual(fresh);
+    });
+
+    it('leaves the catalog alone when the developer edited it, and names the files and what is missing', async () => {
+      await build(['modal']);
+      await apply();
+      const file = join(project, `${SYSTEM}/ui-system.catalog.ts`);
+      const edited = `${await catalog()}\n// my own entry\n`;
+      await writeFile(file, edited);
+      await componentsProfile.apply({
+        targetDir: project,
+        name: 'demo',
+        prefix: 'app',
+        set: ['table'],
+      });
+      const report = await uiSystemProfile.update({
+        targetDir: project,
+        name: 'demo',
+        prefix: 'app',
+      });
+      expect(report).toMatchObject({
+        status: 'edited',
+        missing: expect.arrayContaining(['table']),
+        edited: [`${SYSTEM}/ui-system.catalog.ts`],
+      });
+      expect(await catalog()).toBe(edited);
+    });
+
+    it('does nothing when the catalog is complete', async () => {
+      await apply();
+      expect(
+        await uiSystemProfile.update({ targetDir: project, name: 'demo', prefix: 'app' }),
+      ).toEqual({
+        status: 'current',
+      });
+    });
   });
 });

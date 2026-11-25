@@ -2,12 +2,32 @@ import { NgComponentOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, type Signal, type Type, computed, inject, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
-import { SaAvatar, SaButton, SaCheckbox, SaDivider, SaDrawer, SaIcon, SaInput, SaModal, SaPopover, SaSelect, SaSkeleton, SaTabs, SaTextarea, SaToggle, SaTooltip, type SaTab } from '@shared/components';
-import { AlertService } from '@shared/services';
-import type { ToastPosition } from '@shared/components/sa-toast/sa-toast.types';
+import {
+  SaAvatar, // uis(avatar)
+  SaButton,
+  SaCheckbox, // uis(checkbox)
+  SaDivider, // uis(divider)
+  SaDrawer, // uis(drawer)
+  SaIcon, // uis(icon)
+  SaInput, // uis(input)
+  SaModal, // uis(modal)
+  SaPopover, // uis(popover)
+  SaSearch, // uis(search)
+  SaSelect, // uis(select)
+  SaSkeleton, // uis(skeleton)
+  SaTabs, // uis(tabs)
+  SaTextarea, // uis(textarea)
+  SaThemeColorPicker, // uis(theme-color-picker)
+  SaToggle,
+  SaTooltip, // uis(tooltip)
+  type SaTab, // uis(tabs)
+} from '@shared/components';
+import { AlertService } from '@shared/services'; // uis(toast)
+import type { ToastPosition } from '@shared/components/sa-toast/sa-toast.types'; // uis(toast)
 import { ACTIONS, UI_COMPONENTS, codeOfVariant, groupsOf, type UiComponentEntry, type UiOption, type UiVariant } from './ui-system.catalog';
 import { inputsOf, type UiProps } from './ui-system.code';
 
+// uis:begin(modal)
 /** Lo que recibe el modal de la vista previa: las propiedades de la variante elegida y de los interruptores. */
 interface ModalInputs {
   readonly width?: string;
@@ -20,7 +40,9 @@ interface ModalInputs {
   readonly titleDotColor?: string;
   readonly flush?: boolean;
 }
+// uis:end
 
+// uis:begin(drawer)
 /** Lo que recibe el panel de la vista previa. */
 interface DrawerInputs {
   readonly position?: 'left' | 'right' | 'top' | 'bottom' | 'full';
@@ -33,6 +55,7 @@ interface DrawerInputs {
   readonly closeIcon?: string;
   readonly closeLabel?: string;
 }
+// uis:end
 
 const entryOf = (id: string): UiComponentEntry => {
   const entry = UI_COMPONENTS.find((candidate) => candidate.id === id);
@@ -48,20 +71,49 @@ const entryOf = (id: string): UiComponentEntry => {
  */
 @Component({
   selector: '__PREFIX__-ui-system',
-  imports: [NgComponentOutlet, ReactiveFormsModule, SaButton, SaCheckbox, SaDrawer, SaInput, SaModal, SaSelect, SaTabs, SaToggle, SaTooltip],
+  imports: [
+    NgComponentOutlet,
+    ReactiveFormsModule,
+    SaButton,
+    SaCheckbox, // uis(checkbox)
+    SaDrawer, // uis(drawer)
+    SaInput, // uis(input)
+    SaModal, // uis(modal)
+    SaSearch, // uis(search)
+    SaSelect, // uis(select)
+    SaTabs, // uis(tabs)
+    SaToggle,
+    SaTooltip, // uis(tooltip)
+  ],
   templateUrl: './ui-system.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class UiSystem {
-  private readonly alertService = inject(AlertService);
+  private readonly alertService = inject(AlertService); // uis(toast)
 
   readonly components = UI_COMPONENTS;
   readonly groupsOf = groupsOf;
   /** El componente que pinta, tal cual, las variantes de cada tarjeta (el resto tiene su propia plantilla). */
-  readonly outlets: Readonly<Record<string, Type<unknown>>> = { icon: SaIcon, button: SaButton, input: SaInput, textarea: SaTextarea, select: SaSelect, toggle: SaToggle, avatar: SaAvatar, skeleton: SaSkeleton, divider: SaDivider, popover: SaPopover };
+  readonly outlets: Readonly<Record<string, Type<unknown>>> = {
+    icon: SaIcon, // uis(icon)
+    button: SaButton,
+    input: SaInput, // uis(input)
+    textarea: SaTextarea, // uis(textarea)
+    select: SaSelect, // uis(select)
+    toggle: SaToggle,
+    avatar: SaAvatar, // uis(avatar)
+    skeleton: SaSkeleton, // uis(skeleton)
+    divider: SaDivider, // uis(divider)
+    popover: SaPopover, // uis(popover)
+    'theme-color-picker': SaThemeColorPicker, // uis(theme-color-picker)
+  };
 
   /** Lo que se escribe en el buscador. */
   readonly query = signal('');
+  // uis:begin(search)
+  /** El control del buscador de la vista previa. */
+  readonly searchControl = new FormControl('');
+  // uis:end
   /** Los componentes cuya vista previa está oculta. */
   private readonly hidden = signal<ReadonlySet<string>>(new Set());
   /** La variante elegida de cada componente (su id); sin elegir, la primera. */
@@ -70,10 +122,14 @@ export class UiSystem {
   private readonly switches = signal<Readonly<Record<string, boolean>>>({});
   /** Los componentes cuyo código de todas las variantes está desplegado. */
   private readonly codeOpen = signal<ReadonlySet<string>>(new Set());
+  // uis:begin(tabs)
   /** La pestaña activa de cada ejemplo, por variante: ninguno comparte estado con otro. */
   private readonly ownActive = signal<Readonly<Record<string, string>>>({});
+  // uis:end
+  // uis:begin(input)
   /** Las contraseñas que se están viendo, por variante. */
   private readonly shownPasswords = signal<ReadonlySet<string>>(new Set());
+  // uis:end
 
   readonly filtered = computed(() => {
     const text = this.query().trim().toLowerCase();
@@ -82,8 +138,13 @@ export class UiSystem {
   });
 
   // Datos de las vistas previas.
+  // uis:begin(modal)
   readonly modalOpen = signal(false);
+  // uis:end
+  // uis:begin(drawer)
   readonly drawerOpen = signal(false);
+  // uis:end
+  // uis:begin(tabs)
   readonly tabs: readonly SaTab[] = [
     { id: 'one', label: 'Uno' },
     { id: 'two', label: 'Dos' },
@@ -119,29 +180,36 @@ export class UiSystem {
     { id: 'seven', label: 'Eliminados', count: 1 },
     { id: 'eight', label: 'Spam', count: 9 },
   ];
+  // uis:end
   readonly actionItems = ACTIONS;
+  // uis:begin(select)
   /** Un control por selector de solo lectura de la vista previa, con un valor elegido para que se vea cómo luce. */
   readonly readonlySelects: Readonly<Record<string, FormControl<unknown>>> = Object.fromEntries(
     entryOf('select')
       .variants.filter((item) => item.props['readonlyInput'] === true)
       .map((item) => [item.id, new FormControl<unknown>('pro')]),
   );
+  // uis:end
+  // uis:begin(checkbox)
   /** Un control por casilla de la vista previa: su estado sale de la variante. */
   readonly checkboxes: Readonly<Record<string, FormControl<boolean | null>>> = Object.fromEntries(
     entryOf('checkbox').variants.map((item) => [item.id, new FormControl({ value: item.props['checked'] === true, disabled: item.props['disabled'] === true })]),
   );
+  // uis:end
 
   /** El código de todas las variantes de cada componente, uno por tarjeta: solo cambia con los interruptores de esa tarjeta. */
   readonly allCode: Readonly<Record<string, Signal<string>>> = Object.fromEntries(UI_COMPONENTS.map((entry) => [entry.id, computed(() => this.allCodeOf(entry))]));
 
   /** Lo que recibe el modal abierto y el panel abierto. */
-  readonly modalInputs = computed(() => inputsOf(this.propsOf(entryOf('modal'))) as ModalInputs);
-  readonly drawerInputs = computed(() => inputsOf(this.propsOf(entryOf('drawer'))) as DrawerInputs);
-  readonly drawerFooter = computed(() => this.isOptionOn(entryOf('drawer'), { id: 'footer', label: '' }));
-  readonly drawerLong = computed(() => this.isOptionOn(entryOf('drawer'), { id: 'long', label: '' }));
-  readonly modalLong = computed(() => this.isOptionOn(entryOf('modal'), { id: 'long', label: '' }));
+  readonly modalInputs = computed(() => inputsOf(this.propsOf(entryOf('modal'))) as ModalInputs); // uis(modal)
+  readonly drawerInputs = computed(() => inputsOf(this.propsOf(entryOf('drawer'))) as DrawerInputs); // uis(drawer)
+  readonly drawerFooter = computed(() => this.isOptionOn(entryOf('drawer'), { id: 'footer', label: '' })); // uis(drawer)
+  readonly drawerLong = computed(() => this.isOptionOn(entryOf('drawer'), { id: 'long', label: '' })); // uis(drawer)
+  readonly modalLong = computed(() => this.isOptionOn(entryOf('modal'), { id: 'long', label: '' })); // uis(modal)
+  // uis:begin(modal|drawer)
   /** Un texto largo para ver la barra de desplazamiento en el borde del modal y del panel. */
   readonly longText = Array.from({ length: 24 }, (_, index) => `Línea ${index + 1} de un contenido largo que se desplaza.`);
+  // uis:end
 
   isShown(id: string): boolean {
     return !this.hidden().has(id);
@@ -190,19 +258,26 @@ export class UiSystem {
     });
   }
 
+  // uis:begin(tabs)
   /** La pestaña activa de un ejemplo: la suya, que empieza en la primera. */
   activeOf(item: UiVariant): string {
     return this.ownActive()[item.id] ?? 'one';
   }
+  // uis:end
 
+  // uis:begin(tabs)
   setActive(item: UiVariant, id: string): void {
     this.ownActive.update((current) => ({ ...current, [item.id]: id }));
   }
+  // uis:end
 
+  // uis:begin(input)
   isPasswordShown(item: UiVariant): boolean {
     return this.shownPasswords().has(item.id);
   }
+  // uis:end
 
+  // uis:begin(input)
   togglePassword(item: UiVariant): void {
     this.shownPasswords.update((current) => {
       const next = new Set(current);
@@ -210,6 +285,7 @@ export class UiSystem {
       return next;
     });
   }
+  // uis:end
 
   /** Lo que se proyecta dentro del componente de una variante (el texto de un popover o de un separador), una sola vez por variante. */
   private readonly projected = new Map<string, Node[][]>();
@@ -262,13 +338,16 @@ export class UiSystem {
       .join('\n\n');
   }
 
+  // uis:begin(modal|drawer)
   /** Abre el modal o el panel con la variante pedida (y la deja elegida, para que el código la siga). */
   openOverlay(entry: UiComponentEntry, item: UiVariant): void {
     this.choose(entry, item);
     if (entry.id === 'modal') this.modalOpen.set(true);
     else this.drawerOpen.set(true);
   }
+  // uis:end
 
+  // uis:begin(toast)
   showToast(item: UiVariant): void {
     this.choose(entryOf('toast'), item);
     const position = item.props['position'] as ToastPosition | undefined;
@@ -298,7 +377,9 @@ export class UiSystem {
         alerts.showSuccess(title, message, undefined, undefined, position);
     }
   }
+  // uis:end
 
+  // uis:begin(tabs)
   /** Las pestañas de la variante: las de siempre, con iconos, con contador, o muchas para que no quepan. */
   tabsOf(item: UiVariant): readonly SaTab[] {
     switch (item.props['[tabs]']) {
@@ -314,4 +395,5 @@ export class UiSystem {
         return this.tabs;
     }
   }
+  // uis:end
 }
