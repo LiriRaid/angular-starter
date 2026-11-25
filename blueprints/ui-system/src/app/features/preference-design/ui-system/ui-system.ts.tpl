@@ -120,6 +120,8 @@ export class UiSystem {
   private readonly chosen = signal<Readonly<Record<string, string>>>({});
   /** El estado de los interruptores de modal y panel, por `componente/opción`. */
   private readonly switches = signal<Readonly<Record<string, boolean>>>({});
+  /** El modo elegido de cada tarjeta que tiene modos (`entry.modes`); sin elegir, el primero. */
+  private readonly modeChoice = signal<Readonly<Record<string, string>>>({});
   /** Los componentes cuyo código de todas las variantes está desplegado. */
   private readonly codeOpen = signal<ReadonlySet<string>>(new Set());
   // uis:begin(tabs)
@@ -197,6 +199,11 @@ export class UiSystem {
   );
   // uis:end
 
+  /** Lo que recibe cada vista previa de las tarjetas con modos: las propiedades de la variante, en el modo elegido. */
+  private readonly modePreviews: Readonly<Record<string, Signal<Readonly<Record<string, Record<string, unknown>>>>>> = Object.fromEntries(
+    UI_COMPONENTS.filter((entry) => entry.modes).map((entry) => [entry.id, computed(() => Object.fromEntries(entry.variants.map((item) => [item.id, inputsOf({ ...item.props, ...this.modeProps(entry, item) })])))]),
+  );
+
   /** El código de todas las variantes de cada componente, uno por tarjeta: solo cambia con los interruptores de esa tarjeta. */
   readonly allCode: Readonly<Record<string, Signal<string>>> = Object.fromEntries(UI_COMPONENTS.map((entry) => [entry.id, computed(() => this.allCodeOf(entry))]));
 
@@ -244,6 +251,20 @@ export class UiSystem {
 
   setOption(entry: UiComponentEntry, option: UiOption, on: boolean): void {
     this.switches.update((current) => ({ ...current, [`${entry.id}/${option.id}`]: on }));
+  }
+
+  /** El modo elegido de una tarjeta con modos. */
+  modeOf(entry: UiComponentEntry): string {
+    return this.modeChoice()[entry.id] ?? entry.modes?.[0] ?? '';
+  }
+
+  setMode(entry: UiComponentEntry, mode: string): void {
+    this.modeChoice.update((current) => ({ ...current, [entry.id]: mode }));
+  }
+
+  /** Lo que recibe la vista previa de una variante: sus propiedades, en el modo elegido de su tarjeta. */
+  previewOf(entry: UiComponentEntry, item: UiVariant): Record<string, unknown> {
+    return this.modePreviews[entry.id]?.()[item.id] ?? item.inputs;
   }
 
   isCodeOpen(id: string): boolean {
@@ -307,7 +328,15 @@ export class UiSystem {
     return nodes;
   }
 
-  /** Las propiedades de lo que se muestra: las de la variante elegida y las de los interruptores que cambiaron. */
+  /** El modo que se le pone a una variante: ninguno si fija el suyo, si la tarjeta no tiene modos o si es el que el componente ya tiene. */
+  private modeProps(entry: UiComponentEntry, item: UiVariant): UiProps {
+    const modes = entry.modes;
+    if (!modes || 'variant' in item.props) return {};
+    const mode = this.modeOf(entry);
+    return mode === modes[0] ? {} : { variant: mode };
+  }
+
+  /** Las propiedades de lo que se muestra: las de la variante elegida, en el modo elegido, y las de los interruptores que cambiaron. */
   private propsOf(entry: UiComponentEntry, item: UiVariant = this.selectedOf(entry)): UiProps {
     const extra: Record<string, string | number | boolean> = {};
     for (const option of entry.options ?? []) {
@@ -316,7 +345,7 @@ export class UiSystem {
       if (on === (option.startsOn ?? false)) continue;
       extra[option.prop] = (on ? option.on : option.off) ?? on;
     }
-    return { ...entry.baseProps, ...item.props, ...extra };
+    return { ...entry.baseProps, ...item.props, ...this.modeProps(entry, item), ...extra };
   }
 
   /** Las zonas activas: los interruptores que están encendidos. */

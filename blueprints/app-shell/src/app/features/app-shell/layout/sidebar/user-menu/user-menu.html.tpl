@@ -7,7 +7,7 @@
 
 <sa-popover #popover position="top" [triggerIcon]="null" triggerVariant="text" triggerStyleClass="um-trigger" triggerAriaLabel="Abrir menú de usuario" [triggerTooltip]="expanded() ? null : userInfoTooltip" triggerTooltipPosition="right" [triggerTooltipDelay]="300">
   <div popover-trigger class="um-card flex items-center gap-3 w-full min-w-0 text-left">
-    <sa-avatar class="um-card-avatar" [label]="userInitials()" background="var(--app-sidebar-user-avatar-bg)" color="var(--app-sidebar-user-avatar-text)" textClass="text-caption-1-bold tracking-[0.02em]" [alt]="userName()" />
+    <sa-avatar class="um-card-avatar" [label]="userInitials()" background="var(--app-sidebar-user-avatar-bg)" color="var(--app-sidebar-user-avatar-text)" textClass="tracking-[0.02em]" [alt]="userName()" />
 
     <div class="um-card-meta flex flex-col gap-[0.05rem] flex-1 min-w-0" [class.um-text-hidden]="!expanded()">
       <p class="um-card-name text-(--app-text-color) text-caption-1-bold overflow-hidden text-ellipsis whitespace-nowrap max-w-full">{{ userName() }}</p>
@@ -19,7 +19,7 @@
 
   <div class="flex flex-col gap-3 w-60 p-3.5">
     <div class="flex items-center gap-3 min-w-0">
-      <sa-avatar [label]="userInitials()" background="var(--app-sidebar-user-avatar-bg)" color="var(--app-sidebar-user-avatar-text)" textClass="text-caption-1-bold tracking-[0.02em]" [alt]="userName()" />
+      <sa-avatar [label]="userInitials()" background="var(--app-sidebar-user-avatar-bg)" color="var(--app-sidebar-user-avatar-text)" textClass="tracking-[0.02em]" [alt]="userName()" />
 
       <div class="flex flex-col gap-[0.05rem] min-w-0">
         <span class="text-body-2-bold text-(--app-text-color) truncate">{{ userName() }}</span>

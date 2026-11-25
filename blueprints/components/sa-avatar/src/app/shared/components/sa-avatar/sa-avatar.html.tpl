@@ -1,7 +1,7 @@
 @if (imageUrl(); as src) {
   <img [src]="src" [alt]="alt()" class="sa-avatar sa-avatar--img" [style.width]="sizeValue()" [style.height]="sizeValue()" [style.borderRadius]="radius()" />
 } @else {
-  <span [class]="initialsClass()" [style.width]="sizeValue()" [style.height]="sizeValue()" [style.borderRadius]="radius()" [style.background]="background()" [style.color]="color()">
+  <span [class]="initialsClass()" [style.width]="sizeValue()" [style.height]="sizeValue()" [style.borderRadius]="radius()" [style.fontSize]="initialsFontSize()" [style.background]="background()" [style.color]="color()">
     {{ label() }}
   </span>
 }

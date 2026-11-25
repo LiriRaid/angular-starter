@@ -16,7 +16,7 @@
        ver select-styles.css), así ningún consumidor necesita declarar nada por su cuenta. -->
   <ng-template #richOptionLabel let-option let-hideLabel="hideLabel">
     @if (hasAvatarOption()) {
-      <sa-avatar [label]="optionAvatarLabelOf(option)" [imageUrl]="optionAvatarOf(option) ?? null" [background]="optionAccent(option)" [shape]="optionAvatarShape()" [size]="22" textClass="text-caption-2-bold" [mode]="optionPresence() ? 'presence' : 'avatar'" [presenceStatus]="optionPresenceOf(option)" />
+      <sa-avatar [label]="optionAvatarLabelOf(option)" [imageUrl]="optionAvatarOf(option) ?? null" [background]="optionAccent(option)" [shape]="optionAvatarShape()" [size]="22" [mode]="optionPresence() ? 'presence' : 'avatar'" [presenceStatus]="optionPresenceOf(option)" />
       @if (!hideLabel) {
         <span class="truncate">{{ labelForOption(option) }}</span>
       }
