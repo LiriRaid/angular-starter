@@ -1,4 +1,4 @@
-import { mkdtemp, readFile, readdir, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -12,7 +12,17 @@ const ANGULAR_JSON = `{
   "projects": {
     "demo": {
       "architect": {
-        "build": { "options": { "styles": ["src/styles.css"] } },
+        "build": {
+          "options": { "styles": ["src/styles.css"] },
+          "configurations": {
+            "production": {
+              "budgets": [
+                { "type": "initial", "maximumWarning": "500kB", "maximumError": "1MB" },
+                { "type": "anyComponentStyle", "maximumWarning": "4kB", "maximumError": "8kB" }
+              ]
+            }
+          }
+        },
         "test": { "builder": "@angular/build:unit-test" }
       }
     }
@@ -128,6 +138,24 @@ describe('design base', () => {
     ]);
     const setup = await read('src/test-setup.ts');
     expect(setup).toContain('{ provide: LUCIDE_ICONS, useExisting: SA_LUCIDE_ICONS }');
+  });
+
+  it('raises the budget of the initial bundle, which the design base and its components outgrow', async () => {
+    await apply();
+    const [initial, style] = JSON.parse(await read('angular.json')).projects.demo.architect.build
+      .configurations.production.budgets;
+    expect(initial).toMatchObject({ maximumWarning: '1MB', maximumError: '2MB' });
+    // The stylesheet of each component keeps the budget Angular gives it.
+    expect(style).toMatchObject({ maximumWarning: '4kB', maximumError: '8kB' });
+  });
+
+  it('leaves the budget alone when the developer changed it', async () => {
+    const json = await read('angular.json');
+    await writeFile(join(project, 'angular.json'), json.replace('"500kB"', '"600kB"'));
+    await apply();
+    const [initial] = JSON.parse(await read('angular.json')).projects.demo.architect.build
+      .configurations.production.budgets;
+    expect(initial).toMatchObject({ maximumWarning: '600kB', maximumError: '1MB' });
   });
 
   it('writes the tokens with the sa- prefix and a dark theme, with no business sections', async () => {

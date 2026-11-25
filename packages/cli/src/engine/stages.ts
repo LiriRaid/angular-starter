@@ -24,6 +24,7 @@ import { uiSystemProfile } from './ui-system/ui-system.js';
 import { buildNgAddSsrCommand, buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
 import { pathExists } from './fs.js';
+import { refreshProjectReadme } from './project-readme.js';
 import { applySharedFoundation } from './shared-foundation.js';
 import { refusalOf } from './process.js';
 import type { GenerationContext, Stage } from './pipeline.js';
@@ -237,6 +238,28 @@ export const applyUiSystem: Stage = {
   },
 };
 
+/**
+ * The catalog of a UI System that is already in the project, brought up to the components it has now
+ * (ADR-0024): rewritten when its files are as the CLI left them, and only named when the developer edited
+ * them.
+ */
+export const updateUiSystemCatalog: Stage = {
+  id: 'update-ui-system-catalog',
+  title: 'Completing the UI System catalog',
+  async run({ name, options, targetDir, warnings, notes }) {
+    const report = await uiSystemProfile.update({ targetDir, name, prefix: options.prefix });
+    if (report.status === 'updated') {
+      notes?.push(
+        `The UI System catalog now shows ${report.added.map((id) => `sa-${id}`).join(', ')}.`,
+      );
+    } else if (report.status === 'edited') {
+      warnings.push(
+        `The UI System catalog was not changed: ${report.edited.join(', ')} ${report.edited.length === 1 ? 'was' : 'were'} edited. It lacks ${report.missing.map((id) => `sa-${id}`).join(', ')}: add their entries by hand, or restore ${report.edited.length === 1 ? 'that file' : 'those files'} and run "sa add ui-system" again.`,
+      );
+    }
+  },
+};
+
 export const addIconLibrary: Stage = {
   id: 'add-icon-library',
   title: 'Adding icon library',
@@ -249,6 +272,18 @@ export const addIconLibrary: Stage = {
       [icons.name]: icons.version,
     });
     await writeFile(manifest, updated);
+  },
+};
+
+/**
+ * The README of the project says what it has (ADR-0024): the one `ng new` writes becomes a Starter Angular
+ * one, a README with the block gets only the block rewritten, and the developer's own README is left alone.
+ */
+export const writeProjectReadme: Stage = {
+  id: 'write-project-readme',
+  title: 'Describing the project in its README',
+  async run({ name, options, targetDir }) {
+    await refreshProjectReadme({ targetDir, name, options });
   },
 };
 
@@ -362,6 +397,7 @@ export const NEW_PROJECT_STAGES: readonly Stage[] = [
   applyPresence,
   applyUiSystem,
   addIconLibrary,
+  writeProjectReadme,
   writeStarterConfig,
   installDependencies,
   initGit,

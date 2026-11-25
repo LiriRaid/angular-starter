@@ -416,13 +416,13 @@ export const CAPABILITIES: Registry = {
       id: 'starter',
       label: 'Starter Angular UI System',
       description:
-        'A catalog of the installed sa- components with a preview of each one, its code and what it affects, and the design tokens (radius, button size, density, font size) that you change in real time from the design preferences page. Needs the application shell and a component collection.',
+        'A catalog of the installed sa- components with a preview of each one, its code and what it affects, and the design tokens (radius, button size, density, font size) that you change in real time from the design preferences page. Needs the application shell and the components (a collection or your own selection): it shows the ones you have.',
       docs: STARTER_ROUTED_DOCS,
       available: true,
       requires: {
         architecture: ['screaming'],
         appShell: ['starter'],
-        components: ['recommended', 'all'],
+        components: ['recommended', 'all', 'custom'],
         tailwind: true,
       },
     },

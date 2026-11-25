@@ -7,13 +7,16 @@ import {
 import {
   ALL_COMPONENT_IDS,
   ESSENTIAL_COMPONENT_IDS,
+  UI_SYSTEM_COMPONENT_IDS,
   componentIdsOf,
   normalizeComponents,
 } from '../config/components.js';
 import { resolveOptions } from '../config/resolve.js';
+import { installedComponentIds } from '../engine/components/installed.js';
 import type { StarterOptions } from '../config/schema.js';
 import type { ProgramDeps } from '../deps.js';
 import { runPipeline, type GenerationContext, type Stage } from '../engine/pipeline.js';
+import { uiSystemProfile } from '../engine/ui-system/ui-system.js';
 import {
   addAngularSsr,
   addIconLibrary,
@@ -27,13 +30,22 @@ import {
   applySharedFolders,
   applyUiSystem,
   installDependencies,
+  updateUiSystemCatalog,
+  writeProjectReadme,
   writeStarterConfig,
 } from '../engine/stages.js';
 import { UsageError } from '../errors.js';
 import { println, type CliIo } from '../io.js';
 import { describeComponent } from '../wizard/wizard.js';
-import { findProject } from '../project/find.js';
-import { ADDABLE, NOT_ADDABLE, addableValues, prerequisitesOf, type AddStep } from './addable.js';
+import { findProject, type StarterProject } from '../project/find.js';
+import {
+  ADDABLE,
+  NOT_ADDABLE,
+  addableValues,
+  prerequisitesOf,
+  unchosenOf,
+  type AddStep,
+} from './addable.js';
 import { createStyler } from '../ui/format.js';
 
 export { ADDABLE, addableValues };
@@ -67,7 +79,8 @@ export async function addCommand(
   const current = project.options[category];
   // In a terminal, a capability with several options and no value asks which one instead of failing.
   const value =
-    given ?? (io.interactive ? await askValue(deps, capability, project.options) : undefined);
+    given ??
+    (io.interactive ? await askValue(deps, capability, project.options, project.root) : undefined);
   // Components are added to what the project has: the union is what gets recorded (ADR-0011).
   const addition =
     capability === 'components' && value !== undefined
@@ -75,6 +88,8 @@ export async function addCommand(
       : undefined;
   const choice = addition?.components ?? chooseValue(capability, value);
   if (capability !== 'components' && current === choice) {
+    // A UI System the project has is brought up to its components instead of refused (ADR-0024).
+    if (category === 'uiSystem') return completeCatalog(io, deps, project, flags);
     throw new UsageError(`"${choice}" is already in this project (${capability}).`);
   }
   if (capability === 'rendering' && current === 'starter-ssr') {
@@ -84,6 +99,14 @@ export async function addCommand(
   }
 
   const label = CAPABILITIES[category].find((option) => option.id === choice);
+
+  // Which components the project gets is the developer's choice: they are never added on their behalf.
+  if (unchosenOf(category, choice, project.options).length > 0) {
+    throw new UsageError(
+      `${label?.label ?? choice} needs the sa- components, which this project does not have.`,
+      `Add them first with "sa add components" (a collection, or the ones you pick), then run "sa add ${capability}" again.`,
+    );
+  }
 
   // What the option needs and the project lacks is added first, in order, once the developer agrees.
   const missing = prerequisitesOf(category, choice, project.options);
@@ -115,7 +138,10 @@ export async function addCommand(
       install: flags.install !== false,
     },
   });
-  const stages = stagesFor(category, current, options, project.options);
+  // Every addition leaves the README of the project describing what it has now (ADR-0024).
+  const stages = stagesFor(category, current, options, project.options).flatMap((stage) =>
+    stage === writeStarterConfig ? [writeProjectReadme, stage] : [stage],
+  );
   const style = createStyler(io.color);
 
   // Nothing in the command says that Lucide comes along: say it, and why, before anything runs.
@@ -125,6 +151,18 @@ export async function addCommand(
       io.stdout,
       `${icons} will be installed too: the sa- components draw their icons with sa-icon, which needs it.`,
     );
+  }
+
+  // The UI System draws its own interface with a few components: it brings the ones the project lacks.
+  if (category === 'uiSystem') {
+    const have = await installedComponentIds(project.root);
+    const base = UI_SYSTEM_COMPONENT_IDS.filter((id) => !have.includes(id));
+    if (base.length > 0) {
+      println(
+        io.stdout,
+        `${base.map((id) => `sa-${id}`).join(', ')} will be installed too: the UI System draws its own interface with them.`,
+      );
+    }
   }
 
   if (flags.dryRun) {
@@ -234,6 +272,39 @@ async function addWithPrerequisites(
   }
 }
 
+const named = (ids: readonly string[]): string => ids.map((id) => `sa-${id}`).join(', ');
+
+/**
+ * `sa add ui-system` in a project that has it: the catalog shows the components the project had when it
+ * was generated, so this brings it up to the ones it has now, without rewriting what the developer changed.
+ */
+async function completeCatalog(
+  io: CliIo,
+  deps: ProgramDeps,
+  project: StarterProject,
+  flags: AddFlags,
+): Promise<void> {
+  const missing = await uiSystemProfile.missingEntries(project.root);
+  if (missing.length === 0) {
+    throw new UsageError(
+      '"starter" is already in this project (ui-system), and its catalog shows every component the project has.',
+    );
+  }
+  const style = createStyler(io.color);
+  if (flags.dryRun) {
+    println(io.stdout, style.bold('Dry run: nothing was changed. Planned steps:'));
+    println(io.stdout, `  1. ${updateUiSystemCatalog.title}`);
+    println(io.stdout, `  Adds to the catalog: ${named(missing)}`);
+    return;
+  }
+  println(io.stdout);
+  const context = contextFor(io, deps, project, project.options, flags.verbose);
+  await runPipeline([updateUiSystemCatalog], context);
+  println(io.stdout);
+  for (const note of context.notes ?? []) println(io.stdout, note);
+  for (const warning of context.warnings) println(io.stdout, `${style.yellow('!')} ${warning}`);
+}
+
 /** The UI System is the catalog of the components in the design preferences: offered when it can be added. */
 async function offerUiSystem(
   io: CliIo,
@@ -243,6 +314,28 @@ async function offerUiSystem(
 ): Promise<void> {
   if (category !== 'appShell' && category !== 'components') return;
   const fresh = await findProject(io.cwd);
+  // More components than the catalog describes: offer to complete it (ADR-0024).
+  if (category === 'components' && fresh.options.uiSystem === 'starter') {
+    const missing = await uiSystemProfile.missingEntries(fresh.root);
+    if (missing.length === 0) return;
+    if (!io.interactive) {
+      println(
+        io.stdout,
+        `Next: "sa add ui-system" completes the catalog of the UI System with ${named(missing)}.`,
+      );
+      return;
+    }
+    const yes = await deps.prompter.confirm({
+      name: 'ui-system-catalog',
+      message: `Complete the UI System catalog with ${named(missing)}?`,
+      default: true,
+    });
+    if (yes) {
+      println(io.stdout);
+      await addCommand(io, deps, 'ui-system', undefined, flags, true);
+    }
+    return;
+  }
   const option = CAPABILITIES.uiSystem.find((candidate) => candidate.id === 'starter');
   if (
     fresh.options.uiSystem !== 'none' ||
@@ -345,30 +438,46 @@ async function askValue(
   deps: ProgramDeps,
   capability: string,
   options: StarterOptions,
+  root: string,
 ): Promise<string | undefined> {
-  if (capability === 'components') return askComponents(deps, options);
+  if (capability === 'components') return askComponents(deps, options, root);
   if (capability === 'rendering') return askRendering(deps, options);
   if (capability === 'architecture') return askArchitecture(deps, options);
   return undefined;
 }
 
-/** The components the project lacks, with the essential ones ticked, like the wizard's list. */
-async function askComponents(deps: ProgramDeps, options: StarterOptions): Promise<string> {
-  const has = componentIdsOf(options);
-  const missing = ALL_COMPONENT_IDS.filter((id) => !has.includes(id));
-  if (missing.length === 0) throw new UsageError('This project already has every component.');
+/**
+ * Every component, the ones the project has shown ticked and blocked so a developer sees which are
+ * missing, and the recommended ones marked. What the project has comes from its folders: the shell
+ * brings components the configuration does not list.
+ */
+async function askComponents(
+  deps: ProgramDeps,
+  options: StarterOptions,
+  root: string,
+): Promise<string> {
+  const has = new Set([...componentIdsOf(options), ...(await installedComponentIds(root))]);
+  if (ALL_COMPONENT_IDS.every((id) => has.has(id))) {
+    throw new UsageError('This project already has every component.');
+  }
   const ticked = await deps.prompter.checkbox({
     name: 'components',
     message: 'Which components do you want to add?',
-    choices: missing.map((id) => ({
-      value: id,
-      name: `sa-${id}`,
-      description: describeComponent(id, options.appShell === 'starter'),
-      checked: ESSENTIAL_COMPONENT_IDS.includes(id),
-    })),
+    choices: ALL_COMPONENT_IDS.map((id) => {
+      const installed = has.has(id);
+      return {
+        value: id,
+        name: `sa-${id}${ESSENTIAL_COMPONENT_IDS.includes(id) ? ' (recommended)' : ''}`,
+        description: describeComponent(id, options.appShell === 'starter'),
+        checked: installed || ESSENTIAL_COMPONENT_IDS.includes(id),
+        ...(installed ? { disabled: '(already in the project)' } : {}),
+      };
+    }),
   });
-  if (ticked.length === 0) throw new UsageError('No component was ticked: nothing to add.');
-  return ticked.join(',');
+  // A blocked choice never comes back from a real prompt; the filter keeps it true for any prompter.
+  const added = ticked.filter((id) => !has.has(id));
+  if (added.length === 0) throw new UsageError('No component was ticked: nothing to add.');
+  return added.join(',');
 }
 
 /** The architectures a project can take, the ones still planned listed but not selectable. */

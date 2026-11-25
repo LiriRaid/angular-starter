@@ -56,6 +56,8 @@ export interface UiComponentEntry {
   readonly options?: readonly UiOption[];
   /** Las entradas del componente que el catálogo no muestra a propósito (plantillas, clases, nombres accesibles). */
   readonly notShown?: readonly string[];
+  /** Verdadero cuando el componente aún no tiene vista previa en el catálogo: la tarjeta da su selector y cómo se usa. */
+  readonly noPreview?: boolean;
   /** `ts` cuando el código no es una etiqueta. */
   readonly language?: 'html' | 'ts';
   /** El contenido proyectado que sale en el código, según las zonas que están activas. */
@@ -149,11 +151,13 @@ const inputModes = (): UiVariant[] =>
 const previewContent = (zones: ReadonlySet<string>): string => (zones.has('long') ? 'Contenido largo que se desplaza…' : 'Contenido');
 
 /**
- * Los componentes de la colección esencial, con lo que hace falta para usarlos: el selector, qué
- * tokens los afectan y todas sus variantes, cada una con su vista previa y su código. La vista previa
- * está en `ui-system.html`. Al agregar un componente a la colección, agrégalo aquí y su `@case` allá.
+ * Los componentes que el proyecto tiene, con lo que hace falta para usarlos: el selector, qué tokens
+ * los afectan y todas sus variantes, cada una con su vista previa y su código. La vista previa está en
+ * `ui-system.html`. Cada entrada va entre las marcas `uis:begin` y `uis:end`: el CLI deja solo las de los
+ * componentes instalados (`sa add ui-system`). Al agregar un componente, agrégalo aquí y su `@case` allá.
  */
 export const UI_COMPONENTS: readonly UiComponentEntry[] = [
+  // uis:begin(icon)
   {
     id: 'icon',
     label: 'Icono',
@@ -173,6 +177,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       ...['Check', 'Search', 'User', 'Bell'].map((name) => named(`name-${name.toLowerCase()}`, name, 'Nombres', { name, size: 24 })),
     ],
   },
+  // uis:end
+  // uis:begin(button)
   {
     id: 'button',
     label: 'Botón',
@@ -209,6 +215,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       named('rounded-full', 'rounded="full"', 'Forma', { label: 'Píldora', rounded: 'full' }),
     ],
   },
+  // uis:end
+  // uis:begin(input)
   {
     id: 'input',
     label: 'Campo de texto',
@@ -241,6 +249,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       named('input-class', 'inputClass', 'Otras propiedades', { label: 'Código', inputClass: 'text-center tracking-widest' }),
     ],
   },
+  // uis:end
+  // uis:begin(textarea)
   {
     id: 'textarea',
     label: 'Área de texto',
@@ -270,6 +280,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       named('icon-size', 'iconSize', 'Otras propiedades', { label: 'Comentario', rows: 2, lucideIcon: 'Edit', iconSize: 22 }),
     ],
   },
+  // uis:end
+  // uis:begin(checkbox)
   {
     id: 'checkbox',
     label: 'Casilla',
@@ -287,6 +299,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       variant('disabled-checked', 'Estados', { ariaLabel: 'Deshabilitada y marcada', checked: true, disabled: true }, { code: `accepted = new FormControl({ value: true, disabled: true });\n\n<sa-checkbox ariaLabel="Deshabilitada y marcada" [formControl]="accepted" />` }),
     ],
   },
+  // uis:end
+  // uis:begin(toggle)
   {
     id: 'toggle',
     label: 'Interruptor',
@@ -301,6 +315,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       variant('disabled-on', 'Estados', { checked: true, disabled: true, ariaLabel: 'Encendido y deshabilitado' }),
     ],
   },
+  // uis:end
+  // uis:begin(select)
   {
     id: 'select',
     label: 'Selector',
@@ -343,6 +359,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       ];
     })(),
   },
+  // uis:end
+  // uis:begin(avatar)
   {
     id: 'avatar',
     label: 'Avatar',
@@ -366,6 +384,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       named('presence-dot-size', 'dotSize', 'Presencia', { label: 'EF', size: 56, mode: 'presence', presenceStatus: 'online', dotSize: '1rem' }),
     ],
   },
+  // uis:end
+  // uis:begin(divider)
   {
     id: 'divider',
     label: 'Separador',
@@ -382,6 +402,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       ...(['top', 'center', 'bottom'] as const).map((align) => named(`vertical-text-${align}`, `texto ${align}`, 'Vertical con texto', { layout: 'vertical', type: 'solid', align }, { text: 'Texto', boxClass: 'h-24' })),
     ],
   },
+  // uis:end
+  // uis:begin(skeleton)
   {
     id: 'skeleton',
     label: 'Esqueleto',
@@ -414,6 +436,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       ...(['input', 'select', 'button', 'button-sm', 'chip'] as const).map((kind) => named(`variant-${kind}`, `variant="${kind}"`, 'Como otro componente', { variant: kind }, { boxClass: 'w-56' })),
     ],
   },
+  // uis:end
+  // uis:begin(tooltip)
   {
     id: 'tooltip',
     label: 'Tooltip',
@@ -432,6 +456,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
       named('host-delay', 'showDelay 300', 'Con retraso', { label: 'Ayuda', variant: 'outlined', saTooltip: 'Texto de ayuda', tooltipPosition: 'top', showDelay: 300 }),
     ],
   },
+  // uis:end
+  // uis:begin(modal)
   {
     id: 'modal',
     label: 'Modal',
@@ -459,6 +485,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
     ],
     content: (zones) => [`<div class="p-5">${previewContent(zones)}</div>`, ...(zones.has('footer') ? ['<div modal-footer>…</div>'] : [])].join('\n'),
   },
+  // uis:end
+  // uis:begin(drawer)
   {
     id: 'drawer',
     label: 'Panel lateral',
@@ -486,6 +514,8 @@ export const UI_COMPONENTS: readonly UiComponentEntry[] = [
     ],
     content: (zones) => ['<h3 drawer-header>Título</h3>', `<div class="p-5">${previewContent(zones)}</div>`, ...(zones.has('footer') ? ['<sa-button drawer-footer label="Guardar" />'] : [])].join('\n'),
   },
+  // uis:end
+  // uis:begin(toast)
   {
     id: 'toast',
     label: 'Toast',
@@ -507,6 +537,8 @@ this.alerts.showSuccess('Guardado', 'Los cambios se guardaron.');`,
       ...(['top-left', 'top-center', 'top-right', 'bottom-left', 'bottom-center', 'bottom-right', 'center'] as const).map((position) => toastVariant(`position-${position}`, 'Posición', 'showInfo', position)),
     ],
   },
+  // uis:end
+  // uis:begin(tabs)
   {
     id: 'tabs',
     label: 'Pestañas',
@@ -532,6 +564,8 @@ this.alerts.showSuccess('Guardado', 'Los cambios se guardaron.');`,
       named('fit-counts', 'caben · con contador (a lo ancho)', 'Contenido', { '[tabs]': 'countTabs', '[(active)]': 'active' }, { boxClass: 'w-[26rem] max-w-full' }),
     ],
   },
+  // uis:end
+  // uis:begin(popover)
   {
     id: 'popover',
     label: 'Popover',
@@ -554,6 +588,146 @@ this.alerts.showSuccess('Guardado', 'Los cambios se guardaron.');`,
       named('actions-keep', 'closeOnSelect apagado', 'Acciones', { actions: true, items: asRef('items', ACTIONS), closeOnSelect: false, triggerIcon: 'Ellipsis' }),
     ],
   },
+  // uis:end
+  // uis:begin(search)
+  {
+    id: 'search',
+    label: 'Buscador',
+    selector: 'sa-search',
+    description: 'Un campo de búsqueda que se puede colapsar a un botón, en tres modos.',
+    affects: ['Tamaño de botones', 'Densidad', 'Tamaño de fuente'],
+    // Las clases del campo interno.
+    notShown: ['inputClass'],
+    code: `<sa-search [control]="query" placeholder="Buscar..." (searchEnter)="search($event)" />`,
+    variants: [
+      ...(['input', 'chat', 'collapsed'] as const).map((mode) => named(`mode-${mode}`, `mode="${mode}"`, 'Modos', { mode, control: asRef('query', null) })),
+      named('placeholder', 'placeholder', 'Texto', { placeholder: 'Buscar contactos…', control: asRef('query', null) }),
+    ],
+  },
+  // uis:end
+  // uis:begin(theme-color-picker)
+  {
+    id: 'theme-color-picker',
+    label: 'Selector de colores del tema',
+    selector: 'sa-theme-color-picker',
+    description: 'Un botón que abre el panel para elegir el color primario y el de la superficie del tema.',
+    affects: ['Tamaño de botones'],
+    // Las clases del consumidor y las del tooltip.
+    notShown: ['triggerClass', 'triggerTooltipStyleClass'],
+    code: `<sa-theme-color-picker triggerTooltip="Colores del tema" />`,
+    variants: [
+      ...(['small', 'medium', 'high'] as const).map((size) => named(`size-${size}`, `size="${size}"`, 'Tamaños', { size })),
+      ...(['top', 'bottom', 'left', 'right'] as const).map((position) => named(`tooltip-${position}`, `tooltip ${position}`, 'Tooltip', { triggerTooltip: 'Colores del tema', triggerTooltipPosition: position })),
+    ],
+  },
+  // uis:end
+  // uis:begin(table)
+  {
+    id: 'table',
+    label: 'Tabla',
+    selector: 'sa-table',
+    description: 'Tabla de datos con paginación, carga diferida, esqueletos de carga, filas expandibles y plantillas.',
+    affects: [],
+    noPreview: true,
+    code: `<sa-table [value]="users" [columns]="columns" dataKey="id" [rows]="10" />`,
+    variants: [variant('usage', 'Uso', {}, { code: `const columns: SaTableColumn[] = [
+  { field: 'name', header: 'Nombre' },
+  { field: 'email', header: 'Correo' },
+];
+
+<sa-table [value]="users" [columns]="columns" dataKey="id" [rows]="10" [selectable]="true" />` })],
+  },
+  // uis:end
+  // uis:begin(datepicker)
+  {
+    id: 'datepicker',
+    label: 'Selector de fecha',
+    selector: 'sa-datepicker',
+    description: 'Un campo de fecha con calendario, límites de rango y hora opcional.',
+    affects: [],
+    noPreview: true,
+    code: `<sa-datepicker label="Fecha" [formControl]="date" />`,
+    variants: [variant('usage', 'Uso', {}, { code: `<sa-datepicker label="Entrega" variant="in" [minDate]="today" [formControl]="date" />` })],
+  },
+  // uis:end
+  // uis:begin(section-nav)
+  {
+    id: 'section-nav',
+    label: 'Navegación por secciones',
+    selector: 'sa-section-nav',
+    description: 'Una lista vertical de secciones para páginas de ajustes.',
+    affects: [],
+    noPreview: true,
+    code: `<sa-section-nav title="Ajustes" [items]="sections" />`,
+    variants: [variant('usage', 'Uso', {}, { code: `const sections: SaSectionNavItem[] = [
+  { id: 'profile', icon: 'User', title: 'Perfil' },
+  { id: 'security', icon: 'Lock', title: 'Seguridad', summary: '2FA activo' },
+];
+
+<sa-section-nav title="Ajustes" description="Tu cuenta" [items]="sections" />` })],
+  },
+  // uis:end
+  // uis:begin(selectable-item)
+  {
+    id: 'selectable-item',
+    label: 'Fila seleccionable',
+    selector: 'sa-selectable-item',
+    description: 'Una fila de una lista que se elige, con título, subtítulo y un color de acento.',
+    affects: [],
+    noPreview: true,
+    code: `<sa-selectable-item title="Ana Pérez" [selected]="true" (itemClick)="open(ana)" />`,
+    variants: [variant('usage', 'Uso', {}, { code: `<sa-selectable-item title="Ana Pérez" subtitle="Hace 5 minutos" accentColor="#10b981" [selected]="selected()" (itemClick)="select(ana)" />` })],
+  },
+  // uis:end
+  // uis:begin(reorder-list)
+  {
+    id: 'reorder-list',
+    label: 'Lista reordenable',
+    selector: 'sa-reorder-list',
+    description: 'Una lista cuyos elementos se reordenan arrastrándolos.',
+    affects: [],
+    noPreview: true,
+    code: `<sa-reorder-list [items]="items" [itemTemplate]="row" [trackBy]="byId" (reordered)="items = $event" />`,
+    variants: [variant('usage', 'Uso', {}, { code: `<sa-reorder-list [items]="items" [itemTemplate]="row" [trackBy]="byId" (reordered)="items = $event" />
+<ng-template #row let-item>{{ item.name }}</ng-template>` })],
+  },
+  // uis:end
+  // uis:begin(preview)
+  {
+    id: 'preview',
+    label: 'Vista previa de imagen',
+    selector: 'sa-preview',
+    description: 'Subida de una imagen con su vista previa y la acción de quitarla.',
+    affects: [],
+    noPreview: true,
+    code: `<sa-preview label="logotipo" [imageUrl]="url" (fileSelected)="upload($event)" (removed)="url = null" />`,
+    variants: [variant('usage', 'Uso', {}, { code: `<sa-preview label="logotipo" hint="PNG o JPG, hasta 2 MB" [imageUrl]="url" (fileSelected)="upload($event)" (removed)="url = null" />` })],
+  },
+  // uis:end
+  // uis:begin(media-preview)
+  {
+    id: 'media-preview',
+    label: 'Visor de medios',
+    selector: 'sa-media-preview',
+    description: 'Un visor de imágenes y documentos dentro de un modal.',
+    affects: [],
+    noPreview: true,
+    code: `<sa-media-preview [(visible)]="open" kind="image" [url]="url" />`,
+    variants: [variant('usage', 'Uso', {}, { code: `<sa-media-preview [(visible)]="open" kind="pdf" [url]="url" fileName="contrato.pdf" />` })],
+  },
+  // uis:end
+  // uis:begin(weekly-schedule)
+  {
+    id: 'weekly-schedule',
+    label: 'Horario semanal',
+    selector: 'sa-weekly-schedule',
+    description: 'El editor de las horas de atención de cada día de la semana.',
+    affects: [],
+    noPreview: true,
+    code: `<sa-weekly-schedule label="Horario de atención" [(value)]="schedule" />`,
+    variants: [variant('usage', 'Uso', {}, { code: `<sa-weekly-schedule label="Horario de atención" [(value)]="schedule" />` })],
+  },
+  // uis:end
 ];
 
 /** Las variantes de una tarjeta, juntas por grupo y en el orden en que aparecen. */

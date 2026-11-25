@@ -3,15 +3,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { ANGULAR_CLI_VERSION } from '../src/compat.js';
-import {
-  ALL_COMPONENT_IDS,
-  ESSENTIAL_COMPONENT_IDS,
-  EXTRA_COMPONENT_IDS,
-} from '../src/config/components.js';
+import { ALL_COMPONENT_IDS, ESSENTIAL_COMPONENT_IDS } from '../src/config/components.js';
 import { run } from '../src/main.js';
 import { createFakeIo } from './helpers/fake-io.js';
 import { createFakePrompter } from './helpers/fake-prompter.js';
 import { createFakeRunner, type FakeRunnerOptions } from './helpers/fake-runner.js';
+import { ANGULAR_README } from './helpers/generated-workspace.js';
 import { SSR_APP_CONFIG, createStarterProject } from './helpers/starter-project.js';
 
 let cwd: string;
@@ -676,7 +673,7 @@ describe('sa add', () => {
       const noComponents = await createStarterProject(join(cwd, 'other'), ['--components', 'none']);
       const withoutComponents = await add(noComponents, ['ui-system']);
       expect(withoutComponents.code).toBe(2);
-      expect(withoutComponents.err).toContain('sa add components recommended');
+      expect(withoutComponents.err).toContain('sa add components');
     });
 
     it('refuses to add it twice', async () => {
@@ -923,6 +920,50 @@ describe('sa add: what it says about Lucide Icons', () => {
   });
 });
 
+describe('sa add: the README of the project', () => {
+  const README = (project: string): Promise<string> => readFile(join(project, 'README.md'), 'utf8');
+
+  it('says what the project has after each addition, rewriting only its own block', async () => {
+    const project = await createStarterProject(cwd, [
+      '--components',
+      'none',
+      '--icons',
+      'none',
+      '--app-shell',
+      'none',
+    ]);
+    expect(await README(project)).not.toContain('sa- components');
+    const written = `${await README(project)}\n## Deploy\n\nWe deploy on Fridays.\n`;
+    await writeFile(join(project, 'README.md'), written);
+
+    const result = await add(project, ['components', 'icon,button']);
+    expect(result.code, result.err).toBe(0);
+    const after = await README(project);
+    expect(after).toContain('`sa-` components');
+    expect(after).toContain('We deploy on Fridays.');
+    expect(after).toContain('**Icons**: Lucide Icons');
+  });
+
+  it('turns the README that ng new writes into a Starter Angular one the first time something is added', async () => {
+    const project = await createStarterProject(cwd, ['--components', 'none', '--icons', 'none']);
+    await writeFile(join(project, 'README.md'), ANGULAR_README);
+    const result = await add(project, ['icons', 'lucide']);
+    expect(result.code, result.err).toBe(0);
+    const readme = await README(project);
+    expect(readme).not.toContain('This project was generated using [Angular CLI]');
+    expect(readme).toContain('Lucide Icons');
+  });
+
+  it('does not touch a README the developer wrote', async () => {
+    const project = await createStarterProject(cwd, ['--components', 'none', '--icons', 'none']);
+    const own = '# Our shop\n\nRun it with the script of Ana.\n';
+    await writeFile(join(project, 'README.md'), own);
+    const result = await add(project, ['icons', 'lucide']);
+    expect(result.code, result.err).toBe(0);
+    expect(await README(project)).toBe(own);
+  });
+});
+
 describe('sa add with no value, in a terminal', () => {
   const NO_ICONS = ['--components', 'none', '--icons', 'none'];
 
@@ -941,8 +982,9 @@ describe('sa add with no value, in a terminal', () => {
     const [question] = result.asked;
     expect(question?.kind).toBe('checkbox');
     expect(question?.choices).toEqual([...ALL_COMPONENT_IDS]);
-    expect(question?.names?.[0]).toBe('sa-icon');
+    expect(question?.names?.[0]).toBe('sa-icon (recommended)');
     expect(question?.checked).toEqual([...ESSENTIAL_COMPONENT_IDS]);
+    expect(question?.disabled).toEqual({});
     expect(question?.descriptions?.every((text) => (text ?? '').length > 10)).toBe(true);
   });
 
@@ -964,16 +1006,39 @@ describe('sa add with no value, in a terminal', () => {
     expect(await readConfig(project)).toMatchObject({ components: 'custom', icons: 'lucide' });
   });
 
-  it('offers only the components the project does not have yet', async () => {
+  it('lists every component, blocking the ones the project has and marking the recommended ones', async () => {
     const project = await createStarterProject(cwd);
-    const result = await ask(project, ['components'], [['table']]);
+    // A custom selection can have the UI System: it is offered, and declined here.
+    const result = await ask(project, ['components'], [['table'], false]);
     expect(result.code, result.err).toBe(0);
     const [question] = result.asked;
-    expect(question?.choices).toEqual([...EXTRA_COMPONENT_IDS]);
-    expect(question?.checked).toEqual([]);
+    expect(question?.choices).toEqual([...ALL_COMPONENT_IDS]);
+    // The shell brings search and the theme colour picker, which the recorded collection does not list.
+    const installed = [...ESSENTIAL_COMPONENT_IDS, 'search', 'theme-color-picker'];
+    expect(Object.keys(question?.disabled ?? {}).sort()).toEqual([...installed].sort());
+    expect(new Set(Object.values(question?.disabled ?? {}))).toEqual(
+      new Set(['(already in the project)']),
+    );
+    expect(question?.names).toContain('sa-button (recommended)');
+    expect(question?.names).toContain('sa-table');
+    expect(question?.names).not.toContain('sa-search (recommended)');
+    // What the project has shows ticked and blocked; nothing else starts ticked.
+    expect(question?.checked).toEqual(installed);
     expect(await exists(join(project, 'src/app/shared/components/sa-table/sa-table.ts'))).toBe(
       true,
     );
+  });
+
+  it('adds only what is not blocked, even when the answer holds a component the project has', async () => {
+    const project = await createStarterProject(cwd);
+    const result = await ask(project, ['components'], [['button', 'table'], false]);
+    expect(result.code, result.err).toBe(0);
+    expect(await exists(join(project, 'src/app/shared/components/sa-table/sa-table.ts'))).toBe(
+      true,
+    );
+    const { componentList } = await readConfig(project);
+    expect(componentList).toContain('table');
+    expect(new Set(componentList).size).toBe(componentList.length);
   });
 
   it('stops when nothing is ticked', async () => {
@@ -1061,8 +1126,22 @@ describe('sa add: what a capability needs and what it offers next', () => {
     expect(result.asked).toEqual([]);
   });
 
+  // An Angular project that chose its components, but nothing else of the starter.
+  const WITH_COMPONENTS = [
+    '--architecture',
+    'angular-default',
+    '--routing',
+    'angular',
+    '--components',
+    'recommended',
+    '--icons',
+    'lucide',
+    '--app-shell',
+    'none',
+  ];
+
   it('asks to add what the UI System needs, says what, and adds it in order', async () => {
-    const project = await createStarterProject(cwd, PLAIN);
+    const project = await createStarterProject(cwd, WITH_COMPONENTS);
     const result = await ask(project, ['ui-system'], [true]);
     expect(result.code, result.err).toBe(0);
     expect(result.asked).toHaveLength(1);
@@ -1078,7 +1157,7 @@ describe('sa add: what a capability needs and what it offers next', () => {
   });
 
   it('changes nothing when the developer says no to what it needs', async () => {
-    const project = await createStarterProject(cwd, PLAIN);
+    const project = await createStarterProject(cwd, WITH_COMPONENTS);
     const result = await ask(project, ['ui-system'], [false]);
     expect(result.code, result.err).toBe(0);
     expect(await readConfig(project)).toMatchObject({
@@ -1088,7 +1167,7 @@ describe('sa add: what a capability needs and what it offers next', () => {
   });
 
   it('stops outside a terminal and names the commands to run first', async () => {
-    const project = await createStarterProject(cwd, PLAIN);
+    const project = await createStarterProject(cwd, WITH_COMPONENTS);
     const result = await add(project, ['ui-system']);
     expect(result.code).toBe(2);
     expect(result.err).toContain('sa add architecture screaming');
@@ -1096,12 +1175,62 @@ describe('sa add: what a capability needs and what it offers next', () => {
   });
 
   it('shows the whole chain in a dry run and changes nothing', async () => {
-    const project = await createStarterProject(cwd, PLAIN);
+    const project = await createStarterProject(cwd, WITH_COMPONENTS);
     const result = await add(project, ['ui-system', '--dry-run']);
     expect(result.code, result.err).toBe(0);
     expect(result.out).toContain('architecture');
     expect(result.out).toContain('app-shell');
     expect((await readConfig(project)).architecture).toBe('angular-default');
+  });
+
+  it('never adds the components on its own: without them it stops, asks nothing and says what to run', async () => {
+    const project = await createStarterProject(cwd, PLAIN);
+    const result = await ask(project, ['ui-system'], []);
+    expect(result.code).toBe(2);
+    expect(result.asked).toEqual([]);
+    expect(result.err).toContain('sa add components');
+    expect(result.err).not.toContain('sa add app-shell');
+    expect(await readConfig(project)).toMatchObject({
+      architecture: 'angular-default',
+      components: 'none',
+      uiSystem: 'none',
+    });
+  });
+
+  it('does the same in a dry run and outside a terminal', async () => {
+    const project = await createStarterProject(cwd, PLAIN);
+    for (const args of [['ui-system'], ['ui-system', '--dry-run']]) {
+      const result = await add(project, args);
+      expect(result.code, args.join(' ')).toBe(2);
+      expect(result.err).toContain('sa add components');
+    }
+  });
+
+  it('does not count the components of the shell as a collection the developer chose', async () => {
+    const project = await createStarterProject(cwd, ['--components', 'none']);
+    const result = await ask(project, ['ui-system'], []);
+    expect(result.code).toBe(2);
+    expect(result.err).toContain('sa add components');
+    expect(result.asked).toEqual([]);
+    expect((await readConfig(project)).uiSystem).toBe('none');
+  });
+
+  it('brings the components it draws with when they are not in the project, and says so', async () => {
+    const project = await createStarterProject(cwd, ['--components', 'modal,tabs']);
+    const shared = join(project, 'src/app/shared/components');
+    await rm(join(shared, 'sa-toggle'), { recursive: true });
+    const result = await add(project, ['ui-system']);
+    expect(result.code, result.err).toBe(0);
+    expect(result.out).toContain('sa-toggle will be installed too');
+    expect(await exists(join(shared, 'sa-toggle/sa-toggle.ts'))).toBe(true);
+    expect((await readConfig(project)).uiSystem).toBe('starter');
+  });
+
+  it('does not say it when the shell already brought them', async () => {
+    const project = await createStarterProject(cwd, ['--components', 'modal,tabs']);
+    const result = await add(project, ['ui-system']);
+    expect(result.code, result.err).toBe(0);
+    expect(result.out).not.toContain('will be installed too');
   });
 
   it('offers the UI System after the components when the project has the shell', async () => {
@@ -1118,6 +1247,89 @@ describe('sa add: what a capability needs and what it offers next', () => {
     expect(accepted.code, accepted.err).toBe(0);
     expect(accepted.asked[0]?.kind).toBe('confirm');
     expect((await readConfig(project)).uiSystem).toBe('none');
+  });
+
+  describe('completing the UI System catalog when more components arrive', () => {
+    const CATALOG = 'src/app/features/preference-design/ui-system/ui-system.catalog.ts';
+    const FEW = ['--components', 'modal', '--ui-system', 'starter'];
+    const catalogOf = (project: string): Promise<string> =>
+      readFile(join(project, CATALOG), 'utf8');
+
+    it('only suggests it outside a terminal, naming the components and the command', async () => {
+      const project = await createStarterProject(cwd, FEW);
+      expect(await catalogOf(project)).not.toContain("id: 'table'");
+      const result = await add(project, ['components', 'table']);
+      expect(result.code, result.err).toBe(0);
+      expect(result.out).toContain('Next: "sa add ui-system"');
+      expect(result.out).toContain('sa-table');
+      expect(await catalogOf(project)).not.toContain("id: 'table'");
+    });
+
+    it('asks in a terminal, with yes as the answer by default, and completes the catalog', async () => {
+      const project = await createStarterProject(cwd, FEW);
+      const result = await ask(project, ['components', 'table'], [true]);
+      expect(result.code, result.err).toBe(0);
+      const [question] = result.asked;
+      expect(question?.kind).toBe('confirm');
+      expect(question?.default).toBe(true);
+      expect(question?.message).toContain('sa-table');
+      expect(await catalogOf(project)).toContain("id: 'table'");
+      expect(result.out).toContain('The UI System catalog now shows');
+    });
+
+    it('leaves the catalog as it is when the developer says no', async () => {
+      const project = await createStarterProject(cwd, FEW);
+      const result = await ask(project, ['components', 'table'], [false]);
+      expect(result.code, result.err).toBe(0);
+      expect(await catalogOf(project)).not.toContain("id: 'table'");
+    });
+
+    it('does not ask when the catalog already shows what the project has', async () => {
+      const project = await createStarterProject(cwd, [
+        '--components',
+        'all',
+        '--ui-system',
+        'starter',
+      ]);
+      const result = await ask(project, ['components', 'button'], []);
+      expect(result.code).toBe(2);
+      expect(result.asked).toEqual([]);
+    });
+
+    it('is what "sa add ui-system" does in a project that has it', async () => {
+      const project = await createStarterProject(cwd, FEW);
+      await add(project, ['components', 'table']);
+      const result = await add(project, ['ui-system']);
+      expect(result.code, result.err).toBe(0);
+      expect(result.out).toContain('The UI System catalog now shows');
+      expect(await catalogOf(project)).toContain("id: 'table'");
+      const again = await add(project, ['ui-system']);
+      expect(again.code).toBe(2);
+      expect(again.err).toContain('already');
+    });
+
+    it('shows the step with --dry-run and changes nothing', async () => {
+      const project = await createStarterProject(cwd, FEW);
+      await add(project, ['components', 'table']);
+      const result = await add(project, ['ui-system', '--dry-run']);
+      expect(result.code, result.err).toBe(0);
+      expect(result.out).toContain('Completing the UI System catalog');
+      expect(await catalogOf(project)).not.toContain("id: 'table'");
+    });
+
+    it('warns and changes nothing when the developer edited the catalog', async () => {
+      const project = await createStarterProject(cwd, FEW);
+      await add(project, ['components', 'table']);
+      const edited = `${await catalogOf(project)}
+// mine
+`;
+      await writeFile(join(project, CATALOG), edited);
+      const result = await add(project, ['ui-system']);
+      expect(result.code, result.err).toBe(0);
+      expect(result.out).toContain('ui-system.catalog.ts');
+      expect(result.out).toContain('sa-table');
+      expect(await catalogOf(project)).toBe(edited);
+    });
   });
 
   it('only suggests the UI System outside a terminal', async () => {

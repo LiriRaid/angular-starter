@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 import { BLUEPRINTS_ROOT, copyBlueprint } from '../blueprint.js';
-import { addTestSetupFile } from '../edits/angular-json.js';
+import { addTestSetupFile, raiseInitialBudget } from '../edits/angular-json.js';
 import { planEdit, writeEdits } from '../edits/planned.js';
 import { addInterFont } from '../edits/html.js';
 import { addDesignStyles } from '../edits/styles.js';
@@ -46,7 +46,10 @@ export const designProfile = {
     const planned = [
       await planEdit(targetDir, STYLES, addDesignStyles),
       await planEdit(targetDir, INDEX_HTML, addInterFont),
-      await planEdit(targetDir, ANGULAR_JSON, (text) => addTestSetupFile(text, TEST_SETUP)),
+      // The shell and the components outgrow the 500 kB that Angular gives the initial bundle (ADR-0024).
+      await planEdit(targetDir, ANGULAR_JSON, (text) =>
+        raiseInitialBudget(addTestSetupFile(text, TEST_SETUP)),
+      ),
       await planEdit(targetDir, APP_CONFIG, (text) =>
         addProvider(
           addProvider(text, 'provideThemeInitializer()', [

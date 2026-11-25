@@ -244,12 +244,15 @@ describe('resolveOptions', () => {
     ).toThrow(/components: "custom" requires/);
   });
 
-  it('keeps the UI System for a whole collection', () => {
-    expect(() =>
+  it('gives the UI System to a custom selection of components, which it catalogs, and not to none', () => {
+    expect(
       resolveOptions({
         flags: { components: 'custom', componentList: ['button'], uiSystem: 'starter' },
-      }),
-    ).toThrow(/uiSystem: "starter" requires the components: recommended, all/);
+      }).uiSystem,
+    ).toBe('starter');
+    expect(() => resolveOptions({ flags: { components: 'none', uiSystem: 'starter' } })).toThrow(
+      /uiSystem: "starter" requires the components: recommended, all, custom/,
+    );
   });
 
   it('rejects unknown values and lists every issue', () => {

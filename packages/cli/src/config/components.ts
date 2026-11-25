@@ -37,6 +37,13 @@ export const EXTRA_COMPONENT_IDS: readonly string[] = [
   'weekly-schedule',
 ];
 
+/**
+ * The components the UI System draws its own interface with (the switches of every card, the buttons
+ * that open a modal or a panel). They are in the essential collection and in what the shell brings;
+ * a project that lacks them gets them when the UI System is added.
+ */
+export const UI_SYSTEM_COMPONENT_IDS: readonly string[] = ['button', 'toggle'];
+
 /** Every component (26), in the order of the list the wizard shows. */
 export const ALL_COMPONENT_IDS: readonly string[] = [
   ...ESSENTIAL_COMPONENT_IDS,
