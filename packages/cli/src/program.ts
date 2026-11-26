@@ -22,6 +22,8 @@ const ROOT_COMMANDS: readonly (readonly [name: string, term: string])[] = [
   ['add', 'sa add <capability> [value]'],
   ['generate', 'sa generate, g <kind> <name>'],
   ['test', 'sa test [args...]'],
+  ['lint', 'sa lint [--fix] [args...]'],
+  ['format', 'sa format [--check] [args...]'],
   ['list', 'sa list [category]'],
   ['info', 'sa info'],
   ['config', 'sa config <list|get> [key]'],
@@ -115,6 +117,52 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
     .action(async (args: string[]) => {
       const { testCommand } = await import('./commands/test.js');
       await testCommand(io, deps, args);
+    });
+
+  program
+    .command('lint')
+    .description('Lints the project with ESLint: its lint script, through its package manager.')
+    .usage('[--fix] [args...]')
+    .argument(
+      '[args...]',
+      'Options that go to the script as they are (not a file: the script already has its glob); --fix runs lint:fix',
+    )
+    .allowUnknownOption()
+    .allowExcessArguments()
+    .addHelpText(
+      'after',
+      examples([
+        ['sa lint', 'Check the code with ESLint'],
+        ['sa lint --fix', 'Fix what ESLint can fix (the lint:fix script)'],
+      ]),
+    )
+    .action(async (args: string[]) => {
+      const { lintCommand } = await import('./commands/scripts.js');
+      await lintCommand(io, deps, args);
+    });
+
+  program
+    .command('format')
+    .description(
+      'Formats the project with Prettier: its format script, through its package manager.',
+    )
+    .usage('[--check] [args...]')
+    .argument(
+      '[args...]',
+      'Options that go to the script as they are (not a file: the script already has its glob); --check runs format:check',
+    )
+    .allowUnknownOption()
+    .allowExcessArguments()
+    .addHelpText(
+      'after',
+      examples([
+        ['sa format', 'Format the code with Prettier'],
+        ['sa format --check', 'Only check it, for a pipeline (the format:check script)'],
+      ]),
+    )
+    .action(async (args: string[]) => {
+      const { formatCommand } = await import('./commands/scripts.js');
+      await formatCommand(io, deps, args);
     });
 
   program

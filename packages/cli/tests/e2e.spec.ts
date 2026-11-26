@@ -306,6 +306,9 @@ ${result.stderr}`;
       );
 
       // Lint and format work out of the box on everything the starter generated (ADR-0027).
+      expect(JSON.parse(await read(project, 'package.json')).scripts['test:watch']).toBe(
+        'ng test --watch',
+      );
       await script(project, 'lint');
       await script(project, 'format:check');
 
@@ -344,8 +347,9 @@ ${result.stderr}`;
         '@defer (hydrate on viewport)',
       );
 
-      await script(project, 'lint');
-      await script(project, 'format:check');
+      // The same checks from the CLI that created the project: sa lint and sa format --check.
+      await asProject(project, 'lint');
+      await asProject(project, 'format', '--check');
       await ng(project, 'build');
       // sa test runs the same ng test, from the CLI that created the project.
       await asProject(project, 'test', '--watch=false');

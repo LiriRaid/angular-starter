@@ -102,6 +102,7 @@ async function plan({ targetDir, style }: ToolingProject): Promise<Plan> {
         prettier: TOOLING_PACKAGES['prettier'] ?? '',
       }),
       {
+        'test:watch': 'ng test --watch',
         ...(found ? {} : { lint: `eslint "${sources}"`, 'lint:fix': `eslint "${sources}" --fix` }),
         format: `prettier --write "${formatted}"`,
         'format:check': `prettier --check "${formatted}"`,

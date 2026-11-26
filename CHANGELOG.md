@@ -18,6 +18,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   commands it has.
 - `sa test [args...]` runs `ng test` of any Angular project through its package manager, from any folder of it, with
   the arguments typed and the exit code of `ng test`.
+- `sa lint` and `sa format` run the `lint` and `format` scripts of any Angular project, with the exit code of the script
+  (ADR-0028 and plan 0025): `sa lint --fix` runs `lint:fix` and `sa format --check` runs `format:check`, and every
+  other argument goes to the script. Every project has the `test:watch` script (`ng test --watch`).
 
 - In the UI System the mode (`on`, `in`, `over`) of `sa-input`, `sa-textarea` and `sa-select` is a setting of
   the card (ADR-0025 and plan 0022): a row of chips picks it, every variant is shown in that mode, and the code

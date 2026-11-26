@@ -74,5 +74,5 @@ Two more facts shaped the decision.
   made the project.
 - Negative: a new project installs four more packages (about a dozen seconds with a warm store), and `sa new` runs
   Prettier over `src` once, which adds a few seconds.
-- Follow-up: `sa lint` and `sa format` could be the same kind of pass-through as `sa test`; a CI workflow like the one
+- Follow-up: `sa lint` and `sa format` as the same kind of pass-through as `sa test` (done in [ADR-0028](0028-sa-lint-sa-format-and-test-watch.md)); a CI workflow like the one
   of OmniInbox is not generated (it only makes sense for a project that goes to a given host).

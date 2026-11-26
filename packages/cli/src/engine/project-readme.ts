@@ -50,6 +50,7 @@ const labelOf = (category: CapabilityCategory, id: string): string =>
 
 /** What the quality scripts of ADR-0027 do, in the order the README lists them. */
 const QUALITY_SCRIPTS: readonly (readonly [script: string, what: string])[] = [
+  ['test:watch', 'runs the unit tests and runs them again on every change'],
   ['lint', 'checks the code and the templates with ESLint'],
   ['lint:fix', 'fixes what ESLint can fix'],
   ['format', 'formats the code with Prettier'],
