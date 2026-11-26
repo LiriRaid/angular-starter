@@ -1,0 +1,40 @@
+/*
+ * Layout modes (ADR-0029). The design preferences put the traits of the layout on <html>:
+ * data-layout="compact-joined" and data-layout-traits="compact" (any of compact, floating, transparent).
+ * The components of the shell draw the floating, wide look; what is below changes it for the other modes.
+ * It is outside any @layer on purpose: it has to win over the styles of the components.
+ */
+
+/* Joined: the sidebar, the header and the content touch each other, with no gap and no floating panels. */
+html:not([data-layout-traits~='floating']) __PREFIX__-main .__PREFIX__-layout {
+  padding: 0;
+  gap: 0;
+}
+
+html:not([data-layout-traits~='floating']) __PREFIX__-main .main-container {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+html:not([data-layout-traits~='floating']) __PREFIX__-sidebar {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Compact: the user menu is in the header, after a divider, as wide as its content. */
+__PREFIX__-header .header-user-divider {
+  align-self: stretch;
+  width: 1px;
+  margin: 0.75rem 0.25rem;
+  background: var(--app-border-color);
+}
+
+__PREFIX__-header __PREFIX__-user-menu {
+  width: auto;
+}
+
+__PREFIX__-header __PREFIX__-user-menu .um-trigger.sa-btn {
+  width: auto !important;
+  max-width: 16rem;
+}

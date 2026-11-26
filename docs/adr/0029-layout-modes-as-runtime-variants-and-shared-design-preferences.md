@@ -49,8 +49,9 @@ would that be cached, and for how many people. The alert is enough, and the user
    a reconnection, because pub/sub does not replay what a client missed). The default is none. The docs show how to feed
    a notifier from Redis pub/sub or any queue.
 6. **Compact modes show a search, not a breadcrumb.** As in the reference app, `compact-joined` and `floating-compact`
-   put a search in the header; _Mostrar breadcrumb_ of the Otros tab is disabled (with a note) in those two modes and
-   keeps its value for the others. A compact sidebar shows the icon above the text; an item with children opens a small
+   put a search in the header, and the user menu (with the presence of `sa add presence`) moves from the sidebar to the
+   header, after the colour and theme buttons, as in the reference app; _Mostrar breadcrumb_ of the Otros tab is
+   disabled (with a note) in those two modes and keeps its value for the others. A compact sidebar shows the icon above the text; an item with children opens a small
    secondary navigation panel next to it. Below 1024 px every mode uses the same drawer as today.
 7. **One mode per commit.** The foundation (decisions 1, 2, 4 and 5, with `floating-wide` only) comes first, then
    `compact-joined`, `wide-joined`, `floating-compact`, `transparent-joined` and `transparent-floating`; each with its

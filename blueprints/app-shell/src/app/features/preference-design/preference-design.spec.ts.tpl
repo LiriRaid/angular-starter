@@ -94,6 +94,26 @@ describe('PreferenceDesign', () => {
     expect(service.preferences().showBreadcrumb).toBe(false);
   });
 
+  it('disables "Mostrar breadcrumb" in a compact layout, says why and keeps its value', async () => {
+    const fixture = await render();
+    fixture.componentInstance.activeTab.set('other');
+    await fixture.whenStable();
+    const element = fixture.nativeElement as HTMLElement;
+    const toggle = () => element.querySelector<HTMLButtonElement>('button[aria-label="Mostrar breadcrumb"]');
+    expect(toggle()?.disabled).toBe(false);
+
+    service.set('layout', 'compact-joined');
+    await fixture.whenStable();
+    expect(toggle()?.disabled).toBe(true);
+    expect(element.textContent).toContain('buscador');
+    expect(service.preferences().showBreadcrumb).toBe(true);
+
+    service.set('layout', 'floating-wide');
+    await fixture.whenStable();
+    expect(toggle()?.disabled).toBe(false);
+    expect(element.textContent).not.toContain('buscador');
+  });
+
   it('saves what is on screen through the store and offers the changes only when there are some', async () => {
     const fixture = await render();
     const component = fixture.componentInstance;

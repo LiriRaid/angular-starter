@@ -38,12 +38,24 @@ contracts, both provided by tokens like `PRESENCE_TRANSPORT`:
   `design-update-notice` ("El diseño de la plataforma cambió", with a _Recargar_ button). Nothing is applied by itself.
   The default tells nobody: users see the new design the next time they load the page.
 
+Shipped implementations, all over native `fetch` and `WebSocket`: `HttpDesignPreferencesStore` (`GET` and `PUT` of
+one document), `PollingDesignChangeNotifier` (asks the version every minute and when the tab comes back, no sockets)
+and `WebSocketDesignChangeNotifier` (the server pushes `design-changed`, with reconnection and a version check after
+it). `docs/design-preferences.md` has the contract of the endpoint, a minimal Node server and how to feed the notices
+from Redis pub/sub.
+
 ```ts
 provideDesignPreferences({
-  store: () => inject(MyDesignStore), // an Angular service that implements DesignPreferencesStore
-  notifier: () => inject(MyDesignNotifier), // WebSocket, polling, server-sent events…
+  store: () =>
+    new HttpDesignPreferencesStore({
+      url: '/api/design-preferences',
+      canSave: inject(Session).isAdmin,
+    }),
+  notifier: () => new PollingDesignChangeNotifier({ url: '/api/design-preferences/version' }),
 });
 ```
+
+Or your own: `store: () => inject(MyDesignStore)` with any class that implements the interfaces.
 
 "Restablecer" brings back the defaults, also the theme and the colours, and saves them when the store allows it.
 The theme (light or dark) and the colours are stored by `ThemeService` (`core/theme`) in the browser as soon as they

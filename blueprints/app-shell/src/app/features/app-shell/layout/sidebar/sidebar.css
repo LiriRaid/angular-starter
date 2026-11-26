@@ -23,6 +23,19 @@
   max-width: var(--sw-collapsed);
 }
 
+/* Layouts compactos: un rail de ancho fijo que se cierra del todo con el botón del header. */
+:host(.is-compact) {
+  --sw-expanded: 6rem;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+:host(.is-compact.is-closed) {
+  flex-basis: 0;
+  width: 0;
+  max-width: 0;
+}
+
 @media (max-width: 1023px) {
   :host:has(.sidebar-wrapper.collapsed:not(.mobile)) {
     flex-basis: 0;

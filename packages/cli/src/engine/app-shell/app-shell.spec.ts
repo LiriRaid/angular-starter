@@ -63,6 +63,7 @@ describe('App Shell profile', () => {
       'src/styles/features/sidebar-styles.css',
       'src/styles/features/breadcrumb-styles.css',
       'src/styles/features/user-menu-styles.css',
+      'src/styles/features/layout-modes-styles.css',
     ]) {
       await expect(read(file), file).resolves.toContain('{');
     }
@@ -173,6 +174,37 @@ describe('App Shell profile', () => {
       const tab = await read(`${PAGE}/tabs/appearance-tab.ts`);
       expect(tab).toContain("from '@core/design-preferences/layout-modes'");
       expect(await read(`${PAGE}/tabs/appearance-tab.html`)).toContain('data-layout');
+    });
+
+    it('ships an HTTP store, two notifiers and the guide to connect them to a server (ADR-0029)', async () => {
+      await apply();
+      for (const file of [
+        'http-design-preferences.store.ts',
+        'http-design-preferences.store.spec.ts',
+        'polling-design-change.notifier.ts',
+        'polling-design-change.notifier.spec.ts',
+        'web-socket-design-change.notifier.ts',
+        'web-socket-design-change.notifier.spec.ts',
+      ]) {
+        await expect(read(`${CORE}/${file}`), file).resolves.toBeTypeOf('string');
+      }
+      const guide = await read('docs/design-preferences.md');
+      for (const text of [
+        'HttpDesignPreferencesStore',
+        'PollingDesignChangeNotifier',
+        'WebSocketDesignChangeNotifier',
+        'design-changed',
+        'Redis',
+      ]) {
+        expect(guide).toContain(text);
+      }
+      // The browser storage is never part of it, in the code of the store or of the notifiers.
+      for (const file of [
+        'http-design-preferences.store.ts',
+        'polling-design-change.notifier.ts',
+      ]) {
+        expect(await read(`${CORE}/${file}`)).not.toMatch(/localStorage|sessionStorage/);
+      }
     });
 
     it('adds the route and a navigation entry with its breadcrumb', async () => {

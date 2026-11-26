@@ -21,7 +21,7 @@ export interface LayoutMode extends LayoutTraits {
 /** Every layout of the shell. Each one is a combination of the three traits: one set of components, no files per mode. */
 export const LAYOUT_MODES: readonly LayoutMode[] = [
   { id: 'wide-joined', label: 'Sidebar ancho (unido)', description: 'Icono + texto en fila', built: false, compact: false, floating: false, transparent: false },
-  { id: 'compact-joined', label: 'Sidebar compacto (unido)', description: 'Icono encima del texto', built: false, compact: true, floating: false, transparent: false },
+  { id: 'compact-joined', label: 'Sidebar compacto (unido)', description: 'Icono encima del texto', built: true, compact: true, floating: false, transparent: false },
   { id: 'floating-wide', label: 'Flotante (ancho)', description: 'Sidebar, header y contenido flotantes', built: true, compact: false, floating: true, transparent: false },
   { id: 'floating-compact', label: 'Flotante (compacto)', description: 'Compacto + paneles flotantes', built: false, compact: true, floating: true, transparent: false },
   { id: 'transparent-joined', label: 'Transparente (unido)', description: 'Sin fondo en el sidebar', built: false, compact: false, floating: false, transparent: true },
@@ -29,7 +29,7 @@ export const LAYOUT_MODES: readonly LayoutMode[] = [
 ];
 
 /** The layouts the design preferences page lets the administrator choose. Edit it to offer more or fewer; `sa add layout` adds to it. */
-export const ENABLED_LAYOUT_MODES: readonly LayoutModeId[] = ['floating-wide'];
+export const ENABLED_LAYOUT_MODES: readonly LayoutModeId[] = ['compact-joined', 'floating-wide'];
 
 /** The layout shown when nobody has saved another one. It has to be in `ENABLED_LAYOUT_MODES`. */
 export const DEFAULT_LAYOUT_MODE: LayoutModeId = 'floating-wide';

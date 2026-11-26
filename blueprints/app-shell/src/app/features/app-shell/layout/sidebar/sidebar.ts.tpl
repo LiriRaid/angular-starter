@@ -5,22 +5,26 @@ import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-i
 
 import { filter, pairwise, startWith } from 'rxjs';
 
+import { DesignPreferencesService } from '@core/design-preferences/design-preferences.service';
 import { NavigationGroup, NavigationItem } from '@core/navigation/navigation.types';
 import { NAV_APP_NAME_TOKEN } from '@core/navigation/navigation.tokens';
 import { SidebarStatus } from '../enums/sidebar-status.enum';
 import { LayoutService } from '../../services/layout.service';
 import { filterNavigationGroups, getFolderRootLink, hasActiveDescendant, isNavigationItemActive, normalizeSidebarUrl } from './sidebar-navigation.utils';
 import { SaIcon, SaRipple, SaSearch, SaTooltip } from '@shared/components';
+import { SidebarRail } from './sidebar-rail/sidebar-rail';
 import { UserMenu } from './user-menu/user-menu';
 
 @Component({
   selector: '__PREFIX__-sidebar',
-  imports: [ReactiveFormsModule, SaIcon, SaRipple, SaSearch, SaTooltip, UserMenu],
+  imports: [ReactiveFormsModule, SaIcon, SaRipple, SaSearch, SaTooltip, SidebarRail, UserMenu],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     '(window:resize)': 'onResize()',
+    '[class.is-compact]': 'compact()',
+    '[class.is-closed]': 'compact() && !layoutService.isOpen()',
   },
 })
 export class Sidebar {
@@ -32,6 +36,7 @@ export class Sidebar {
   SidebarStatus = SidebarStatus;
 
   readonly layoutService = inject(LayoutService);
+  private readonly designPreferences = inject(DesignPreferencesService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -42,6 +47,9 @@ export class Sidebar {
   private readonly collapseFoldersAfterExpandedSearchNav = signal(false);
 
   private readonly searchText = toSignal(this.searchInput.valueChanges.pipe(startWith(this.searchInput.value ?? '')), { initialValue: '' });
+
+  /** Los layouts compactos dibujan un rail en lugar de este sidebar; en pantallas chicas todos usan el mismo drawer. */
+  readonly compact = computed(() => this.designPreferences.layoutTraits().compact && !this.layoutService.isMobile());
 
   readonly isSearching = computed(() => (this.searchText() ?? '').trim().length > 0);
   private readonly baseNavigationGroups = computed(() => this.layoutService.getNavigationGroups());

@@ -17,6 +17,29 @@ export interface DesignChangeNotifier {
   disconnect(): void;
 }
 
+/** The message the server pushes: `{ "type": "design-changed", "version": "…" }`. Anything else is ignored. */
+export const parseDesignChange = (data: unknown): DesignChange | null => {
+  try {
+    const message: unknown = typeof data === 'string' ? JSON.parse(data) : null;
+    const { type, version } = (message ?? {}) as Record<string, unknown>;
+    return type === 'design-changed' && typeof version === 'string' ? { version } : null;
+  } catch {
+    return null;
+  }
+};
+
+/** Asks `url` (`GET { "version": "…" }`) for the version of the design; `null` when it cannot be known. */
+export const fetchDesignVersion = async (url: string, options: { readonly fetch?: typeof fetch; readonly headers?: () => Record<string, string> } = {}): Promise<string | null> => {
+  try {
+    const response = await (options.fetch ?? fetch)(url, { headers: { accept: 'application/json', ...options.headers?.() }, credentials: 'include' });
+    if (!response.ok) return null;
+    const { version } = (await response.json()) as { version?: unknown };
+    return typeof version === 'string' ? version : null;
+  } catch {
+    return null;
+  }
+};
+
 /** The default tells nobody: users see the new design when they reload the page. */
 export const DESIGN_CHANGE_NOTIFIER = new InjectionToken<DesignChangeNotifier>('DESIGN_CHANGE_NOTIFIER', {
   providedIn: 'root',

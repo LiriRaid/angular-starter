@@ -5,7 +5,7 @@
   </div>
 </ng-template>
 
-<sa-popover #popover position="top" [triggerIcon]="null" triggerVariant="text" triggerStyleClass="um-trigger" triggerAriaLabel="Abrir menú de usuario" [triggerTooltip]="expanded() ? null : userInfoTooltip" triggerTooltipPosition="right" [triggerTooltipDelay]="300">
+<sa-popover #popover [position]="position()" [triggerIcon]="null" triggerVariant="text" triggerStyleClass="um-trigger" triggerAriaLabel="Abrir menú de usuario" [triggerTooltip]="expanded() ? null : userInfoTooltip" triggerTooltipPosition="right" [triggerTooltipDelay]="300">
   <div popover-trigger class="um-card flex items-center gap-3 w-full min-w-0 text-left">
     <sa-avatar class="um-card-avatar" [label]="userInitials()" background="var(--app-sidebar-user-avatar-bg)" color="var(--app-sidebar-user-avatar-text)" textClass="tracking-[0.02em]" [alt]="userName()" />
 
