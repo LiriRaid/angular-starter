@@ -20,6 +20,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
   text of every page, a small navigation next to it for the folders, and, in the header, a search instead of the
   breadcrumb (the _Mostrar breadcrumb_ switch is disabled there) and the user menu with its presence. Every layout is a mix of three traits (`compact`,
   `floating`, `transparent`) read by the components as a signal and by the stylesheets from `html[data-layout-traits]`.
+- The design preferences no longer read the `localStorage` entry that older projects used to save them: a saved design
+  must be saved again through the store (ADR-0029).
 - Every project comes with lint and format ready, whatever its architecture (ADR-0027 and plan 0024): `sa new` writes
   `eslint.config.mjs` (ESLint 10, `typescript-eslint` and `angular-eslint` with the reference rules and the selector
   prefix of the project), adds the packages at the versions the CLI was tested with (`TOOLING_PACKAGES`) and the scripts

@@ -1,7 +1,7 @@
 <aside class="rail" aria-label="Navegación principal">
   <div class="rail-logo" aria-hidden="true">{{ brandInitial }}</div>
 
-  <nav class="rail-nav">
+  <nav class="rail-nav" (scroll)="closeSubnav()">
     @for (item of items(); track item.id) {
       <button type="button" class="rail-item" [class.rail-item--active]="isActive(item)" [attr.aria-current]="isActive(item) ? (isFolder(item) ? 'true' : 'page') : null" [attr.aria-expanded]="isFolder(item) ? openItemId() === item.id : null" (click)="select(item, $event)">
         @if (item.icon) {

@@ -11,6 +11,7 @@ const TREE: readonly NavigationGroup[] = [
     items: [
       { id: 'home', title: 'Inicio', link: '/home', icon: 'Home' },
       { id: 'users', title: 'Usuarios', link: '/users', icon: 'Users' },
+      { id: 'billing', title: 'Facturas', link: '/billing', icon: 'Receipt', children: [{ id: 'paid', title: 'Pagadas', link: '/billing/paid' }] },
       { id: 'secret', title: 'Secreto', link: '/secret', icon: 'Lock', hidden: () => true },
     ],
   },
@@ -64,7 +65,7 @@ describe('SidebarRail', () => {
   });
 
   it('shows every visible item of the navigation, with its icon above its label', () => {
-    expect(items().map((button) => button.querySelector('.rail-label')?.textContent?.trim())).toEqual(['Inicio', 'Usuarios', 'Configuración']);
+    expect(items().map((button) => button.querySelector('.rail-label')?.textContent?.trim())).toEqual(['Inicio', 'Usuarios', 'Facturas', 'Configuración']);
     expect(item('Inicio')?.querySelector('sa-icon')).not.toBeNull();
     const children = Array.from(item('Inicio')?.children ?? []).map((element) => element.tagName.toLowerCase());
     expect(children.indexOf('sa-icon')).toBeLessThan(children.indexOf('span'));
@@ -88,6 +89,28 @@ describe('SidebarRail', () => {
       expect(host().querySelector('.rail-subnav')?.textContent).toContain('Configuración');
       expect(subnavButtons().map((button) => button.textContent?.trim())).toEqual(['General', 'Notificaciones', 'Correo']);
       expect(router.navigateByUrl).not.toHaveBeenCalled();
+    });
+
+    it('lists its own page first when it has one, so it can still be reached', async () => {
+      item('Facturas')?.click();
+      await fixture.whenStable();
+      expect(subnavButtons().map((button) => button.textContent?.trim())).toEqual(['Facturas', 'Pagadas']);
+      subnavButtons()[0].click();
+      expect(router.navigateByUrl).toHaveBeenCalledWith('/billing');
+    });
+
+    it('closes when the window is resized or the rail scrolls', async () => {
+      item('Configuración')?.click();
+      await fixture.whenStable();
+      window.dispatchEvent(new Event('resize'));
+      await fixture.whenStable();
+      expect(host().querySelector('.rail-subnav')).toBeNull();
+
+      item('Configuración')?.click();
+      await fixture.whenStable();
+      host().querySelector('.rail-nav')?.dispatchEvent(new Event('scroll'));
+      await fixture.whenStable();
+      expect(host().querySelector('.rail-subnav')).toBeNull();
     });
 
     it('goes to the page that is chosen and closes', async () => {
