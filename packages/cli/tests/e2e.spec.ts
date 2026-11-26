@@ -97,6 +97,23 @@ ${result.stderr}`,
     ).toBe(0);
   }
 
+  /** Runs a script of the project through its package manager and fails when it does not pass. */
+  async function script(project: string, name: string) {
+    const npm = existsSync(join(project, 'package-lock.json'));
+    const result = await execa(npm ? 'npm' : 'pnpm', ['run', name], {
+      cwd: project,
+      reject: false,
+      env: CHILD_ENV,
+      extendEnv: true,
+    });
+    expect(
+      result.exitCode,
+      `${name}
+${result.stdout}
+${result.stderr}`,
+    ).toBe(0);
+  }
+
   /** Builds the application for production and fails on any budget warning, which the build prints without failing. */
   async function buildWithinBudgets(project: string) {
     const npm = existsSync(join(project, 'package-lock.json'));
@@ -126,6 +143,10 @@ ${result.stderr}`;
       expect(manifest).toContain('tailwindcss');
       // Zoneless is the Angular 22 default: the app has no zone.js at all.
       expect(manifest).not.toContain('zone.js');
+      // Lint and format come with every project (ADR-0027).
+      expect(existsSync(join(project, 'eslint.config.mjs'))).toBe(true);
+      expect(manifest).toContain('angular-eslint');
+      expect(manifest).toContain('"format:check"');
     },
     TIMEOUT_MS,
   );
@@ -284,6 +305,10 @@ ${result.stderr}`;
         "import('@features/app-shell/layout/main/main')",
       );
 
+      // Lint and format work out of the box on everything the starter generated (ADR-0027).
+      await script(project, 'lint');
+      await script(project, 'format:check');
+
       await ng(project, 'build');
       await ng(project, 'test', '--watch=false');
     },
@@ -319,8 +344,11 @@ ${result.stderr}`;
         '@defer (hydrate on viewport)',
       );
 
+      await script(project, 'lint');
+      await script(project, 'format:check');
       await ng(project, 'build');
-      await ng(project, 'test', '--watch=false');
+      // sa test runs the same ng test, from the CLI that created the project.
+      await asProject(project, 'test', '--watch=false');
     },
     INSTALL_TIMEOUT_MS,
   );

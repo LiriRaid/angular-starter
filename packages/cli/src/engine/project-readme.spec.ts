@@ -100,6 +100,58 @@ describe('refreshProjectReadme', () => {
     expect(await README()).toContain('yarn start');
   });
 
+  describe('lint and format commands', () => {
+    const SCRIPTS = {
+      lint: 'eslint "src/**/*.{ts,html}"',
+      'lint:fix': 'eslint "src/**/*.{ts,html}" --fix',
+      format: 'prettier --write "src/**/*.{ts,html,css}"',
+      'format:check': 'prettier --check "src/**/*.{ts,html,css}"',
+    };
+
+    it('lists the ones the project has, in the syntax of its package manager', async () => {
+      await writeFile(join(project, 'README.md'), ANGULAR_README);
+      await writeFile(join(project, 'package.json'), JSON.stringify({ scripts: SCRIPTS }));
+      await refresh({ ...DEFAULT_OPTIONS, packageManager: 'pnpm' });
+      const pnpm = await README();
+      for (const command of ['pnpm lint', 'pnpm lint:fix', 'pnpm format', 'pnpm format:check']) {
+        expect(pnpm, command).toContain(`\`${command}\``);
+      }
+
+      await writeFile(join(project, 'README.md'), ANGULAR_README);
+      await refresh({ ...DEFAULT_OPTIONS, packageManager: 'npm' });
+      const npm = await README();
+      for (const command of [
+        'npm run lint',
+        'npm run lint:fix',
+        'npm run format',
+        'npm run format:check',
+      ]) {
+        expect(npm, command).toContain(`\`${command}\``);
+      }
+    });
+
+    it('does not list a command the project does not have', async () => {
+      await writeFile(join(project, 'README.md'), ANGULAR_README);
+      await writeFile(
+        join(project, 'package.json'),
+        JSON.stringify({ scripts: { format: 'prettier --write .' } }),
+      );
+      await refresh({ ...DEFAULT_OPTIONS, packageManager: 'pnpm' });
+      const text = await README();
+
+      expect(text).toContain('`pnpm format`');
+      expect(text).not.toContain('pnpm lint');
+      expect(text).not.toContain('format:check');
+    });
+
+    it('lists none when the project has no package.json to read', async () => {
+      await writeFile(join(project, 'README.md'), ANGULAR_README);
+      await refresh();
+
+      expect(await README()).not.toContain('lint');
+    });
+  });
+
   it('rewrites only its own block when it is there, and keeps what the developer wrote around it', async () => {
     await writeFile(join(project, 'README.md'), ANGULAR_README);
     await refresh();
