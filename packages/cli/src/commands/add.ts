@@ -16,6 +16,7 @@ import { installedComponentIds } from '../engine/components/installed.js';
 import type { StarterOptions } from '../config/schema.js';
 import type { ProgramDeps } from '../deps.js';
 import { runPipeline, type GenerationContext, type Stage } from '../engine/pipeline.js';
+import { toolingProfile } from '../engine/tooling/tooling.js';
 import { uiSystemProfile } from '../engine/ui-system/ui-system.js';
 import {
   addAngularSsr,
@@ -28,6 +29,7 @@ import {
   applyRendering,
   applyRouting,
   applySharedFolders,
+  applyTooling,
   applyUiSystem,
   installDependencies,
   updateUiSystemCatalog,
@@ -40,7 +42,9 @@ import { describeComponent } from '../wizard/wizard.js';
 import { findProject, type StarterProject } from '../project/find.js';
 import {
   ADDABLE,
+  ADDABLE_WORDS,
   NOT_ADDABLE,
+  TOOLING_CAPABILITY,
   addableValues,
   prerequisitesOf,
   unchosenOf,
@@ -49,6 +53,9 @@ import {
 import { createStyler } from '../ui/format.js';
 
 export { ADDABLE, addableValues };
+
+const TOOLING_DOCS =
+  'https://github.com/LiriRaid/starter-angular/blob/main/docs/adr/0027-default-eslint-prettier-and-sa-test.md';
 
 export interface AddFlags {
   install?: boolean;
@@ -65,13 +72,15 @@ export async function addCommand(
   /** True when another `sa add` runs this one to bring what it needs: it asks nothing more. */
   chained = false,
 ): Promise<void> {
+  // Lint and format are not an option of the project (every new project has them): they have no category.
+  if (capability === TOOLING_CAPABILITY) return addTooling(io, deps, flags);
   const category = capability === undefined ? undefined : ADDABLE[capability];
   if (capability === undefined || category === undefined) {
     throw new UsageError(
       capability === undefined
         ? 'Usage: sa add <capability> [value]'
         : `Unknown capability "${capability}".`,
-      `Choose one of: ${Object.keys(ADDABLE).join(', ')}. The stylesheet format, Tailwind CSS, the package manager and the selector prefix are decided by "sa new".`,
+      `Choose one of: ${ADDABLE_WORDS.join(', ')}. The stylesheet format, Tailwind CSS, the package manager and the selector prefix are decided by "sa new".`,
     );
   }
 
@@ -201,6 +210,46 @@ export async function addCommand(
   } else {
     await offerUiSystem(io, deps, category, flags);
   }
+}
+
+/**
+ * `sa add tooling` (ADR-0027): the ESLint configuration, its packages and the lint and format scripts, for a
+ * project made before every project had them. An ESLint setup the project has stays as it is.
+ */
+async function addTooling(io: CliIo, deps: ProgramDeps, flags: AddFlags): Promise<void> {
+  const project = await findProject(io.cwd);
+  const request = {
+    targetDir: project.root,
+    prefix: project.options.prefix,
+    style: project.options.style,
+  };
+  if (await toolingProfile.isComplete(request)) {
+    throw new UsageError(
+      'Lint and format are already in this project (tooling): it has the ESLint setup and the lint and format scripts.',
+    );
+  }
+
+  const options = { ...project.options, install: flags.install !== false };
+  const stages = [applyTooling, writeProjectReadme, installDependencies];
+  const style = createStyler(io.color);
+  const context = contextFor(io, deps, project, options, flags.verbose);
+
+  if (flags.dryRun) {
+    println(io.stdout, style.bold('Dry run: nothing was changed. Planned steps:'));
+    stages
+      .filter((stage) => !stage.enabled || stage.enabled(context))
+      .forEach((stage, index) => println(io.stdout, `  ${index + 1}. ${stage.title}`));
+    println(io.stdout, '  Adds: lint and format (ESLint, Prettier scripts)');
+    return;
+  }
+
+  println(io.stdout);
+  await runPipeline(stages, context);
+  println(io.stdout);
+  println(io.stdout, style.green('Lint and format added.'));
+  println(io.stdout, `Documentation: ${TOOLING_DOCS}`);
+  for (const note of context.notes ?? []) println(io.stdout, note);
+  for (const warning of context.warnings) println(io.stdout, `${style.yellow('!')} ${warning}`);
 }
 
 /** Does this capability run an install after its steps? */

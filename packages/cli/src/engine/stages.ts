@@ -20,6 +20,7 @@ import { componentsProfile } from './components/components.js';
 import { designProfile } from './design/design.js';
 import { appShellProfile } from './app-shell/app-shell.js';
 import { presenceProfile } from './presence/presence.js';
+import { toolingProfile } from './tooling/tooling.js';
 import { uiSystemProfile } from './ui-system/ui-system.js';
 import { buildNgAddSsrCommand, buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
@@ -34,6 +35,7 @@ import { ROUTING_PROFILES } from './routing/index.js';
 const PROBE_TIMEOUT_MS = 15_000;
 const WORKSPACE_TIMEOUT_MS = 10 * 60_000;
 const INSTALL_TIMEOUT_MS = 15 * 60_000;
+const FORMAT_TIMEOUT_MS = 5 * 60_000;
 const INITIAL_COMMIT_MESSAGE = 'chore: initial commit from Starter Angular';
 
 export const validateEnvironment: Stage = {
@@ -276,6 +278,60 @@ export const addIconLibrary: Stage = {
 };
 
 /**
+ * Lint and format for every project (ADR-0027): the ESLint configuration with Angular's rules, its
+ * packages and the lint and format scripts. A project that has an ESLint setup of its own keeps it.
+ */
+export const applyTooling: Stage = {
+  id: 'apply-tooling',
+  title: 'Adding ESLint and the lint and format scripts',
+  async run({ options, targetDir, notes, created }) {
+    const report = await toolingProfile.apply({
+      targetDir,
+      prefix: options.prefix,
+      style: options.style,
+    });
+    if (report.eslint === 'kept') {
+      notes?.push(
+        `Kept your ESLint setup (${report.found}): no ESLint packages and no lint scripts were added; the format scripts were.`,
+      );
+    }
+    if (!options.install) {
+      const manager = options.packageManager;
+      // A new project is formatted once its packages are there; tooling added to a project leaves its code alone.
+      notes?.push(
+        created
+          ? `Prettier is not installed yet: after "${manager} install", run "${manager} run format" so the generated code follows the Prettier configuration.`
+          : `Run "${manager} install" to install the new packages.`,
+      );
+    }
+  },
+};
+
+/**
+ * The code the stages wrote does not follow the Prettier configuration of `ng new` (its width and trailing
+ * commas), so the project is formatted once, right after its dependencies are installed and before the
+ * first commit: `format:check` starts green. A failure is a warning, the project is complete without it.
+ */
+export const formatProject: Stage = {
+  id: 'format-project',
+  title: 'Formatting the generated code',
+  enabled: ({ options }) => options.install,
+  async run({ options, targetDir, deps, verbose, warnings }) {
+    try {
+      await deps.run(options.packageManager, ['run', 'format'], {
+        cwd: targetDir,
+        inherit: verbose,
+        timeoutMs: FORMAT_TIMEOUT_MS,
+      });
+    } catch (error) {
+      warnings.push(
+        `The generated code could not be formatted (${describe(error)}). Run "${options.packageManager} run format" inside the project.`,
+      );
+    }
+  },
+};
+
+/**
  * The README of the project says what it has (ADR-0024): the one `ng new` writes becomes a Starter Angular
  * one, a README with the block gets only the block rewritten, and the developer's own README is left alone.
  */
@@ -358,6 +414,7 @@ export const verifyProject: Stage = {
       'angular.json',
       join('src', 'main.ts'),
       PROJECT_CONFIG_FILE,
+      ...toolingProfile.requiredFiles,
       ...(ARCHITECTURE_PROFILES[options.architecture]?.requiredFiles ?? []),
       ...(ROUTING_PROFILES[options.routing]?.requiredFiles ?? []),
       ...(RENDERING_PROFILES[options.rendering]?.requiredFilesFor(options.architecture) ?? []),
@@ -397,9 +454,11 @@ export const NEW_PROJECT_STAGES: readonly Stage[] = [
   applyPresence,
   applyUiSystem,
   addIconLibrary,
+  applyTooling,
   writeProjectReadme,
   writeStarterConfig,
   installDependencies,
+  formatProject,
   initGit,
   verifyProject,
 ];

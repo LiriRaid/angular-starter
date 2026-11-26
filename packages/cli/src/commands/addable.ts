@@ -17,6 +17,12 @@ export const ADDABLE: Readonly<Record<string, Extract<CapabilityCategory, keyof 
     architecture: 'architecture',
   };
 
+/** Lint and format (ADR-0027): added by `sa add`, but they are no option of the project, so they have no category. */
+export const TOOLING_CAPABILITY = 'tooling';
+
+/** Every word `sa add` takes for a capability. */
+export const ADDABLE_WORDS: readonly string[] = [...Object.keys(ADDABLE), TOOLING_CAPABILITY];
+
 /** Options that are "off" in a project and that adding a capability can turn on. */
 export const NOT_ADDABLE: Readonly<Record<string, readonly string[]>> = {
   icons: ['none'],

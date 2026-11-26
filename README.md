@@ -78,14 +78,15 @@ configuration, which is saved in `starter-angular.config.json` inside the new pr
 
 `sa --help` lists the commands and the options, like `ng --help`; `sa <command> --help` shows the flags and examples of each one:
 
-| Command                            | What it does                                                                                                                 |
-| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `new`                              | Create a project (wizard, flags, `--defaults`, `--config`, `--dry-run`)                                                      |
-| `init`                             | Set up an Angular project that `sa new` did not make: it reads what the project has and writes `starter-angular.config.json` |
-| `add <capability> [value]`         | Add `architecture`, `routing`, `app-shell`, `presence`, `components`, `ui-system`, `icons` or `rendering` to a project       |
-| `generate` (`g`) `<kind> <name>`   | Create a `feature` (folder, lazy route, navigation entry) or a `component`                                                   |
-| `list`, `info`, `config`, `doctor` | See what each option is, the project's options, change them in the configuration and check the environment                   |
-| `version`, `update`                | Print the version of the CLI and of the Angular CLI it runs; `update` is planned                                             |
+| Command                            | What it does                                                                                                                      |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `new`                              | Create a project (wizard, flags, `--defaults`, `--config`, `--dry-run`)                                                           |
+| `init`                             | Set up an Angular project that `sa new` did not make: it reads what the project has and writes `starter-angular.config.json`      |
+| `add <capability> [value]`         | Add `architecture`, `routing`, `app-shell`, `presence`, `components`, `ui-system`, `icons`, `rendering` or `tooling` to a project |
+| `generate` (`g`) `<kind> <name>`   | Create a `feature` (folder, lazy route, navigation entry) or a `component`                                                        |
+| `test [args...]`                   | Run the tests of any Angular project: `ng test` through its package manager, with your arguments and its exit code                |
+| `list`, `info`, `config`, `doctor` | See what each option is, the project's options, change them in the configuration and check the environment                        |
+| `version`, `update`                | Print the version of the CLI and of the Angular CLI it runs; `update` is planned                                                  |
 
 `sa version` (or `-v`) prints the version of the CLI and the one of the Angular CLI that `sa new` runs (the tested one, not the latest on npm). `sa list` prints one table: the id of each option, the commands that add it and ask for it (`sa add ...`, `sa new --...`, none while it is planned) and its name, description and documentation.
 
@@ -96,6 +97,7 @@ configuration, which is saved in `starter-angular.config.json` inside the new pr
 - **It lists the choices.** In a terminal `sa add architecture` shows the architectures (the planned ones listed, not selectable), `sa add rendering` the two server renderings, and `sa add components` a checklist of the 26 components: the ones the project has come ticked and blocked (`(already in the project)`), the recommended ones are marked `(recommended)`.
 - **It completes what a capability needs.** The shell needs the routing and the routing needs the Screaming Architecture: `sa add app-shell` on a default Angular project says what is missing, asks once and adds it in order. Outside a terminal it stops and names the commands. `sa add architecture` only adds the structure (the folders, the aliases and the READMEs, without moving anything of yours) and, in a terminal, asks whether to add the routing and the shell too.
 - **The components are always your choice.** The UI System, the catalog of the components in the UI tab of the design preferences, needs the shell and components: it never picks them for you, and without them it stops and names `sa add components`. Its catalog is built from the components the project has, so with three components it shows three. When more arrive, `sa add components` offers to complete the catalog (a question in a terminal, a `Next:` line outside one) and `sa add ui-system` does it, without rewriting a catalog you edited ([ADR-0024](docs/adr/0024-ui-system-by-installed-components-budgets-and-project-readme.md)).
+- **Lint and format come with every project.** `sa new` adds ESLint with Angular's rules (`eslint.config.mjs`, the packages at the versions the CLI was tested with) and the scripts `lint`, `lint:fix`, `format` and `format:check`, and formats the generated code once after installing so `format:check` starts green; Prettier, Vitest (`ng test`) and zoneless change detection already come from `ng new`. `sa add tooling` gives the same to a project that lacks it and never replaces an ESLint setup you have. `sa test` runs `ng test` from any folder of the project, with the arguments you type ([ADR-0027](docs/adr/0027-default-eslint-prettier-and-sa-test.md)).
 - **The README follows the project.** `sa new` and each `sa add` replace the README that `ng new` writes with one that says what the project has and its commands, inside a block between `<!-- sa:project -->` and `<!-- /sa:project -->`. Only that block is rewritten; a README you wrote is never touched.
 - **The build fits its budgets.** With the shell or the components the initial bundle budget goes to 1 MB (warning) and 2 MB (error), unless you changed Angular's; each component stylesheet keeps the 4 kB of Angular.
 

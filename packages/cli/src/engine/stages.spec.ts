@@ -5,6 +5,7 @@ import { RuntimeError } from '../errors.js';
 import { screamingProfile } from './architectures/screaming.js';
 import { DEFAULT_OPTIONS } from '../config/resolve.js';
 import type { GenerationContext } from './pipeline.js';
+import { toolingProfile } from './tooling/tooling.js';
 import {
   NEW_PROJECT_STAGES,
   applyAppShell,
@@ -12,6 +13,8 @@ import {
   applyComponents,
   applyDesign,
   applyPresence,
+  applyTooling,
+  formatProject,
   installArgsOf,
   validateEnvironment,
 } from './stages.js';
@@ -58,8 +61,10 @@ describe('new project stages', () => {
       'apply-app-shell',
       'apply-presence',
       'add-icon-library',
+      'apply-tooling',
       'write-starter-config',
       'install-dependencies',
+      'format-project',
       'init-git',
       'verify-project',
     ];
@@ -156,5 +161,82 @@ describe('applyArchitectureToProject', () => {
       .mockRejectedValue(new RuntimeError('disk full'));
     await expect(applyArchitectureToProject.run(contextOf())).rejects.toThrow('disk full');
     adopt.mockRestore();
+  });
+});
+
+describe('tooling stages', () => {
+  const contextWith = (
+    install: boolean,
+    run: GenerationContext['deps']['run'],
+    packageManager: 'npm' | 'pnpm' | 'yarn' = 'pnpm',
+  ): GenerationContext =>
+    ({
+      name: 'demo',
+      targetDir: join(tmpdir(), 'demo'),
+      options: { ...DEFAULT_OPTIONS, install, packageManager },
+      deps: { run, nodeVersion: '24.15.0' },
+      warnings: [],
+      notes: [],
+    }) as unknown as GenerationContext;
+
+  it('adds lint and format to every project, whatever its architecture or options', () => {
+    expect(applyTooling.enabled).toBeUndefined();
+  });
+
+  describe('what applyTooling tells after the steps', () => {
+    const toldBy = async (install: boolean, created: boolean): Promise<string> => {
+      const apply = vi.spyOn(toolingProfile, 'apply').mockResolvedValue({ eslint: 'added' });
+      const context = contextWith(install, vi.fn());
+      context.created = created;
+      await applyTooling.run(context);
+      apply.mockRestore();
+      return (context.notes ?? []).join('\n');
+    };
+
+    it('says nothing when the dependencies are installed', async () => {
+      expect(await toldBy(true, true)).toBe('');
+      expect(await toldBy(true, false)).toBe('');
+    });
+
+    it('asks a new project that was not installed to format it after installing', async () => {
+      const notes = await toldBy(false, true);
+
+      expect(notes).toContain('pnpm install');
+      expect(notes).toContain('pnpm run format');
+    });
+
+    it('asks a project that was not installed, when the tooling was added to it, to install: its code was not reformatted', async () => {
+      const notes = await toldBy(false, false);
+
+      expect(notes).toContain('pnpm install');
+      expect(notes).not.toContain('run format');
+    });
+  });
+
+  it('formats the generated code only when the dependencies are installed, since Prettier comes with them', () => {
+    expect(formatProject.enabled?.(contextWith(true, vi.fn()))).toBe(true);
+    expect(formatProject.enabled?.(contextWith(false, vi.fn()))).toBe(false);
+  });
+
+  it.each(['npm', 'pnpm', 'yarn'] as const)(
+    'formats with the format script of the project, through %s',
+    async (manager) => {
+      const run = vi.fn().mockResolvedValue({ stdout: '', stderr: '' });
+      await formatProject.run(contextWith(true, run, manager));
+
+      expect(run).toHaveBeenCalledWith(
+        manager,
+        ['run', 'format'],
+        expect.objectContaining({ cwd: join(tmpdir(), 'demo') }),
+      );
+    },
+  );
+
+  it('warns instead of failing when the formatting cannot run: the project is complete without it', async () => {
+    const context = contextWith(true, vi.fn().mockRejectedValue(new Error('prettier is gone')));
+    await formatProject.run(context);
+
+    expect(context.warnings.join('\n')).toContain('prettier is gone');
+    expect(context.warnings.join('\n')).toContain('run format');
   });
 });

@@ -28,6 +28,19 @@ export const COMPONENT_PACKAGES: Readonly<Record<string, string>> = {
   '@angular/cdk': '^22.3.0',
 };
 
+/**
+ * What every project gets to lint and format its code (ADR-0027), as dev dependencies. The ranges are
+ * the latest stable releases that work together with the Angular version above; `prettier` is a
+ * project's own when `ng new` wrote it, and keeps the version the project has.
+ */
+export const TOOLING_PACKAGES: Readonly<Record<string, string>> = {
+  '@eslint/js': '^10.0.1',
+  'angular-eslint': '^22.8.0',
+  eslint: '^10.15.0',
+  prettier: '^3.10.1',
+  'typescript-eslint': '^8.74.0',
+};
+
 /** Same range the Angular CLI declares for the version above, since this CLI runs it. */
 export const SUPPORTED_NODE_RANGE = '^22.22.3 || ^24.15.0 || >=26.0.0';
 
