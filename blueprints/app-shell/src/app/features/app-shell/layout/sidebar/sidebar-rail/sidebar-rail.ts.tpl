@@ -30,6 +30,7 @@ interface SubnavEntry {
   host: {
     '(document:click)': 'onDocumentClick($event)',
     '(document:keydown.escape)': 'closeSubnav()',
+    '(window:resize)': 'closeSubnav()',
   },
 })
 export class SidebarRail {
@@ -59,7 +60,10 @@ export class SidebarRail {
         visit(item.children ?? [], depth + 1);
       }
     };
-    visit(this.openItem()?.children ?? [], 0);
+    const folder = this.openItem();
+    // A folder that has a page of its own lists it first: pressing it only opens this panel.
+    if (folder?.link) entries.push({ id: folder.id + ':self', title: folder.title, link: folder.link, depth: 0 });
+    visit(folder?.children ?? [], 0);
     return entries;
   });
 
