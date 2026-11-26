@@ -607,4 +607,67 @@ describe('UiSystem', () => {
     });
   });
   // uis:end
+
+  // uis:begin(search)
+  describe('the collapsed search', () => {
+    const collapsed = () => entryOf('search').variants.find((variant) => variant.id === 'mode-collapsed')!;
+    const frames = async (fixture: { detectChanges: () => void }) => {
+      for (let i = 0; i < 3; i++) await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      fixture.detectChanges();
+    };
+    const collapsedSearch = (root: HTMLElement) => root.querySelector('[data-component="search"] sa-search.sa-search--collapsed') as HTMLElement | null;
+
+    afterEach(() => document.body.replaceChildren());
+
+    it('starts as a lone button, like the sidebar does when it is collapsed', async () => {
+      const { component, root } = await render();
+      expect(component.searchModeOf(collapsed())).toBe('collapsed');
+      expect(collapsedSearch(root)?.querySelector('input')).toBeNull();
+    });
+
+    it('opens its field, with the cursor in it, when the button is pressed', async () => {
+      const { fixture, component, root } = await render();
+      document.body.append(root);
+      const host = collapsedSearch(root)!;
+      (host.querySelector('button') as HTMLButtonElement).click();
+      fixture.detectChanges();
+      await frames(fixture);
+
+      expect(component.searchModeOf(collapsed())).toBe('input');
+      const field = host.querySelector('input');
+      expect(field).not.toBeNull();
+      expect(document.activeElement).toBe(field);
+    });
+
+    it('collapses again with Escape and forgets what was typed', async () => {
+      const { component } = await render();
+      component.expandSearch(collapsed());
+      component.collapsibleSearchControl.setValue('inbox');
+
+      component.collapseSearch(collapsed(), true);
+
+      expect(component.searchModeOf(collapsed())).toBe('collapsed');
+      expect(component.collapsibleSearchControl.value).toBe('');
+    });
+
+    it('collapses when the field loses the focus empty, and stays open while there is text', async () => {
+      const { component } = await render();
+      component.expandSearch(collapsed());
+      component.collapsibleSearchControl.setValue('inbox');
+      component.collapseSearch(collapsed());
+      expect(component.searchModeOf(collapsed())).toBe('input');
+
+      component.collapsibleSearchControl.setValue('');
+      component.collapseSearch(collapsed());
+      expect(component.searchModeOf(collapsed())).toBe('collapsed');
+    });
+
+    it('leaves the other modes as they are: only the collapsed one opens and closes', async () => {
+      const { component } = await render();
+      const chat = entryOf('search').variants.find((variant) => variant.id === 'mode-chat')!;
+      component.expandSearch(chat);
+      expect(component.searchModeOf(chat)).toBe('chat');
+    });
+  });
+  // uis:end
 });

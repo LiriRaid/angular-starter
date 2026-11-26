@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Injector, V
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, NgControl, ReactiveFormsModule } from '@angular/forms';
 
+import { isAnchorOutOfView, visibleBounds } from '@shared/utils/panel-placement';
 import { NativeOverlayRuntime } from '../../utils/native-overlay-dismiss';
 import { SaButton } from '../sa-button/sa-button';
 import { SaIcon } from '../sa-icon/sa-icon';
@@ -416,13 +417,21 @@ export class SaDatepicker implements ControlValueAccessor {
     const trigger = this.triggerElement;
     if (!panel || !trigger) return;
 
+    const bounds = visibleBounds(trigger);
+
+    // El scroll de un contenedor puede sacar el campo de vista: el calendario no se queda flotando sin ancla ni pegado a la ventana.
+    if (isAnchorOutOfView(trigger, bounds)) {
+      this.closeCalendar();
+      return;
+    }
+
     const triggerRect = trigger.getBoundingClientRect();
     const panelWidth = panel.offsetWidth;
     const panelHeight = panel.offsetHeight;
     const viewportWidth = this.document.documentElement.clientWidth;
     const viewportHeight = this.document.documentElement.clientHeight;
 
-    const layout = buildDatepickerPanelLayout(triggerRect, panelWidth, panelHeight, viewportWidth, viewportHeight);
+    const layout = buildDatepickerPanelLayout(triggerRect, panelWidth, panelHeight, viewportWidth, viewportHeight, undefined, undefined, bounds);
 
     panel.style.setProperty('position', 'fixed', 'important');
     panel.style.setProperty('top', `${layout.top}px`, 'important');

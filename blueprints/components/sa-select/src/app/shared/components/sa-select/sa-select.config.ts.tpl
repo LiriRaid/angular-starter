@@ -6,6 +6,7 @@ import type { ValidationErrors } from '@angular/forms';
 // idéntico al de `sa-input` — en vez de duplicar esas fórmulas se reusan directo sus
 // funciones puras (ya pensadas para no depender de estado del componente dueño).
 import { resolveFieldsetBoxShadow, resolveLabelColor, resolveLabelPositionClass } from '../sa-input/sa-input.config';
+import { resolveSide, type IPanelBounds } from '@shared/utils/panel-placement';
 import type { SaIconPosition, SaSelectVariant } from './sa-select.entity';
 
 export const SELECT_ALL_VALUE = '__all__';
@@ -19,14 +20,17 @@ export type SelectPanelLayout = {
 
 /** A diferencia del popover, el panel de Select no lleva flecha y siempre tiene el mismo
  *  ancho que el trigger — prueba abajo primero, si no cabe prueba arriba, y si tampoco cabe
- *  se queda abajo clampeado al viewport (mismo criterio de fallback que el tooltip/popover). */
-export function getSelectPanelLayout(triggerRect: DOMRect, panelHeight: number, viewportWidth: number, viewportHeight: number, gap: number = 2, viewportMargin: number = 8): SelectPanelLayout {
+ *  se queda abajo clampeado al viewport (mismo criterio de fallback que el tooltip/popover).
+ *  Con `bounds` (el área donde el trigger se ve: la ventana recortada por sus contenedores con scroll)
+ *  el espacio se mide contra ese área y no contra toda la ventana; si ningún lado cabe, el que tiene más. */
+export function getSelectPanelLayout(triggerRect: DOMRect, panelHeight: number, viewportWidth: number, viewportHeight: number, gap: number = 2, viewportMargin: number = 8, bounds?: IPanelBounds): SelectPanelLayout {
   const belowTop = triggerRect.bottom + gap;
   const aboveTop = triggerRect.top - panelHeight - gap;
   const fitsBelow = belowTop + panelHeight <= viewportHeight - viewportMargin;
   const fitsAbove = aboveTop >= viewportMargin;
 
-  const placement = fitsBelow || !fitsAbove ? 'bottom' : 'top';
+  const side = bounds ? resolveSide({ preferred: 'bottom', allowed: ['bottom', 'top'], trigger: triggerRect, size: { width: triggerRect.width, height: panelHeight }, bounds, gap, margin: viewportMargin }) : null;
+  const placement: 'top' | 'bottom' = side ? (side === 'top' ? 'top' : 'bottom') : fitsBelow || !fitsAbove ? 'bottom' : 'top';
   const top = clamp(placement === 'bottom' ? belowTop : aboveTop, viewportMargin, viewportHeight - panelHeight - viewportMargin);
   const left = clamp(triggerRect.left, viewportMargin, viewportWidth - triggerRect.width - viewportMargin);
 

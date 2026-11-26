@@ -2,7 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { booleanAttribute, ChangeDetectionStrategy, Component, DestroyRef, ElementRef, TemplateRef, ViewEncapsulation, inject, input, output, signal, viewChild } from '@angular/core';
 
 import { NativeOverlayRuntime, resolveOverlayTriggerElement } from '../../utils/native-overlay-dismiss';
-import { isOutOfBounds, visibleBounds } from '@shared/utils/panel-placement';
+import { isAnchorOutOfView, visibleBounds } from '@shared/utils/panel-placement';
 import { SaButton } from '../sa-button/sa-button';
 import { SaTooltip } from '../sa-tooltip/sa-tooltip.directive';
 import { getPopoverPanelLayout, getPopoverSubPanelAnchor, resolvePopoverPlacement } from './sa-popover.config';
@@ -190,9 +190,7 @@ export class SaPopover {
     const bounds = visibleBounds(trigger);
 
     // El scroll de un contenedor (ej. el hilo de mensajes) puede sacar el ancla de vista: el panel no se queda flotando sin ancla.
-    // Un ancla sin tamaño (oculta o desmontada) no se mide: sigue el comportamiento de siempre en vez de cerrarse al abrir.
-    const anchorHasSize = triggerRect.width > 0 || triggerRect.height > 0;
-    if (anchorHasSize && isOutOfBounds(triggerRect, bounds)) {
+    if (isAnchorOutOfView(trigger, bounds)) {
       this.hide();
       return;
     }
@@ -250,14 +248,6 @@ export class SaPopover {
     delete panel.dataset['positioned'];
   }
 
-  private getActionsOffsetX(): number {
-    if (!this.actions() || this.position() !== 'bottom') {
-      return 0;
-    }
-
-    return this.document.documentElement.clientWidth <= 1400 ? -90 : 0;
-  }
-
   private getPanelElement(): HTMLElement | undefined {
     return this.popoverPanel()?.nativeElement;
   }
@@ -274,7 +264,6 @@ export class SaPopover {
       arrowOffsetX: 0,
       offsetX: this.offsetX(),
       offsetY: this.offsetY(),
-      actionsOffsetX: this.getActionsOffsetX(),
     };
   }
 }

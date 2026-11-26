@@ -52,6 +52,16 @@ export function isOutOfBounds(anchor: IPanelBounds, bounds: IPanelBounds): boole
   return anchor.bottom <= bounds.top || anchor.top >= bounds.bottom || anchor.right <= bounds.left || anchor.left >= bounds.right;
 }
 
+/**
+ * El scroll de un contenedor puede sacar el ancla de vista: el panel (que es `fixed`) no se queda flotando sin ancla ni pegado a la ventana, se cierra.
+ * Un ancla sin tamaño (oculta o desmontada) no se mide: sigue el comportamiento de siempre en vez de cerrarse al abrir.
+ */
+export function isAnchorOutOfView(anchor: Element, bounds: IPanelBounds = visibleBounds(anchor)): boolean {
+  const rect = anchor.getBoundingClientRect();
+  if (rect.width <= 0 && rect.height <= 0) return false;
+  return isOutOfBounds(rect, bounds);
+}
+
 function freeSpace(side: PanelSide, anchor: IPanelBounds, bounds: IPanelBounds, gap: number, margin: number): number {
   switch (side) {
     case 'top':

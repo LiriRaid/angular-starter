@@ -17,10 +17,6 @@ type SaThemeColorPickerInternals = {
   onEscapeKeyDown: (event: KeyboardEvent) => void;
   isEventInsidePicker: (event: Event) => boolean;
   resolveTriggerElement: (event: MouseEvent) => HTMLElement | null;
-  getVisualOffsetX: () => number;
-  clamp: (value: number, min: number, max: number) => number;
-  getPanelLeft: (params: { triggerCenterX: number; panelWidth: number; viewportWidth: number }) => number;
-  getPanelTop: (params: { panel: HTMLElement; triggerRect: DOMRect; panelHeight: number; viewportHeight: number }) => number;
 };
 
 class ThemeServiceMock {
@@ -34,10 +30,6 @@ class ThemeServiceMock {
   applySurface = vi.fn((key: string) => {
     this.surfaceColorKey.set(key);
   });
-}
-
-function makeDomRect(overrides: Partial<DOMRect> = {}): DOMRect {
-  return { x: 0, y: 0, width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0, toJSON: () => '', ...overrides } as DOMRect;
 }
 
 describe('SaThemeColorPicker', () => {
@@ -166,60 +158,110 @@ describe('SaThemeColorPicker', () => {
     });
   });
 
-  describe('clamp', () => {
-    it('respeta el rango cuando el valor ya está dentro', () => {
-      expect(internals.clamp(5, 0, 10)).toBe(5);
+  describe('posición del panel', () => {
+    let scroller: HTMLElement;
+    let trigger: HTMLElement;
+    let panel: HTMLElement;
+    const setRect = (el: HTMLElement, rect: { top: number; left: number; width: number; height: number }): void => {
+      vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({ ...rect, bottom: rect.top + rect.height, right: rect.left + rect.width, x: rect.left, y: rect.top, toJSON: () => ({}) } as DOMRect);
+    };
+    const reposition = (): void => (component as unknown as { positionPanel: () => void }).positionPanel();
+    const arrowX = (): number => parseFloat(panel.style.getPropertyValue('--color-picker-arrow-x'));
+    const viewport = (width: number, height = 800): void => {
+      vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(width);
+      vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(height);
+    };
+
+    beforeEach(() => {
+      scroller = document.createElement('div');
+      scroller.style.overflowY = 'auto';
+      trigger = document.createElement('button');
+      scroller.appendChild(trigger);
+      panel = document.createElement('div');
+      Object.defineProperty(panel, 'offsetWidth', { value: 240, configurable: true });
+      Object.defineProperty(panel, 'offsetHeight', { value: 200, configurable: true });
+      document.body.append(scroller, panel);
+
+      const target = component as unknown as { triggerElement: HTMLElement | null; getPanelElement: () => HTMLElement };
+      target.triggerElement = trigger;
+      vi.spyOn(target, 'getPanelElement').mockReturnValue(panel);
     });
 
-    it('limita al mínimo', () => {
-      expect(internals.clamp(-5, 0, 10)).toBe(0);
+    afterEach(() => {
+      scroller.remove();
+      panel.remove();
+      vi.restoreAllMocks();
     });
 
-    it('limita al máximo', () => {
-      expect(internals.clamp(50, 0, 10)).toBe(10);
-    });
-  });
+    it.each([1200, 1600])('centra el panel bajo el disparador sin correrlo a mano en un viewport de %ipx', (width) => {
+      viewport(width);
+      setRect(scroller, { top: 0, left: 0, width, height: 800 });
+      setRect(trigger, { top: 100, left: 580, width: 40, height: 40 });
 
-  describe('getVisualOffsetX', () => {
-    it('retorna 45 en viewports anchos (>=1557px)', () => {
-      Object.defineProperty(document.documentElement, 'clientWidth', { value: 1600, configurable: true });
-      expect(internals.getVisualOffsetX()).toBe(45);
-    });
+      reposition();
 
-    it('retorna -35 en viewports angostos', () => {
-      Object.defineProperty(document.documentElement, 'clientWidth', { value: 1200, configurable: true });
-      expect(internals.getVisualOffsetX()).toBe(-35);
-    });
-  });
-
-  describe('getPanelLeft', () => {
-    it('centra el panel respecto al trigger dentro del margen del viewport', () => {
-      Object.defineProperty(document.documentElement, 'clientWidth', { value: 1200, configurable: true });
-      const left = internals.getPanelLeft({ triggerCenterX: 600, panelWidth: 200, viewportWidth: 1200 });
-      // 600 - 100 + (-35 offset en viewport angosto) = 465
-      expect(left).toBe(465);
-    });
-
-    it('no deja que el panel se salga por la izquierda', () => {
-      Object.defineProperty(document.documentElement, 'clientWidth', { value: 1200, configurable: true });
-      const left = internals.getPanelLeft({ triggerCenterX: 0, panelWidth: 200, viewportWidth: 1200 });
-      expect(left).toBe(12); // viewportMargin
-    });
-  });
-
-  describe('getPanelTop', () => {
-    it('ubica el panel debajo del trigger cuando hay espacio', () => {
-      const panel = document.createElement('div');
-      const top = internals.getPanelTop({ panel, triggerRect: makeDomRect({ top: 100, bottom: 120 }), panelHeight: 200, viewportHeight: 800 });
-      expect(top).toBe(128); // bottom(120) + gap(8)
+      expect(parseFloat(panel.style.left)).toBe(480); // 600 (centro del disparador) - 120 (mitad del panel)
+      expect(parseFloat(panel.style.top)).toBe(148); // bottom (140) + gap (8)
+      expect(arrowX()).toBe(120);
       expect(panel.dataset['placement']).toBe('bottom');
     });
 
-    it('ubica el panel arriba del trigger cuando no cabe abajo', () => {
-      const panel = document.createElement('div');
-      const top = internals.getPanelTop({ panel, triggerRect: makeDomRect({ top: 700, bottom: 720 }), panelHeight: 200, viewportHeight: 800 });
-      expect(top).toBe(492); // top(700) - panelHeight(200) - gap(8)
+    it('cerca del borde derecho se corre lo justo para verse y la flecha sigue apuntando al centro del disparador', () => {
+      viewport(1000);
+      setRect(scroller, { top: 0, left: 0, width: 1000, height: 800 });
+      setRect(trigger, { top: 20, left: 940, width: 40, height: 40 });
+
+      reposition();
+
+      expect(parseFloat(panel.style.left)).toBe(748); // 1000 - 240 - 12 de margen
+      expect(arrowX()).toBe(212); // centro del disparador (960) - left (748)
+    });
+
+    it('abre hacia arriba cuando abajo no hay lugar', () => {
+      viewport(1000, 400);
+      setRect(scroller, { top: 0, left: 0, width: 1000, height: 400 });
+      setRect(trigger, { top: 330, left: 480, width: 40, height: 40 });
+
+      reposition();
+
       expect(panel.dataset['placement']).toBe('top');
+      expect(parseFloat(panel.style.top)).toBe(122); // top (330) - alto (200) - gap (8)
+    });
+
+    it('sigue al disparador cuando se mueve con el scroll del contenedor, no se queda en la posición donde se abrió', () => {
+      viewport(1000);
+      setRect(scroller, { top: 0, left: 0, width: 1000, height: 800 });
+      setRect(trigger, { top: 300, left: 480, width: 40, height: 40 });
+      reposition();
+      expect(parseFloat(panel.style.top)).toBe(348);
+
+      setRect(trigger, { top: 220, left: 480, width: 40, height: 40 });
+      reposition();
+
+      expect(parseFloat(panel.style.top)).toBe(268);
+    });
+
+    it('cuando el scroll saca el disparador del contenedor, cierra el panel en vez de dejarlo flotando', () => {
+      viewport(1000);
+      setRect(scroller, { top: 80, left: 0, width: 1000, height: 600 });
+      setRect(trigger, { top: 20, left: 480, width: 40, height: 40 });
+      Object.assign(panel, { hidePopover: vi.fn() });
+
+      reposition();
+
+      expect((panel as unknown as { hidePopover: () => void }).hidePopover).toHaveBeenCalled();
+      expect(panel.dataset['positioned']).toBeUndefined();
+    });
+
+    it('un disparador sin tamaño (oculto o desmontado) no cierra el panel al abrirse', () => {
+      viewport(1000);
+      setRect(trigger, { top: 0, left: 0, width: 0, height: 0 });
+      Object.assign(panel, { hidePopover: vi.fn() });
+
+      reposition();
+
+      expect((panel as unknown as { hidePopover: () => void }).hidePopover).not.toHaveBeenCalled();
+      expect(panel.dataset['positioned']).toBe('true');
     });
   });
 });
