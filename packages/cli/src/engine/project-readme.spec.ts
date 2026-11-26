@@ -102,6 +102,7 @@ describe('refreshProjectReadme', () => {
 
   describe('lint and format commands', () => {
     const SCRIPTS = {
+      'test:watch': 'ng test --watch',
       lint: 'eslint "src/**/*.{ts,html}"',
       'lint:fix': 'eslint "src/**/*.{ts,html}" --fix',
       format: 'prettier --write "src/**/*.{ts,html,css}"',
@@ -113,7 +114,13 @@ describe('refreshProjectReadme', () => {
       await writeFile(join(project, 'package.json'), JSON.stringify({ scripts: SCRIPTS }));
       await refresh({ ...DEFAULT_OPTIONS, packageManager: 'pnpm' });
       const pnpm = await README();
-      for (const command of ['pnpm lint', 'pnpm lint:fix', 'pnpm format', 'pnpm format:check']) {
+      for (const command of [
+        'pnpm test:watch',
+        'pnpm lint',
+        'pnpm lint:fix',
+        'pnpm format',
+        'pnpm format:check',
+      ]) {
         expect(pnpm, command).toContain(`\`${command}\``);
       }
 
@@ -121,6 +128,7 @@ describe('refreshProjectReadme', () => {
       await refresh({ ...DEFAULT_OPTIONS, packageManager: 'npm' });
       const npm = await README();
       for (const command of [
+        'npm run test:watch',
         'npm run lint',
         'npm run lint:fix',
         'npm run format',

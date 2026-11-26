@@ -83,6 +83,7 @@ describe('tooling profile', () => {
     expect(Object.keys(scripts)).toEqual([
       'build',
       'test',
+      'test:watch',
       'lint',
       'lint:fix',
       'format',
@@ -93,6 +94,7 @@ describe('tooling profile', () => {
     expect(scripts['format']).toBe('prettier --write "src/**/*.{ts,html,css}"');
     expect(scripts['format:check']).toBe('prettier --check "src/**/*.{ts,html,css}"');
     expect(scripts['test']).toBe('ng test');
+    expect(scripts['test:watch']).toBe('ng test --watch');
   });
 
   it.each([
@@ -150,6 +152,7 @@ describe('tooling profile', () => {
       expect(scripts['lint']).toBeUndefined();
       expect(scripts['format']).toBeDefined();
       expect(scripts['format:check']).toBeDefined();
+      expect(scripts['test:watch']).toBeDefined();
     },
   );
 
@@ -197,6 +200,15 @@ describe('tooling profile: what a project lacks', () => {
     expect(await toolingProfile.isComplete(project())).toBe(false);
     expect(await readFile(join(dir, 'package.json'), 'utf8')).toBe(before);
     expect(await pathExists(join(dir, 'eslint.config.mjs'))).toBe(false);
+  });
+
+  it('says a project that has everything but the watch script of the tests lacks it', async () => {
+    await toolingProfile.apply(project());
+    const manifest = JSON.parse(await readFile(join(dir, 'package.json'), 'utf8'));
+    delete manifest.scripts['test:watch'];
+    await writeFile(join(dir, 'package.json'), JSON.stringify(manifest, null, 2));
+
+    expect(await toolingProfile.isComplete(project())).toBe(false);
   });
 
   it('says a project has it once the tooling is applied', async () => {
