@@ -152,3 +152,85 @@ describe('SaSelect · opciones con ícono (template)', () => {
     expect(panel.classList.contains('sa-select-panel')).toBe(true);
   });
 });
+
+describe('SaSelect · seguimiento del scroll', () => {
+  let fixture: ComponentFixture<SaSelect>;
+  let component: SaSelect;
+  let scroller: HTMLElement;
+  let trigger: HTMLElement;
+  let panel: HTMLElement;
+  const setRect = (el: HTMLElement, top: number, height: number): void => {
+    vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({ top, bottom: top + height, left: 400, right: 640, width: 240, height, x: 400, y: top, toJSON: () => ({}) } as DOMRect);
+  };
+  const reposition = (): void => (component as unknown as { positionPanel: () => void }).positionPanel();
+
+  beforeEach(async () => {
+    TestBed.overrideComponent(SaSelect, { set: { imports: [], template: '' } });
+    await TestBed.configureTestingModule({ imports: [SaSelect] }).compileComponents();
+    fixture = TestBed.createComponent(SaSelect);
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('options', OPTIONS);
+    fixture.detectChanges();
+
+    vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(1000);
+    vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(800);
+    scroller = document.createElement('div');
+    scroller.style.overflowY = 'auto';
+    setRect(scroller, 80, 600);
+    trigger = document.createElement('div');
+    scroller.appendChild(trigger);
+    panel = document.createElement('div');
+    document.body.append(scroller, panel);
+
+    const target = component as unknown as { triggerRef: () => unknown; panelRef: () => unknown };
+    vi.spyOn(target, 'triggerRef').mockReturnValue({ nativeElement: trigger });
+    vi.spyOn(target, 'panelRef').mockReturnValue({ nativeElement: panel });
+    vi.spyOn(panel, 'getBoundingClientRect').mockReturnValue({ top: 0, bottom: 200, left: 0, right: 240, width: 240, height: 200, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
+  });
+
+  afterEach(() => {
+    scroller.remove();
+    panel.remove();
+    vi.restoreAllMocks();
+    vi.useRealTimers();
+  });
+
+  it('con el campo visible coloca el panel pegado a él', () => {
+    setRect(trigger, 300, 40);
+    const hideSpy = vi.spyOn(component, 'hidePanel');
+
+    reposition();
+
+    expect(panel.style.top).toBe('342px');
+    expect(panel.style.left).toBe('400px');
+    expect(hideSpy).not.toHaveBeenCalled();
+  });
+
+  it('cuando el scroll saca el campo del contenedor, el panel se cierra en vez de quedar pegado a la ventana', () => {
+    setRect(trigger, 20, 40);
+    const hideSpy = vi.spyOn(component, 'hidePanel').mockImplementation(() => undefined);
+
+    reposition();
+
+    expect(hideSpy).toHaveBeenCalled();
+  });
+
+  it('con el panel abierto un scroll lo reposiciona y al cerrarlo deja de escuchar', () => {
+    setRect(trigger, 300, 40);
+    Object.assign(panel, { showPopover: vi.fn(), hidePopover: vi.fn(), matches: () => false });
+    vi.useFakeTimers();
+
+    component.showPanel();
+    vi.runAllTimers();
+    setRect(trigger, 340, 40);
+    scroller.dispatchEvent(new Event('scroll'));
+    vi.runAllTimers();
+    expect(panel.style.top).toBe('382px');
+
+    component.onPanelToggle({ newState: 'closed' } as ToggleEvent);
+    setRect(trigger, 400, 40);
+    scroller.dispatchEvent(new Event('scroll'));
+    vi.runAllTimers();
+    expect(panel.style.top).toBe('382px');
+  });
+});

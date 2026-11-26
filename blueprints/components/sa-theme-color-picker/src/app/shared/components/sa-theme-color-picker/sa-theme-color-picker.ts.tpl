@@ -3,9 +3,10 @@ import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, TemplateRef
 
 import { PRIMARY_COLORS, SURFACE_COLORS } from '@core/theme/theme-palettes';
 import { ThemeService } from '@core/theme/theme.service';
+import { isAnchorOutOfView, visibleBounds } from '@shared/utils/panel-placement';
 import { addNativeOverlayListeners, isEventInsideOverlay, NativeOverlayScheduler, removeNativeOverlayListeners, resolveOverlayTriggerElement } from '../../utils/native-overlay-dismiss';
 import { SaButton } from '..';
-import { clamp } from '../sa-popover/sa-popover.config';
+import { getPopoverPanelLayout, resolvePopoverPlacement } from '../sa-popover/sa-popover.config';
 import { SaTooltip } from '../sa-tooltip/sa-tooltip.directive';
 
 @Component({
@@ -151,51 +152,28 @@ export class SaThemeColorPicker {
       return;
     }
 
+    const bounds = visibleBounds(trigger);
+
+    // El scroll de un contenedor puede sacar el disparador de vista: el panel no se queda flotando sin ancla ni pegado a la ventana.
+    if (isAnchorOutOfView(trigger, bounds)) {
+      this.markPanelAsClosing();
+      panel.hidePopover();
+      return;
+    }
+
     const triggerRect = trigger.getBoundingClientRect();
     const panelWidth = panel.offsetWidth;
     const panelHeight = panel.offsetHeight;
-
     const viewportWidth = this.document.documentElement.clientWidth;
     const viewportHeight = this.document.documentElement.clientHeight;
+    const config = { viewportMargin: this.viewportMargin, panelGap: this.panelGap, arrowMinOffset: this.arrowMinOffset, arrowOffsetX: 0, offsetX: 0, offsetY: 0 };
 
-    const triggerCenterX = triggerRect.left + triggerRect.width / 2;
+    // Centrado en el disparador y solo se corre lo justo para verse: la flecha siempre apunta a su centro, sin correcciones a mano por layout.
+    const placement = resolvePopoverPlacement('bottom', triggerRect, panelWidth, panelHeight, viewportWidth, viewportHeight, config, bounds);
+    const layout = getPopoverPanelLayout({ placement, triggerRect, panelWidth, panelHeight, viewportWidth, viewportHeight }, config);
 
-    const left = this.getPanelLeft({
-      triggerCenterX,
-      panelWidth,
-      viewportWidth,
-    });
-
-    const top = this.getPanelTop({
-      panel,
-      triggerRect,
-      panelHeight,
-      viewportHeight,
-    });
-
-    const arrowX = this.clamp(triggerCenterX - left, this.arrowMinOffset, panelWidth - this.arrowMinOffset);
-
-    this.applyPanelPosition(panel, left, top, arrowX);
-  }
-
-  private getPanelLeft(params: { triggerCenterX: number; panelWidth: number; viewportWidth: number }): number {
-    const left = params.triggerCenterX - params.panelWidth / 2 + this.getVisualOffsetX();
-
-    return this.clamp(left, this.viewportMargin, params.viewportWidth - params.panelWidth - this.viewportMargin);
-  }
-
-  private getPanelTop(params: { panel: HTMLElement; triggerRect: DOMRect; panelHeight: number; viewportHeight: number }): number {
-    const belowTop = params.triggerRect.bottom + this.panelGap;
-    const aboveTop = params.triggerRect.top - params.panelHeight - this.panelGap;
-
-    if (belowTop + params.panelHeight > params.viewportHeight - this.viewportMargin && aboveTop >= this.viewportMargin) {
-      params.panel.dataset['placement'] = 'top';
-      return aboveTop;
-    }
-
-    params.panel.dataset['placement'] = 'bottom';
-
-    return this.clamp(belowTop, this.viewportMargin, params.viewportHeight - params.panelHeight - this.viewportMargin);
+    panel.dataset['placement'] = placement;
+    this.applyPanelPosition(panel, layout.left, layout.top, layout.arrowX ?? panelWidth / 2);
   }
 
   private applyPanelPosition(panel: HTMLElement, left: number, top: number, arrowX: number): void {
@@ -249,21 +227,6 @@ export class SaThemeColorPicker {
 
   private getPanelElement(): HTMLElement | null {
     return this.panelRef()?.nativeElement ?? null;
-  }
-
-  /** Corrección empírica: el trigger de este picker vive en el header, cuyo layout desplaza el
-   *  botón lateralmente de forma distinta a ambos lados de este ancho de viewport (no hay una
-   *  media query o breakpoint con nombre asociado — el valor se ajustó a mano contra el layout
-   *  real hasta centrar la flecha bajo el botón en los dos anchos de prueba). Si el header
-   *  cambia de layout, este valor puede necesitar recalibrarse. */
-  private getVisualOffsetX(): number {
-    const width = this.document.documentElement.clientWidth;
-
-    return width >= 1557 ? 45 : -35;
-  }
-
-  private clamp(value: number, min: number, max: number): number {
-    return clamp(value, min, max);
   }
 
   private joinClasses(...classes: string[]): string {

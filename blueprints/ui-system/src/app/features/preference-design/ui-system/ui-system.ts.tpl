@@ -113,6 +113,45 @@ export class UiSystem {
   // uis:begin(search)
   /** El control del buscador de la vista previa. */
   readonly searchControl = new FormControl('');
+  /** El control del buscador colapsable, aparte: lo que se escribe ahí no aparece en los otros modos. */
+  readonly collapsibleSearchControl = new FormControl('');
+  /** Los buscadores colapsables (por variante) que están abiertos. */
+  private readonly openedSearches = signal<ReadonlySet<string>>(new Set());
+
+  /**
+   * El modo con el que se dibuja el buscador de una variante. El colapsado funciona como el del sidebar:
+   * el botón avisa, la vista decide el modo y el componente enfoca el campo al abrirse.
+   */
+  searchModeOf(item: UiVariant): string {
+    const mode = String(item.inputs['mode'] ?? 'input');
+    return mode === 'collapsed' && this.openedSearches().has(item.id) ? 'input' : mode;
+  }
+
+  searchControlOf(item: UiVariant): FormControl<string | null> {
+    return item.inputs['mode'] === 'collapsed' ? this.collapsibleSearchControl : this.searchControl;
+  }
+
+  expandSearch(item: UiVariant): void {
+    if (item.inputs['mode'] !== 'collapsed') return;
+    this.openedSearches.update((current) => new Set(current).add(item.id));
+  }
+
+  /** Se cierra con Escape (borrando lo escrito) o al perder el foco vacío; con texto se queda abierto para no esconder un filtro activo. */
+  collapseSearch(item: UiVariant, clear = false): void {
+    if (item.inputs['mode'] !== 'collapsed') return;
+    if (clear) this.collapsibleSearchControl.setValue('');
+    if (this.collapsibleSearchControl.value) return;
+    this.openedSearches.update((current) => {
+      const next = new Set(current);
+      next.delete(item.id);
+      return next;
+    });
+  }
+
+  /** Solo el campo al perder el foco colapsa: el botón, al desmontarse en el cambio de modo, también lo pierde. */
+  onSearchFocusOut(item: UiVariant, event: FocusEvent): void {
+    if ((event.target as Element | null)?.tagName === 'INPUT') this.collapseSearch(item);
+  }
   // uis:end
   /** Los componentes cuya vista previa está oculta. */
   private readonly hidden = signal<ReadonlySet<string>>(new Set());

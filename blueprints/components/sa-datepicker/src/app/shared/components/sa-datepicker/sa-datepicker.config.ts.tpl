@@ -1,6 +1,7 @@
 import { computed } from '@angular/core';
 import type { AbstractControl } from '@angular/forms';
 
+import { resolveSide, type IPanelBounds } from '@shared/utils/panel-placement';
 import { clamp } from '../sa-popover/sa-popover.config';
 // El look del campo (borde, sombra de foco, color del label, etc.) es idéntico al de
 // `sa-input` — en vez de duplicar esas fórmulas se reusan directo sus funciones puras
@@ -162,13 +163,15 @@ export interface DatepickerPanelLayout {
 /** A diferencia de `getSelectPanelLayout` (que fuerza el ancho del panel al del trigger), acá el
  *  panel tiene su propio ancho natural (necesita espacio para el grid de 7 columnas) — el trigger
  *  puede ser bastante angosto (ej. `min-w-40`), así que no tendría sentido heredar su ancho. */
-export function buildDatepickerPanelLayout(triggerRect: DOMRect, panelWidth: number, panelHeight: number, viewportWidth: number, viewportHeight: number, gap = 4, margin = 8): DatepickerPanelLayout {
+export function buildDatepickerPanelLayout(triggerRect: DOMRect, panelWidth: number, panelHeight: number, viewportWidth: number, viewportHeight: number, gap = 4, margin = 8, bounds?: IPanelBounds): DatepickerPanelLayout {
   const belowTop = triggerRect.bottom + gap;
   const aboveTop = triggerRect.top - panelHeight - gap;
   const fitsBelow = belowTop + panelHeight <= viewportHeight - margin;
   const fitsAbove = aboveTop >= margin;
 
-  const placement: 'top' | 'bottom' = fitsBelow || !fitsAbove ? 'bottom' : 'top';
+  // Con `bounds` (el área donde el campo se ve: la ventana recortada por sus contenedores con scroll) el espacio se mide contra ese área.
+  const side = bounds ? resolveSide({ preferred: 'bottom', allowed: ['bottom', 'top'], trigger: triggerRect, size: { width: panelWidth, height: panelHeight }, bounds, gap, margin }) : null;
+  const placement: 'top' | 'bottom' = side ? (side === 'top' ? 'top' : 'bottom') : fitsBelow || !fitsAbove ? 'bottom' : 'top';
   const top = clamp(placement === 'bottom' ? belowTop : aboveTop, margin, viewportHeight - panelHeight - margin);
   const left = clamp(triggerRect.left, margin, viewportWidth - panelWidth - margin);
 

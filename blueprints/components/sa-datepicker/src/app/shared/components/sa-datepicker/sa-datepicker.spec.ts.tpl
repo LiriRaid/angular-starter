@@ -121,4 +121,56 @@ describe('SaDatepicker', () => {
       expect(onChange).not.toHaveBeenCalled();
     });
   });
+
+  describe('seguimiento del scroll', () => {
+    let scroller: HTMLElement;
+    let trigger: HTMLElement;
+    let panel: HTMLElement;
+    const setRect = (el: HTMLElement, top: number, height: number): void => {
+      vi.spyOn(el, 'getBoundingClientRect').mockReturnValue({ top, bottom: top + height, left: 400, right: 600, width: 200, height, x: 400, y: top, toJSON: () => ({}) } as DOMRect);
+    };
+    const reposition = (): void => (component as unknown as { positionPanel: () => void }).positionPanel();
+
+    beforeEach(() => {
+      vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(1000);
+      vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(800);
+      scroller = document.createElement('div');
+      scroller.style.overflowY = 'auto';
+      setRect(scroller, 80, 600);
+      trigger = document.createElement('div');
+      scroller.appendChild(trigger);
+      panel = document.createElement('div');
+      document.body.append(scroller, panel);
+
+      const target = component as unknown as { triggerElement: HTMLElement | null; panelRef: () => unknown };
+      target.triggerElement = trigger;
+      vi.spyOn(target, 'panelRef').mockReturnValue({ nativeElement: panel });
+    });
+
+    afterEach(() => {
+      scroller.remove();
+      panel.remove();
+      vi.restoreAllMocks();
+    });
+
+    it('con el campo visible posiciona el calendario junto a él', () => {
+      setRect(trigger, 300, 40);
+      const closeSpy = vi.spyOn(component, 'closeCalendar');
+
+      reposition();
+
+      expect(panel.dataset['positioned']).toBe('true');
+      expect(closeSpy).not.toHaveBeenCalled();
+    });
+
+    it('cuando el scroll saca el campo del contenedor, el calendario se cierra en vez de quedar pegado a la ventana', () => {
+      setRect(trigger, 20, 40);
+      const closeSpy = vi.spyOn(component, 'closeCalendar').mockImplementation(() => undefined);
+
+      reposition();
+
+      expect(closeSpy).toHaveBeenCalled();
+      expect(panel.dataset['positioned']).toBeUndefined();
+    });
+  });
 });

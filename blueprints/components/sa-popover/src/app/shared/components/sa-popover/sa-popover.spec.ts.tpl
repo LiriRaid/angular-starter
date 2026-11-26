@@ -128,6 +128,34 @@ describe('SaPopover', () => {
       expect(hideSpy).not.toHaveBeenCalled();
     });
 
+    it.each([1200, 1600])('con acciones abajo el panel se centra en el disparador sin correrlo a mano en un viewport de %ipx', (width) => {
+      vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(width);
+      Object.defineProperty(panel, 'offsetWidth', { value: 200, configurable: true });
+      Object.defineProperty(panel, 'offsetHeight', { value: 100, configurable: true });
+      fixture.componentRef.setInput('actions', true);
+      fixture.componentRef.setInput('position', 'bottom');
+      setRect(trigger, 300, 40);
+
+      reposition();
+
+      expect(parseFloat(panel.style.left)).toBe(400); // centro del disparador (500) - mitad del panel (100)
+      expect(panel.style.getPropertyValue('--sa-popover-arrow-x')).toBe('100px');
+    });
+
+    it('sigue al disparador cuando el scroll del contenedor lo mueve, no se queda donde se abrió', () => {
+      Object.defineProperty(panel, 'offsetWidth', { value: 200, configurable: true });
+      Object.defineProperty(panel, 'offsetHeight', { value: 100, configurable: true });
+      fixture.componentRef.setInput('position', 'bottom');
+      setRect(trigger, 300, 40);
+      reposition();
+      expect(parseFloat(panel.style.top)).toBe(348);
+
+      setRect(trigger, 220, 40);
+      reposition();
+
+      expect(parseFloat(panel.style.top)).toBe(268);
+    });
+
     it('un ancla sin tamaño (oculta o desmontada) no cuenta como "fuera de vista": no cierra el popover al abrirse', () => {
       vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue({ top: 0, bottom: 0, left: 0, right: 0, width: 0, height: 0, x: 0, y: 0, toJSON: () => ({}) } as DOMRect);
       const hideSpy = vi.spyOn(component, 'hide');

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, ViewEncapsulation, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, Injector, ViewEncapsulation, afterNextRender, effect, inject, input, output, signal } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 
 import { SaButton } from '../sa-button/sa-button';
@@ -35,6 +35,11 @@ export class SaSearch {
   readonly renderCollapsed = signal(false);
 
   private collapseTimer: ReturnType<typeof setTimeout> | null = null;
+  private focusOnExpand = false;
+  private focusTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly focusRequestMs = 1500;
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private readonly injector = inject(Injector);
 
   constructor() {
     let initialized = false;
@@ -53,11 +58,32 @@ export class SaSearch {
           this.collapseTimer = null;
         }, this.collapseTransitionMs);
       } else {
-        requestAnimationFrame(() => this.renderCollapsed.set(false));
+        requestAnimationFrame(() => {
+          this.renderCollapsed.set(false);
+          this.focusFieldAfterRender();
+        });
       }
     });
 
-    inject(DestroyRef).onDestroy(() => this.clearTimer());
+    inject(DestroyRef).onDestroy(() => {
+      this.clearTimer();
+      this.clearFocusTimer();
+    });
+  }
+
+  /**
+   * El padre decide el modo (el sidebar, la lista de conversaciones): el botón avisa y, cuando el padre lo expande,
+   * el cursor queda en el campo sin que el padre tenga que buscarlo. Un cambio de modo que no viene del botón no roba el foco.
+   */
+  onCollapsedClick(): void {
+    this.focusOnExpand = true;
+    // Si el padre no expande el buscador, la petición caduca: un cambio de modo posterior no roba el foco.
+    if (this.focusTimer) clearTimeout(this.focusTimer);
+    this.focusTimer = setTimeout(() => {
+      this.focusOnExpand = false;
+      this.focusTimer = null;
+    }, this.focusRequestMs);
+    this.collapsedSearchClick.emit();
   }
 
   onKeyup(event: KeyboardEvent): void {
@@ -66,6 +92,19 @@ export class SaSearch {
     if (event.key === 'Enter' || term === '') {
       this.searchEnter.emit(term);
     }
+  }
+
+  private focusFieldAfterRender(): void {
+    if (!this.focusOnExpand) return;
+    this.focusOnExpand = false;
+
+    afterNextRender(() => this.host.nativeElement.querySelector<HTMLInputElement>('input')?.focus(), { injector: this.injector });
+  }
+
+  private clearFocusTimer(): void {
+    if (!this.focusTimer) return;
+    clearTimeout(this.focusTimer);
+    this.focusTimer = null;
   }
 
   private clearTimer(): void {

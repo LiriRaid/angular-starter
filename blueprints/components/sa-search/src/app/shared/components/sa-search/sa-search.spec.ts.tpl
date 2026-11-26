@@ -35,6 +35,68 @@ describe('SaSearch', () => {
     vi.useRealTimers();
   });
 
+  describe('opening from the collapsed button', () => {
+    const nextFrames = async (): Promise<void> => {
+      for (let i = 0; i < 3; i++) await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
+      fixture.detectChanges();
+    };
+    const collapsedFixture = (): HTMLButtonElement => {
+      fixture.destroy();
+      fixture = TestBed.createComponent(SaSearch);
+      component = fixture.componentInstance;
+      document.body.append(fixture.nativeElement);
+      fixture.componentRef.setInput('control', new FormControl<string | null>(''));
+      fixture.componentRef.setInput('mode', 'collapsed');
+      fixture.detectChanges();
+      return fixture.nativeElement.querySelector('button[aria-label="Buscar"]') as HTMLButtonElement;
+    };
+    const field = (): HTMLInputElement => fixture.nativeElement.querySelector('input') as HTMLInputElement;
+
+    afterEach(() => fixture.nativeElement.remove());
+
+    it('puts the cursor in the field once the parent expands it after the click', async () => {
+      collapsedFixture().click();
+      fixture.componentRef.setInput('mode', 'input');
+      fixture.detectChanges();
+      await nextFrames();
+
+      expect(field()).not.toBeNull();
+      expect(document.activeElement).toBe(field());
+    });
+
+    it('does the same when it expands into chat mode', async () => {
+      collapsedFixture().click();
+      fixture.componentRef.setInput('mode', 'chat');
+      fixture.detectChanges();
+      await nextFrames();
+
+      expect(document.activeElement).toBe(field());
+    });
+
+    it('forgets the request when the parent does not expand it in time, so a later change does not steal the focus', async () => {
+      vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+      collapsedFixture().click();
+      vi.advanceTimersByTime(2000);
+      vi.useRealTimers();
+      fixture.componentRef.setInput('mode', 'input');
+      fixture.detectChanges();
+      await nextFrames();
+
+      expect(field()).not.toBeNull();
+      expect(document.activeElement).not.toBe(field());
+    });
+
+    it('does not steal focus when the parent changes the mode without a click on the collapsed button', async () => {
+      collapsedFixture();
+      fixture.componentRef.setInput('mode', 'input');
+      fixture.detectChanges();
+      await nextFrames();
+
+      expect(field()).not.toBeNull();
+      expect(document.activeElement).not.toBe(field());
+    });
+  });
+
   it('emits the search term when Enter is pressed', () => {
     const emitSpy = vi.spyOn(component.searchEnter, 'emit');
     component.control().setValue('  inbox  ');

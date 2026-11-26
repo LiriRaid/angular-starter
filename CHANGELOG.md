@@ -15,8 +15,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 - `sa-button` has its eight severities (`primary`, `secondary`, `success`, `info`, `warn`, `help`, `danger`,
   `contrast`), each a block of custom properties; `outlined` and `text` by severity use the colour of the severity.
 
+- The collapsed `sa-search` opens (ADR-0026 and plan 0023): after its button is pressed and the parent expands it, the
+  cursor is in the field, and the UI System wires that variant like the sidebar does (the button opens it, Escape
+  closes and clears it, losing the focus empty closes it).
+- The panels of `sa-select` and `sa-datepicker` follow their anchor when a container scrolls and close when the anchor
+  leaves its container, like `sa-popover` and `sa-theme-color-picker`; `isAnchorOutOfView` and the reposition
+  listeners are shared helpers.
+
 ### Fixed
 
+- The panel of `sa-theme-color-picker`, and the one of `sa-popover` with `actions` at the bottom, are centred on
+  their button in any layout: the offsets (`+45`/`-35` px and `-90` px) tuned by hand against another header are gone.
 - In dark, the `success` and `danger` buttons darken on hover like in light, and `text` by severity no longer
   paints a solid block. The colour of a severity wins over the primary colour in every variant and state.
 - The letters of `sa-avatar` grow with its size (Tailwind classes by size, a `calc` when the size is in CSS).
