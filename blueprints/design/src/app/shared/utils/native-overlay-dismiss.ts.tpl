@@ -17,21 +17,30 @@ export type NativeOverlayListenerHandlers = {
   onEscapeKeyDown: (event: KeyboardEvent) => void;
 };
 
+/** Solo el seguimiento: el scroll de cualquier contenedor (capture) y el resize reposicionan el panel. Para paneles `popover="auto"`, cuyo cierre por click afuera y Escape ya lo hace el navegador. */
+export function addNativeOverlayRepositionListeners(reposition: () => void): void {
+  window.addEventListener('scroll', reposition, true);
+  window.addEventListener('resize', reposition);
+  window.visualViewport?.addEventListener('resize', reposition);
+  window.visualViewport?.addEventListener('scroll', reposition);
+}
+
+export function removeNativeOverlayRepositionListeners(reposition: () => void): void {
+  window.removeEventListener('scroll', reposition, true);
+  window.removeEventListener('resize', reposition);
+  window.visualViewport?.removeEventListener('resize', reposition);
+  window.visualViewport?.removeEventListener('scroll', reposition);
+}
+
 export function addNativeOverlayListeners(document: Document, handlers: NativeOverlayListenerHandlers): void {
-  window.addEventListener('scroll', handlers.reposition, true);
-  window.addEventListener('resize', handlers.reposition);
-  window.visualViewport?.addEventListener('resize', handlers.reposition);
-  window.visualViewport?.addEventListener('scroll', handlers.reposition);
+  addNativeOverlayRepositionListeners(handlers.reposition);
 
   document.addEventListener('pointerdown', handlers.onOutsidePointerDown, true);
   document.addEventListener('keydown', handlers.onEscapeKeyDown, true);
 }
 
 export function removeNativeOverlayListeners(document: Document, handlers: NativeOverlayListenerHandlers): void {
-  window.removeEventListener('scroll', handlers.reposition, true);
-  window.removeEventListener('resize', handlers.reposition);
-  window.visualViewport?.removeEventListener('resize', handlers.reposition);
-  window.visualViewport?.removeEventListener('scroll', handlers.reposition);
+  removeNativeOverlayRepositionListeners(handlers.reposition);
 
   document.removeEventListener('pointerdown', handlers.onOutsidePointerDown, true);
   document.removeEventListener('keydown', handlers.onEscapeKeyDown, true);

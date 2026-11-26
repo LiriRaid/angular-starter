@@ -8,7 +8,6 @@ type PopoverPositionConfig = {
   arrowOffsetX: number;
   offsetX: number;
   offsetY: number;
-  actionsOffsetX: number;
 };
 
 type PopoverPositionParams = {
@@ -65,8 +64,7 @@ export function getPopoverSubPanelAnchor(position: SaPopoverPosition, panelRect:
 
 function getVerticalPanelLayout(params: PopoverPositionParams, config: PopoverPositionConfig, triggerCenterX: number, placement: 'top' | 'bottom'): PopoverPanelLayout {
   const topBase = placement === 'bottom' ? params.triggerRect.bottom + config.panelGap + config.offsetY : params.triggerRect.top - params.panelHeight - config.panelGap + config.offsetY;
-  const leftOffset = placement === 'bottom' ? config.actionsOffsetX : 0;
-  const left = clamp(triggerCenterX - params.panelWidth / 2 + config.offsetX + leftOffset, config.viewportMargin, params.viewportWidth - params.panelWidth - config.viewportMargin);
+  const left = clamp(triggerCenterX - params.panelWidth / 2 + config.offsetX, config.viewportMargin, params.viewportWidth - params.panelWidth - config.viewportMargin);
   const top = clamp(topBase, config.viewportMargin, params.viewportHeight - params.panelHeight - config.viewportMargin);
 
   return {

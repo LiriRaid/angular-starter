@@ -1,4 +1,4 @@
-import { buildCalendarDays, buildYearOptions, convertTo24Hour, formatDateValue, formatDisplayDate, formatHourMaskInput, formatTime12Hour, getMonthNames, getWeekdayNames, isDateEnabled, isSameDay, parseDateValue, parseInputDateTime } from './sa-datepicker.config';
+import { buildCalendarDays, buildDatepickerPanelLayout, buildYearOptions, convertTo24Hour, formatDateValue, formatDisplayDate, formatHourMaskInput, formatTime12Hour, getMonthNames, getWeekdayNames, isDateEnabled, isSameDay, parseDateValue, parseInputDateTime } from './sa-datepicker.config';
 
 describe('sa-datepicker.config', () => {
   describe('formatDateValue / parseDateValue', () => {
@@ -223,6 +223,24 @@ describe('sa-datepicker.config', () => {
       expect(weekdays).toHaveLength(7);
       expect(weekdays[0].toLowerCase()).toContain('dom');
       expect(weekdays[6].toLowerCase()).toContain('sáb');
+    });
+  });
+
+  describe('buildDatepickerPanelLayout', () => {
+    const rect = (top: number, left: number, width = 160, height = 40) => ({ top, left, bottom: top + height, right: left + width, width, height }) as DOMRect;
+
+    it('sin bounds mide contra la ventana: abajo si cabe', () => {
+      expect(buildDatepickerPanelLayout(rect(100, 200), 300, 320, 1000, 800)).toMatchObject({ placement: 'bottom', top: 144 });
+    });
+
+    it('con bounds mide contra el área visible del campo: si el contenedor no deja lugar abajo, abre arriba aunque la ventana sí tenga', () => {
+      const bounds = { top: 0, left: 0, right: 1000, bottom: 400 };
+      expect(buildDatepickerPanelLayout(rect(300, 200), 300, 320, 1000, 800, 4, 8, bounds)).toMatchObject({ placement: 'top' });
+    });
+
+    it('con bounds y lugar en ambos lados prefiere abajo', () => {
+      const bounds = { top: 0, left: 0, right: 1000, bottom: 800 };
+      expect(buildDatepickerPanelLayout(rect(100, 200), 300, 320, 1000, 800, 4, 8, bounds).placement).toBe('bottom');
     });
   });
 });

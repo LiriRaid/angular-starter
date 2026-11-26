@@ -8,7 +8,6 @@ const CONFIG = {
   arrowOffsetX: 0,
   offsetX: 0,
   offsetY: 0,
-  actionsOffsetX: 0,
 };
 
 function rect(partial: Partial<DOMRect>): DOMRect {

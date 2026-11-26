@@ -6,6 +6,8 @@ import { AbstractControl, ControlValueAccessor, FormsModule, NG_VALUE_ACCESSOR, 
 import { LucideIconName } from '@core/common/icons/lucide-icons';
 import { deriveInitials } from '@shared/utils/derive-initials';
 import { accentFor } from '@shared/utils/avatar-accent';
+import { isAnchorOutOfView, visibleBounds } from '@shared/utils/panel-placement';
+import { addNativeOverlayRepositionListeners, NativeOverlayScheduler, removeNativeOverlayRepositionListeners } from '../../utils/native-overlay-dismiss';
 import { SaAvatar } from '../sa-avatar/sa-avatar';
 import { SaIcon } from '../sa-icon/sa-icon';
 import { createSelectInteractions } from './sa-select.interactions';
@@ -232,10 +234,7 @@ export class SaSelect implements ControlValueAccessor {
       this.control?.events.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(() => this.refreshValidation());
     });
 
-    // Browser only: there is no window while the server renders.
-    if (typeof window === 'undefined') return;
-    this.destroyRef.onDestroy(() => window.removeEventListener('resize', this.onWindowResize));
-    window.addEventListener('resize', this.onWindowResize);
+    this.destroyRef.onDestroy(() => this.stopFollowingTrigger());
   }
 
   /** Igual que sa-popover: showPopover()/hidePopover() se llaman directo y
@@ -253,12 +252,14 @@ export class SaSelect implements ControlValueAccessor {
 
     if (!panel.matches(':popover-open')) panel.showPopover();
     this.isOpen.set(true);
+    this.followTrigger();
     requestAnimationFrame(() => this.positionPanel());
   }
 
   hidePanel(): void {
     const panel = this.panelRef()?.nativeElement;
     this.isOpen.set(false);
+    this.stopFollowingTrigger();
     if (panel?.matches(':popover-open')) panel.hidePopover();
   }
 
@@ -269,17 +270,33 @@ export class SaSelect implements ControlValueAccessor {
   /** A diferencia de sa-popover/sa-theme-color-picker (que usan `popover="manual"`
    *  y por eso arman a mano su propio outside-click/Escape con NativeOverlayRuntime), este panel
    *  usa `popover` en modo auto (ver template): el navegador ya da gratis el light-dismiss por
-   *  click afuera y por Escape. Lo único que falta cubrir a mano es el reposicionamiento en
-   *  resize — de ahí que no haga falta ninguno de los helpers de native-overlay-dismiss.ts aquí. */
-  private readonly onWindowResize = (): void => {
-    if (this.isOpen()) this.positionPanel();
+   *  click afuera y por Escape. Lo único que falta cubrir a mano es el seguimiento del trigger
+   *  (scroll de cualquier contenedor y resize): solo ese tramo de native-overlay-dismiss.ts. */
+  private readonly scheduler = new NativeOverlayScheduler(() => this.positionPanel());
+  private readonly reposition = (): void => {
+    if (this.isOpen()) this.scheduler.schedule();
   };
 
   onPanelToggle(event: ToggleEvent): void {
-    if (event.newState === 'closed' && this.isOpen()) {
-      this.isOpen.set(false);
-      this.activeIndex.set(null);
+    if (event.newState === 'closed') {
+      this.stopFollowingTrigger();
+      if (this.isOpen()) {
+        this.isOpen.set(false);
+        this.activeIndex.set(null);
+      }
     }
+  }
+
+  /** El panel es `fixed`: con el scroll de un contenedor acompaña al trigger en vez de quedar pegado a la ventana. */
+  private followTrigger(): void {
+    // Browser only: there is no window while the server renders (showPanel only runs on a click).
+    removeNativeOverlayRepositionListeners(this.reposition);
+    addNativeOverlayRepositionListeners(this.reposition);
+  }
+
+  private stopFollowingTrigger(): void {
+    this.scheduler.cancel();
+    if (typeof window !== 'undefined') removeNativeOverlayRepositionListeners(this.reposition);
   }
 
   isSelectAllOption(option: unknown): boolean {
@@ -360,9 +377,17 @@ export class SaSelect implements ControlValueAccessor {
     const panel = this.panelRef()?.nativeElement;
     if (!trigger || !panel) return;
 
+    const bounds = visibleBounds(trigger);
+
+    // El scroll de un contenedor puede sacar el trigger de vista: el panel no se queda flotando sin ancla.
+    if (isAnchorOutOfView(trigger, bounds)) {
+      this.hidePanel();
+      return;
+    }
+
     const triggerRect = trigger.getBoundingClientRect();
     const panelHeight = panel.getBoundingClientRect().height;
-    const layout = getSelectPanelLayout(triggerRect, panelHeight, document.documentElement.clientWidth, document.documentElement.clientHeight);
+    const layout = getSelectPanelLayout(triggerRect, panelHeight, document.documentElement.clientWidth, document.documentElement.clientHeight, undefined, undefined, bounds);
 
     panel.style.top = `${layout.top}px`;
     panel.style.left = `${layout.left}px`;

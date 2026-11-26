@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { isOutOfBounds, resolveSide, visibleBounds, type IPanelBounds } from './panel-placement';
+import { isAnchorOutOfView, isOutOfBounds, resolveSide, visibleBounds, type IPanelBounds } from './panel-placement';
 
 const rect = (top: number, left: number, width = 144, height = 48) => ({ top, left, bottom: top + height, right: left + width });
 const content: IPanelBounds = { top: 80, left: 130, right: 1900, bottom: 1100 };
@@ -113,5 +113,38 @@ describe('visibleBounds', () => {
     document.body.append(scroller);
 
     expect(visibleBounds(anchor)).toEqual({ top: 80, left: 130, right: 1500, bottom: 900 });
+  });
+});
+
+describe('isAnchorOutOfView', () => {
+  afterEach(() => {
+    document.body.innerHTML = '';
+    vi.restoreAllMocks();
+  });
+
+  const mount = (anchorBox: { top: number; bottom: number; height: number }) => {
+    vi.spyOn(document.documentElement, 'clientWidth', 'get').mockReturnValue(1600);
+    vi.spyOn(document.documentElement, 'clientHeight', 'get').mockReturnValue(900);
+    const scroller = document.createElement('div');
+    scroller.style.overflowY = 'auto';
+    vi.spyOn(scroller, 'getBoundingClientRect').mockReturnValue({ top: 80, left: 130, right: 1500, bottom: 1000, width: 1370, height: 920 } as DOMRect);
+    const anchor = document.createElement('button');
+    const width = anchorBox.height > 0 ? 40 : 0;
+    vi.spyOn(anchor, 'getBoundingClientRect').mockReturnValue({ ...anchorBox, left: 400, right: 400 + width, width, x: 400, y: anchorBox.top, toJSON: () => ({}) } as DOMRect);
+    scroller.append(anchor);
+    document.body.append(scroller);
+    return anchor;
+  };
+
+  it('un ancla visible dentro de su contenedor no está fuera de vista', () => {
+    expect(isAnchorOutOfView(mount({ top: 300, bottom: 340, height: 40 }))).toBe(false);
+  });
+
+  it('un ancla que el scroll sacó por arriba del contenedor está fuera de vista', () => {
+    expect(isAnchorOutOfView(mount({ top: 20, bottom: 60, height: 40 }))).toBe(true);
+  });
+
+  it('un ancla sin tamaño (oculta o desmontada) no se mide: no cuenta como fuera de vista', () => {
+    expect(isAnchorOutOfView(mount({ top: 0, bottom: 0, height: 0 }))).toBe(false);
   });
 });

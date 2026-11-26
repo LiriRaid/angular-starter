@@ -104,7 +104,7 @@
                             <!-- uis:end -->
                             <!-- uis:begin(search) -->
                             @case ('search') {
-                              <sa-search [control]="searchControl" [mode]="$any(item.inputs['mode'] ?? 'input')" [placeholder]="$any(item.inputs['placeholder'] ?? 'Buscar...')" />
+                              <sa-search [control]="searchControlOf(item)" [mode]="$any(searchModeOf(item))" [placeholder]="$any(item.inputs['placeholder'] ?? 'Buscar...')" (collapsedSearchClick)="expandSearch(item)" (keydown.escape)="collapseSearch(item, true)" (focusout)="onSearchFocusOut(item, $event)" />
                             }
                             <!-- uis:end -->
                             @default {
