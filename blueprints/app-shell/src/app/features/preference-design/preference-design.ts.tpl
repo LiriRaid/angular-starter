@@ -29,11 +29,11 @@ export class PreferenceDesign {
 
   readonly activeTab = signal('appearance');
 
-  save(): void {
-    this.designPreferences.save();
+  save(): Promise<void> {
+    return this.designPreferences.save();
   }
 
-  reset(): void {
-    this.designPreferences.reset();
+  reset(): Promise<void> {
+    return this.designPreferences.reset();
   }
 }
