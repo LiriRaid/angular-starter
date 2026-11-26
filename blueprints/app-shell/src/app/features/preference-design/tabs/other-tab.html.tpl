@@ -9,8 +9,11 @@
       <div class="flex flex-col">
         <span class="text-caption-1-semibold text-(--app-text-color)">{{ toggle.label }}</span>
         <span class="text-caption-2-regular text-(--app-text-subtle)">{{ toggle.hint }}</span>
+        @if (toggle.note?.(); as note) {
+          <span class="text-caption-2-regular text-(--app-text-subtle)">{{ note }}</span>
+        }
       </div>
-      <sa-toggle [checked]="toggle.value()" (changed)="toggle.setValue($event)" [ariaLabel]="toggle.label" />
+      <sa-toggle [checked]="toggle.value()" [disabled]="toggle.disabled?.() ?? false" (changed)="toggle.setValue($event)" [ariaLabel]="toggle.label" />
     </div>
   }
 </div>

@@ -21,3 +21,6 @@
 @if (alertService.toastActive()) {
   <sa-toast />
 }
+
+<__PREFIX__-design-update-notice />
+
