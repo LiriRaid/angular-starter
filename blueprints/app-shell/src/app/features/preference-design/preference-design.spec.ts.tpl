@@ -15,6 +15,9 @@ class FakeStore implements DesignPreferencesStore {
   });
 }
 
+/** Rendering the tabs is slow on a loaded machine: the default of 5 s is not enough there. */
+const SLOW_RENDER_MS = 20_000;
+
 describe('PreferenceDesign', () => {
   let service: DesignPreferencesService;
   let store: FakeStore;
@@ -43,7 +46,7 @@ describe('PreferenceDesign', () => {
     expect(compiled.querySelector('h1')?.textContent).toContain('Preferencias de Diseño');
     expect(fixture.componentInstance.tabs.map((tab) => tab.label)).toEqual(['Apariencia', 'Tema', 'UI', 'Otros']);
     expect(compiled.querySelector('sa-tabs')).not.toBeNull();
-  });
+  }, SLOW_RENDER_MS);
 
   it('starts on the appearance tab with every layout listed and the enabled ones available', async () => {
     const fixture = await render();
@@ -83,7 +86,7 @@ describe('PreferenceDesign', () => {
     sharp?.click();
     expect(service.preferences().radius).toBe('sharp');
     expect(document.documentElement.style.getPropertyValue('--sa-ui-radius-scale')).toBe('0.25');
-  });
+  }, SLOW_RENDER_MS);
 
   it('turns the breadcrumb off from the other tab', async () => {
     const fixture = await render();

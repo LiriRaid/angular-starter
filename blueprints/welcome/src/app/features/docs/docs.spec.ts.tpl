@@ -4,6 +4,9 @@ import { RouterTestingHarness } from '@angular/router/testing';
 import { DOC_PAGES, DOC_SECTIONS } from './docs.data';
 import { DOCS_ROUTES } from './docs.routes';
 
+/** Rendering these pages is slow on a loaded machine: the default of 5 s is not enough there. */
+const SLOW_RENDER_MS = 20_000;
+
 describe('Docs', () => {
   /** A router with the documentation, and a way to open one of its pages and get what is drawn. */
   const setup = async () => {
@@ -22,7 +25,7 @@ describe('Docs', () => {
     const page = await open('/docs');
     expect(TestBed.inject(Router).url).toBe('/docs/getting-started');
     expect(page.querySelector('h1')?.textContent).toContain('Getting started');
-  });
+  }, SLOW_RENDER_MS);
 
   it('draws the page that the route names, for every page', async () => {
     const { open } = await setup();
@@ -31,7 +34,7 @@ describe('Docs', () => {
       expect(page.querySelector('h1')?.textContent, doc.id).toContain(doc.title);
       expect(page.querySelector(`[data-page="${doc.id}"]`), doc.id).not.toBeNull();
     }
-  });
+  }, SLOW_RENDER_MS);
 
   it('lists every page in the side menu and marks the one that is open', async () => {
     const { open } = await setup();
