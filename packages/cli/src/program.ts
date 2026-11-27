@@ -1,6 +1,6 @@
 import { Command, Help } from 'commander';
 import { availableIds, type CapabilityCategory } from './config/capabilities.js';
-import { ADDABLE, addableValues } from './commands/addable.js';
+import { ADDABLE_WORDS, addableValues } from './commands/addable.js';
 import type { AddFlags } from './commands/add.js';
 import { configCommand } from './commands/config.js';
 import { doctorCommand } from './commands/doctor.js';
@@ -21,6 +21,9 @@ const ROOT_COMMANDS: readonly (readonly [name: string, term: string])[] = [
   ['init', 'sa init'],
   ['add', 'sa add <capability> [value]'],
   ['generate', 'sa generate, g <kind> <name>'],
+  ['test', 'sa test [args...]'],
+  ['lint', 'sa lint [--fix] [args...]'],
+  ['format', 'sa format [--check] [args...]'],
   ['list', 'sa list [category]'],
   ['info', 'sa info'],
   ['config', 'sa config <list|get> [key]'],
@@ -95,6 +98,72 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
 
   registerAddCommand(program, io, deps);
   registerGenerateCommand(program, io);
+
+  program
+    .command('test')
+    .description('Runs the tests of the project: ng test, through its package manager.')
+    .usage('[args...]')
+    .argument('[args...]', 'Arguments and options that go to ng test as they are')
+    .allowUnknownOption()
+    .allowExcessArguments()
+    .addHelpText(
+      'after',
+      examples([
+        ['sa test', 'Run the tests as ng test does'],
+        ['sa test --watch=false', 'Run once and exit, for a script or a pipeline'],
+        ['sa test --include "src/app/**/*.spec.ts"', 'Only the specs that match'],
+      ]),
+    )
+    .action(async (args: string[]) => {
+      const { testCommand } = await import('./commands/test.js');
+      await testCommand(io, deps, args);
+    });
+
+  program
+    .command('lint')
+    .description('Lints the project with ESLint: its lint script, through its package manager.')
+    .usage('[--fix] [args...]')
+    .argument(
+      '[args...]',
+      'Options that go to the script as they are (not a file: the script already has its glob); --fix runs lint:fix',
+    )
+    .allowUnknownOption()
+    .allowExcessArguments()
+    .addHelpText(
+      'after',
+      examples([
+        ['sa lint', 'Check the code with ESLint'],
+        ['sa lint --fix', 'Fix what ESLint can fix (the lint:fix script)'],
+      ]),
+    )
+    .action(async (args: string[]) => {
+      const { lintCommand } = await import('./commands/scripts.js');
+      await lintCommand(io, deps, args);
+    });
+
+  program
+    .command('format')
+    .description(
+      'Formats the project with Prettier: its format script, through its package manager.',
+    )
+    .usage('[--check] [args...]')
+    .argument(
+      '[args...]',
+      'Options that go to the script as they are (not a file: the script already has its glob); --check runs format:check',
+    )
+    .allowUnknownOption()
+    .allowExcessArguments()
+    .addHelpText(
+      'after',
+      examples([
+        ['sa format', 'Format the code with Prettier'],
+        ['sa format --check', 'Only check it, for a pipeline (the format:check script)'],
+      ]),
+    )
+    .action(async (args: string[]) => {
+      const { formatCommand } = await import('./commands/scripts.js');
+      await formatCommand(io, deps, args);
+    });
 
   program
     .command('list')
@@ -262,6 +331,10 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     ],
     ['rendering', 'Server-side rendering'],
     [
+      'tooling',
+      'ESLint with Angular rules and the lint and format scripts, for a project that does not have them',
+    ],
+    [
       'architecture',
       'The Screaming Architecture (core, features, shared), only on a project that is still what ng new generates',
     ],
@@ -272,7 +345,7 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
       'Adds a capability, such as components, routing, an app shell or icons, to a project.',
     )
     .usage('<capability> [value]')
-    .argument('[capability]', Object.keys(ADDABLE).join(', '))
+    .argument('[capability]', ADDABLE_WORDS.join(', '))
     .argument('[value]', 'What to add; optional when the capability has one option')
     .option('--no-install', 'Do not install dependencies')
     .option('--dry-run', 'Show what would be done without changing anything')
@@ -293,6 +366,7 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
           ['sa add presence', 'User status in the shell, in memory or over a WebSocket'],
           ['sa add ui-system', 'Components catalog in the UI tab of the design preferences'],
           ['sa add rendering starter-ssr', 'Angular SSR with incremental hydration'],
+          ['sa add tooling', 'ESLint with Angular rules and the lint and format scripts'],
           ['sa add components all --dry-run', 'See the steps without changing anything'],
         ])
       );

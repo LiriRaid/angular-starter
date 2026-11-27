@@ -83,3 +83,37 @@ function collectLeafLinks(item: NavigationItem): string[] {
 
   return links;
 }
+
+/** An item of the navigation that leads somewhere, with the titles of the folders that hold it. */
+export interface NavigationEntry {
+  readonly id: string;
+  readonly title: string;
+  readonly link: string;
+  readonly icon?: string;
+  /** The titles of the folders it is inside, outermost first. */
+  readonly trail: readonly string[];
+}
+
+/** Every item with a link, in the order of the tree; hidden items and what they hold are left out. */
+export function flattenNavigation(groups: readonly NavigationGroup[], isHidden: (item: NavigationItem) => boolean): readonly NavigationEntry[] {
+  const entries: NavigationEntry[] = [];
+
+  const visit = (item: NavigationItem, trail: readonly string[], inheritedIcon: string | undefined): void => {
+    if (isHidden(item)) return;
+    const icon = item.icon ?? inheritedIcon;
+    if (item.link) entries.push({ id: item.id, title: item.title, link: item.link, icon, trail });
+    for (const child of item.children ?? []) visit(child, [...trail, item.title], icon);
+  };
+
+  for (const group of groups) for (const item of group.items) visit(item, [], undefined);
+  return entries;
+}
+
+const plain = (text: string): string => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+/** The entries whose title, or the title of a folder that holds them, contains `query` (case and accents do not matter). */
+export function searchNavigation(entries: readonly NavigationEntry[], query: string): readonly NavigationEntry[] {
+  const needle = plain(query.trim());
+  if (!needle) return [];
+  return entries.filter((entry) => [entry.title, ...entry.trail].some((title) => plain(title).includes(needle)));
+}

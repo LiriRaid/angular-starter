@@ -42,6 +42,7 @@ const SHELL_STYLES = [
   'breadcrumb-styles',
   'user-menu-styles',
   'design-preferences-styles',
+  'layout-modes-styles',
 ];
 
 const FEATURE_ROUTES: readonly RouteSpec[] = [

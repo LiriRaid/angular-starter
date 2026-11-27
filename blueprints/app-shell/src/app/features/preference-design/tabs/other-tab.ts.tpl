@@ -8,6 +8,9 @@ interface ToggleItem {
   readonly label: string;
   readonly hint: string;
   readonly value: () => boolean;
+  /** Un interruptor que el layout actual no usa se ve deshabilitado, con la razón en `note`. */
+  readonly disabled?: () => boolean;
+  readonly note?: () => string | null;
   readonly setValue: (value: boolean) => void;
 }
 
@@ -26,6 +29,8 @@ export class OtherTab {
       label: 'Mostrar breadcrumb',
       hint: 'La ruta de la página actual en el header',
       value: () => this.designPreferences.preferences().showBreadcrumb,
+      disabled: () => this.designPreferences.layoutTraits().compact,
+      note: () => (this.designPreferences.layoutTraits().compact ? 'El layout compacto muestra un buscador en el header en lugar del breadcrumb.' : null),
       setValue: (value) => this.designPreferences.set('showBreadcrumb', value),
     },
     {

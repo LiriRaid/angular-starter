@@ -27,11 +27,15 @@
     </div>
 
     <footer class="flex flex-wrap items-center justify-end gap-2 border-t border-(--app-border-color) p-3">
-      @if (designPreferences.hasChanges()) {
-        <span class="mr-auto text-caption-2-regular text-(--app-text-subtle)">Hay cambios sin guardar: se pierden al recargar.</span>
+      @if (designPreferences.saveFailed()) {
+        <span class="mr-auto text-caption-2-regular text-(--app-text-subtle)" role="alert">No se pudo guardar el diseño. Los cambios siguen en pantalla; vuelve a intentarlo.</span>
+      } @else if (!designPreferences.canSave()) {
+        <span class="mr-auto text-caption-2-regular text-(--app-text-subtle)">No tienes permiso para guardar el diseño de la plataforma: tus cambios se ven solo hasta que recargues.</span>
+      } @else if (designPreferences.hasChanges()) {
+        <span class="mr-auto text-caption-2-regular text-(--app-text-subtle)">Hay cambios sin guardar. Al guardar valen para toda la plataforma y los demás usuarios recibirán un aviso para recargar.</span>
       }
       <sa-button variant="outlined" size="medium" icon="Refresh" iconSize="16" label="Restablecer" (onClick)="reset()" />
-      <sa-button size="medium" icon="Check" iconSize="16" label="Guardar cambios" [disabled]="!designPreferences.hasChanges()" (onClick)="save()" />
+      <sa-button size="medium" icon="Check" iconSize="16" label="Guardar cambios" [disabled]="!designPreferences.hasChanges() || !designPreferences.canSave()" (onClick)="save()" />
     </footer>
   </div>
 </section>

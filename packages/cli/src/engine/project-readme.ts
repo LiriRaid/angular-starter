@@ -48,14 +48,38 @@ function isAngularReadme(text: string): boolean {
 const labelOf = (category: CapabilityCategory, id: string): string =>
   CAPABILITIES[category].find((option) => option.id === id)?.label ?? id;
 
-/** The commands of the project, in the syntax of its package manager. */
-function commandsOf(packageManager: string): string[] {
-  const build = packageManager === 'npm' ? 'npm run build' : `${packageManager} build`;
+/** What the quality scripts of ADR-0027 do, in the order the README lists them. */
+const QUALITY_SCRIPTS: readonly (readonly [script: string, what: string])[] = [
+  ['test:watch', 'runs the unit tests and runs them again on every change'],
+  ['lint', 'checks the code and the templates with ESLint'],
+  ['lint:fix', 'fixes what ESLint can fix'],
+  ['format', 'formats the code with Prettier'],
+  ['format:check', 'checks that the code is formatted (for CI)'],
+];
+
+/** The commands of the project, in the syntax of its package manager; the quality ones only when the project has the script. */
+function commandsOf(packageManager: string, scripts: ReadonlySet<string>): string[] {
+  const run = (script: string): string =>
+    packageManager === 'npm' ? `npm run ${script}` : `${packageManager} ${script}`;
   return [
     `- \`${packageManager} start\`: starts the development server (http://localhost:4200).`,
-    `- \`${build}\`: builds the application into \`dist/\`.`,
-    `- \`${packageManager} test\`: runs the unit tests.`,
+    `- \`${run('build')}\`: builds the application into \`dist/\`.`,
+    `- \`${packageManager} test\`: runs the unit tests (\`sa test\` does the same from the CLI).`,
+    ...QUALITY_SCRIPTS.filter(([script]) => scripts.has(script)).map(
+      ([script, what]) => `- \`${run(script)}\`: ${what}.`,
+    ),
   ];
+}
+
+/** The names of the scripts of the project; none when it has no readable package.json. */
+async function scriptsOf(targetDir: string): Promise<Set<string>> {
+  const text = await readFile(join(targetDir, 'package.json'), 'utf8').catch(() => undefined);
+  try {
+    const scripts: unknown = text === undefined ? undefined : JSON.parse(text).scripts;
+    return new Set(scripts && typeof scripts === 'object' ? Object.keys(scripts) : []);
+  } catch {
+    return new Set();
+  }
 }
 
 async function projectBlock(
@@ -92,7 +116,7 @@ async function projectBlock(
     ...(options.icons === 'none' ? [] : [`- **Icons**: ${labelOf('icons', options.icons)}.`]),
   ];
   const commands = [
-    ...commandsOf(options.packageManager),
+    ...commandsOf(options.packageManager, await scriptsOf(targetDir)),
     ...(structured
       ? ['- `sa generate feature <name>`: creates a feature in `src/app/features`.']
       : []),

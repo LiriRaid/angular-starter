@@ -5,6 +5,7 @@ import { NAV_APP_NAME_TOKEN } from '@core/navigation/navigation.tokens';
 import { Sidebar } from './sidebar';
 import { LayoutService } from '../../services/layout.service';
 import { SidebarStatus } from '../enums/sidebar-status.enum';
+import { DesignPreferencesService } from '@core/design-preferences/design-preferences.service';
 
 class LayoutServiceMock {
   readonly state = signal(SidebarStatus.EXPANDED);
@@ -112,5 +113,26 @@ describe('Sidebar', () => {
 
     expect(component['restoreCollapsedAfterSearch']()).toBe(false);
     expect(component['collapseFoldersAfterCollapsedSearchNav']()).toBe(false);
+  });
+
+  describe('layout', () => {
+    const preferences = (): DesignPreferencesService => TestBed.inject(DesignPreferencesService);
+
+    it('is not compact in the default layout', () => {
+      expect(component.compact()).toBe(false);
+    });
+
+    it('is compact in a compact layout and goes back with the next one', () => {
+      preferences().set('layout', 'compact-joined');
+      expect(component.compact()).toBe(true);
+      preferences().set('layout', 'floating-wide');
+      expect(component.compact()).toBe(false);
+    });
+
+    it('is the drawer of every layout on a small screen, compact or not', () => {
+      preferences().set('layout', 'compact-joined');
+      layoutService.isMobile.set(true);
+      expect(component.compact()).toBe(false);
+    });
   });
 });

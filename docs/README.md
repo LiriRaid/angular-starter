@@ -11,15 +11,17 @@ The package is `@liriraid/starter-angular` and installs two binaries, `sa` and `
 selector prefix of the native components is `sa-`, and a project records its choices in
 `starter-angular.config.json`.
 
-| Command                             | What it does                                                                                                            |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `sa new <name>`                     | Creates a project: a chained wizard, flags, `--defaults`, `--config`, `--dry-run`                                       |
-| `sa init`                           | Sets up an Angular project `sa new` did not make; reads what it has and writes the configuration, changing no code      |
-| `sa add <capability> [value]`       | Adds `architecture`, `routing`, `app-shell`, `presence`, `components`, `ui-system`, `icons` or `rendering` to a project |
-| `sa generate <kind> <name>`         | Creates a `feature` or a `component`                                                                                    |
-| `sa list [category]`                | Lists every option, the commands that add it and its documentation                                                      |
-| `sa info`, `sa config`, `sa doctor` | Shows the options of the project, reads or changes its configuration, checks the environment                            |
-| `sa version`                        | Prints the version of the CLI and of the Angular CLI it runs                                                            |
+| Command                                  | What it does                                                                                                                       |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `sa new <name>`                          | Creates a project: a chained wizard, flags, `--defaults`, `--config`, `--dry-run`                                                  |
+| `sa init`                                | Sets up an Angular project `sa new` did not make; reads what it has and writes the configuration, changing no code                 |
+| `sa add <capability> [value]`            | Adds `architecture`, `routing`, `app-shell`, `presence`, `components`, `ui-system`, `icons`, `rendering` or `tooling` to a project |
+| `sa generate <kind> <name>`              | Creates a `feature` or a `component`                                                                                               |
+| `sa test [args...]`                      | Runs `ng test` of any Angular project through its package manager, with your arguments and its exit code                           |
+| `sa lint [--fix]`, `sa format [--check]` | Run the `lint` and `format` scripts of the project (`lint:fix`, `format:check` with the flag), with the exit code of the script    |
+| `sa list [category]`                     | Lists every option, the commands that add it and its documentation                                                                 |
+| `sa info`, `sa config`, `sa doctor`      | Shows the options of the project, reads or changes its configuration, checks the environment                                       |
+| `sa version`                             | Prints the version of the CLI and of the Angular CLI it runs                                                                       |
 
 How `sa add` works, which is what a person trying a project piece by piece meets:
 
@@ -35,6 +37,10 @@ How `sa add` works, which is what a person trying a project piece by piece meets
   ([ADR-0024](adr/0024-ui-system-by-installed-components-budgets-and-project-readme.md)).
 - The README of the project says what it has between `<!-- sa:project -->` and `<!-- /sa:project -->` and is
   refreshed by `sa new` and every `sa add`; what you write outside the block is never touched.
+- Every project has ESLint and Prettier ready (`lint`, `lint:fix`, `format`, `format:check`); `sa add tooling` adds them
+  to one that lacks them without replacing an ESLint setup it has, and `sa test`, `sa lint` and `sa format` run
+  the tests, the lint and the format of any Angular project; every project has `test:watch`
+  ([ADR-0027](adr/0027-default-eslint-prettier-and-sa-test.md), [ADR-0028](adr/0028-sa-lint-sa-format-and-test-watch.md)).
 - With the shell or the components the budget of the initial bundle goes to 1 MB (warning) and 2 MB (error),
   unless you changed the one Angular writes.
 
@@ -64,6 +70,8 @@ How `sa add` works, which is what a person trying a project piece by piece meets
 | [0024](adr/0024-ui-system-by-installed-components-budgets-and-project-readme.md)                                                                               | The UI System from the installed components, the budgets and the project README        |
 | [0025](adr/0025-ui-system-modes-button-severities-filled-icons-and-avatar-scale.md)                                                                            | The mode of a field per card, the button severities, filled icons and the avatar scale |
 | [0026](adr/0026-floating-panels-follow-their-anchor-and-collapsed-search-opens.md)                                                                             | Floating panels centred on their anchor and following it; the collapsed search opens   |
+| [0027](adr/0027-default-eslint-prettier-and-sa-test.md)                                                                                                        | Every project comes with ESLint and Prettier ready; `sa test` runs the tests           |
+| [0028](adr/0028-sa-lint-sa-format-and-test-watch.md)                                                                                                           | `sa lint` and `sa format` run the project's scripts; every project has `test:watch`    |
 
 Each plan in `plans/` has the number of its decision's step list and ends with its gates; the one of
 [ADR-0024](adr/0024-ui-system-by-installed-components-budgets-and-project-readme.md) is

@@ -8,6 +8,34 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- The layout of the app shell is a design preference that an administrator changes in production (ADR-0029 and plan
+  0026). In `Preferencias de Diseño` (Apariencia) the cards of the layouts now switch the shell at once, with signals
+  and no reload, and _Guardar cambios_ keeps the design for the whole platform: the users who are online get an alert
+  ("El diseño de la plataforma cambió", _Recargar_) and see it when they reload. The design lives behind two contracts
+  provided by tokens, never in `localStorage` or `sessionStorage`: `DESIGN_PREFERENCES_STORE` (`load`, `save`,
+  `canSave`; in memory by default, `HttpDesignPreferencesStore` over `fetch`) and `DESIGN_CHANGE_NOTIFIER`
+  (`PollingDesignChangeNotifier`, `WebSocketDesignChangeNotifier`). `docs/design-preferences.md` documents the endpoint,
+  a minimal Node server and how to feed the notices from Redis pub/sub.
+- `compact-joined`, the first of the five layouts still to build: a rail with the logo only and the icon above the
+  text of every page, a small navigation next to it for the folders, and, in the header, a search instead of the
+  breadcrumb (the _Mostrar breadcrumb_ switch is disabled there) and the user menu with its presence. Every layout is a mix of three traits (`compact`,
+  `floating`, `transparent`) read by the components as a signal and by the stylesheets from `html[data-layout-traits]`.
+- The design preferences no longer read the `localStorage` entry that older projects used to save them: a saved design
+  must be saved again through the store (ADR-0029).
+- Every project comes with lint and format ready, whatever its architecture (ADR-0027 and plan 0024): `sa new` writes
+  `eslint.config.mjs` (ESLint 10, `typescript-eslint` and `angular-eslint` with the reference rules and the selector
+  prefix of the project), adds the packages at the versions the CLI was tested with (`TOOLING_PACKAGES`) and the scripts
+  `lint`, `lint:fix`, `format` and `format:check`, and formats the generated code once after installing, so
+  `format:check` starts green. An ESLint setup the project already has is kept. Zoneless change detection, Vitest
+  (`ng test`) and Prettier already come from `ng new`.
+- `sa add tooling` adds the same to a project that lacks it, and the README of a project lists the lint and format
+  commands it has.
+- `sa test [args...]` runs `ng test` of any Angular project through its package manager, from any folder of it, with
+  the arguments typed and the exit code of `ng test`.
+- `sa lint` and `sa format` run the `lint` and `format` scripts of any Angular project, with the exit code of the script
+  (ADR-0028 and plan 0025): `sa lint --fix` runs `lint:fix` and `sa format --check` runs `format:check`, and every
+  other argument goes to the script. Every project has the `test:watch` script (`ng test --watch`).
+
 - In the UI System the mode (`on`, `in`, `over`) of `sa-input`, `sa-textarea` and `sa-select` is a setting of
   the card (ADR-0025 and plan 0022): a row of chips picks it, every variant is shown in that mode, and the code
   carries `variant` only when it is not the default. The options of a field are no longer repeated for each mode.

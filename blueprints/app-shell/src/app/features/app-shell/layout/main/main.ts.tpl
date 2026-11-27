@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, ElementRef, inject, viewChild } fro
 import { RouterOutlet } from '@angular/router';
 import { SidebarStatus } from '../enums/sidebar-status.enum';
 import { Sidebar } from '../sidebar/sidebar';
+import { DesignUpdateNotice } from '../design-update-notice/design-update-notice';
 import { LayoutService } from '../../services/layout.service';
 import { Header } from '../header/header';
 import { SaToast } from '@shared/components';
@@ -9,7 +10,7 @@ import { AlertService } from '@shared/services';
 
 @Component({
   selector: '__PREFIX__-main',
-  imports: [RouterOutlet, Sidebar, Header, SaToast],
+  imports: [RouterOutlet, Sidebar, Header, SaToast, DesignUpdateNotice],
   templateUrl: './main.html',
   styleUrl: './main.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

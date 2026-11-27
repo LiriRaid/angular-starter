@@ -106,6 +106,13 @@ async function styleOf(root: string): Promise<StarterOptions['style']> {
   return 'css';
 }
 
+/** The package manager a project uses, told from its lockfile or from the `packageManager` field of its package.json. */
+export async function detectPackageManager(
+  root: string,
+): Promise<StarterOptions['packageManager']> {
+  return packageManagerOf(root, parseJson(await readText(root, 'package.json')));
+}
+
 async function packageManagerOf(
   root: string,
   manifest: Record<string, unknown>,

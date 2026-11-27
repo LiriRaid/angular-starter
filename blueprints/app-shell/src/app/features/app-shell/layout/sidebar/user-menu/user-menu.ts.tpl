@@ -15,6 +15,8 @@ import { NAV_APP_NAME_TOKEN } from '@core/navigation/navigation.tokens';
 })
 export class UserMenu {
   readonly expanded = input(true);
+  /** Where the menu opens: the sidebar is at the bottom of the screen, the header (compact layouts) at the top. */
+  readonly position = input<'top' | 'bottom'>('top');
 
   private readonly router = inject(Router);
 

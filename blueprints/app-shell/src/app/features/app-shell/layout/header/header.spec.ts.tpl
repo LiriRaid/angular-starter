@@ -125,4 +125,44 @@ describe('Header breadcrumb preference', () => {
     fixture.detectChanges();
     expect(element.querySelector('__PREFIX__-breadcrumb')).toBeNull();
   });
+
+  it('shows a search instead of the breadcrumb in a compact layout, whatever "Mostrar breadcrumb" says', async () => {
+    const fixture = await render();
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('__PREFIX__-header-search')).toBeNull();
+
+    TestBed.inject(DesignPreferencesService).set('layout', 'compact-joined');
+    fixture.detectChanges();
+    expect(element.querySelector('__PREFIX__-header-search')).not.toBeNull();
+    expect(element.querySelector('__PREFIX__-breadcrumb')).toBeNull();
+
+    TestBed.inject(DesignPreferencesService).set('layout', 'floating-wide');
+    fixture.detectChanges();
+    expect(element.querySelector('__PREFIX__-header-search')).toBeNull();
+    expect(element.querySelector('__PREFIX__-breadcrumb')).not.toBeNull();
+  });
+
+  it('moves the user menu from the sidebar to the header in a compact layout', async () => {
+    const fixture = await render();
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('__PREFIX__-user-menu')).toBeNull();
+
+    TestBed.inject(DesignPreferencesService).set('layout', 'compact-joined');
+    fixture.detectChanges();
+    expect(element.querySelector('__PREFIX__-user-menu')).not.toBeNull();
+
+    TestBed.inject(DesignPreferencesService).set('layout', 'floating-wide');
+    fixture.detectChanges();
+    expect(element.querySelector('__PREFIX__-user-menu')).toBeNull();
+  });
+
+  it('goes back to the breadcrumb on a small screen, where every layout uses the same drawer', async () => {
+    const fixture = await render();
+    const element = fixture.nativeElement as HTMLElement;
+    TestBed.inject(DesignPreferencesService).set('layout', 'compact-joined');
+    (TestBed.inject(LayoutService) as unknown as LayoutServiceMock).isMobile.mockReturnValue(true);
+    fixture.detectChanges();
+    expect(element.querySelector('__PREFIX__-header-search')).toBeNull();
+    expect(element.querySelector('__PREFIX__-breadcrumb')).not.toBeNull();
+  });
 });

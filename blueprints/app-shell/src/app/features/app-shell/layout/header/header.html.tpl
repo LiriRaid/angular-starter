@@ -4,7 +4,9 @@
       <sa-button type="button" variant="text" size="small" [icon]="isSidebarOpen ? 'PanelClose' : 'PanelOpen'" iconSize="24" styleClass="header-theme-btn !border-0 [color:var(--app-action-icon-color)] hover:[color:var(--app-text-primary)] hover:!bg-(--app-action-hover-bg)" [ariaLabel]="isSidebarOpen ? 'Colapsar sidebar' : 'Expandir sidebar'" [saTooltip]="isSidebarOpen ? 'Colapsar' : 'Expandir'" tooltipPosition="bottom" [showDelay]="300" (onClick)="toggleSidebar()" />
 
       <div class="breadcrumb-slot flex-1 min-w-0 mr-3 overflow-visible">
-        @if (designPreferences.preferences().showBreadcrumb) {
+        @if (compact()) {
+          <__PREFIX__-header-search />
+        } @else if (designPreferences.preferences().showBreadcrumb) {
           <__PREFIX__-breadcrumb [breadcrumbs]="breadcrumbService.breadcrumbs()" />
         }
       </div>
@@ -15,6 +17,12 @@
 
       <!-- Modo oscuro/claro -->
       <sa-button type="button" variant="outlined" size="medium" [icon]="isDark() ? 'Sun' : 'Moon'" iconSize="20" styleClass="header-theme-btn" ariaLabel="Cambiar tema" [saTooltip]="isDark() ? 'Modo Claro' : 'Modo Oscuro'" tooltipPosition="bottom" [showDelay]="300" (onClick)="toggleTheme()" />
+
+      <!-- En los layouts compactos el usuario (y su presencia) está aquí y no en el sidebar. -->
+      @if (compact()) {
+        <span class="header-user-divider" aria-hidden="true"></span>
+        <__PREFIX__-user-menu [expanded]="true" position="bottom" />
+      }
     </div>
   </div>
 </nav>
