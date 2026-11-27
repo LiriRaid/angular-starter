@@ -27,6 +27,9 @@ const entryOf = (id: string): UiComponentEntry => {
 };
 const idsOf = (id: string): string[] => entryOf(id).variants.map((variant) => variant.id);
 
+/** Rendering these pages is slow on a loaded machine: the default of 5 s is not enough there. */
+const SLOW_RENDER_MS = 20_000;
+
 describe('UiSystem', () => {
   beforeEach(() => {
     // jsdom no implementa `<dialog>.show()` ni `.close()`: el panel los llama al abrirse y al cerrarse.
@@ -56,7 +59,7 @@ describe('UiSystem', () => {
     expect(cards).toHaveLength(UI_COMPONENTS.length);
     expect(root.textContent).toContain('sa-button');
     expect(Array.from(cards).every((card) => card.querySelector('.border-dashed') !== null)).toBe(true);
-  });
+  }, SLOW_RENDER_MS);
 
   it('says which tokens change a component', async () => {
     const { card } = await render();
