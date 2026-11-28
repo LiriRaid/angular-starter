@@ -34,12 +34,16 @@ export interface Stage {
   plan?(context: GenerationContext, files: FilePlan): Promise<void>;
 }
 
-/** The files the stages would create, change and delete, in the order they run, without writing anything. */
+/**
+ * The files the stages would create, change and delete, in the order they run, without writing anything.
+ * Several runs of stages that follow one another (a chain of `sa add`) share one `files`, so each sees what the
+ * ones before it left.
+ */
 export async function planStages(
   stages: readonly Stage[],
   context: GenerationContext,
+  files = new FilePlan(context.targetDir),
 ): Promise<PlannedFile[]> {
-  const files = new FilePlan(context.targetDir);
   for (const stage of stages) {
     if (stage.enabled && !stage.enabled(context)) continue;
     await stage.plan?.(context, files);

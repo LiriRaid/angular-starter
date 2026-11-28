@@ -443,7 +443,8 @@ export const installDependencies: Stage = {
     }
   },
   async plan({ options }, files) {
-    await files.write(LOCKFILES[options.packageManager]);
+    // The install changes the lockfile when a step changed what the project depends on.
+    if (files.wasEdited('package.json')) await files.write(LOCKFILES[options.packageManager]);
   },
 };
 

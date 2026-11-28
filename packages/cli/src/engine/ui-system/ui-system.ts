@@ -133,26 +133,45 @@ export const uiSystemProfile = {
    * edited is never rewritten, and the report names it and what is missing.
    */
   async update({ targetDir, name, prefix }: UiSystemProject): Promise<CatalogUpdate> {
-    const catalog = await readFile(join(targetDir, CATALOG), 'utf8').catch(() => undefined);
-    if (catalog === undefined) {
-      throw new RuntimeError(`The UI System catalog (${CATALOG}) is not in this project.`);
-    }
-    const have = catalogIdsOf(catalog);
-    const missing = await missingEntries(targetDir);
-    if (missing.length === 0) return { status: 'current' };
+    const change = await catalogChange({ targetDir, name, prefix });
+    for (const [file, content] of change.files) await writeFile(join(targetDir, file), content);
+    return change.report;
+  },
 
-    const before = await renderFiles(new Set(have), { name, prefix });
-    const edited: string[] = [];
-    for (const [file, expected] of before) {
-      const actual = await readFile(join(targetDir, file), 'utf8').catch(() => undefined);
-      if (actual !== expected) edited.push(file);
-    }
-    if (edited.length > 0) return { status: 'edited', missing, edited };
-
-    const after = await renderFiles(new Set([...have, ...missing]), { name, prefix });
-    for (const [file, content] of after) {
-      if (content !== before.get(file)) await writeFile(join(targetDir, file), content);
-    }
-    return { status: 'updated', added: missing };
+  /** The files `update` would rewrite, recorded in `files` without writing anything. */
+  async planUpdate(
+    files: FilePlan,
+    { name, prefix }: Omit<UiSystemProject, 'targetDir'>,
+  ): Promise<void> {
+    const change = await catalogChange({ targetDir: files.targetDir, name, prefix });
+    for (const file of change.files.keys()) await files.edit(file);
   },
 };
+
+/** What bringing the catalog up to the components of the project would do: the report and the new text of each file. */
+async function catalogChange({ targetDir, name, prefix }: UiSystemProject): Promise<{
+  report: CatalogUpdate;
+  files: Map<string, string>;
+}> {
+  const catalog = await readFile(join(targetDir, CATALOG), 'utf8').catch(() => undefined);
+  if (catalog === undefined) {
+    throw new RuntimeError(`The UI System catalog (${CATALOG}) is not in this project.`);
+  }
+  const have = catalogIdsOf(catalog);
+  const missing = await missingEntries(targetDir);
+  if (missing.length === 0) return { report: { status: 'current' }, files: new Map() };
+
+  const before = await renderFiles(new Set(have), { name, prefix });
+  const edited: string[] = [];
+  for (const [file, expected] of before) {
+    const actual = await readFile(join(targetDir, file), 'utf8').catch(() => undefined);
+    if (actual !== expected) edited.push(file);
+  }
+  if (edited.length > 0) {
+    return { report: { status: 'edited', missing, edited }, files: new Map() };
+  }
+
+  const after = await renderFiles(new Set([...have, ...missing]), { name, prefix });
+  const changed = new Map([...after].filter(([file, content]) => content !== before.get(file)));
+  return { report: { status: 'updated', added: missing }, files: changed };
+}

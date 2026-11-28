@@ -9,6 +9,7 @@ import { createFakeIo } from './helpers/fake-io.js';
 import { createFakePrompter } from './helpers/fake-prompter.js';
 import { createFakeRunner, type FakeRunnerOptions } from './helpers/fake-runner.js';
 import { ANGULAR_README } from './helpers/generated-workspace.js';
+import { difference, readTree, snapshot } from './helpers/plan-tree.js';
 import { SSR_APP_CONFIG, createStarterProject } from './helpers/starter-project.js';
 
 let cwd: string;
@@ -234,6 +235,19 @@ describe('sa add', () => {
       expect(result.out).toContain('~ app.routes.ts');
       expect(result.out).toMatch(/Would create \d+ files and update \d+ files/);
       expect(await exists(join(project, 'src/app/features/app-shell/layout'))).toBe(false);
+    });
+  });
+
+  describe('the lockfile in a dry run', () => {
+    it('is drawn only when a step changes what the project depends on', async () => {
+      const bare = await createStarterProject(cwd, ['--icons', 'none']);
+      const icons = await add(bare, ['icons', 'lucide', '--dry-run', '--verbose']);
+      expect(icons.out).toContain('package-lock.json');
+      // Presence changes no package: the install would leave the lockfile as it is.
+      await rm(bare, { recursive: true, force: true });
+      const shell = await createStarterProject(cwd);
+      const presence = await add(shell, ['presence', '--dry-run', '--verbose']);
+      expect(presence.out).not.toContain('package-lock.json');
     });
   });
 
@@ -1164,6 +1178,18 @@ describe('sa add: what a capability needs and what it offers next', () => {
     });
   });
 
+  it('draws in a dry run the files of the whole chain, the same ones it then writes', async () => {
+    const project = await createStarterProject(cwd, WITH_COMPONENTS);
+    const before = await snapshot(project);
+    const preview = await add(project, ['ui-system', '--no-install', '--dry-run', '--verbose']);
+    expect(preview.code, preview.err).toBe(0);
+    expect(difference(before, await snapshot(project))).toEqual([]);
+
+    const real = await ask(project, ['ui-system', '--no-install'], [true]);
+    expect(real.code, real.err).toBe(0);
+    expect(readTree(preview.out)).toEqual(difference(before, await snapshot(project)));
+  });
+
   it('changes nothing when the developer says no to what it needs', async () => {
     const project = await createStarterProject(cwd, WITH_COMPONENTS);
     const result = await ask(project, ['ui-system'], [false]);
@@ -1323,6 +1349,24 @@ describe('sa add: what a capability needs and what it offers next', () => {
       expect(result.code, result.err).toBe(0);
       expect(result.out).toContain('Completing the UI System catalog');
       expect(await catalogOf(project)).not.toContain("id: 'table'");
+    });
+
+    it('draws in a dry run the files of the catalog it would rewrite, the same ones it then rewrites', async () => {
+      const project = await createStarterProject(cwd, FEW);
+      await add(project, ['components', 'table']);
+      const before = await snapshot(project);
+      const preview = await add(project, ['ui-system', '--dry-run', '--verbose']);
+      expect(preview.code, preview.err).toBe(0);
+      expect(difference(before, await snapshot(project))).toEqual([]);
+      const promised = readTree(preview.out);
+      expect(promised.length).toBeGreaterThan(0);
+
+      await add(project, ['ui-system']);
+      expect(promised).toEqual(
+        difference(before, await snapshot(project)).filter(
+          (file) => file.path !== 'starter-angular.config.json',
+        ),
+      );
     });
 
     it('warns and changes nothing when the developer edited the catalog', async () => {

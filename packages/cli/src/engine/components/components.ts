@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { COMPONENT_PACKAGES } from '../../compat.js';
 import { BLUEPRINTS_ROOT, copyBlueprint } from '../blueprint.js';
@@ -80,11 +81,22 @@ export const componentsProfile = {
 
   /** The files `apply` would create and change, recorded in `files` without writing anything. */
   async plan(files: FilePlan, set: ComponentSet | readonly string[]): Promise<void> {
+    let added = false;
     for (const { id } of definitionsOf(set)) {
       if (await files.exists(componentFile(id))) continue;
       await files.blueprint(join(BLUEPRINTS_ROOT, 'components', `sa-${id}`));
+      added = true;
     }
-    for (const file of [BARREL, STYLES, PACKAGE_JSON]) await files.edit(file);
+    // Components that are all there already change nothing: not the barrel, the styles nor the packages.
+    if (!added) return;
+    for (const file of [BARREL, STYLES]) await files.edit(file);
+    // The packages the components import are in the project already when it had components before.
+    const manifest = await readFile(join(files.targetDir, PACKAGE_JSON), 'utf8').catch(
+      () => undefined,
+    );
+    if (manifest === undefined || addDependencies(manifest, COMPONENT_PACKAGES) !== manifest) {
+      await files.edit(PACKAGE_JSON);
+    }
     await planGeneratedReadmes(files, { components: true, styles: true });
   },
 };

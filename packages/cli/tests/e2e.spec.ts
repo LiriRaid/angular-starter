@@ -9,6 +9,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { StarterOptions } from '../src/config/schema.js';
 import { buildNgCommand } from '../src/engine/angular-cli.js';
 import { skeletonFiles } from '../src/engine/skeleton.js';
+import { difference, readTree, snapshot } from './helpers/plan-tree.js';
 
 /**
  * Runs the compiled CLI against the real Angular CLI (needs network and a prior `pnpm build`).
@@ -83,6 +84,7 @@ ${result.stderr}`,
 ${result.stdout}
 ${result.stderr}`,
     ).toBe(0);
+    return result.stdout;
   }
 
   async function ng(project: string, ...args: string[]) {
@@ -166,6 +168,42 @@ ${result.stderr}`;
       }
     },
     TIMEOUT_MS,
+  );
+
+  it(
+    'draws in --dry-run the files that ng add @angular/ssr and the starter then write',
+    async () => {
+      const project = await createInstalled(
+        'e2e-ssr-plan',
+        '--architecture',
+        'screaming',
+        '--routing',
+        'angular',
+        '--icons',
+        'none',
+        '--components',
+        'none',
+        '--app-shell',
+        'none',
+      );
+      const before = await snapshot(project);
+      const preview = await asProject(
+        project,
+        'add',
+        'rendering',
+        'starter-ssr',
+        '--dry-run',
+        '--verbose',
+      );
+      const promised = readTree(preview);
+      await asProject(project, 'add', 'rendering', 'starter-ssr');
+      // ng add installs by itself, which rewrites the lockfile the dry run does not claim to know.
+      const lockfiles = ['pnpm-lock.yaml', 'package-lock.json', 'yarn.lock'];
+      const written = (file: { path: string }): boolean => !lockfiles.includes(file.path);
+      const done = difference(before, await snapshot(project)).filter(written);
+      expect(promised.filter(written)).toEqual(done);
+    },
+    INSTALL_TIMEOUT_MS,
   );
 
   it(
