@@ -41,6 +41,12 @@ How `sa add` works, which is what a person trying a project piece by piece meets
   to one that lacks them without replacing an ESLint setup it has, and `sa test`, `sa lint` and `sa format` run
   the tests, the lint and the format of any Angular project; every project has `test:watch`
   ([ADR-0027](adr/0027-default-eslint-prettier-and-sa-test.md), [ADR-0028](adr/0028-sa-lint-sa-format-and-test-watch.md)).
+- `--dry-run` of `sa new`, `sa add`, `sa generate` and `sa init` draws what the command would write as a tree
+  (`+` created, `~` changed, `-` deleted) and writes nothing; `--verbose` lists every file.
+- The layout of the shell is a preference of the whole platform: the administrator switches it in the design
+  preferences, the store the developer connects (`DESIGN_PREFERENCES_STORE`) keeps it and the users online are told
+  to reload ([ADR-0029](adr/0029-layout-modes-as-runtime-variants-and-shared-design-preferences.md),
+  [plan 0026](plans/0026-layout-modes-and-shared-design-preferences.md)).
 - With the shell or the components the budget of the initial bundle goes to 1 MB (warning) and 2 MB (error),
   unless you changed the one Angular writes.
 
@@ -55,7 +61,7 @@ How `sa add` works, which is what a person trying a project piece by piece meets
 | [0005](adr/0005-design-base-and-native-components.md)                                                                                                          | The design base and the native components                                              |
 | [0006](adr/0006-project-commands.md)                                                                                                                           | `add`, `generate`, `config` and a categorized help                                     |
 | [0007](adr/0007-omni-structure-design-and-components.md)                                                                                                       | The structure of the reference application, without its business                       |
-| [0008](adr/0008-app-shell.md)                                                                                                                                  | The application shell, in its first layout mode                                        |
+| [0008](adr/0008-app-shell.md)                                                                                                                                  | The application shell, in its first layout mode (more layouts in ADR-0029)             |
 | [0009](adr/0009-presence-documentation-and-welcome-home.md)                                                                                                    | Presence, the documentation inside the application and the welcome home                |
 | [0010](adr/0010-routed-wizard-layout-modes-and-design-preferences.md)                                                                                          | The chained wizard, the layout modes and the design preferences page                   |
 | [0011](adr/0011-components-picker-and-design-preferences-tabs.md)                                                                                              | The components picker and the tabs of the design preferences                           |
@@ -72,6 +78,7 @@ How `sa add` works, which is what a person trying a project piece by piece meets
 | [0026](adr/0026-floating-panels-follow-their-anchor-and-collapsed-search-opens.md)                                                                             | Floating panels centred on their anchor and following it; the collapsed search opens   |
 | [0027](adr/0027-default-eslint-prettier-and-sa-test.md)                                                                                                        | Every project comes with ESLint and Prettier ready; `sa test` runs the tests           |
 | [0028](adr/0028-sa-lint-sa-format-and-test-watch.md)                                                                                                           | `sa lint` and `sa format` run the project's scripts; every project has `test:watch`    |
+| [0029](adr/0029-layout-modes-as-runtime-variants-and-shared-design-preferences.md)                                                                             | Layout modes as run-time variants; the design preferences shared by the platform       |
 
 Each plan in `plans/` has the number of its decision's step list and ends with its gates; the one of
 [ADR-0024](adr/0024-ui-system-by-installed-components-budgets-and-project-readme.md) is

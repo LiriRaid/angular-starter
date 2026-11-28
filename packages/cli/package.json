@@ -24,8 +24,12 @@
     "url": "git+https://github.com/LiriRaid/starter-angular.git",
     "directory": "packages/cli"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json && node scripts/sync-blueprints.mjs",
+    "prepack": "pnpm run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run"
   },
