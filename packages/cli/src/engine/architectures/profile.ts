@@ -1,3 +1,5 @@
+import type { FilePlan } from '../plan.js';
+
 export interface ArchitectureProject {
   /** The generated Angular workspace. */
   targetDir: string;
@@ -32,4 +34,8 @@ export interface ArchitectureProfile {
    * leaves every other file alone, naming what the developer should review.
    */
   adopt(project: ArchitectureProject): Promise<AdoptionReport>;
+  /** The files `apply` would create, change and delete, recorded in `files` without writing anything. */
+  plan(files: FilePlan): Promise<void>;
+  /** The files `adopt` would create, change and delete in the project `files` points at. */
+  planAdoption(files: FilePlan): Promise<void>;
 }

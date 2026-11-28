@@ -166,7 +166,11 @@ describe('sa generate feature', () => {
     const result = await generate(['feature', 'billing', '--dry-run']);
     expect(result.code).toBe(0);
     expect(result.out).toContain('Dry run');
-    expect(result.out).toContain('src/app/features/billing/billing.ts');
+    // A tree of what it would write: `+` for the files it creates and `~` for the ones it adapts.
+    expect(result.out).toContain('billing/');
+    expect(result.out).toContain('+ billing.ts');
+    expect(result.out).toContain('~ app.routes.ts');
+    expect(result.out).toMatch(/Would create 5 files and update \d files?\./);
     expect(await exists(join(project, 'src/app/features/billing'))).toBe(false);
   });
 });
@@ -292,7 +296,9 @@ describe('sa generate component in a project that is not Screaming', () => {
   it('shows what it would create with --dry-run and creates nothing', async () => {
     const result = await generate(['component', 'invoice-card', '--dry-run'], folder);
     expect(result.code).toBe(0);
-    expect(result.out).toContain('src/app/invoice-card/invoice-card.ts');
+    expect(result.out).toContain('invoice-card/');
+    expect(result.out).toContain('+ invoice-card.ts');
+    expect(result.out).toContain('Would create 4 files.');
     expect(await exists(join(folder, 'src/app/invoice-card'))).toBe(false);
   });
 
@@ -313,7 +319,9 @@ describe('sa generate component --path with dot segments', () => {
         folder,
       );
       expect(result.code, result.err).toBe(0);
-      expect(result.out).toContain('src/app/billing/invoice-card/invoice-card.ts');
+      expect(result.out).toContain('billing/');
+      expect(result.out).toContain('invoice-card/');
+      expect(result.out).toContain('+ invoice-card.ts');
     } finally {
       await rm(plain, { recursive: true, force: true });
     }

@@ -52,6 +52,15 @@ export async function listBlueprintFiles(directory: string): Promise<string[]> {
     .sort();
 }
 
+/** The file of a blueprint as the project gets it: a template loses its `.tpl` suffix. */
+const targetOf = (file: string): string =>
+  file.endsWith(TEMPLATE_SUFFIX) ? file.slice(0, -TEMPLATE_SUFFIX.length) : file;
+
+/** The project paths a blueprint writes, sorted; what `--dry-run` shows without copying anything. */
+export async function blueprintTargets(directory: string): Promise<string[]> {
+  return (await listBlueprintFiles(directory)).map(targetOf).sort();
+}
+
 /**
  * Copies a blueprint into a project and returns the project paths it wrote. Nothing is written
  * when any destination already exists and is not in `overwrite`.
@@ -60,7 +69,7 @@ export async function copyBlueprint(options: CopyBlueprintOptions): Promise<stri
   const { source, target, variables, overwrite = [], transform } = options;
   const files = (await listBlueprintFiles(source)).map((file) => ({
     from: file,
-    to: file.endsWith(TEMPLATE_SUFFIX) ? file.slice(0, -TEMPLATE_SUFFIX.length) : file,
+    to: targetOf(file),
   }));
 
   const collisions: string[] = [];

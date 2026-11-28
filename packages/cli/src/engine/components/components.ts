@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { COMPONENT_PACKAGES } from '../../compat.js';
 import { BLUEPRINTS_ROOT, copyBlueprint } from '../blueprint.js';
@@ -5,7 +6,8 @@ import { addDependencies } from '../edits/package-json.js';
 import { planEdit, writeEdits } from '../edits/planned.js';
 import { addComponentStyles } from '../edits/styles.js';
 import { pathExists } from '../fs.js';
-import { refreshGeneratedReadmes } from '../readme.js';
+import type { FilePlan } from '../plan.js';
+import { planGeneratedReadmes, refreshGeneratedReadmes } from '../readme.js';
 import {
   barrelLines,
   componentsOf,
@@ -27,6 +29,8 @@ export interface ComponentsProject {
   set: ComponentSet | readonly string[];
 }
 
+const componentFile = (id: string): string => `${SHARED}/sa-${id}/sa-${id}.ts`;
+
 const definitionsOf = (set: ComponentSet | readonly string[]) =>
   typeof set === 'string' ? componentsOf(set) : componentsOfIds(set);
 
@@ -40,7 +44,10 @@ const definitionsOf = (set: ComponentSet | readonly string[]) =>
 export const componentsProfile = {
   /** Project files (forward slashes) that must exist once the collection has been applied. */
   requiredFilesFor: (set: ComponentSet | readonly string[]): string[] =>
-    definitionsOf(set).map(({ id }) => `${SHARED}/sa-${id}/sa-${id}.ts`),
+    definitionsOf(set).map(({ id }) => componentFile(id)),
+
+  /** The main file of a component; the project has the component when it has this file. */
+  componentFile,
 
   async apply({ targetDir, name, prefix, set }: ComponentsProject): Promise<void> {
     const definitions = definitionsOf(set);
@@ -70,5 +77,26 @@ export const componentsProfile = {
     }
     await writeEdits(planned);
     await refreshGeneratedReadmes(targetDir);
+  },
+
+  /** The files `apply` would create and change, recorded in `files` without writing anything. */
+  async plan(files: FilePlan, set: ComponentSet | readonly string[]): Promise<void> {
+    let added = false;
+    for (const { id } of definitionsOf(set)) {
+      if (await files.exists(componentFile(id))) continue;
+      await files.blueprint(join(BLUEPRINTS_ROOT, 'components', `sa-${id}`));
+      added = true;
+    }
+    // Components that are all there already change nothing: not the barrel, the styles nor the packages.
+    if (!added) return;
+    for (const file of [BARREL, STYLES]) await files.edit(file);
+    // The packages the components import are in the project already when it had components before.
+    const manifest = await readFile(join(files.targetDir, PACKAGE_JSON), 'utf8').catch(
+      () => undefined,
+    );
+    if (manifest === undefined || addDependencies(manifest, COMPONENT_PACKAGES) !== manifest) {
+      await files.edit(PACKAGE_JSON);
+    }
+    await planGeneratedReadmes(files, { components: true, styles: true });
   },
 };

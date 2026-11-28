@@ -74,4 +74,12 @@ export const starterSsrProfile: RenderingProfile = {
     }
     await writeEdits(edits);
   },
+
+  async plan(files, architecture) {
+    await files.edit(APP_CONFIG);
+    if (architecture !== 'screaming') return;
+    await files.edit(HOME_TS);
+    await files.edit(HOME_HTML);
+    await files.blueprint(join(BLUEPRINTS_ROOT, 'rendering', 'starter-ssr'));
+  },
 };

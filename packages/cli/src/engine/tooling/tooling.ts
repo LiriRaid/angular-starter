@@ -7,6 +7,7 @@ import { BLUEPRINTS_ROOT, copyBlueprint } from '../blueprint.js';
 import { addDevDependencies, addScripts } from '../edits/package-json.js';
 import { planEdit, writeEdits, type PlannedEdit } from '../edits/planned.js';
 import { pathExists } from '../fs.js';
+import type { FilePlan } from '../plan.js';
 
 const CONFIG_FILE = 'eslint.config.mjs';
 
@@ -80,6 +81,14 @@ export const toolingProfile = {
     }
     await writeEdits([manifest]);
     return found ? { eslint: 'kept', found } : { eslint: 'added' };
+  },
+
+  /** The files `apply` would create and change, recorded in `files` without writing anything. */
+  async plan(files: FilePlan): Promise<void> {
+    if ((await existingEslintSetup(files.targetDir)) === undefined) {
+      await files.blueprint(join(BLUEPRINTS_ROOT, 'tooling'));
+    }
+    await files.edit('package.json');
   },
 };
 
