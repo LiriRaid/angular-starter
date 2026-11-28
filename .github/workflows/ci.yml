@@ -1,0 +1,42 @@
+name: CI
+
+# The same gates as a developer runs locally: typecheck, lint, format and tests.
+on:
+  pull_request:
+  push:
+    branches: [main, development]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Some specs create a Git repository and commit in it.
+      GIT_AUTHOR_NAME: ci
+      GIT_AUTHOR_EMAIL: ci@users.noreply.github.com
+      GIT_COMMITTER_NAME: ci
+      GIT_COMMITTER_EMAIL: ci@users.noreply.github.com
+    steps:
+      - uses: actions/checkout@v4
+
+      # The version of pnpm comes from "packageManager" in package.json.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+      - run: pnpm run lint
+      - run: pnpm run format:check
+      - run: pnpm test
+      - run: pnpm run build

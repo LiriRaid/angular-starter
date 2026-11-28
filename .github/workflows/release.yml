@@ -1,0 +1,63 @@
+name: Release
+
+# Publishes @liriraid/starter-angular to npm when a tag `vX.Y.Z` is pushed. The tag must match the
+# version of packages/cli/package.json. Needs the repository secret NPM_TOKEN (an npm automation
+# token); without it the gates still run and the publish step is skipped.
+on:
+  push:
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    env:
+      NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      GIT_AUTHOR_NAME: ci
+      GIT_AUTHOR_EMAIL: ci@users.noreply.github.com
+      GIT_COMMITTER_NAME: ci
+      GIT_COMMITTER_EMAIL: ci@users.noreply.github.com
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - name: The tag matches the version of the package
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          version="$(node -p "require('./packages/cli/package.json').version")"
+          if [ "$TAG" != "v$version" ]; then
+            echo "::error::The tag $TAG does not match the version $version of packages/cli/package.json"
+            exit 1
+          fi
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm run typecheck
+      - run: pnpm run lint
+      - run: pnpm run format:check
+      - run: pnpm test
+
+      - name: Publish to npm
+        if: ${{ env.NPM_TOKEN != '' }}
+        working-directory: packages/cli
+        env:
+          NODE_AUTH_TOKEN: ${{ env.NPM_TOKEN }}
+        # `prepack` builds the package and syncs the blueprints before the tarball is made.
+        run: npm publish --provenance --access public
+
+      - name: Publish skipped
+        if: ${{ env.NPM_TOKEN == '' }}
+        run: echo "::warning::The secret NPM_TOKEN is not set, so nothing was published."

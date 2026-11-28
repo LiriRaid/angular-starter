@@ -6,8 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-27
+
 ### Added
 
+- The package `@liriraid/starter-angular` is ready for npm: it has its own README (the one npm shows), `publishConfig`
+  with public access and a `prepack` that builds the package and syncs the blueprints so a tarball never leaves
+  without them. `.github/workflows` has `ci.yml` (typecheck, lint, format and tests on every pull request) and
+  `release.yml`, which publishes with provenance when a tag `vX.Y.Z` that matches the version is pushed, using the
+  `NPM_TOKEN` secret of the repository.
 - `--dry-run` of `sa new`, `sa add`, `sa generate` and `sa init` draws a preview of what the command would write as a tree,
   like `tree` does: `+` for the files it creates, `~` for the ones it changes and `-` for the ones it deletes, with a
   line that counts them. The deep folders are one line with their file count (`components/ (84 files)`) and
