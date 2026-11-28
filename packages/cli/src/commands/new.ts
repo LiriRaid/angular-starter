@@ -11,10 +11,11 @@ import { buildNgCommand } from '../engine/angular-cli.js';
 import { ARCHITECTURE_PROFILES } from '../engine/architectures/index.js';
 import { RENDERING_PROFILES } from '../engine/rendering/index.js';
 import { ROUTING_PROFILES } from '../engine/routing/index.js';
-import { runPipeline, type GenerationContext } from '../engine/pipeline.js';
+import { planStages, runPipeline, type GenerationContext } from '../engine/pipeline.js';
 import { NEW_PROJECT_STAGES, validateEnvironment } from '../engine/stages.js';
 import { CliError, UsageError } from '../errors.js';
 import { println, type CliIo } from '../io.js';
+import { printDryRun } from '../ui/dry-run.js';
 import { formatRows, createStyler } from '../ui/format.js';
 import { validateProjectName } from '../validation/project-name.js';
 import { runWizard } from '../wizard/wizard.js';
@@ -271,6 +272,15 @@ async function runDryRun(context: GenerationContext): Promise<void> {
     ...(options.git ? ['Initialize a Git repository with an initial commit'] : []),
   ];
   steps.forEach((step, index) => println(io.stdout, `  ${index + 1}. ${step}`));
+
+  // The structure the project would have, worked out from the same steps without writing anything.
+  println(io.stdout);
+  printDryRun(io, {
+    title: 'What it would write:',
+    root: name,
+    entries: await planStages(NEW_PROJECT_STAGES, context),
+    verbose: context.verbose,
+  });
 }
 
 function printSuccess(context: GenerationContext): void {

@@ -66,7 +66,7 @@ pnpm install
 pnpm build
 node packages/cli/dist/bin.js new my-app            # interactive wizard
 node packages/cli/dist/bin.js new my-app --defaults # default set, no prompts
-node packages/cli/dist/bin.js new my-app --dry-run  # show the plan, create nothing
+node packages/cli/dist/bin.js new my-app --dry-run  # show the files it would create as a tree, create nothing
 node packages/cli/dist/bin.js new my-app --style scss --rendering ssr
 node packages/cli/dist/bin.js new my-app --defaults --architecture angular-default --routing angular --components none
 ```

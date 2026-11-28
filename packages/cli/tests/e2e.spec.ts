@@ -3,8 +3,12 @@ import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stripVTControlCharacters } from 'node:util';
 import { execa } from 'execa';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import type { StarterOptions } from '../src/config/schema.js';
+import { buildNgCommand } from '../src/engine/angular-cli.js';
+import { skeletonFiles } from '../src/engine/skeleton.js';
 
 /**
  * Runs the compiled CLI against the real Angular CLI (needs network and a prior `pnpm build`).
@@ -132,6 +136,37 @@ ${result.stderr}`;
 
   const read = (project: string, file: string): Promise<string> =>
     readFile(join(project, file), 'utf8');
+
+  it(
+    'lists in --dry-run the same files the Angular CLI writes in ng new (skeletonFiles)',
+    async () => {
+      const cases: Pick<StarterOptions, 'style' | 'tailwind' | 'rendering' | 'packageManager'>[] = [
+        { style: 'css', tailwind: true, rendering: 'csr', packageManager: 'pnpm' },
+        { style: 'scss', tailwind: false, rendering: 'starter-ssr', packageManager: 'npm' },
+      ];
+      for (const options of cases) {
+        const { command, args } = buildNgCommand('skeleton-check', {
+          ...options,
+          prefix: 'app',
+        } as StarterOptions);
+        // The Angular CLI's own --dry-run lists what it would write and writes nothing.
+        const result = await execa(command, [...args, '--dry-run'], {
+          cwd,
+          reject: false,
+          env: CHILD_ENV,
+          extendEnv: true,
+        });
+        expect(result.exitCode, `${result.stdout}\n${result.stderr}`).toBe(0);
+        const created = stripVTControlCharacters(result.stdout)
+          .split('\n')
+          .map((line) => /^CREATE skeleton-check\/(\S+)/.exec(line)?.[1])
+          .filter((path): path is string => path !== undefined)
+          .sort();
+        expect(created, JSON.stringify(options)).toEqual([...skeletonFiles(options)].sort());
+      }
+    },
+    TIMEOUT_MS,
+  );
 
   it(
     'creates a CSS + Tailwind application with the default options',

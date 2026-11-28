@@ -2,6 +2,7 @@ import { readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, relative, sep } from 'node:path';
 import { COMPONENT_DESCRIPTIONS } from './components/descriptions.js';
 import { replaceGeneratedBlock } from './edits/readme.js';
+import type { FilePlan } from './plan.js';
 
 const COMPONENTS_README = 'src/app/shared/components/README.md';
 const COMPONENTS_FOLDER = 'src/app/shared/components';
@@ -64,6 +65,23 @@ async function refresh(targetDir: string, readme: string, lines: string[]): Prom
  * stylesheets) from the files that are really there. A README that is missing, or whose block the
  * developer removed, is left as it is.
  */
+/**
+ * The READMEs `refreshGeneratedReadmes` would rewrite, recorded in `files` without writing anything: the
+ * one of the components when a step adds components, the one of the stylesheets when it adds stylesheets.
+ * A README the project does not have is left alone, as it is when they are refreshed.
+ */
+export async function planGeneratedReadmes(
+  files: FilePlan,
+  changed: { components?: boolean; styles?: boolean },
+): Promise<void> {
+  for (const [readme, wanted] of [
+    [COMPONENTS_README, changed.components],
+    [STYLES_README, changed.styles],
+  ] as const) {
+    if (wanted && (await files.exists(readme))) await files.edit(readme);
+  }
+}
+
 export async function refreshGeneratedReadmes(targetDir: string): Promise<void> {
   await refresh(targetDir, COMPONENTS_README, await componentLines(targetDir));
   await refresh(targetDir, STYLES_README, await styleLines(targetDir));

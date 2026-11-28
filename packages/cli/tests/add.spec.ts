@@ -229,6 +229,10 @@ describe('sa add', () => {
       expect(result.code).toBe(0);
       expect(result.out).toContain('Dry run');
       expect(result.out).toContain('Adding the application shell');
+      // The files it would write, drawn as a tree: `+` the ones it creates, `~` the ones it adapts.
+      expect(result.out).toContain('app-shell/');
+      expect(result.out).toContain('~ app.routes.ts');
+      expect(result.out).toMatch(/Would create \d+ files and update \d+ files/);
       expect(await exists(join(project, 'src/app/features/app-shell/layout'))).toBe(false);
     });
   });
@@ -288,9 +292,13 @@ describe('sa add', () => {
 
     it('shows the steps with --dry-run and changes nothing', async () => {
       const project = await createStarterProject(cwd);
-      const result = await add(project, ['presence', '--dry-run']);
+      // --verbose draws every file; without it core/presence would be one line with its count.
+      const result = await add(project, ['presence', '--dry-run', '--verbose']);
       expect(result.code).toBe(0);
       expect(result.out).toContain('Adding presence');
+      expect(result.out).toContain('+ presence.service.ts');
+      expect(result.out).toContain('~ app.config.ts');
+      expect(result.out).toContain('~ starter-angular.config.json');
       expect(await exists(join(project, 'src/app/core/presence'))).toBe(false);
     });
   });

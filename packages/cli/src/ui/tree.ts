@@ -1,8 +1,8 @@
 import { createStyler } from './format.js';
 
-export type TreeAction = 'create' | 'update';
+export type TreeAction = 'create' | 'update' | 'remove';
 
-/** A project file (relative path, any separator) a command would create or change. */
+/** A project file (relative path, any separator) a command would create, change or delete. */
 export interface TreeEntry {
   path: string;
   action: TreeAction;
@@ -18,7 +18,7 @@ export interface TreeOptions {
   maxDepth?: number;
 }
 
-const DEFAULT_MAX_DEPTH = 4;
+const DEFAULT_MAX_DEPTH = 3;
 
 interface Folder {
   folders: Map<string, Folder>;
@@ -30,6 +30,7 @@ type Child = { name: string; folder: Folder } | { name: string; action: TreeActi
 interface Counts {
   create: number;
   update: number;
+  remove: number;
 }
 
 const newFolder = (): Folder => ({ folders: new Map(), files: new Map() });
@@ -65,29 +66,34 @@ function buildFolders(entries: Map<string, TreeAction>): Folder {
 }
 
 function countIn(folder: Folder): Counts {
-  const counts: Counts = { create: 0, update: 0 };
+  const counts: Counts = { create: 0, update: 0, remove: 0 };
   for (const action of folder.files.values()) counts[action] += 1;
   for (const child of folder.folders.values()) {
     const inner = countIn(child);
     counts.create += inner.create;
     counts.update += inner.update;
+    counts.remove += inner.remove;
   }
   return counts;
 }
 
 const plural = (count: number, word: string): string => `${count} ${word}${count === 1 ? '' : 's'}`;
 
-/** `(2 files)` for a folder of new files; `(2 new, 1 updated)` when it holds changes to existing ones. */
-function describeCounts({ create, update }: Counts): string {
-  if (update === 0) return `(${plural(create, 'file')})`;
-  if (create === 0) return `(${update} updated)`;
-  return `(${create} new, ${update} updated)`;
+/** `(2 files)` for a folder of new files; `(2 new, 1 updated)` when it holds other changes too. */
+function describeCounts({ create, update, remove }: Counts): string {
+  if (update === 0 && remove === 0) return `(${plural(create, 'file')})`;
+  const parts = [
+    ...(create > 0 ? [`${create} new`] : []),
+    ...(update > 0 ? [`${update} updated`] : []),
+    ...(remove > 0 ? [`${remove} removed`] : []),
+  ];
+  return `(${parts.join(', ')})`;
 }
 
 const byName = (left: string, right: string): number => left.localeCompare(right, 'en');
 
 /**
- * Draws the files a command would create (`+`) or change (`~`) as a tree, like `tree` does. Folders come
+ * Draws the files a command would create (`+`), change (`~`) or delete (`-`) as a tree, like `tree` does. Folders come
  * before files, each group sorted by name. Unless verbose, folders below `maxDepth` are one line with
  * how many files they hold, so a whole project still reads at a glance.
  */
@@ -100,7 +106,11 @@ export function renderTree(entries: readonly TreeEntry[], options: TreeOptions):
   if (options.root !== undefined) lines.push(style.bold(`${options.root}/`));
 
   const marker = (action: TreeAction): string =>
-    action === 'create' ? style.green('+') : style.yellow('~');
+    action === 'create'
+      ? style.green('+')
+      : action === 'update'
+        ? style.yellow('~')
+        : style.red('-');
 
   const draw = (folder: Folder, prefix: string, depth: number): void => {
     const children: Child[] = [
@@ -138,6 +148,9 @@ export function summarizeEntries(entries: readonly TreeEntry[]): string {
   const parts = [
     ...(counts.create > 0 ? [`create ${plural(counts.create, 'file')}`] : []),
     ...(counts.update > 0 ? [`update ${plural(counts.update, 'file')}`] : []),
+    ...(counts.remove > 0 ? [`remove ${plural(counts.remove, 'file')}`] : []),
   ];
-  return parts.length === 0 ? 'Would change nothing.' : `Would ${parts.join(' and ')}.`;
+  if (parts.length === 0) return 'Would change nothing.';
+  const last = parts.pop();
+  return `Would ${parts.length > 0 ? `${parts.join(', ')} and ` : ''}${last}.`;
 }

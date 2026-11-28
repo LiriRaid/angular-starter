@@ -32,5 +32,11 @@ export function printDryRun(io: CliIo, preview: DryRunPreview): void {
   }
   println(io.stdout);
   println(io.stdout, summarizeEntries(preview.entries));
-  println(io.stdout, style.dim(`${style.green('+')} created   ${style.yellow('~')} updated`));
+  const used = new Set(preview.entries.map((entry) => entry.action));
+  const legend = [
+    ...(used.has('create') ? [`${style.green('+')} created`] : []),
+    ...(used.has('update') ? [`${style.yellow('~')} updated`] : []),
+    ...(used.has('remove') ? [`${style.red('-')} removed`] : []),
+  ];
+  println(io.stdout, style.dim(legend.join('   ')));
 }

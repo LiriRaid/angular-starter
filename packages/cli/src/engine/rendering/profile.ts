@@ -1,4 +1,5 @@
 import type { ArchitectureProject } from '../architectures/profile.js';
+import type { FilePlan } from '../plan.js';
 
 export interface RenderingProject extends ArchitectureProject {
   /** The architecture that was applied; some pieces only exist on some architectures. */
@@ -14,4 +15,6 @@ export interface RenderingProfile {
   /** Project files (forward slashes) that must exist once the profile has been applied. */
   requiredFilesFor(architecture: string): readonly string[];
   apply(project: RenderingProject): Promise<void>;
+  /** The files `apply` would create and change, recorded in `files` without writing anything. */
+  plan(files: FilePlan, architecture: string): Promise<void>;
 }

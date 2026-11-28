@@ -15,7 +15,7 @@ import { resolveOptions } from '../config/resolve.js';
 import { installedComponentIds } from '../engine/components/installed.js';
 import type { StarterOptions } from '../config/schema.js';
 import type { ProgramDeps } from '../deps.js';
-import { runPipeline, type GenerationContext, type Stage } from '../engine/pipeline.js';
+import { planStages, runPipeline, type GenerationContext, type Stage } from '../engine/pipeline.js';
 import { toolingProfile } from '../engine/tooling/tooling.js';
 import { uiSystemProfile } from '../engine/ui-system/ui-system.js';
 import {
@@ -50,6 +50,7 @@ import {
   unchosenOf,
   type AddStep,
 } from './addable.js';
+import { printDryRun } from '../ui/dry-run.js';
 import { createStyler } from '../ui/format.js';
 
 export { ADDABLE, addableValues };
@@ -180,6 +181,13 @@ export async function addCommand(
       .filter((stage) => !stage.enabled || stage.enabled(contextFor(io, deps, project, options)))
       .forEach((stage, index) => println(io.stdout, `  ${index + 1}. ${stage.title}`));
     println(io.stdout, `  Adds: ${label?.label ?? choice}`);
+    println(io.stdout);
+    printDryRun(io, {
+      title: 'What it would write:',
+      root: project.name,
+      entries: await planStages(stages, contextFor(io, deps, project, options)),
+      verbose: flags.verbose,
+    });
     return;
   }
 
@@ -240,6 +248,13 @@ async function addTooling(io: CliIo, deps: ProgramDeps, flags: AddFlags): Promis
       .filter((stage) => !stage.enabled || stage.enabled(context))
       .forEach((stage, index) => println(io.stdout, `  ${index + 1}. ${stage.title}`));
     println(io.stdout, '  Adds: lint and format (ESLint, Prettier scripts)');
+    println(io.stdout);
+    printDryRun(io, {
+      title: 'What it would write:',
+      root: project.name,
+      entries: await planStages(stages, context),
+      verbose: flags.verbose,
+    });
     return;
   }
 

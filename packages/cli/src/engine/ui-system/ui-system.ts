@@ -12,6 +12,7 @@ import { componentsProfile } from '../components/components.js';
 import { installedComponentIds } from '../components/installed.js';
 import { componentsOfIds } from '../components/manifest.js';
 import { pathExists } from '../fs.js';
+import type { FilePlan } from '../plan.js';
 import { planEdit, writeEdits } from '../edits/planned.js';
 import { addUiSystemToUiTabClass, addUiSystemToUiTabTemplate } from '../edits/ui-system.js';
 import { selectRegions } from './regions.js';
@@ -112,6 +113,18 @@ export const uiSystemProfile = {
     });
     if (base.length > 0) await componentsProfile.apply({ targetDir, name, prefix, set: base });
     await writeEdits(planned);
+  },
+
+  /** The files `apply` would create and change, recorded in `files` without writing anything. */
+  async plan(files: FilePlan): Promise<void> {
+    await files.edit(`${TAB}.html`);
+    await files.edit(`${TAB}.ts`);
+    await files.blueprint(BLUEPRINT);
+    const base: string[] = [];
+    for (const id of UI_SYSTEM_COMPONENT_IDS) {
+      if (!(await files.exists(componentsProfile.componentFile(id)))) base.push(id);
+    }
+    if (base.length > 0) await componentsProfile.plan(files, base);
   },
 
   /**

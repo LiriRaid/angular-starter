@@ -82,6 +82,26 @@ describe('renderTree', () => {
     expect(lines).toEqual(['└── + a.ts']);
   });
 
+  it('marks what it removes with a minus and counts it in a collapsed folder', () => {
+    const lines = renderTree(
+      [{ path: 'src/app/app.html', action: 'remove' }, create('src/main.ts')],
+      {
+        color: false,
+      },
+    );
+    expect(lines).toEqual([
+      '└── src/',
+      '    ├── app/',
+      '    │   └── - app.html',
+      '    └── + main.ts',
+    ]);
+    const deep = renderTree(
+      [{ path: 'a/b/c/d/e/old.ts', action: 'remove' }, create('a/b/c/d/e/new.ts')],
+      { color: false, maxDepth: 4 },
+    );
+    expect(deep.at(-1)).toContain('e/ (1 new, 1 removed)');
+  });
+
   it('draws nothing when there is nothing', () => {
     expect(renderTree([], { root: 'demo', color: false })).toEqual([]);
   });
@@ -90,6 +110,22 @@ describe('renderTree', () => {
     const colored = renderTree([create('a.ts'), update('b.ts')], { color: true }).join('\n');
     expect(colored).toContain('\u001b[');
     expect(renderTree([create('a.ts')], { color: false }).join('\n')).not.toContain('\u001b[');
+  });
+});
+
+describe('renderTree depth', () => {
+  it('shows three levels of folders by default and collapses what is deeper', () => {
+    const lines = renderTree(
+      [create('src/app/core/theme/theme.ts'), create('src/app/core/index.ts')],
+      { color: false },
+    );
+    expect(lines).toEqual([
+      '└── src/',
+      '    └── app/',
+      '        └── core/',
+      '            ├── theme/ (1 file)',
+      '            └── + index.ts',
+    ]);
   });
 });
 
@@ -104,5 +140,11 @@ describe('summarizeEntries', () => {
     expect(summarizeEntries([create('a')])).toBe('Would create 1 file.');
     expect(summarizeEntries([update('a'), update('b')])).toBe('Would update 2 files.');
     expect(summarizeEntries([])).toBe('Would change nothing.');
+  });
+
+  it('joins three kinds of change with commas and an and', () => {
+    expect(summarizeEntries([create('a'), update('b'), { path: 'c', action: 'remove' }])).toBe(
+      'Would create 1 file, update 1 file and remove 1 file.',
+    );
   });
 });
