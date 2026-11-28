@@ -433,6 +433,42 @@ describe('sa new (non-interactive)', () => {
     expect(await exists(join(cwd, 'my-app'))).toBe(false);
   });
 
+  it('draws the files it would create as a tree, without writing any', async () => {
+    const fake = createFakeIo({ cwd });
+    const code = await run(
+      ['new', 'my-app', '--defaults', '--architecture', 'screaming', '--dry-run'],
+      fake.io,
+      { run: createFakeRunner().run },
+    );
+    expect(code).toBe(0);
+    const out = fake.out();
+    expect(out).toContain('my-app/');
+    // What `ng new` writes, what the starter adds, and the file that records the choices.
+    expect(out).toContain('+ angular.json');
+    expect(out).toContain('+ starter-angular.config.json');
+    expect(out).toMatch(/Would create \d+ files/);
+    // The welcome page of `ng new` is replaced by the architecture's home: it is never in the project.
+    expect(out).not.toMatch(/\+ app\.html/);
+    expect(await exists(join(cwd, 'my-app'))).toBe(false);
+  });
+
+  it('collapses the deep folders of the tree unless --verbose asks for every file', async () => {
+    const lines = async (extra: string[]): Promise<string[]> => {
+      const fake = createFakeIo({ cwd });
+      const code = await run(
+        ['new', 'my-app', '--defaults', '--architecture', 'screaming', '--dry-run', ...extra],
+        fake.io,
+        { run: createFakeRunner().run },
+      );
+      expect(code).toBe(0);
+      return fake.out().split('\n');
+    };
+    const summary = await lines([]);
+    const verbose = await lines(['--verbose']);
+    expect(summary.some((line) => /\(\d+ files?\)/.test(line))).toBe(true);
+    expect(verbose.length).toBeGreaterThan(summary.length);
+  });
+
   it('mentions the architecture profile in the --dry-run plan', async () => {
     const fake = createFakeIo({ cwd });
     const code = await run(

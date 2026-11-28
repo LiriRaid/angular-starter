@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import { ANGULAR_CLI_VERSION } from '../compat.js';
 import type { StarterOptions } from '../config/schema.js';
 import {
@@ -11,6 +11,7 @@ import {
 import { detectProject, findWorkspace } from '../engine/detect.js';
 import { UsageError } from '../errors.js';
 import { println, type CliIo } from '../io.js';
+import { printDryRun } from '../ui/dry-run.js';
 import { createStyler, formatRows } from '../ui/format.js';
 import { CLI_VERSION } from '../version.js';
 
@@ -43,10 +44,7 @@ export async function initCommand(io: CliIo, flags: InitFlags): Promise<void> {
   const options = flags.force ? await keepRecorded(file, detected.options) : detected.options;
   const notes = detected.notes;
   const style = createStyler(io.color);
-  println(
-    io.stdout,
-    style.bold(flags.dryRun ? 'Dry run: this is what it found.' : 'Found in the project:'),
-  );
+  println(io.stdout, style.bold('Found in the project:'));
   for (const line of formatRows(
     Object.entries(options)
       .filter(([key]) => key !== 'componentList' && key !== 'git' && key !== 'install')
@@ -58,7 +56,15 @@ export async function initCommand(io: CliIo, flags: InitFlags): Promise<void> {
     println(io.stdout, `  components: ${options.componentList.join(', ')}`);
   for (const note of notes) println(io.stdout, style.dim(`  Note: ${note}`));
 
-  if (flags.dryRun) return;
+  if (flags.dryRun) {
+    println(io.stdout);
+    printDryRun(io, {
+      title: 'Dry run: nothing was written. It would write:',
+      root: basename(root),
+      entries: [{ path: PROJECT_CONFIG_FILE, action: existsSync(file) ? 'update' : 'create' }],
+    });
+    return;
+  }
   const manifest = await readManifest(root);
   const installed = (
     manifest.devDependencies?.['@angular/cli'] ??

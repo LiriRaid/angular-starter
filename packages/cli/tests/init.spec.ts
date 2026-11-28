@@ -102,6 +102,9 @@ describe('sa init', () => {
     const { code, out } = await init(root, '--dry-run');
     expect(code).toBe(0);
     expect(out).toContain('Dry run');
+    // What it found, and the one file it would write, drawn like the other commands do.
+    expect(out).toContain(`+ ${CONFIG}`);
+    expect(out).toContain('Would create 1 file.');
     expect(existsSync(join(root, CONFIG))).toBe(false);
   });
 

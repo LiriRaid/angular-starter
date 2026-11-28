@@ -5,6 +5,7 @@ import { UsageError } from '../errors.js';
 import { planEdit, writeEdits } from './edits/planned.js';
 import { addPathAliases } from './edits/tsconfig.js';
 import { pathExists } from './fs.js';
+import type { FilePlan } from './plan.js';
 
 const TSCONFIG = 'tsconfig.json';
 const BARREL = 'src/app/shared/components/index.ts';
@@ -17,17 +18,12 @@ const ALIASES: Readonly<Record<string, string[]>> = {
 
 const normalize = (target: string): string => target.replace(/^\.\//, '').replace(/\/$/, '');
 
-/**
- * What the native components need in a project that has no architecture of the starter (ADR-0019): the
- * `@core` and `@shared` aliases and the barrel of `shared/components`. An alias the project already
- * has is kept when it points where the components expect it, and stops the stage when it does not; a
- * barrel that exists is left as it is. Nothing the developer has is moved or replaced.
- */
-export async function applySharedFoundation(
+/** What `applySharedFoundation` has to add to `tsconfig.json`; an alias that points elsewhere stops it. */
+async function missingAliasesOf(
   targetDir: string,
-  aliases: Readonly<Record<string, string[]>> = ALIASES,
-  needsThem = 'the components',
-): Promise<string[]> {
+  aliases: Readonly<Record<string, string[]>>,
+  needsThem: string,
+): Promise<{ missing: string[]; toWrite: Record<string, string[]> }> {
   const own = await readTsconfig(targetDir, TSCONFIG);
   const inherited = await inheritedPaths(targetDir, own);
   const ownPaths = pathsOf(own);
@@ -57,9 +53,23 @@ export async function applySharedFoundation(
       if (!(alias in ownPaths) && Array.isArray(targets)) toWrite[alias] = targets as string[];
     }
   }
+  return { missing: Object.keys(missing), toWrite };
+}
 
+/**
+ * What the native components need in a project that has no architecture of the starter (ADR-0019): the
+ * `@core` and `@shared` aliases and the barrel of `shared/components`. An alias the project already
+ * has is kept when it points where the components expect it, and stops the stage when it does not; a
+ * barrel that exists is left as it is. Nothing the developer has is moved or replaced.
+ */
+export async function applySharedFoundation(
+  targetDir: string,
+  aliases: Readonly<Record<string, string[]>> = ALIASES,
+  needsThem = 'the components',
+): Promise<string[]> {
+  const { missing, toWrite } = await missingAliasesOf(targetDir, aliases, needsThem);
   const planned =
-    Object.keys(missing).length === 0
+    missing.length === 0
       ? []
       : [await planEdit(targetDir, TSCONFIG, (text) => addPathAliases(text, toWrite))];
   await writeEdits(planned);
@@ -68,7 +78,19 @@ export async function applySharedFoundation(
     await mkdir(dirname(join(targetDir, BARREL)), { recursive: true });
     await writeFile(join(targetDir, BARREL), 'export {};\n');
   }
-  return Object.keys(missing);
+  return missing;
+}
+
+/** The files `applySharedFoundation` would change or create, recorded in `files` without writing anything. */
+export async function planSharedFoundation(
+  files: FilePlan,
+  aliases: Readonly<Record<string, string[]>> = ALIASES,
+  needsThem = 'the components',
+): Promise<string[]> {
+  const { missing } = await missingAliasesOf(files.targetDir, aliases, needsThem);
+  if (missing.length > 0) await files.edit(TSCONFIG);
+  if (!(await files.exists(BARREL))) await files.write(BARREL);
+  return missing;
 }
 
 type Tsconfig = { extends?: unknown; compilerOptions?: { paths?: Record<string, unknown> } };

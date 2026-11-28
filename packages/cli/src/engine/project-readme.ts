@@ -138,6 +138,12 @@ async function projectBlock(
   ].join(eol);
 }
 
+/** Does `refreshProjectReadme` rewrite this README? Only the one `ng new` writes or one that has the block. */
+export function rewritesProjectReadme(current: string): boolean {
+  const start = current.indexOf(PROJECT_START);
+  return isAngularReadme(current) || (start >= 0 && current.indexOf(PROJECT_END) >= start);
+}
+
 export interface ProjectReadme {
   targetDir: string;
   /** The project name, as typed by the user. */

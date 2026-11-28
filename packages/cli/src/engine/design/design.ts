@@ -5,7 +5,8 @@ import { planEdit, writeEdits } from '../edits/planned.js';
 import { addInterFont } from '../edits/html.js';
 import { addDesignStyles } from '../edits/styles.js';
 import { addProvider } from '../edits/typescript.js';
-import { refreshGeneratedReadmes } from '../readme.js';
+import type { FilePlan } from '../plan.js';
+import { planGeneratedReadmes, refreshGeneratedReadmes } from '../readme.js';
 
 const ANGULAR_JSON = 'angular.json';
 const TEST_SETUP = 'src/test-setup.ts';
@@ -71,5 +72,12 @@ export const designProfile = {
     });
     await writeEdits(planned);
     await refreshGeneratedReadmes(targetDir);
+  },
+
+  /** The files `apply` would create and change, recorded in `files` without writing anything. */
+  async plan(files: FilePlan): Promise<void> {
+    await files.blueprint(join(BLUEPRINTS_ROOT, 'design'));
+    for (const file of [STYLES, INDEX_HTML, ANGULAR_JSON, APP_CONFIG]) await files.edit(file);
+    await planGeneratedReadmes(files, { styles: true });
   },
 };

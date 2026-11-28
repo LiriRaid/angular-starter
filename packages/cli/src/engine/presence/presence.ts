@@ -6,7 +6,8 @@ import { addFeatureStyles } from '../edits/styles.js';
 import { addProvider } from '../edits/typescript.js';
 import { addWelcomeCard } from '../edits/welcome.js';
 import { pathExists } from '../fs.js';
-import { refreshGeneratedReadmes } from '../readme.js';
+import type { FilePlan } from '../plan.js';
+import { planGeneratedReadmes, refreshGeneratedReadmes } from '../readme.js';
 
 const APP_CONFIG = 'src/app/app.config.ts';
 const STYLES = 'src/styles.css';
@@ -75,5 +76,15 @@ export const presenceProfile = {
     });
     await writeEdits(planned);
     await refreshGeneratedReadmes(targetDir);
+  },
+
+  /** The files `apply` would create and change, recorded in `files` without writing anything. */
+  async plan(files: FilePlan): Promise<void> {
+    for (const file of [APP_CONFIG, STYLES, `${MENU}/user-menu.html`, `${MENU}/user-menu.ts`]) {
+      await files.edit(file);
+    }
+    if (await files.exists(WELCOME_DATA)) await files.edit(WELCOME_DATA);
+    await files.blueprint(join(BLUEPRINTS_ROOT, 'presence'));
+    await planGeneratedReadmes(files, { styles: true });
   },
 };

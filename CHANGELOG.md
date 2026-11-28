@@ -8,6 +8,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ### Added
 
+- `--dry-run` of `sa new`, `sa add`, `sa generate` and `sa init` draws a preview of what the command would write as a tree,
+  like `tree` does: `+` for the files it creates, `~` for the ones it changes and `-` for the ones it deletes, with a
+  line that counts them. The deep folders are one line with their file count (`components/ (84 files)`) and
+  `--verbose` draws every file. Nothing is written, not even in a temporary folder: each step of the command works
+  out its files from its blueprints (`plan` next to `apply`), and the tests compare the tree with what the command
+  really writes so it cannot drift.
 - The layout of the app shell is a design preference that an administrator changes in production (ADR-0029 and plan
   0026). In `Preferencias de Diseño` (Apariencia) the cards of the layouts now switch the shell at once, with signals
   and no reload, and _Guardar cambios_ keeps the design for the whole platform: the users who are online get an alert

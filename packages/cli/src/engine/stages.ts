@@ -25,8 +25,9 @@ import { uiSystemProfile } from './ui-system/ui-system.js';
 import { buildNgAddSsrCommand, buildNgCommand } from './angular-cli.js';
 import { addDependencies } from './edits/package-json.js';
 import { pathExists } from './fs.js';
-import { refreshProjectReadme } from './project-readme.js';
-import { applySharedFoundation } from './shared-foundation.js';
+import { refreshProjectReadme, rewritesProjectReadme } from './project-readme.js';
+import { skeletonFiles, ssrFiles } from './skeleton.js';
+import { applySharedFoundation, planSharedFoundation } from './shared-foundation.js';
 import { refusalOf } from './process.js';
 import type { GenerationContext, Stage } from './pipeline.js';
 import { RENDERING_PROFILES } from './rendering/index.js';
@@ -36,6 +37,8 @@ const PROBE_TIMEOUT_MS = 15_000;
 const WORKSPACE_TIMEOUT_MS = 10 * 60_000;
 const INSTALL_TIMEOUT_MS = 15 * 60_000;
 const FORMAT_TIMEOUT_MS = 5 * 60_000;
+/** The file each package manager records the versions it installed in. */
+const LOCKFILES = { npm: 'package-lock.json', pnpm: 'pnpm-lock.yaml', yarn: 'yarn.lock' } as const;
 const INITIAL_COMMIT_MESSAGE = 'chore: initial commit from Starter Angular';
 
 export const validateEnvironment: Stage = {
@@ -95,6 +98,9 @@ export const createWorkspace: Stage = {
       throw new RuntimeError(`The Angular CLI could not create the workspace: ${describe(error)}`);
     }
   },
+  async plan({ options }, files) {
+    for (const file of skeletonFiles(options)) await files.write(file);
+  },
 };
 
 export const applyArchitecture: Stage = {
@@ -107,6 +113,9 @@ export const applyArchitecture: Stage = {
       name,
       prefix: options.prefix,
     });
+  },
+  async plan({ options }, files) {
+    await ARCHITECTURE_PROFILES[options.architecture]?.plan(files);
   },
 };
 
@@ -136,6 +145,9 @@ export const applyArchitectureToProject: Stage = {
       'Next: "sa generate feature <name>" creates a feature; "sa add routing starter" and "sa add app-shell" add the navigation and the shell.',
     );
   },
+  async plan({ options }, files) {
+    await ARCHITECTURE_PROFILES[options.architecture]?.planAdoption(files);
+  },
 };
 
 export const applyRouting: Stage = {
@@ -144,6 +156,9 @@ export const applyRouting: Stage = {
   enabled: ({ options }) => ROUTING_PROFILES[options.routing] !== undefined,
   async run({ name, options, targetDir }) {
     await ROUTING_PROFILES[options.routing]?.apply({ targetDir, name, prefix: options.prefix });
+  },
+  async plan({ options }, files) {
+    await ROUTING_PROFILES[options.routing]?.plan(files);
   },
 };
 
@@ -163,6 +178,11 @@ export const addAngularSsr: Stage = {
       throw new RuntimeError(`ng add @angular/ssr failed: ${describe(error)}`);
     }
   },
+  async plan(_context, files) {
+    const { created, changed } = ssrFiles();
+    for (const file of created) await files.write(file);
+    for (const file of changed) await files.edit(file);
+  },
 };
 
 export const applyRendering: Stage = {
@@ -177,6 +197,9 @@ export const applyRendering: Stage = {
       architecture: options.architecture,
     });
   },
+  async plan({ options }, files) {
+    await RENDERING_PROFILES[options.rendering]?.plan(files, options.architecture);
+  },
 };
 
 export const applySharedFolders: Stage = {
@@ -188,6 +211,9 @@ export const applySharedFolders: Stage = {
   async run({ targetDir }) {
     await applySharedFoundation(targetDir);
   },
+  async plan(_context, files) {
+    await planSharedFoundation(files);
+  },
 };
 
 export const applyDesign: Stage = {
@@ -196,6 +222,9 @@ export const applyDesign: Stage = {
   enabled: ({ options }) => options.components !== 'none' || options.appShell === 'starter',
   async run({ name, options, targetDir }) {
     await designProfile.apply({ targetDir, name, prefix: options.prefix });
+  },
+  async plan(_context, files) {
+    await designProfile.plan(files);
   },
 };
 
@@ -211,6 +240,9 @@ export const applyComponents: Stage = {
       set: componentSetOf(options),
     });
   },
+  async plan({ options }, files) {
+    await componentsProfile.plan(files, componentSetOf(options));
+  },
 };
 
 export const applyAppShell: Stage = {
@@ -219,6 +251,9 @@ export const applyAppShell: Stage = {
   enabled: ({ options }) => options.appShell === 'starter',
   async run({ name, options, targetDir }) {
     await appShellProfile.apply({ targetDir, name, prefix: options.prefix });
+  },
+  async plan({ options }, files) {
+    await appShellProfile.plan(files, options.prefix);
   },
 };
 
@@ -229,6 +264,9 @@ export const applyPresence: Stage = {
   async run({ name, options, targetDir }) {
     await presenceProfile.apply({ targetDir, name, prefix: options.prefix });
   },
+  async plan(_context, files) {
+    await presenceProfile.plan(files);
+  },
 };
 
 export const applyUiSystem: Stage = {
@@ -237,6 +275,9 @@ export const applyUiSystem: Stage = {
   enabled: ({ options }) => options.uiSystem === 'starter',
   async run({ name, options, targetDir }) {
     await uiSystemProfile.apply({ targetDir, name, prefix: options.prefix });
+  },
+  async plan(_context, files) {
+    await uiSystemProfile.plan(files);
   },
 };
 
@@ -275,6 +316,9 @@ export const addIconLibrary: Stage = {
     });
     await writeFile(manifest, updated);
   },
+  async plan(_context, files) {
+    await files.edit('package.json');
+  },
 };
 
 /**
@@ -304,6 +348,9 @@ export const applyTooling: Stage = {
           : `Run "${manager} install" to install the new packages.`,
       );
     }
+  },
+  async plan(_context, files) {
+    await toolingProfile.plan(files);
   },
 };
 
@@ -341,6 +388,12 @@ export const writeProjectReadme: Stage = {
   async run({ name, options, targetDir }) {
     await refreshProjectReadme({ targetDir, name, options });
   },
+  async plan({ targetDir }, files) {
+    if (!(await files.exists('README.md'))) return;
+    // The one `ng new` writes is a planned file; a README of the project is rewritten only when it is the starter's.
+    const current = await readFile(join(targetDir, 'README.md'), 'utf8').catch(() => undefined);
+    if (current === undefined || rewritesProjectReadme(current)) await files.edit('README.md');
+  },
 };
 
 export const writeStarterConfig: Stage = {
@@ -352,6 +405,9 @@ export const writeStarterConfig: Stage = {
       angularCli: ANGULAR_CLI_VERSION,
     });
     await writeFile(join(targetDir, PROJECT_CONFIG_FILE), serializeProjectConfig(config));
+  },
+  async plan(_context, files) {
+    await files.write(PROJECT_CONFIG_FILE);
   },
 };
 
@@ -385,6 +441,10 @@ export const installDependencies: Stage = {
         `The project was created. Run "${options.packageManager} install" inside it to try again.`,
       );
     }
+  },
+  async plan({ options }, files) {
+    // The install changes the lockfile when a step changed what the project depends on.
+    if (files.wasEdited('package.json')) await files.write(LOCKFILES[options.packageManager]);
   },
 };
 

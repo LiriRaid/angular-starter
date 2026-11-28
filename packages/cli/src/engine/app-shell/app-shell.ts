@@ -7,7 +7,8 @@ import { planEdit, writeEdits, type PlannedEdit } from '../edits/planned.js';
 import { addFeatureStyles } from '../edits/styles.js';
 import { addNavigationItem, addProvider, addRoutes, type RouteSpec } from '../edits/typescript.js';
 import { pathExists } from '../fs.js';
-import { refreshGeneratedReadmes } from '../readme.js';
+import type { FilePlan } from '../plan.js';
+import { planGeneratedReadmes, refreshGeneratedReadmes } from '../readme.js';
 
 const APP = 'src/app/app.ts';
 const APP_CONFIG = 'src/app/app.config.ts';
@@ -120,6 +121,15 @@ export const appShellProfile = {
     await applyWelcomeHome({ targetDir, name, prefix });
     await refreshGeneratedReadmes(targetDir);
   },
+
+  /** The files `apply` would create and change, recorded in `files` without writing anything. */
+  async plan(files: FilePlan, prefix: string): Promise<void> {
+    for (const file of [STYLES, APP, APP_CONFIG, APP_ROUTES, TREE]) await files.edit(file);
+    await files.blueprint(join(BLUEPRINTS_ROOT, 'app-shell'));
+    await componentsProfile.plan(files, SHELL_COMPONENTS);
+    await planWelcomeHome(files, prefix);
+    await planGeneratedReadmes(files, { components: true, styles: true });
+  },
 };
 
 const HOME_FOLDER = 'src/app/features/home';
@@ -179,6 +189,21 @@ async function applyWelcomeHome({ targetDir, name, prefix }: AppShellProject): P
       }),
     ),
   ]);
+}
+
+/** Mirrors `applyWelcomeHome`: the welcome page replaces a home that is still as the architecture wrote it. */
+async function planWelcomeHome(files: FilePlan, prefix: string): Promise<void> {
+  const { targetDir } = files;
+  if (await files.exists(`${HOME_FOLDER}/home.data.ts`)) return;
+  if (await pathExists(join(targetDir, 'src/app/features', DOCS_FEATURE))) return;
+  for (const file of HOME_FILES) {
+    const path = `${HOME_FOLDER}/${file}`;
+    if (files.wasEdited(path)) return;
+    // A file the project has is compared with the blueprint; one only the plan has is still as the blueprint wrote it.
+    const onDisk = await pathExists(join(targetDir, path));
+    if (onDisk ? !(await isPristine(targetDir, file, prefix)) : !(await files.exists(path))) return;
+  }
+  await files.blueprint(join(BLUEPRINTS_ROOT, 'welcome'));
 }
 
 async function planEdits(targetDir: string): Promise<PlannedEdit[]> {

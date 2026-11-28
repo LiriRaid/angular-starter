@@ -11,7 +11,7 @@ import {
 } from '../edits/typescript.js';
 import type { RouteSpec } from '../edits/typescript.js';
 import { pathExists } from '../fs.js';
-import { applySharedFoundation } from '../shared-foundation.js';
+import { applySharedFoundation, planSharedFoundation } from '../shared-foundation.js';
 import type { AdoptionReport, ArchitectureProfile } from './profile.js';
 
 const ALIASES = {
@@ -67,6 +67,35 @@ export const screamingProfile: ArchitectureProfile = {
     });
     await writeEdits(planned);
     for (const file of REMOVED) await rm(join(targetDir, file), { force: true });
+  },
+
+  async plan(files) {
+    await files.blueprint(join(BLUEPRINTS_ROOT, 'architectures', 'screaming'));
+    for (const [file] of EDITS) await files.edit(file);
+    for (const file of REMOVED) await files.remove(file);
+  },
+
+  async planAdoption(files) {
+    const read = (file: string): Promise<string | undefined> =>
+      readFile(join(files.targetDir, file), 'utf8').catch(() => undefined);
+    await planSharedFoundation(files, ALIASES, 'the architecture');
+    for (const readme of FOLDER_READMES) {
+      if (!(await files.exists(readme))) await files.write(readme);
+    }
+
+    // Mirrors `adopt`: the skeleton is adapted only while it is as `ng new` leaves it.
+    const root = await tryPlan(files.targetDir, 'src/app/app.ts', rootEdit);
+    const angularWelcome = (await read('src/app/app.html'))?.includes(WELCOME_TEMPLATE) === true;
+    if (angularWelcome && root) await files.edit('src/app/app.ts');
+    const current = await read('src/app/app.config.ts');
+    const config = await tryPlan(files.targetDir, 'src/app/app.config.ts', configEdit);
+    if (config && config.text !== current) await files.edit('src/app/app.config.ts');
+    if (!angularWelcome || !root) return;
+    await files.remove('src/app/app.html');
+    if ((await read('src/app/app.css'))?.trim() === '') await files.remove('src/app/app.css');
+    if ((await read('src/app/app.spec.ts'))?.includes(WELCOME_SPEC)) {
+      await files.edit('src/app/app.spec.ts');
+    }
   },
 
   async adopt({ targetDir, name, prefix }) {

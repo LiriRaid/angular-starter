@@ -31,4 +31,9 @@ export const starterRoutingProfile: RoutingProfile = {
     });
     await writeEdits([planned]);
   },
+
+  async plan(files) {
+    await files.blueprint(join(BLUEPRINTS_ROOT, 'routing', 'starter'));
+    await files.edit(APP_CONFIG);
+  },
 };

@@ -15,7 +15,8 @@ import { resolveOptions } from '../config/resolve.js';
 import { installedComponentIds } from '../engine/components/installed.js';
 import type { StarterOptions } from '../config/schema.js';
 import type { ProgramDeps } from '../deps.js';
-import { runPipeline, type GenerationContext, type Stage } from '../engine/pipeline.js';
+import { FilePlan, type PlannedFile } from '../engine/plan.js';
+import { planStages, runPipeline, type GenerationContext, type Stage } from '../engine/pipeline.js';
 import { toolingProfile } from '../engine/tooling/tooling.js';
 import { uiSystemProfile } from '../engine/ui-system/ui-system.js';
 import {
@@ -50,6 +51,7 @@ import {
   unchosenOf,
   type AddStep,
 } from './addable.js';
+import { printDryRun } from '../ui/dry-run.js';
 import { createStyler } from '../ui/format.js';
 
 export { ADDABLE, addableValues };
@@ -122,6 +124,7 @@ export async function addCommand(
   if (missing.length > 0) {
     const mainValue = value ?? choice;
     await addWithPrerequisites(io, deps, {
+      project,
       capability,
       value: mainValue,
       label: label?.label ?? choice,
@@ -135,22 +138,15 @@ export async function addCommand(
   // The components and the shell draw their icons with Lucide, so adding them adds it too.
   const implied =
     category === 'components' || category === 'appShell' ? label?.requires?.icons?.[0] : undefined;
-  const recorded: Partial<StarterOptions> = { ...project.options };
-  delete recorded.componentList;
-  const options = resolveOptions({
-    file: {
-      ...(capability === 'components' ? recorded : project.options),
-      ...(implied ? { icons: implied as StarterOptions['icons'] } : {}),
-      ...dependentChoices(category, choice),
-      [category]: choice,
-      ...(addition?.componentList ? { componentList: addition.componentList } : {}),
-      install: flags.install !== false,
-    },
+  const options = optionsAfterAdd(project.options, {
+    capability,
+    category,
+    choice,
+    implied,
+    componentList: addition?.componentList,
+    install: flags.install !== false,
   });
-  // Every addition leaves the README of the project describing what it has now (ADR-0024).
-  const stages = stagesFor(category, current, options, project.options).flatMap((stage) =>
-    stage === writeStarterConfig ? [writeProjectReadme, stage] : [stage],
-  );
+  const stages = stagesOfAdd(category, current, options, project.options);
   const style = createStyler(io.color);
 
   // Nothing in the command says that Lucide comes along: say it, and why, before anything runs.
@@ -180,6 +176,13 @@ export async function addCommand(
       .filter((stage) => !stage.enabled || stage.enabled(contextFor(io, deps, project, options)))
       .forEach((stage, index) => println(io.stdout, `  ${index + 1}. ${stage.title}`));
     println(io.stdout, `  Adds: ${label?.label ?? choice}`);
+    println(io.stdout);
+    printDryRun(io, {
+      title: 'What it would write:',
+      root: project.name,
+      entries: await planStages(stages, contextFor(io, deps, project, options)),
+      verbose: flags.verbose,
+    });
     return;
   }
 
@@ -240,6 +243,13 @@ async function addTooling(io: CliIo, deps: ProgramDeps, flags: AddFlags): Promis
       .filter((stage) => !stage.enabled || stage.enabled(context))
       .forEach((stage, index) => println(io.stdout, `  ${index + 1}. ${stage.title}`));
     println(io.stdout, '  Adds: lint and format (ESLint, Prettier scripts)');
+    println(io.stdout);
+    printDryRun(io, {
+      title: 'What it would write:',
+      root: project.name,
+      entries: await planStages(stages, context),
+      verbose: flags.verbose,
+    });
     return;
   }
 
@@ -257,6 +267,7 @@ const installs = (capability: string): boolean =>
   capability === 'components' || capability === 'app-shell' || capability === 'icons';
 
 interface Pending {
+  project: StarterProject;
   capability: string;
   value: string;
   label: string;
@@ -274,7 +285,7 @@ interface Pending {
 async function addWithPrerequisites(
   io: CliIo,
   deps: ProgramDeps,
-  { capability, value, label, missing, flags, chained }: Pending,
+  { project, capability, value, label, missing, flags, chained }: Pending,
 ): Promise<void> {
   const commands = missing.map((step) => `sa add ${step.capability} ${step.value}`);
   const names = missing.map((step) => {
@@ -288,6 +299,13 @@ async function addWithPrerequisites(
     for (const command of [...commands, `sa add ${capability} ${value}`]) {
       println(io.stdout, `  ${command}`);
     }
+    println(io.stdout);
+    printDryRun(io, {
+      title: 'What it would write:',
+      root: project.name,
+      entries: await planChain(io, deps, project, [...missing, { capability, value }], flags),
+      verbose: flags.verbose,
+    });
     return;
   }
   if (!io.interactive || chained) {
@@ -321,6 +339,49 @@ async function addWithPrerequisites(
   }
 }
 
+/**
+ * The files a chain of additions would write: each step is planned with the options the one before it leaves,
+ * on one shared plan, and installs only at the last step that does, as the real run does.
+ */
+async function planChain(
+  io: CliIo,
+  deps: ProgramDeps,
+  project: StarterProject,
+  steps: readonly AddStep[],
+  flags: AddFlags,
+): Promise<PlannedFile[]> {
+  const files = new FilePlan(project.root);
+  let state = project.options;
+  for (const [index, step] of steps.entries()) {
+    const category = ADDABLE[step.capability];
+    if (category === undefined) continue;
+    const later = steps.slice(index + 1).some((next) => installs(next.capability));
+    const addition =
+      step.capability === 'components' ? componentsAddition(state, step.value) : undefined;
+    const choice = addition?.components ?? chooseValue(step.capability, step.value);
+    const label = CAPABILITIES[category].find((option) => option.id === choice);
+    const implied =
+      category === 'components' || category === 'appShell'
+        ? label?.requires?.icons?.[0]
+        : undefined;
+    const options = optionsAfterAdd(state, {
+      capability: step.capability,
+      category,
+      choice,
+      implied,
+      componentList: addition?.componentList,
+      install: flags.install !== false && !(installs(step.capability) && later),
+    });
+    await planStages(
+      stagesOfAdd(category, state[category], options, state),
+      contextFor(io, deps, project, options),
+      files,
+    );
+    state = options;
+  }
+  return files.files();
+}
+
 const named = (ids: readonly string[]): string => ids.map((id) => `sa-${id}`).join(', ');
 
 /**
@@ -344,6 +405,15 @@ async function completeCatalog(
     println(io.stdout, style.bold('Dry run: nothing was changed. Planned steps:'));
     println(io.stdout, `  1. ${updateUiSystemCatalog.title}`);
     println(io.stdout, `  Adds to the catalog: ${named(missing)}`);
+    const files = new FilePlan(project.root);
+    await uiSystemProfile.planUpdate(files, { name: project.name, prefix: project.options.prefix });
+    println(io.stdout);
+    printDryRun(io, {
+      title: 'What it would write:',
+      root: project.name,
+      entries: files.files(),
+      verbose: flags.verbose,
+    });
     return;
   }
   println(io.stdout);
@@ -570,6 +640,45 @@ async function askRendering(deps: ProgramDeps, options: StarterOptions): Promise
 /** What `sa add components` accepts: a collection, or the ids of the components one by one. */
 function componentsHint(): string {
   return `Choose a collection (${addableValues('components').join(', ')}) or ids from: ${ALL_COMPONENT_IDS.join(', ')}.`;
+}
+
+/** What the project records once the capability is added: its options plus the new choice and what comes with it. */
+function optionsAfterAdd(
+  state: StarterOptions,
+  change: {
+    capability: string;
+    category: Extract<CapabilityCategory, keyof StarterOptions>;
+    choice: string;
+    implied: string | undefined;
+    componentList?: string[];
+    install: boolean;
+  },
+): StarterOptions {
+  const { capability, category, choice, implied, componentList, install } = change;
+  const recorded: Partial<StarterOptions> = { ...state };
+  delete recorded.componentList;
+  return resolveOptions({
+    file: {
+      ...(capability === 'components' ? recorded : state),
+      ...(implied ? { icons: implied as StarterOptions['icons'] } : {}),
+      ...dependentChoices(category, choice),
+      [category]: choice,
+      ...(componentList ? { componentList } : {}),
+      install,
+    },
+  });
+}
+
+/** The steps of `stagesFor`, with the README of the project described after each addition (ADR-0024). */
+function stagesOfAdd(
+  category: Extract<CapabilityCategory, keyof StarterOptions>,
+  current: string,
+  options: StarterOptions,
+  before: StarterOptions,
+): Stage[] {
+  return stagesFor(category, current, options, before).flatMap((stage) =>
+    stage === writeStarterConfig ? [writeProjectReadme, stage] : [stage],
+  );
 }
 
 /** The steps that bring a project from `current` to the new option, then record it. */

@@ -83,7 +83,7 @@ export function createProgram(io: CliIo, deps: ProgramDeps): Command {
     .command('init')
     .description('Prepares an Angular project you already have so the other commands work on it.')
     .option('--force', 'Read the project again and replace its starter-angular.config.json')
-    .option('--dry-run', 'Show what it found without writing anything')
+    .option('--dry-run', 'Show what it found and the file it would write, without writing anything')
     .addHelpText(
       'after',
       examples([
@@ -280,8 +280,11 @@ function registerNewCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     .option('--no-install', 'Do not install dependencies')
     .option('--defaults', 'Never prompt: use the default for every option that was not provided')
     .option('--config <file>', 'Read options from a JSON file (flags override it)')
-    .option('--dry-run', 'Show what would be done without creating anything')
-    .option('--verbose', 'Show the output of the commands that are run')
+    .option('--dry-run', 'Show the files it would create as a tree, without creating anything')
+    .option(
+      '--verbose',
+      'Show the output of the commands that are run; with --dry-run, draw every file of the tree',
+    )
     .addHelpText(
       'after',
       '\nOnly Tailwind CSS, Client-Side Rendering and Lucide Icons are marked (Recommended) and preselected.\n' +
@@ -348,8 +351,14 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
     .argument('[capability]', ADDABLE_WORDS.join(', '))
     .argument('[value]', 'What to add; optional when the capability has one option')
     .option('--no-install', 'Do not install dependencies')
-    .option('--dry-run', 'Show what would be done without changing anything')
-    .option('--verbose', 'Show the output of the commands that are run')
+    .option(
+      '--dry-run',
+      'Show the files it would create and change as a tree, without changing anything',
+    )
+    .option(
+      '--verbose',
+      'Show the output of the commands that are run; with --dry-run, draw every file of the tree',
+    )
     .addHelpText('after', () => {
       const rows = capabilities.map(([name, text]) => {
         const values = addableValues(name);
@@ -367,7 +376,10 @@ function registerAddCommand(program: Command, io: CliIo, deps: ProgramDeps): voi
           ['sa add ui-system', 'Components catalog in the UI tab of the design preferences'],
           ['sa add rendering starter-ssr', 'Angular SSR with incremental hydration'],
           ['sa add tooling', 'ESLint with Angular rules and the lint and format scripts'],
-          ['sa add components all --dry-run', 'See the steps without changing anything'],
+          [
+            'sa add components all --dry-run',
+            'See the steps and the files, as a tree, without changing anything',
+          ],
         ])
       );
     })
@@ -401,7 +413,10 @@ function registerGenerateCommand(program: Command, io: CliIo): void {
       '--path <folder>',
       'Folder below src/app for the component (projects that are not Screaming)',
     )
-    .option('--dry-run', 'Show what would be created without writing anything')
+    .option(
+      '--dry-run',
+      'Show the files it would create and change as a tree, without writing anything',
+    )
     .addHelpText(
       'after',
       `\nKinds:\n${formatRows(kinds).join('\n')}\n\nIt uses your selector prefix. Features and the --feature and --shared places need the Screaming Architecture; in any other project a component goes below src/app, or below --path.\n` +
