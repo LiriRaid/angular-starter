@@ -1,12 +1,12 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import { BLUEPRINTS_ROOT, renderTemplate } from '../engine/blueprint.js';
 import { addNavigationItem, addRoutes } from '../engine/edits/typescript.js';
 import { pathExists } from '../engine/fs.js';
 import { RuntimeError, UsageError } from '../errors.js';
 import { println, type CliIo } from '../io.js';
 import { findProject, type StarterProject } from '../project/find.js';
-import { createStyler } from '../ui/format.js';
+import { printDryRun } from '../ui/dry-run.js';
 import { GENERATE_KINDS } from './generate-kinds.js';
 
 export { GENERATE_KINDS };
@@ -65,12 +65,21 @@ export async function generateCommand(
         ? await planComponent(project, name, flags)
         : await planPlainComponent(project, name, flags);
 
-  const style = createStyler(io.color);
-  if (flags.dryRun) println(io.stdout, style.bold('Dry run: nothing was written. It would:'));
-  const verb = flags.dryRun ? ['create', 'update'] : ['created', 'updated'];
-  for (const path of plan.create.keys()) println(io.stdout, `  ${verb[0]} ${path}`);
-  for (const path of plan.update.keys()) println(io.stdout, `  ${verb[1]} ${path}`);
-  if (flags.dryRun) return;
+  if (flags.dryRun) {
+    // A generation touches a handful of files: every one is drawn, however deep its folder is.
+    printDryRun(io, {
+      title: 'Dry run: nothing was written.',
+      root: basename(project.root),
+      entries: [
+        ...[...plan.create.keys()].map((path) => ({ path, action: 'create' as const })),
+        ...[...plan.update.keys()].map((path) => ({ path, action: 'update' as const })),
+      ],
+      verbose: true,
+    });
+    return;
+  }
+  for (const path of plan.create.keys()) println(io.stdout, `  created ${path}`);
+  for (const path of plan.update.keys()) println(io.stdout, `  updated ${path}`);
 
   for (const [path, text] of [...plan.create, ...plan.update]) {
     await mkdir(dirname(join(project.root, path)), { recursive: true });
